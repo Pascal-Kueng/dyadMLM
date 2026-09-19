@@ -801,6 +801,32 @@ in the APIM vignette</a>.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="checking-partner-dependence">Checking partner dependence<a class="anchor" aria-label="anchor" href="#checking-partner-dependence"></a>
+</h2>
+<p>We can check whether the fitted DSM reproduces each role’s response
+variance and the partner correlation by comparing observed and simulated
+data. We supply the original roles because the model uses a role
+contrast instead of <code>gender</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dsm_simulations</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">dsm_model</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
+<span>  <span class="va">dsm_simulations</span>,</span>
+<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">cross_dsm_data</span><span class="op">$</span><span class="va">gender</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="dsm_files/figure-html/check-cross-dsm-1.svg" class="r-plt" alt="Six predictive-check histograms for the DSM. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values." width="100%"></p>
+<p>The left column shows role-specific SDs and partner correlation. The
+right column shows the same information using dyad averages and half the
+differences between partners. Histograms show simulated values and red
+lines mark observed values. A red line far from most simulations
+suggests a mismatch.</p>
+<p>By default, the check subtracts the model’s fixed-effect predictions
+from observed and simulated responses. Good agreement is often expected
+for variances and correlations estimated from the same data. See the <a href="https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html">function
+help</a> for details and interpretation. These checks currently support
+cross-sectional dyads only.</p>
+</div>
+<div class="section level2">
 <h2 id="intensive-longitudinal-dsm">Intensive longitudinal DSM<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-dsm"></a>
 </h2>
 <p>The intensive longitudinal DSM extends the cross-sectional DSM using
@@ -810,7 +836,7 @@ parameterization described above. For more detail on centering decisions
 and mean-and-deviation interpretation, refer to the <a href="dim.html#intensive-longitudinal-dim">DIM vignette</a>. For dynamic
 models and their cautions, see the <a href="apim.html#dynamic-models">dynamic ILD APIM example</a>.</p>
 <p>Brief example of ILD DSM:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_dsm_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_ild</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -877,7 +903,7 @@ support and closeness and allows separate linear trends for the outcome
 level and the female-minus-male outcome difference. It also includes the
 role-specific AR(1) components specified and interpreted in the APIM
 vignette.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">dsm_ILD</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>

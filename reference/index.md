@@ -12,6 +12,20 @@
   : Recover member-level residual covariance from exchangeable
   random-effect blocks
 
+## Predictive diagnostics
+
+Experimental descriptive checks of how well a fitted model reproduces
+partner dependence.
+
+- [`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.md)
+  **\[experimental\]** : Simulate response datasets for predictive
+  checks
+- [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
+  **\[experimental\]** : Check whether a fitted model reproduces partner
+  dependence
+- [`plot(`*`<dyadMLM_partner_check>`*`)`](https://pascal-kueng.github.io/dyadMLM/reference/plot.dyadMLM_partner_check.md)
+  **\[experimental\]** : Plot a saved partner-dependence check
+
 ## Example data
 
 - [`dyads_cross`](https://pascal-kueng.github.io/dyadMLM/reference/dyads_cross.md)

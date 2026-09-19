@@ -92,19 +92,15 @@
 </div>
 <!-- badges: start -->
 
-<p><code>dyadMLM</code> is an R package for preparing and checking cross-sectional and intensive longitudinal dyadic data for linear and generalized linear mixed-effects models. It supports the Actor–Partner Interdependence Model, Dyad–Individual Model, and Dyadic Score Model parameterizations and includes selected post-estimation tools. Models are fitted using packages such as <code>glmmTMB</code> or <code>brms</code>.</p>
-<p>Start here:</p>
-<ol style="list-style-type: decimal">
-<li><a href="#id_1-data-preparation-and-validation">Data preparation and validation of dyadic data</a></li>
-<li><a href="#id_2-post-estimation-tools">Post-estimation tools</a></li>
-</ol>
+<p><code>dyadMLM</code> provides tools for dyadic multilevel modeling with linear and generalized linear mixed-effects models.</p>
+<p>It provides functions for data preparation for various types of dyadic models and post-estimation tools for interpretation and checking of model assumptions.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>Install the stable release from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span></code></pre></div>
-<p>To try the latest changes and help test upcoming features, install the development version from R-universe:</p>
+<p>To try the latest changes and help test upcoming features, install the development version:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
 <span>  <span class="st">"dyadMLM"</span>,</span>
@@ -113,40 +109,122 @@
 <span>    <span class="st">"https://cloud.r-project.org"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Development versions may change more frequently.</p>
 </div>
 <div class="section level2">
-<h2 id="questions-and-contributing">Questions and contributing<a class="anchor" aria-label="anchor" href="#questions-and-contributing"></a>
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>Questions about using <code>dyadMLM</code>, specifying models, or interpreting output are welcome in <a href="https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/q-a" class="external-link">Q&amp;A Discussions</a>. Early feature or method ideas can start in <a href="https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/ideas" class="external-link">Ideas</a>, while bugs and concrete improvements can be shared through <a href="https://github.com/Pascal-Kueng/dyadMLM/issues/new/choose" class="external-link">Issues</a>.</p>
-<p>Documentation, examples, tests, reviews, and code contributions are all welcome; see the <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md" class="external-link">contribution guide</a>. Please only share data you are permitted to make public. Never upload identifiable or confidential research data.</p>
+<p>If you use <code>dyadMLM</code>, please cite the installed package version. Run:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="id_1-data-preparation-and-validation">1. Data preparation and validation<a class="anchor" aria-label="anchor" href="#id_1-data-preparation-and-validation"></a>
+<h2 id="data-preparation-and-validation">Data preparation and validation<a class="anchor" aria-label="anchor" href="#data-preparation-and-validation"></a>
 </h2>
-<p>The core feature of this package is data preparation and validation for various types of dyadic data. It creates model-ready columns for dyadic multilevel models, including the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model (DIM), and the Dyadic Score Model (DSM).</p>
-<p>The package currently supports:</p>
+<p><a href="https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.html"><code>prepare_dyad_data()</code></a> validates dyadic data and creates model-ready columns for:</p>
 <ul>
-<li>cross-sectional and intensive longitudinal dyadic data (e.g., daily diary data)</li>
-<li>distinguishable and exchangeable (indistinguishable) dyads</li>
-<li>datasets containing multiple dyad compositions (e.g., opposite-sex partners and same-sex partners)</li>
+<li>✅ <strong>Actor-Partner Interdependence Model (APIM):</strong> distinguishable and exchangeable dyads.</li>
+<li>✅ <strong>Dyad-Individual Model (DIM):</strong> exchangeable dyads.</li>
+<li>✅ <strong>Dyadic Score Model (DSM):</strong> distinguishable dyads.</li>
 </ul>
-<p>See the <a href="https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html">Getting Started vignette</a>.</p>
+<p>It supports cross-sectional and intensive longitudinal dyadic data (e.g., daily diary data). The package also supports datasets containing multiple dyad compositions.</p>
+<p>Preparation options include selecting and pooling compositions, treating selected compositions as exchangeable, centering predictors, and creating within-/between-person components and lagged predictors.</p>
+<p>Prepared data can be used with <strong>glmmTMB</strong> or <strong>brms</strong>. See the <a href="https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html">Getting Started vignette</a> for data requirements and examples.</p>
 </div>
 <div class="section level2">
-<h2 id="id_2-post-estimation-tools">2. Post-estimation tools<a class="anchor" aria-label="anchor" href="#id_2-post-estimation-tools"></a>
+<h2 id="post-estimation-tools">Post-estimation tools<a class="anchor" aria-label="anchor" href="#post-estimation-tools"></a>
 </h2>
-<p>Selected post-estimation tools currently include:</p>
-<ul>
-<li>a function to compare compatible nested models</li>
-<li>a function to back-transform exchangeable random-effect covariance structures into interpretable member-level quantities, as described in the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">APIM vignette</a>
-</li>
-</ul>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr>
+<th>Tool</th>
+<th>glmmTMB</th>
+<th>brms</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html">Compare nested models</a></td>
+<td>✅ Supported</td>
+<td>Not implemented · <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md" class="external-link">Contribute</a>
+</td>
+</tr>
+<tr>
+<td><a href="https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html">Recover exchangeable member variances and partner covariances</a></td>
+<td>✅ Point estimates</td>
+<td>✅ Posterior summaries and draws</td>
+</tr>
+<tr>
+<td><a href="https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html">Check partner dependence — cross-sectional</a></td>
+<td>✅ Experimental</td>
+<td>Not implemented · <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md" class="external-link">Contribute</a>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Predictive checks assess whether a model reproduces response variances and partner correlations. See the <a href="https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html">function help</a> for supported models and interpretation.</p>
+</div>
+<div class="section level2">
+<h2 id="quick-example">Quick example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
+</h2>
+<p>In this example, we prepare the simulated data included in <code>dyadMLM</code>, fit a cross-sectional APIM, and visually check how well the model reproduces observed partner dependence. The predictive check requires the development version.</p>
+<p>The example also requires <strong>glmmTMB</strong>. Install it with <code>install.packages("glmmTMB")</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"dyads_cross"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">prepared_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
+<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
+<span>  model_types <span class="op">=</span> <span class="st">"apim"</span>,</span>
+<span>  add_apim_gmc_predictors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keep_compositions <span class="op">=</span> <span class="st">"female-male"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fit the distinguishable Gaussian APIM from the vignette.</span></span>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="va">closeness</span> <span class="op">~</span></span>
+<span></span>
+<span>    <span class="co"># Gender-specific intercepts</span></span>
+<span>    <span class="fl">0</span> <span class="op">+</span> <span class="va">.is_female</span> <span class="op">+</span> <span class="va">.is_male</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Gender-specific actor effects</span></span>
+<span>    <span class="va">.is_female</span><span class="op">:</span><span class="va">.provided_support_gmc_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.is_male</span><span class="op">:</span><span class="va">.provided_support_gmc_actor</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Gender-specific partner effects</span></span>
+<span>    <span class="va">.is_female</span><span class="op">:</span><span class="va">.provided_support_gmc_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.is_male</span><span class="op">:</span><span class="va">.provided_support_gmc_partner</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Each role's residual variance and the covariance between partners</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.is_female</span> <span class="op">+</span> <span class="va">.is_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>, <span class="co"># Fix the additional Gaussian residual variance near zero</span></span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Simulate responses and visually check partner dependence.</span></span>
+<span><span class="va">simulations</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">model</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
+<span>  <span class="va">simulations</span>,</span>
+<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">prepared_data</span><span class="op">$</span><span class="va">gender</span>,</span>
+<span>  ask <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-cross-sectional-prep-1.png" alt="Histogram of simulated partner correlations with the observed correlation marked in red and the middle 95 percent of simulations marked by dashed lines." width="100%"></p>
+<p>The function draws six plots. Only the partner-correlation plot is shown here.</p>
+<p>Continue with the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">APIM vignette</a> for details on the model specification and interpretation.</p>
 </div>
 <div class="section level2">
 <h2 id="vignettes-and-examples">Vignettes and examples<a class="anchor" aria-label="anchor" href="#vignettes-and-examples"></a>
 </h2>
-<p>Start with the vignettes, or scroll down for a quick example.</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -163,130 +241,33 @@
 </tr>
 <tr>
 <td><a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">Actor-Partner Interdependence Model</a></td>
-<td>APIM preparation and formulas for distinguishable and exchangeable dyads in cross-sectional and intensive longitudinal data</td>
+<td>Cross-sectional and longitudinal APIMs, distinguishability checks, covariance recovery, random slopes, and AR(1)</td>
 </tr>
 <tr>
 <td><a href="https://pascal-kueng.github.io/dyadMLM/articles/dim.html">Dyad-Individual Model</a></td>
-<td>DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads</td>
+<td>DIM predictor construction, longitudinal models, and an interactive demonstration of equivalence to the exchangeable APIM</td>
 </tr>
 <tr>
 <td><a href="https://pascal-kueng.github.io/dyadMLM/articles/dsm.html">Dyadic Score Model</a></td>
-<td>DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads</td>
+<td>DSM predictor-score and contrast construction, longitudinal models, and the relationship to the distinguishable APIM</td>
 </tr>
 </tbody>
 </table>
-<p>For theoretical foundations and a practical walkthrough of dyadic data analysis, from data preparation and model fitting to interpretation and diagnostics using <code>dyadMLM</code> with <code>glmmTMB</code>, see the <a href="https://pascal-kueng.github.io/dyadMLM/workshop/">Dyadic Data Analysis Workshop</a>. For a Bayesian workflow using <code>dyadMLM</code> and <code>brms</code>, refer to <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling</a> (<a href="https://github.com/Pascal-Kueng/05DyadicDataAnalysis" class="external-link">source</a>, <a href="https://doi.org/10.5281/zenodo.17400655" class="external-link">DOI</a>).</p>
-<div class="section level3">
-<h3 id="simple-cross-sectional-example">Simple Cross-Sectional Example<a class="anchor" aria-label="anchor" href="#simple-cross-sectional-example"></a>
-</h3>
-<p>Prepare distinguishable dyads for a cross-sectional APIM:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">prepared_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
-<span>  <span class="va">dyads_cross</span>,</span>
-<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
-<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
-<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
-<span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
-<span>  model_types <span class="op">=</span> <span class="st">"apim"</span>,</span>
-<span>  <span class="co"># All three observed compositions in `dyads_cross` are detected and retained by</span></span>
-<span>  <span class="co"># default. This example focuses on `female-male` dyads, so we restrict the</span></span>
-<span>  <span class="co"># analysis here.</span></span>
-<span>  keep_compositions <span class="op">=</span> <span class="st">"female-male"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">prepared_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # dyadMLM data</span></span>
-<span><span class="co">#&gt; # Rows: 240 | Dyads: 120 | Intensive longitudinal: no</span></span>
-<span><span class="co">#&gt; # Structure: dyad = coupleID, member = personID, role = gender</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_male distinguishable 120 dyads</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .composition       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .composition_role  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .is_{role}         composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .{pred}_actor      APIM actor predictor: actor's original predictor values</span></span>
-<span><span class="co">#&gt; #   .{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
-<span><span class="co">#&gt; #                      values</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; # A tibble: 240 × 11</span></span>
-<span><span class="co">#&gt;   personID coupleID gender closeness provided_support .composition</span></span>
-<span><span class="co">#&gt;      &lt;int&gt;    &lt;int&gt; &lt;fct&gt;      &lt;dbl&gt;            &lt;dbl&gt; &lt;fct&gt;</span></span>
-<span><span class="co">#&gt; 1        1        1 female      4.71             4.49 female_x_male</span></span>
-<span><span class="co">#&gt; 2        2        1 male        4.61             4.76 female_x_male</span></span>
-<span><span class="co">#&gt; 3        3        2 female      6.69             4.09 female_x_male</span></span>
-<span><span class="co">#&gt; 4        4        2 male        5.98             6.20 female_x_male</span></span>
-<span><span class="co">#&gt; # ℹ 236 more rows</span></span>
-<span><span class="co">#&gt; # ℹ 5 more variables: .composition_role &lt;fct&gt;, .is_female &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   .is_male &lt;dbl&gt;, .provided_support_actor &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   .provided_support_partner &lt;dbl&gt;</span></span></code></pre></div>
-<p>The prepared data contains the composition indicators and APIM actor/partner predictor columns used in the model formulas below.</p>
-<p>One simple distinguishable APIM formula is:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">simple_apim</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
-<span>  <span class="va">closeness</span> <span class="op">~</span></span>
-<span></span>
-<span>    <span class="co"># Gender-specific intercepts</span></span>
-<span>    <span class="fl">0</span> <span class="op">+</span> <span class="va">.is_female</span> <span class="op">+</span> <span class="va">.is_male</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Gender-specific actor effects</span></span>
-<span>    <span class="va">.provided_support_actor</span><span class="op">:</span><span class="va">.is_female</span> <span class="op">+</span></span>
-<span>    <span class="va">.provided_support_actor</span><span class="op">:</span><span class="va">.is_male</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Gender-specific partner effects</span></span>
-<span>    <span class="va">.provided_support_partner</span><span class="op">:</span><span class="va">.is_female</span> <span class="op">+</span></span>
-<span>    <span class="va">.provided_support_partner</span><span class="op">:</span><span class="va">.is_male</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Dyad-level random effects represent the two members'</span></span>
-<span>    <span class="co"># residual covariance structure</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.is_female</span> <span class="op">+</span> <span class="va">.is_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
-<span></span>
-<span>  <span class="co"># With the residual covariance represented by the dyad-level</span></span>
-<span>  <span class="co"># random effects above, the Gaussian residual dispersion is fixed near zero.</span></span>
-<span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
-<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
+<p>The model-fitting examples use <strong>glmmTMB</strong>. Joint analysis of multiple dyad compositions is also supported with glmmTMB. A dedicated vignette is in preparation.</p>
+<p>For theoretical foundations and a practical walkthrough of dyadic data analysis, from data preparation and model fitting to interpretation and diagnostics using <code>dyadMLM</code> with <code>glmmTMB</code>, see the <a href="https://pascal-kueng.github.io/dyadMLM/workshop/">Dyadic Data Analysis Workshop</a>. For Bayesian APIM and DIM workflows using <code>dyadMLM</code> and <code>brms</code>, refer to <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling</a> (<a href="https://github.com/Pascal-Kueng/05DyadicDataAnalysis" class="external-link">source</a>, <a href="https://doi.org/10.5281/zenodo.17400655" class="external-link">DOI</a>).</p>
 </div>
 <div class="section level2">
-<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+<h2 id="questions-and-contributing">Questions and contributing<a class="anchor" aria-label="anchor" href="#questions-and-contributing"></a>
 </h2>
-<p>If you use <code>dyadMLM</code>, please cite the installed package version. Run:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; To cite package 'dyadMLM' in publications use:</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt;   Küng P (2026). _dyadMLM: Tools for Dyadic Multilevel Models_.</span></span>
-<span><span class="co">#&gt;   University of Zurich. doi:10.5281/zenodo.22047083</span></span>
-<span><span class="co">#&gt;   &lt;https://doi.org/10.5281/zenodo.22047083&gt;. R package version</span></span>
-<span><span class="co">#&gt;   0.2.0.9000, &lt;https://pascal-kueng.github.io/dyadMLM/&gt;.</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt;   @Manual{,</span></span>
-<span><span class="co">#&gt;     title = {dyadMLM: Tools for Dyadic Multilevel Models},</span></span>
-<span><span class="co">#&gt;     author = {Pascal Küng},</span></span>
-<span><span class="co">#&gt;     year = {2026},</span></span>
-<span><span class="co">#&gt;     note = {R package version 0.2.0.9000},</span></span>
-<span><span class="co">#&gt;     url = {https://pascal-kueng.github.io/dyadMLM/},</span></span>
-<span><span class="co">#&gt;     doi = {10.5281/zenodo.22047083},</span></span>
-<span><span class="co">#&gt;     organization = {University of Zurich},</span></span>
-<span><span class="co">#&gt;   }</span></span></code></pre></div>
-<hr>
-<p><strong>Continue</strong> with the <a href="https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html">Getting Started Vignette</a>.</p>
-<p>Or go directly to a model-specific vignette:</p>
-<ul>
-<li>
-<a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">Actor-Partner Interdependence Model (APIM) vignette</a>,</li>
-<li>
-<a href="https://pascal-kueng.github.io/dyadMLM/articles/dim.html">Dyad-Individual Model vignette</a>, or</li>
-<li>
-<a href="https://pascal-kueng.github.io/dyadMLM/articles/dsm.html">Dyadic Score Model vignette</a>.</li>
-</ul>
+<p>Questions about using <code>dyadMLM</code>, specifying models, or interpreting output are welcome in <a href="https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/q-a" class="external-link">Q&amp;A Discussions</a>.</p>
+<p>Feature or method ideas can be proposed in <a href="https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/ideas" class="external-link">Ideas</a>.</p>
+<p>Please report any bugs you find or any concrete improvement suggestions through <a href="https://github.com/Pascal-Kueng/dyadMLM/issues/new/choose" class="external-link">Issues</a>.</p>
+<p>Documentation, examples, tests, reviews, and code contributions are all welcome. See the <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md" class="external-link">contribution guide</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="full-citation">Full citation<a class="anchor" aria-label="anchor" href="#full-citation"></a>
+</h2>
+<p>Küng P (2026). <em>dyadMLM: Tools for Dyadic Multilevel Models</em>. University of Zurich. <a href="https://doi.org/10.5281/zenodo.22047083" class="external-link">doi:10.5281/zenodo.22047083</a>. R package version 0.2.0.9000, <a href="https://pascal-kueng.github.io/dyadMLM/" class="uri">https://pascal-kueng.github.io/dyadMLM/</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

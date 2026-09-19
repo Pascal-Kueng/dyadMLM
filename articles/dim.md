@@ -534,6 +534,41 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable
 for the derivation and back-transformation to the member-level
 covariance matrix.
 
+### Checking partner dependence
+
+We can check whether the fitted DIM reproduces the response variance and
+partner correlation by comparing observed and simulated data. Use
+`role = NULL` here because the members are exchangeable.
+
+``` r
+
+dim_simulations <- dyadMLM::simulate_dyad_responses(dim_1, seed = 123)
+dyadMLM::check_partner_dependence(
+  dim_simulations,
+  dyad = coupleID,
+  role = NULL
+)
+```
+
+![Four predictive-check histograms for exchangeable dyads: common member
+SD, partner correlation, dyad-average SD, and half-difference RMS. Red
+lines mark observed
+values.](dim_files/figure-html/check-cross-dim-1.svg)
+
+The left column shows the common member SD and partner correlation. The
+right column shows the same information using dyad averages and half the
+differences between partners. Histograms show simulated values and red
+lines mark observed values. A red line far from most simulations
+suggests a mismatch.
+
+By default, the check subtracts the model’s fixed-effect predictions
+from observed and simulated responses. Good agreement is often expected
+for variances and correlations estimated from the same data. See the
+[function
+help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
+for details and interpretation. These checks currently support
+cross-sectional dyads only.
+
 ## Intensive Longitudinal DIM
 
 For longitudinal DIM, predictors are decomposed into within-person and

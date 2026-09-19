@@ -486,6 +486,49 @@ whether the models are mathematically nested; that remains a modeling
 requirement. The usual chi-squared reference distribution may be
 unreliable when a tested variance parameter lies on its boundary.
 
+### Checking partner dependence
+
+The model comparison tests the restrictions jointly. Predictive checks
+show whether the restricted model reproduces each role’s variance and
+the partner correlation. We supply the original roles to examine their
+variances separately.
+
+``` r
+
+apim_simulations <- dyadMLM::simulate_dyad_responses(
+  apim_exchangeable_model, seed = 123
+)
+dyadMLM::check_partner_dependence(
+  apim_simulations,
+  dyad = coupleID,
+  role = apim_distinguishable_data$gender
+)
+```
+
+![Six predictive-check histograms. Member SDs and partner correlation
+are on the left; dyad-average and half-difference summaries are on the
+right. Red lines mark observed
+values.](apim_files/figure-html/check-cross-apim-1.svg)
+
+The left column shows role-specific SDs and partner correlation. The
+right column shows the same information using dyad averages and half the
+differences between partners. Histograms show simulated values and red
+lines mark observed values. A red line far from most simulations
+suggests a mismatch.
+
+Here, the restricted model produces a lower partner correlation than
+observed. It also overstates how much the partner differences vary
+across dyads. The plots do not identify which restriction causes the
+mismatch.
+
+By default, the check subtracts the model’s fixed-effect predictions
+from observed and simulated responses. Good agreement is often expected
+for variances and correlations estimated from the same data. See the
+[function
+help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
+for details and interpretation. These checks currently support
+cross-sectional dyads only.
+
 ### Intensive longitudinal APIMs
 
 For longitudinal APIMs, time-varying predictors are decomposed into

@@ -599,6 +599,31 @@ West 2025)</span>. See the <a href="apim.html#exchangeable-residual-structure">e
 residual-structure section of the APIM vignette</a> for the derivation
 and back-transformation to the member-level covariance matrix.</p>
 </div>
+<div class="section level3">
+<h3 id="checking-partner-dependence">Checking partner dependence<a class="anchor" aria-label="anchor" href="#checking-partner-dependence"></a>
+</h3>
+<p>We can check whether the fitted DIM reproduces the response variance
+and partner correlation by comparing observed and simulated data. Use
+<code>role = NULL</code> here because the members are exchangeable.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dim_simulations</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">dim_1</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
+<span>  <span class="va">dim_simulations</span>,</span>
+<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  role <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="dim_files/figure-html/check-cross-dim-1.svg" class="r-plt" alt="Four predictive-check histograms for exchangeable dyads: common member SD, partner correlation, dyad-average SD, and half-difference RMS. Red lines mark observed values." width="100%"></p>
+<p>The left column shows the common member SD and partner correlation.
+The right column shows the same information using dyad averages and half
+the differences between partners. Histograms show simulated values and
+red lines mark observed values. A red line far from most simulations
+suggests a mismatch.</p>
+<p>By default, the check subtracts the model’s fixed-effect predictions
+from observed and simulated responses. Good agreement is often expected
+for variances and correlations estimated from the same data. See the <a href="https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html">function
+help</a> for details and interpretation. These checks currently support
+cross-sectional dyads only.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="intensive-longitudinal-dim">Intensive Longitudinal DIM<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-dim"></a>
@@ -632,7 +657,7 @@ therefore be biased or imprecise, so they should be interpreted
 cautiously <span class="citation">(Gottfredson 2019)</span>.</p>
 <p>Use <code>temporal_decomposition = "none"</code> to construct only
 the raw dyad-occasion mean and within-dyad member deviation.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_ild</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -718,7 +743,7 @@ the raw dyad-occasion mean and within-dyad member deviation.</p>
 <p>The example below estimates same-day associations between support and
 closeness and includes <code>diaryday</code> to adjust for a linear
 trend across the study.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">dim_ILD</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
@@ -784,7 +809,7 @@ trend across the study.</p>
 covariance. To add persistent within-member variation while pooling the
 AR parameters across exchangeable members, we fit the complete model
 with one member-series term:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dim_ILD_ar_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
 <span>    <span class="fl">1</span> <span class="op">+</span></span>

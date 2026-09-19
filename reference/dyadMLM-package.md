@@ -17,6 +17,12 @@ post-estimation tools.
   back-transforms exchangeable shared/difference random-effect
   covariance structures into member-level quantities.
 
+- [`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.md)
+  and
+  [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
+  provide experimental predictive comparisons of response variances and
+  partner correlations.
+
 ## Example data
 
 See

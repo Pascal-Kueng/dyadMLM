@@ -632,6 +632,42 @@ nested models. This is equivalent to the comparison shown in [Testing
 distinguishability in the APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#testing-distinguishability).
 
+## Checking partner dependence
+
+We can check whether the fitted DSM reproduces each role’s response
+variance and the partner correlation by comparing observed and simulated
+data. We supply the original roles because the model uses a role
+contrast instead of `gender`.
+
+``` r
+
+dsm_simulations <- dyadMLM::simulate_dyad_responses(dsm_model, seed = 123)
+dyadMLM::check_partner_dependence(
+  dsm_simulations,
+  dyad = coupleID,
+  role = cross_dsm_data$gender
+)
+```
+
+![Six predictive-check histograms for the DSM. Member SDs and partner
+correlation are on the left; dyad-average and half-difference summaries
+are on the right. Red lines mark observed
+values.](dsm_files/figure-html/check-cross-dsm-1.svg)
+
+The left column shows role-specific SDs and partner correlation. The
+right column shows the same information using dyad averages and half the
+differences between partners. Histograms show simulated values and red
+lines mark observed values. A red line far from most simulations
+suggests a mismatch.
+
+By default, the check subtracts the model’s fixed-effect predictions
+from observed and simulated responses. Good agreement is often expected
+for variances and correlations estimated from the same data. See the
+[function
+help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
+for details and interpretation. These checks currently support
+cross-sectional dyads only.
+
 ## Intensive longitudinal DSM
 
 The intensive longitudinal DSM extends the cross-sectional DSM using the
