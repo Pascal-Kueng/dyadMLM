@@ -14,10 +14,9 @@ Invisibly returns \code{data} when compatible.
 }
 \description{
 Checks whether a \code{dyadMLM_data} object can be used for the currently
-supported undirected DIM construction. These models
-currently support only data with exactly one exchangeable dyad composition.
+supported undirected DIM construction.
 DIM requires one final exchangeable dyad composition, which may result
-from pooling exchangeable compositions. Distinguishable dyad compositions
-are rejected until explicit role-contrast support is added.
+from pooling exchangeable compositions. Distinguishable dyads are not
+currently supported.
 }
 \keyword{internal}

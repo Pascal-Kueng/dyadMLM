@@ -50,7 +50,7 @@
 #'   )
 #'   full_data <- restricted_data
 #'
-#'   # Compare a common mean with gender-specific means, keeping covariance the same.
+#'   # Compare an exchangeable model with a distinguishable model.
 #'   restricted_model <- glmmTMB::glmmTMB(
 #'     closeness ~ 1 +
 #'       us(1 | coupleID) +
@@ -60,13 +60,13 @@
 #'   )
 #'
 #'   full_model <- glmmTMB::glmmTMB(
-#'     closeness ~ gender +
-#'       us(1 | coupleID) +
-#'       us(0 + .member_contrast_arbitrary | coupleID),
+#'     closeness ~ 0 + gender +
+#'       us(0 + gender | coupleID),
 #'     dispformula = ~ 0,
 #'     data = full_data
 #'   )
 #'
+#'   # Test equal means and residual variances jointly.
 #'   compare_nested_models(restricted_model, full_model)
 #' }
 #'
