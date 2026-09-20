@@ -124,7 +124,7 @@ tested variance parameters are on the boundary.
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">full_data</span> <span class="op">&lt;-</span> <span class="va">restricted_data</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="co"># Compare a common mean with gender-specific means, keeping covariance the same.</span></span></span>
+<span class="r-in"><span>  <span class="co"># Compare an exchangeable model with a distinguishable model.</span></span></span>
 <span class="r-in"><span>  <span class="va">restricted_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span></span>
@@ -134,13 +134,13 @@ tested variance parameters are on the boundary.
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">full_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">closeness</span> <span class="op">~</span> <span class="va">gender</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.member_contrast_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="va">closeness</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">gender</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">gender</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">full_data</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Test equal means and residual variances jointly.</span></span></span>
 <span class="r-in"><span>  <span class="fu">compare_nested_models</span><span class="op">(</span><span class="va">restricted_model</span>, <span class="va">full_model</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Likelihood-ratio test for nested models fitted to equivalent data</span>
@@ -148,7 +148,7 @@ tested variance parameters are on the boundary.
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  Df    AIC    BIC  logLik deviance  Chisq Chi Df Pr(&gt;Chisq)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> restricted_model  3 894.85 905.29 -444.42   888.85                             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> full_model        4 829.98 843.91 -410.99   821.98 66.862      1  2.911e-16 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> full_model        5 821.88 839.28 -405.94   811.88 76.966      2  &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

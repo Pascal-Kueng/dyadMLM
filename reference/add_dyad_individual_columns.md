@@ -2,12 +2,10 @@
 
 Adds Dyad-Individual Model (DIM) style dyad-mean and within-dyad
 member-deviation columns for the predictors recorded in a `dyadMLM_data`
-object. For currently supported DIMs, the data must contain one
-exchangeable dyad composition. DIM requires one final exchangeable dyad
-composition, which may result from pooling exchangeable compositions.
-Distinguishable dyads are not supported by DIM construction until
-explicit role-contrast support is added. For intensive longitudinal
-predictors decomposed by
+object. DIM requires one final exchangeable dyad composition, which may
+result from pooling exchangeable compositions. Distinguishable dyads are
+not currently supported. For intensive longitudinal predictors
+decomposed by
 [`center_predictors()`](https://pascal-kueng.github.io/dyadMLM/reference/center_predictors.md),
 raw predictors and within-person components are decomposed within each
 dyad-time occasion, while between-person components are decomposed once

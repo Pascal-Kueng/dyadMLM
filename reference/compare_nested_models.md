@@ -69,7 +69,7 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
   )
   full_data <- restricted_data
 
-  # Compare a common mean with gender-specific means, keeping covariance the same.
+  # Compare an exchangeable model with a distinguishable model.
   restricted_model <- glmmTMB::glmmTMB(
     closeness ~ 1 +
       us(1 | coupleID) +
@@ -79,13 +79,13 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
   )
 
   full_model <- glmmTMB::glmmTMB(
-    closeness ~ gender +
-      us(1 | coupleID) +
-      us(0 + .member_contrast_arbitrary | coupleID),
+    closeness ~ 0 + gender +
+      us(0 + gender | coupleID),
     dispformula = ~ 0,
     data = full_data
   )
 
+  # Test equal means and residual variances jointly.
   compare_nested_models(restricted_model, full_model)
 }
 #> Likelihood-ratio test for nested models fitted to equivalent data
@@ -93,7 +93,7 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
 #> 
 #>                  Df    AIC    BIC  logLik deviance  Chisq Chi Df Pr(>Chisq)    
 #> restricted_model  3 894.85 905.29 -444.42   888.85                             
-#> full_model        4 829.98 843.91 -410.99   821.98 66.862      1  2.911e-16 ***
+#> full_model        5 821.88 839.28 -405.94   811.88 76.966      2  < 2.2e-16 ***
 #> ---
 #> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 #> 
