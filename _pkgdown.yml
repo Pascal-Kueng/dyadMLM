@@ -26,6 +26,9 @@ navbar:
     left: [reference, articles, workshop, news]
     right: [search, github, lightswitch]
   components:
+    reference:
+      text: Functions
+      href: reference/index.html
     articles:
       text: Vignettes
       menu:
