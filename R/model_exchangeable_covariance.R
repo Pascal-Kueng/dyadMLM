@@ -46,9 +46,9 @@
 #' print(result)
 #' ```
 #'
-#' Supply `block_pairings` when automatic matching is ambiguous or when a model uses
-#' custom indicators, multiple covariance levels, or deliberately omitted
-#' blocks or terms. To specify one pair with a custom difference indicator:
+#' Supply `block_pairings` when automatic matching is ambiguous or when a
+#' model uses custom indicators or deliberately omitted blocks or terms.
+#' To specify one pair with a custom difference indicator:
 #'
 #' ```r
 #' result <- dyadMLM::recover_exchangeable_covariance(
@@ -145,9 +145,9 @@
 #' In `brms`, cross-sectional and same-occasion partner dependence can be
 #' represented directly with
 #' `unstr(time = member_position, gr = residual_group)`. With Gaussian
-#' outcomes, `sigma ~ 1` supplies the common residual scale. Non-Gaussian
-#' families have no `sigma` parameter here; `unstr()` instead estimates a
-#' common latent residual scale and correlation on the linear-predictor scale.
+#' outcomes, `sigma ~ 1` supplies the common residual scale. For families
+#' such as Poisson and negative binomial, `unstr()` adds a latent residual
+#' scale and correlation on the linear-predictor scale.
 #' Here,
 #' `member_position` identifies the same two arbitrary positions within every
 #' group, and `residual_group` identifies dyads in cross-sectional data or
