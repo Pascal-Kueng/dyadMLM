@@ -2,6 +2,10 @@
 
 ## dyadMLM (development version)
 
+- Improved function help and the model-comparison example (thanks to
+  [@musanyaks](https://github.com/musanyaks),
+  [\#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).
+
 - Added experimental checks of whether cross-sectional `glmmTMB` models
   reproduce response variances and partner correlations, for Gaussian
   and selected non-Gaussian responses.
@@ -13,6 +17,7 @@
   warning; plot labels show how many draws contribute. Identifier
   arguments accept fitted columns or aligned external vectors. See the
   function help for examples, model support, and technical details.
+
 - Added `panel = TRUE` to
   [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
   and its [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
