@@ -63,8 +63,9 @@ jobs:
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
 
-      - name: Export workshop slides to PDF
-        run: bash .github/scripts/export-workshop-slides.sh
+      # PDF export is paused after the workshop. Uncomment to enable it again.
+      # - name: Export workshop slides to PDF
+      #   run: bash .github/scripts/export-workshop-slides.sh
 
       - name: Add workshop materials
         run: |
@@ -76,8 +77,8 @@ jobs:
           cp dev/workshop/04_exercises_ild.Rmd docs/workshop/04_exercises_ild.Rmd
           zip -jq docs/workshop/dyadic-data-analysis-workshop.zip \
             dev/workshop/00_setup.R \
-            docs/workshop/01_conceptual_foundations.pdf \
-            docs/workshop/02_applied_tutorial.pdf \
+            dev/workshop/dyad-day.html \
+            dev/workshop/applied-tutorial.html \
             dev/workshop/03_exercises_cross_sectional.Rmd \
             dev/workshop/04_exercises_ild.Rmd \
             dev/workshop/dyadic-data.rds \
@@ -93,8 +94,8 @@ jobs:
             docs/workshop/index.html
             docs/workshop/conceptual/index.html
             docs/workshop/applied/index.html
-            docs/workshop/01_conceptual_foundations.pdf
-            docs/workshop/02_applied_tutorial.pdf
+            # docs/workshop/01_conceptual_foundations.pdf
+            # docs/workshop/02_applied_tutorial.pdf
             docs/workshop/03_exercises_cross_sectional.Rmd
             docs/workshop/04_exercises_ild.Rmd
             docs/workshop/dyadic-data-analysis-workshop.zip

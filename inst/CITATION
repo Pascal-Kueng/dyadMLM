@@ -3,6 +3,11 @@
 local({
   package_citation <- citation(auto = meta)
   package_citation$doi <- "10.5281/zenodo.22047083"
-  package_citation$organization <- "University of Zurich"
+  package_citation$url <- NULL
+  package_citation$title <- "dyadMLM: Tools for dyadic multilevel models"
+  package_citation$textVersion <- sprintf(
+    "Küng, P. (%s). %s (Version %s) [Computer software]. https://doi.org/%s",
+    package_citation$year, package_citation$title, meta$Version, package_citation$doi
+  )
   package_citation
 })

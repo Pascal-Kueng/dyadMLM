@@ -1,0 +1,343 @@
+---
+title: "Outer simulation study: Gaussian partner-dependence checks"
+output:
+  html_document:
+    toc: true
+    code_folding: hide
+params:
+  outer_repetitions: 500
+  inner_simulations: 1000
+---
+
+This study repeats **generate data → fit model → predictive check**. It compares
+correct models with deliberately wrong covariance restrictions. An independent
+known-truth control separates the ranking step from model fitting. These are
+descriptive checks; observed positions are not p-values.
+
+```{r setup, include=FALSE}
+devtools::load_all(normalizePath(file.path("..", "..")), quiet = TRUE)
+library(dplyr)
+knitr::opts_chunk$set(fig.width = 8, fig.height = 5, message = FALSE, warning = FALSE)
+n_outer <- as.integer(params$outer_repetitions)
+n_inner <- as.integer(params$inner_simulations)
+stopifnot(n_outer >= 1L, n_inner >= 20L)
+sample_sizes <- c(50L, 200L)
+base_seed <- 20260826L
+is_pilot <- n_outer < 500L || n_inner < 1000L
+```
+
+# Design
+
+Each population has a fixed predictor design; new responses are generated for
+every repetition. Correct and restricted models use the same datasets. Defaults
+are 500 repetitions × 1,000 reference simulations × 50/200 dyads: 7,000 fits.
+At 500 repetitions, a rate has Monte Carlo SE of about 1 percentage point near
+5%, and at most 2.2 points near 50%. The large restrictions below assess whether
+the intended problems are detectable, not sensitivity to small departures.
+
+```{r scenarios}
+truths <- tibble::tribble(
+  ~truth, ~sd_1, ~sd_2, ~rho, ~mean_1, ~mean_2, ~role_aware,
+  "positive",            1,   1,  0.5,    0,   0, FALSE,
+  "zero",                1,   1,    0,    0,   0, FALSE,
+  "negative",            1,   1, -0.5,    0,   0, FALSE,
+  "distinguishable",    0.8, 1.4,  0.4, -0.3, 0.3, TRUE
+)
+scenarios <- tibble::tribble(
+  ~scenario, ~truth, ~fitted_model, ~model_correct,
+  "positive_correct", "positive", "exchangeable", TRUE,
+  "positive_independent", "positive", "independent", FALSE,
+  "zero_correct", "zero", "independent", TRUE,
+  "negative_correct", "negative", "exchangeable", TRUE,
+  "negative_independent", "negative", "independent", FALSE,
+  "distinguishable_correct", "distinguishable", "unstructured", TRUE,
+  "distinguishable_exchangeable", "distinguishable", "exchangeable_roles", FALSE
+)
+knitr::kable(left_join(scenarios, truths, by = "truth"))
+```
+
+# Generate, fit, check
+
+Data come directly from a bivariate Gaussian distribution, independently of
+`glmmTMB`. The predictor combines shared and member-specific components; its
+population slope is 0.6. Shared and member-sign random effects allow either sign
+of correlation with equal role variances. The unstructured model allows unequal
+role variances. Role means are estimated separately for distinguishable dyads.
+
+```{r functions}
+make_design <- function(n_dyads, seed) {
+  set.seed(seed)
+  shared_x <- rep(rnorm(n_dyads, sd = 0.6), each = 2L)
+  member_x <- rnorm(2L * n_dyads, sd = 0.8)
+  data.frame(
+    dyad = factor(rep(seq_len(n_dyads), each = 2L)),
+    role = factor(rep(c("member_1", "member_2"), n_dyads),
+                  levels = c("member_1", "member_2")),
+    member_sign = rep(c(-1, 1), n_dyads), x = shared_x + member_x
+  )
+}
+
+draw_data <- function(design, truth, seed) {
+  set.seed(seed)
+  n <- nlevels(design$dyad)
+  z_1 <- rnorm(n)
+  z_2 <- rnorm(n)
+  error_1 <- truth$sd_1 * z_1
+  error_2 <- truth$sd_2 * (truth$rho * z_1 + sqrt(1 - truth$rho^2) * z_2)
+  design$expected_mean <- rep(c(truth$mean_1, truth$mean_2), n) + 0.6 * design$x
+  design$y <- design$expected_mean + as.vector(rbind(error_1, error_2))
+  design
+}
+
+fit_model <- function(data, model_name) {
+  formula <- switch(model_name,
+    exchangeable = y ~ 1 + x + (1 | dyad) + (0 + member_sign | dyad),
+    independent = y ~ 1 + x,
+    unstructured = y ~ 0 + role + x + (0 + role | dyad),
+    exchangeable_roles = y ~ 0 + role + x + (1 | dyad) + (0 + member_sign | dyad),
+    stop("Unknown model: ", model_name)
+  )
+  glmmTMB::glmmTMB(formula, data = data, family = gaussian(),
+                  dispformula = if (model_name == "independent") ~1 else ~0)
+}
+
+extract_results <- function(check, scenario, truth, n_dyads, outer_rep, method) {
+  statistic_names <- intersect(names(check$observed_statistics), c(
+    "Common member SD (exchangeable)", "Partner correlation (exchangeable)",
+    "SD (member_1)", "SD (member_2)", "Partner correlation (member_1 and member_2)"
+  ))
+  # This study needs tail directions and observed positions across repetitions.
+  bind_rows(lapply(statistic_names, function(statistic_name) {
+    observed_value <- check$observed_statistics[[statistic_name]]
+    simulated_values <- check$replicated_statistics[, statistic_name]
+    simulated_values <- simulated_values[is.finite(simulated_values)]
+    limits <- quantile(simulated_values, c(0.025, 0.975), names = FALSE)
+    direction <- if (observed_value < limits[1]) "below" else
+      if (observed_value > limits[2]) "above" else "inside"
+    tibble::tibble(
+      scenario = scenario, truth = truth, n_dyads = n_dyads,
+      outer_rep = outer_rep, method = method, statistic_name,
+      observed_quantile = (1 + sum(simulated_values <= observed_value)) /
+        (length(simulated_values) + 1),
+      outside_95 = direction != "inside", direction = direction
+    )
+  }))
+}
+
+run_oracle <- function(data, truth, n_dyads, outer_rep, nsim, seed) {
+  set.seed(seed)
+  z_1 <- matrix(rnorm(n_dyads * nsim), nrow = n_dyads)
+  z_2 <- matrix(rnorm(n_dyads * nsim), nrow = n_dyads)
+  error_1 <- truth$sd_1 * z_1
+  error_2 <- truth$sd_2 * (truth$rho * z_1 + sqrt(1 - truth$rho^2) * z_2)
+  simulated <- matrix(NA_real_, nrow = nsim, ncol = 2L * n_dyads)
+  simulated[, seq.int(1L, 2L * n_dyads, 2L)] <-
+    t(error_1 + data$expected_mean[data$role == "member_1"])
+  simulated[, seq.int(2L, 2L * n_dyads, 2L)] <-
+    t(error_2 + data$expected_mean[data$role == "member_2"])
+  simulations <- structure(list(
+    observed_response = data$y, simulated_responses = simulated,
+    predicted_response = data$expected_mean, model_frame = data.frame(y = data$y)
+  ), class = c("dyadMLM_response_simulations", "list"), dyadMLM = list(
+    backend = "glmmTMB", family = "gaussian", link = "identity",
+    reference = "known-parameter oracle", random_effects = "known covariance",
+    parameter_uncertainty = "not applicable", seed = seed
+  ))
+  check <- check_partner_dependence(simulations, dyad = data$dyad, plot = FALSE)
+  extract_results(check, "positive_oracle", truth$truth, n_dyads, outer_rep, "oracle")
+}
+
+run_fitted_check <- function(data, scenario, role_aware, n_dyads, outer_rep, nsim, seed) {
+  warnings <- character()
+  scenario_name <- scenario$scenario
+  truth_name <- scenario$truth
+  status <- tibble::tibble(
+    scenario = scenario_name, truth = truth_name, n_dyads = n_dyads,
+    outer_rep = outer_rep, status = "fit_error", convergence = NA_integer_,
+    pd_hess = NA, warnings = "", error = NA_character_
+  )
+  statistics <- tryCatch(withCallingHandlers({
+    fit <- fit_model(data, scenario$fitted_model)
+    status$convergence <- fit$fit$convergence
+    status$pd_hess <- fit$sdr$pdHess
+    if (!isTRUE(status$convergence == 0L) || !isTRUE(status$pd_hess)) {
+      status$status <- "fit_problem"
+      NULL
+    } else {
+      status$status <- "check_error"
+      simulations <- simulate_dyad_responses(fit, nsim = nsim, seed = seed)
+      check <- check_partner_dependence(
+        simulations, dyad = data$dyad,
+        role = if (role_aware) data$role else NULL, plot = FALSE
+      )
+      stopifnot(check$n_pairs == n_dyads)
+      if (role_aware) stopifnot(identical(
+        names(check$observed_statistics)[1:2], c("SD (member_1)", "SD (member_2)")
+      ))
+      result <- extract_results(check, scenario$scenario, scenario$truth,
+                                n_dyads, outer_rep, "fitted plug-in")
+      status$status <- "success"
+      result
+    }
+  }, warning = function(w) {
+    warnings <<- c(warnings, conditionMessage(w))
+    invokeRestart("muffleWarning")
+  }), error = function(e) {
+    status$error <<- conditionMessage(e)
+    NULL
+  })
+  status$warnings <- paste(unique(warnings), collapse = " | ")
+  list(status = status, statistics = statistics)
+}
+```
+
+The oracle uses true means and covariance for the positive-correlation population.
+Observed and reference datasets are then exchangeable; positions should be roughly
+uniform. Fitted checks instead use estimated parameters. Fit/check errors,
+convergence codes, Hessian problems, and warnings are recorded without retries.
+
+```{r run-study}
+designs <- lapply(seq_along(sample_sizes), function(i) {
+  make_design(sample_sizes[[i]], seed = base_seed + 1000L * i)
+})
+statuses <- statistics <- list()
+for (size_i in seq_along(sample_sizes)) {
+  n_dyads <- sample_sizes[[size_i]]
+  for (truth_i in seq_len(nrow(truths))) {
+    truth <- truths[truth_i, ]
+    truth_scenarios <- scenarios[scenarios$truth == truth$truth, ]
+    for (outer_rep in seq_len(n_outer)) {
+      data_seed <- base_seed + 100000L * truth_i + 10000L * size_i + outer_rep
+      data <- draw_data(designs[[size_i]], truth, seed = data_seed)
+      if (truth$truth == "positive") {
+        statistics[[length(statistics) + 1L]] <- run_oracle(
+          data, truth, n_dyads, outer_rep, n_inner, seed = data_seed + 20000000L
+        )
+      }
+      for (scenario_i in seq_len(nrow(truth_scenarios))) {
+        scenario <- truth_scenarios[scenario_i, ]
+        global_i <- match(scenario$scenario, scenarios$scenario)
+        result <- run_fitted_check(data, scenario, truth$role_aware,
+          n_dyads, outer_rep, n_inner, seed = data_seed + 10000000L + 1000L * global_i)
+        statuses[[length(statuses) + 1L]] <- result$status
+        if (!is.null(result$statistics)) statistics[[length(statistics) + 1L]] <- result$statistics
+      }
+    }
+  }
+}
+run_status <- bind_rows(statuses)
+outer_results <- bind_rows(statistics)
+```
+
+# Results
+
+Rates use only successful fits/checks and the member parameterization. The
+mean/difference parameterization carries equivalent covariance information and
+is not counted as additional evidence. MCSE is the plug-in estimate; zero MCSE
+at an observed rate of 0 or 1 does not establish an exact population rate.
+
+```{r completion, echo=FALSE}
+completion <- run_status |>
+  group_by(scenario, n_dyads) |>
+  summarise(attempted = n(), success_rate = mean(status == "success"),
+    warning_runs = sum(nzchar(warnings)), fit_problems = sum(status == "fit_problem"),
+    fit_errors = sum(status == "fit_error"), check_errors = sum(status == "check_error"),
+    .groups = "drop")
+knitr::kable(completion, digits = 3)
+```
+
+## Known truth and correct fits
+
+The oracle should put about 2.5% in each tail, with position SD near
+`r sprintf("%.3f", 1 / sqrt(12))`. Flexible fitted models can cluster near the
+middle because they estimated the same features being checked. Independence
+fits estimate variance but fix correlation, leaving correlation informative.
+
+```{r rates, echo=FALSE}
+rates <- outer_results |>
+  group_by(method, scenario, n_dyads, statistic_name) |>
+  summarise(repetitions = n(), outside_count = sum(outside_95),
+    below = mean(direction == "below"), outside = mean(outside_95),
+    above = mean(direction == "above"), mean_position = mean(observed_quantile),
+    sd_position = sd(observed_quantile), .groups = "drop") |>
+  mutate(mcse = sqrt(outside * (1 - outside) / repetitions))
+oracle_rates <- filter(rates, method == "oracle")
+correct_rates <- filter(rates, method == "fitted plug-in",
+                         scenario %in% scenarios$scenario[scenarios$model_correct])
+knitr::kable(oracle_rates, digits = 3)
+knitr::kable(correct_rates, digits = 3)
+```
+
+```{r position-plot, echo=FALSE}
+plot_data <- filter(outer_results, n_dyads == max(sample_sizes),
+                    statistic_name == "Partner correlation (exchangeable)")
+old_par <- par(mfrow = c(1, 2))
+for (shown in c("positive_oracle", "positive_correct")) {
+  plot(ecdf(plot_data$observed_quantile[plot_data$scenario == shown]),
+       main = if (shown == "positive_oracle") "Oracle" else "Correct fitted model",
+       xlab = "Observed position", ylab = "Cumulative proportion",
+       xlim = c(0, 1), ylim = c(0, 1))
+  abline(a = 0, b = 1, lty = 2, col = "grey40")
+}
+par(old_par)
+```
+
+## Wrong restrictions: paired comparisons
+
+Directions are specified in advance: omitting positive/negative correlation
+should put it above/below the reference; imposing equal role variances should put
+the smaller/larger SD below/above it. Each paired gain compares both fits on the
+same dataset, conditional on both succeeding.
+
+```{r paired-comparisons, echo=FALSE}
+targets <- tibble::tribble(
+  ~constrained, ~correct, ~statistic_name, ~expected,
+  "positive_independent", "positive_correct", "Partner correlation (exchangeable)", "above",
+  "negative_independent", "negative_correct", "Partner correlation (exchangeable)", "below",
+  "distinguishable_exchangeable", "distinguishable_correct", "SD (member_1)", "below",
+  "distinguishable_exchangeable", "distinguishable_correct", "SD (member_2)", "above"
+)
+fitted_results <- outer_results |>
+  filter(method == "fitted plug-in") |>
+  select(scenario, truth, n_dyads, outer_rep, statistic_name, direction)
+paired <- targets |>
+  inner_join(fitted_results, by = c("constrained" = "scenario", "statistic_name")) |>
+  inner_join(fitted_results,
+    by = c("correct" = "scenario", "truth", "n_dyads", "outer_rep", "statistic_name"),
+    suffix = c("_constrained", "_correct")) |>
+  mutate(constrained_flag = direction_constrained == expected,
+    correct_flag = direction_correct == expected,
+    gain = as.integer(constrained_flag) - as.integer(correct_flag))
+paired_summary <- paired |>
+  group_by(constrained, n_dyads, statistic_name, expected) |>
+  summarise(paired_runs = n(), correct_rate = mean(correct_flag),
+    constrained_rate = mean(constrained_flag), paired_gain = mean(gain),
+    gain_mcse = sd(gain) / sqrt(n()), .groups = "drop")
+knitr::kable(paired_summary, digits = 3)
+```
+
+# Interpretation and reproducibility
+
+```{r pilot-note, echo=FALSE, results='asis'}
+if (is_pilot) cat("**Pilot run:** these rates are too imprecise for validation conclusions.\n")
+```
+
+Read the oracle ranks first, then fitted-model concentration and paired detection
+rates. Agreement for flexible fits is expected and alone provides little evidence
+of fit. This study concerns large covariance restrictions in cross-sectional
+Gaussian models; it does not establish sensitivity to smaller problems or
+performance for non-Gaussian or longitudinal models.
+
+The default run is the full study. For a quick execution check, override its
+parameters (this does not replace the full study):
+
+```r
+rmarkdown::render(
+  "dev/diagnostic_checks/partner-dependence-outer-simulation-study.Rmd",
+  params = list(outer_repetitions = 20, inner_simulations = 99)
+)
+```
+
+```{r session-info}
+sessionInfo()
+```

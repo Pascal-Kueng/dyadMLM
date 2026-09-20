@@ -1,5 +1,10 @@
 url: https://pascal-kueng.github.io/dyadMLM/
 
+# Give the six-panel reference examples the same 8-by-9-inch size as the vignettes.
+figures:
+  fig.width: 8
+  fig.asp: 1.125
+
 home:
   title: "dyadMLM: Tools for Dyadic Multilevel Models"
   description: "Prepare and analyze distinguishable and exchangeable dyadic data for APIM, DIM, and DSM multilevel models in R."
@@ -56,9 +61,14 @@ reference:
 - title: Main functions
   contents:
   - prepare_dyad_data
-  - summary.dyadMLM_data
   - compare_nested_models
   - recover_exchangeable_covariance
+
+- title: Predictive diagnostics
+  desc: Experimental descriptive checks of how well a fitted model reproduces partner dependence.
+  contents:
+  - simulate_dyad_responses
+  - check_partner_dependence
 
 - title: Example data
   contents:

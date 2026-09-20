@@ -1,0 +1,159 @@
+---
+title: "Reference validation: exchangeable partner-dependence summaries"
+output: html_document
+---
+
+This report checks the four exchangeable summaries against an independent
+Woody–Sadler calculation and recorded Dingy output. It does not validate response
+simulation, model centring, or predictive calibration.
+
+```{r setup, include=FALSE}
+package_root <- normalizePath(file.path("..", ".."))
+devtools::load_all(package_root, quiet = TRUE)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, collapse = TRUE,
+                      comment = "#>")
+tolerance <- 1e-12
+```
+
+## Reference calculation
+
+For member values \(Y_{i1},Y_{i2}\), define the dyad average
+\(M_i=(Y_{i1}+Y_{i2})/2\) and half-difference \(D_i=(Y_{i1}-Y_{i2})/2\).
+The interchangeable-member decomposition uses
+\(MS_B=2\operatorname{var}(M)\) and \(MS_W=2\operatorname{mean}(D^2)\).
+The first divides by \(n-1\); the second divides by \(n\) and measures
+half-differences about zero, making arbitrary within-dyad swaps irrelevant.
+
+The function below was written independently from Woody and Sadler (2005),
+[Structural Equation Models for Interchangeable Dyads](https://doi.org/10.1037/1082-989X.10.2.139).
+No code or data were copied from the
+[APA supplement](https://supp.apa.org/psycarticles/supplemental/1082-989X.10.2.139/1082-989X.10.2.139_supp.html).
+
+```{r reference}
+woody_sadler_reference <- function(member_1, member_2) {
+  n <- length(member_1)
+  stopifnot(n == length(member_2), n >= 2L)
+  MS_between <- 2 * var((member_1 + member_2) / 2)
+  MS_within <- sum((member_1 - member_2)^2) / (2 * n)
+  member_variance <- (MS_between + MS_within) / 2
+  partner_covariance <- (MS_between - MS_within) / 2
+  c(
+    MS_between = MS_between,
+    MS_within = MS_within,
+    "Common member SD (exchangeable)" = sqrt(member_variance),
+    "Partner correlation (exchangeable)" = partner_covariance / member_variance,
+    "Dyad-average SD" = sqrt(MS_between / 2),
+    "Half-difference RMS (about zero)" = sqrt(MS_within / 2)
+  )
+}
+```
+
+## Numerical agreement and member swaps
+
+The same seeded 48-dyad dataset underlies the calculation and the recorded
+Dingy comparison. All assertions below use an absolute tolerance of `1e-12`.
+
+```{r numerical-checks}
+set.seed(20260826L)
+n_dyads <- 48L
+generated_means <- rnorm(n_dyads, mean = 2, sd = 1.1)
+generated_half_differences <- rnorm(n_dyads, mean = 0, sd = 0.55)
+validation_data <- data.frame(
+  dyad = seq_len(n_dyads),
+  member_1 = generated_means + generated_half_differences,
+  member_2 = generated_means - generated_half_differences
+)
+stopifnot(nrow(validation_data) >= 40L, all(complete.cases(validation_data)))
+actual <- dyadMLM:::calculate_partner_pair_statistics(
+  validation_data$member_1, validation_data$member_2
+)
+reference <- woody_sadler_reference(
+  validation_data$member_1, validation_data$member_2
+)
+M <- (validation_data$member_1 + validation_data$member_2) / 2
+D <- (validation_data$member_1 - validation_data$member_2) / 2
+member_variance <- actual[["Common member SD (exchangeable)"]]^2
+partner_covariance <- actual[["Partner correlation (exchangeable)"]] * member_variance
+stopifnot(
+  max(abs(actual - reference[names(actual)])) <= tolerance,
+  abs(reference[["MS_between"]] - 2 * var(M)) <= tolerance,
+  abs(reference[["MS_within"]] - 2 * mean(D^2)) <= tolerance,
+  abs(member_variance - (var(M) + mean(D^2))) <= tolerance,
+  abs(partner_covariance - (var(M) - mean(D^2))) <= tolerance
+)
+
+set.seed(20260827L)
+rows_to_swap <- sort(sample(seq_len(n_dyads), size = 16L))
+swapped <- validation_data
+swapped[rows_to_swap, c("member_1", "member_2")] <-
+  swapped[rows_to_swap, c("member_2", "member_1")]
+swapped_D <- (swapped$member_1 - swapped$member_2) / 2
+swapped_actual <- dyadMLM:::calculate_partner_pair_statistics(
+  swapped$member_1, swapped$member_2
+)
+swapped_reference <- woody_sadler_reference(swapped$member_1, swapped$member_2)
+stopifnot(
+  max(abs(swapped_actual - actual)) <= tolerance,
+  max(abs(swapped_reference - reference)) <= tolerance,
+  max(abs(swapped_D[rows_to_swap] + D[rows_to_swap])) <= tolerance,
+  max(abs(swapped_D^2 - D^2)) <= tolerance
+)
+cat("All reference, covariance-identity, and member-swap assertions passed.\n")
+```
+
+## Dingy cross-check
+
+The live [Dingy](https://davidakenny.net/DyadR/DyadRweb.htm) run on 2026-08-26
+reported lavaan 0.6-19. Its rounded estimates were variance **1.36**, covariance
+**0.67**, and correlation **0.50**. The recorded nonindependence test,
+\(\chi^2(1)=13.566, p<.001\), is context only, not one of these four summaries.
+
+Dingy's ML convention divides the centred dyad-mean sum of squares by \(n\)
+instead of \(n-1\). Reconstructing that convention must reproduce its displayed
+estimates. This is a historical software cross-check, not a fresh Dingy run.
+
+```{r dingy-check}
+dingy_displayed <- c(
+  common_member_variance = 1.36,
+  cross_member_covariance = 0.67,
+  partner_correlation = 0.50
+)
+ml_variance_of_M <- mean((M - mean(M))^2)
+dingy_reconstruction <- c(
+  common_member_variance = ml_variance_of_M + mean(D^2),
+  cross_member_covariance = ml_variance_of_M - mean(D^2)
+)
+dingy_reconstruction <- c(
+  dingy_reconstruction,
+  partner_correlation = dingy_reconstruction[["cross_member_covariance"]] /
+    dingy_reconstruction[["common_member_variance"]]
+)
+stopifnot(max(abs(round(dingy_reconstruction, 2) - dingy_displayed)) <= tolerance)
+dingy_summaries <- c(
+  sqrt(dingy_reconstruction[["common_member_variance"]]),
+  dingy_reconstruction[["partner_correlation"]],
+  sqrt(ml_variance_of_M),
+  sqrt(mean(D^2))
+)
+knitr::kable(data.frame(
+  statistic = names(actual),
+  dyadMLM = unname(actual),
+  Woody_Sadler = unname(reference[names(actual)]),
+  absolute_difference = unname(abs(actual - reference[names(actual)])),
+  Dingy_ML_reconstruction = dingy_summaries
+), digits = 9)
+```
+
+The four package summaries match the independent reference. Arbitrary member
+swaps preserve them. Dingy's small differences follow from ML scaling; both
+conventions use the same half-difference mean square about zero.
+
+To repeat the external check, upload the temporary CSV below, select `member_1`
+and `member_2` as one mixed variable, treat positions as indistinguishable, and
+request nonindependence analysis. Retain the tables and computer/lavaan output.
+
+```{r dingy-upload}
+dingy_csv <- file.path(tempdir(), "dyadMLM-partner-dependence-validation.csv")
+write.csv(validation_data, dingy_csv, row.names = FALSE)
+cat("Temporary Dingy upload file:", dingy_csv, "\n")
+```

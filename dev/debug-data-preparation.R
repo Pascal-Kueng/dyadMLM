@@ -22,18 +22,18 @@
 
 
 source_data_preparation_internals <- function() {
-  source("R/utils-args.R")
-  source("R/utils-compositions.R")
-  source("R/assign_arbitrary_member_roles.R")
-  source("R/validate_dyad_data.R")
-  source("R/dyad-generated-columns.R")
-  source("R/infer_dyad_compositions.R")
-  source("R/center_predictors.R")
-  source("R/add_temporal_lag_columns.R")
-  source("R/validate-model-compatibility.R")
-  source("R/add_actor_partner_columns.R")
-  source("R/add_dyad_individual_columns.R")
-  source("R/add_dyadic_score_columns.R")
+  source("R/utils_arguments.R")
+  source("R/utils_compositions.R")
+  source("R/data_prep_arbitrary_roles.R")
+  source("R/data_prep_validation.R")
+  source("R/data_prep_generated_columns.R")
+  source("R/data_prep_compositions.R")
+  source("R/data_prep_centering.R")
+  source("R/data_prep_lags.R")
+  source("R/data_prep_model_compatibility.R")
+  source("R/data_prep_apim.R")
+  source("R/data_prep_dim.R")
+  source("R/data_prep_dsm.R")
 
   invisible(TRUE)
 }
