@@ -1,5 +1,9 @@
 # dyadMLM (development version)
 
+* Improved function help and the model-comparison example (thanks to
+  [@musanyaks](https://github.com/musanyaks),
+  [#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).
+
 * Added experimental checks of whether cross-sectional `glmmTMB` models
   reproduce response variances and partner correlations, for Gaussian and selected
   non-Gaussian responses. `simulate_dyad_responses()` generates datasets;
