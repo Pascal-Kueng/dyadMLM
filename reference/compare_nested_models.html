@@ -118,16 +118,26 @@ tested variance parameters are on the boundary.
 <span class="r-in"><span>    <span class="co"># All three observed compositions in `dyads_cross` are detected and retained</span></span></span>
 <span class="r-in"><span>    <span class="co"># by default. This example focuses on `female-male` dyads, so we restrict the</span></span></span>
 <span class="r-in"><span>    <span class="co"># analysis here.</span></span></span>
-<span class="r-in"><span>    keep_compositions <span class="op">=</span> <span class="st">"female-male"</span></span></span>
+<span class="r-in"><span>    keep_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span></span>
+<span class="r-in"><span>    include_arbitrary_member_contrast <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    seed <span class="op">=</span> <span class="fl">123</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">full_data</span> <span class="op">&lt;-</span> <span class="va">restricted_data</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Compare a common mean with gender-specific means, keeping covariance the same.</span></span></span>
 <span class="r-in"><span>  <span class="va">restricted_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.member_contrast_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">restricted_data</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">full_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">closeness</span> <span class="op">~</span> <span class="va">gender</span> <span class="op">+</span> <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="va">closeness</span> <span class="op">~</span> <span class="va">gender</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.member_contrast_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">full_data</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

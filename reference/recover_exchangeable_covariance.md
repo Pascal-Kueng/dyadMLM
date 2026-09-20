@@ -85,9 +85,8 @@ Most models fitted with `dyadMLM`-generated columns therefore need only:
     print(result)
 
 Supply `block_pairings` when automatic matching is ambiguous or when a
-model uses custom indicators, multiple covariance levels, or
-deliberately omitted blocks or terms. To specify one pair with a custom
-difference indicator:
+model uses custom indicators or deliberately omitted blocks or terms. To
+specify one pair with a custom difference indicator:
 
     result <- dyadMLM::recover_exchangeable_covariance(
       model,
@@ -186,16 +185,16 @@ section for the manual calculation.
 In `brms`, cross-sectional and same-occasion partner dependence can be
 represented directly with
 `unstr(time = member_position, gr = residual_group)`. With Gaussian
-outcomes, `sigma ~ 1` supplies the common residual scale. Non-Gaussian
-families have no `sigma` parameter here; `unstr()` instead estimates a
-common latent residual scale and correlation on the linear-predictor
-scale. Here, `member_position` identifies the same two arbitrary
-positions within every group, and `residual_group` identifies dyads in
-cross-sectional data or dyad-occasions in longitudinal data. This direct
-specification applies when one covariance structure is sufficient.
-Separate composition-specific `unstr()` structures for mixed dyad types
-are not currently supported in a standard single-response `brms` model.
-For Gaussian mixed-dyad residual covariance, use `glmmTMB`.
+outcomes, `sigma ~ 1` supplies the common residual scale. For families
+such as Poisson and negative binomial, `unstr()` adds a latent residual
+scale and correlation on the linear-predictor scale. Here,
+`member_position` identifies the same two arbitrary positions within
+every group, and `residual_group` identifies dyads in cross-sectional
+data or dyad-occasions in longitudinal data. This direct specification
+applies when one covariance structure is sufficient. Separate
+composition-specific `unstr()` structures for mixed dyad types are not
+currently supported in a standard single-response `brms` model. For
+Gaussian mixed-dyad residual covariance, use `glmmTMB`.
 Shared/difference blocks remain relevant for higher-level random effects
 and can represent latent link-scale covariance in non-Gaussian models.
 

@@ -136,9 +136,9 @@ terms. Most models fitted with <code>dyadMLM</code>-generated columns therefore 
 only:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span></code></pre><p></p></div>
-<p>Supply <code>block_pairings</code> when automatic matching is ambiguous or when a model uses
-custom indicators, multiple covariance levels, or deliberately omitted
-blocks or terms. To specify one pair with a custom difference indicator:</p>
+<p>Supply <code>block_pairings</code> when automatic matching is ambiguous or when a
+model uses custom indicators or deliberately omitted blocks or terms.
+To specify one pair with a custom difference indicator:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance</a></span><span class="op">(</span></span>
 <span>  <span class="va">model</span>,</span>
 <span>  block_pairings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -224,9 +224,9 @@ section for the manual calculation.</p>
 <p>In <code>brms</code>, cross-sectional and same-occasion partner dependence can be
 represented directly with
 <code>unstr(time = member_position, gr = residual_group)</code>. With Gaussian
-outcomes, <code>sigma ~ 1</code> supplies the common residual scale. Non-Gaussian
-families have no <code>sigma</code> parameter here; <code>unstr()</code> instead estimates a
-common latent residual scale and correlation on the linear-predictor scale.
+outcomes, <code>sigma ~ 1</code> supplies the common residual scale. For families
+such as Poisson and negative binomial, <code>unstr()</code> adds a latent residual
+scale and correlation on the linear-predictor scale.
 Here,
 <code>member_position</code> identifies the same two arbitrary positions within every
 group, and <code>residual_group</code> identifies dyads in cross-sectional data or
