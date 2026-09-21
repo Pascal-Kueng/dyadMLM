@@ -144,7 +144,6 @@ with `print()`:
 
 ``` r
 print(prepared_data, n = 4)
-
 #> # dyadMLM data
 #> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
@@ -239,12 +238,17 @@ simulations <- simulate_dyad_responses(model, seed = 123)
 check_partner_dependence(
   simulations,
   dyad = coupleID,
-  role = prepared_data$gender,
-  panel = TRUE
+  role = gender,
+  # Supply the fitting data because gender is not in the model formula.
+  data = prepared_data,
+  panels = TRUE
 )
 ```
 
-<img src="man/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
+<img src="man/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
+
+The function groups the six plots in one figure. Use `panels = FALSE` to
+show them separately.
 
 Here, simulations produce weaker partner correlations and larger SDs of
 partner half-differences than observed (red lines), suggesting
@@ -255,6 +259,14 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
 Use
 [`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
 to compare the two nested models.
+
+With mixed dyad compositions, each observed role pair gets its own
+figure. It can be worthwhile to check plausible role distinctions even
+when fitting an exchangeable model, since pooling can hide differences
+in variances or partner correlations. These checks alone do not
+establish whether fixed effects should be pooled ([nested model
+comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
+can help assess those restrictions).
 
 ## Vignettes and examples
 

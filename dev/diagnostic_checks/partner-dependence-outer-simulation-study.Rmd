@@ -102,14 +102,15 @@ fit_model <- function(data, model_name) {
 }
 
 extract_results <- function(check, scenario, truth, n_dyads, outer_rep, method) {
-  statistic_names <- intersect(names(check$observed_statistics), c(
+  composition_statistics <- check$compositions$statistics[[1]]
+  statistic_names <- intersect(names(composition_statistics), c(
     "Common member SD (exchangeable)", "Partner correlation (exchangeable)",
     "SD (member_1)", "SD (member_2)", "Partner correlation (member_1 and member_2)"
   ))
   # This study needs tail directions and observed positions across repetitions.
   bind_rows(lapply(statistic_names, function(statistic_name) {
-    observed_value <- check$observed_statistics[[statistic_name]]
-    simulated_values <- check$replicated_statistics[, statistic_name]
+    observed_value <- composition_statistics[[statistic_name]][1]
+    simulated_values <- composition_statistics[[statistic_name]][-1]
     simulated_values <- simulated_values[is.finite(simulated_values)]
     limits <- quantile(simulated_values, c(0.025, 0.975), names = FALSE)
     direction <- if (observed_value < limits[1]) "below" else
@@ -143,12 +144,15 @@ run_oracle <- function(data, truth, n_dyads, outer_rep, nsim, seed) {
     reference = "known-parameter oracle", random_effects = "known covariance",
     parameter_uncertainty = "not applicable", seed = seed
   ))
-  check <- check_partner_dependence(simulations, dyad = data$dyad, plot = FALSE)
+  check <- check_partner_dependence(
+    simulations, dyad = dyad, data = data, plot = FALSE
+  )
   extract_results(check, "positive_oracle", truth$truth, n_dyads, outer_rep, "oracle")
 }
 
 run_fitted_check <- function(data, scenario, role_aware, n_dyads, outer_rep, nsim, seed) {
   warnings <- character()
+  role_column <- if (role_aware) "role" else NULL
   scenario_name <- scenario$scenario
   truth_name <- scenario$truth
   status <- tibble::tibble(
@@ -167,12 +171,13 @@ run_fitted_check <- function(data, scenario, role_aware, n_dyads, outer_rep, nsi
       status$status <- "check_error"
       simulations <- simulate_dyad_responses(fit, nsim = nsim, seed = seed)
       check <- check_partner_dependence(
-        simulations, dyad = data$dyad,
-        role = if (role_aware) data$role else NULL, plot = FALSE
+        simulations, dyad = dyad, role = !!role_column,
+        data = data, plot = FALSE
       )
       stopifnot(check$n_pairs == n_dyads)
       if (role_aware) stopifnot(identical(
-        names(check$observed_statistics)[1:2], c("SD (member_1)", "SD (member_2)")
+        names(check$compositions$statistics[[1]])[2:3],
+        c("SD (member_1)", "SD (member_2)")
       ))
       result <- extract_results(check, scenario$scenario, scenario$truth,
                                 n_dyads, outer_rep, "fitted plug-in")
