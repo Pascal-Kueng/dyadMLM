@@ -258,6 +258,9 @@ to compare the two nested models.
 
 ## Vignettes and examples
 
+For an overview of the available functions, see the [function
+reference](https://pascal-kueng.github.io/dyadMLM/reference/index.html).
+
 | Vignette | Focus |
 |----|----|
 | [Getting Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
