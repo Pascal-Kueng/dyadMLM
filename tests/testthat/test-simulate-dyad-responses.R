@@ -159,55 +159,112 @@ test_that("model simulation settings and RNG are restored after an error", {
 
 test_that("zero-inflated and hurdle checks use the combined response", {
   skip_if_not_installed("glmmTMB")
-  families <- list(stats::poisson(), glmmTMB::ziGamma(link = "log"))
+  families <- list(stats::poisson(), glmmTMB::ziGamma(link = "log"),
+                   glmmTMB::truncated_poisson())
   for (family in families) {
     withr::local_seed(8140)
     fitting_data <- data.frame(
       dyad = factor(rep(seq_len(240), each = 2)),
       study = factor(rep(seq_len(40), each = 12)),
       predictor = stats::rnorm(480),
-      zero_predictor = stats::rnorm(480)
+      zero_predictor = stats::rnorm(480),
+      zero_offset = rep(c(-0.2, 0.2), times = 240)
     )
     response_mean <- exp(1.7 + 0.25 * fitting_data$predictor +
       stats::rnorm(240, sd = 0.5)[fitting_data$dyad])
     zero_probability <- stats::plogis(-0.5 + 0.4 * fitting_data$zero_predictor +
+      fitting_data$zero_offset +
       stats::rnorm(40, sd = 0.9)[fitting_data$study])
-    fitting_data$outcome <- if (family$family == "poisson") {
-      stats::rpois(480, response_mean)
-    } else {
+    fitting_data$outcome <- if (family$family == "Gamma") {
       stats::rgamma(480, shape = 4, scale = response_mean / 4)
+    } else {
+      stats::rpois(480, response_mean)
+    }
+    if (family$family == "truncated_poisson") {
+      # The response component of a hurdle model must generate positive counts.
+      while (any(fitting_data$outcome == 0)) {
+        zero_rows <- which(fitting_data$outcome == 0)
+        fitting_data$outcome[zero_rows] <- stats::rpois(
+          length(zero_rows), response_mean[zero_rows]
+        )
+      }
     }
     fitting_data$outcome[stats::runif(480) < zero_probability] <- 0
     fitting_data$zero_predictor[3] <- NA_real_
-    model <- glmmTMB::glmmTMB(
-      outcome ~ predictor + (1 | dyad),
-      ziformula = ~zero_predictor,
-      family = family, data = fitting_data, na.action = stats::na.exclude
-    )
-    expect_identical(model$fit$convergence, 0L)
-    expect_true(model$sdr$pdHess)
-    expected_draws <- t(as.matrix(stats::simulate(model, nsim = 20, seed = 8141)))
+    for (zero_formula in list(
+      ~zero_predictor + offset(zero_offset),
+      ~zero_predictor + offset(zero_offset) + (1 | study)
+    )) {
+      model <- glmmTMB::glmmTMB(
+        outcome ~ predictor + (1 | dyad), ziformula = zero_formula,
+        family = family, data = fitting_data, na.action = stats::na.exclude
+      )
+      expect_identical(model$fit$convergence, 0L)
+      expect_true(model$sdr$pdHess)
+      expected_draws <- t(as.matrix(stats::simulate(model, nsim = 20, seed = 8141)))
 
-    simulations <- simulate_dyad_responses(model, nsim = 20, seed = 8141)
-    expect_identical(simulations$simulated_responses, expected_draws)
-    expect_identical(simulations$observed_response, fitting_data$outcome[-3])
-    expect_identical(dim(simulations$simulated_responses), c(20L, 479L))
-    fixed_response_mean <- exp(stats::model.matrix(model, component = "cond") %*%
-      glmmTMB::fixef(model)$cond)
-    fixed_zero_probability <- stats::plogis(
-      stats::model.matrix(model, component = "zi") %*% glmmTMB::fixef(model)$zi
-    )
-    expect_equal(simulations$predicted_response,
-                 as.numeric(fixed_response_mean * (1 - fixed_zero_probability)))
-    expect_warning(check <- check_partner_dependence(
-      simulations, dyad = dyad, role = NULL, plot = FALSE
-    ), "Omitted: 1 incomplete dyad, with ID: 2.", fixed = TRUE)
-    expect_identical(check$n_pairs, 239L)
+      # Both components must draw new random effects, then restore caller settings.
+      model$obj$env$data$terms[[1]]$simCode <- 1
+      if (length(model$obj$env$data$termszi)) {
+        model$obj$env$data$termszi[[1]]$simCode <- 0
+      }
+      caller_data <- model$obj$env$data
+      rng_state <- .Random.seed
+      simulations <- simulate_dyad_responses(model, nsim = 20, seed = 8141)
+      expect_identical(model$obj$env$data, caller_data)
+      expect_identical(.Random.seed, rng_state)
+      expect_identical(simulations$simulated_responses, expected_draws)
+      expect_identical(simulations$observed_response, fitting_data$outcome[-3])
+      expect_identical(dim(simulations$simulated_responses), c(20L, 479L))
 
-    zero_random_effect_model <- update(model, ziformula = ~zero_predictor + (1 | study))
-    expect_error(simulate_dyad_responses(zero_random_effect_model),
-                 "do not yet support random effects in `ziformula`", fixed = TRUE)
+      # Calculate the combined mean independently, with both random effects zero.
+      fitted_coefficients <- glmmTMB::fixef(model)
+      fitted_data <- fitting_data[-3, ]
+      fixed_response_mean <- exp(fitted_coefficients$cond["(Intercept)"] +
+        fitted_coefficients$cond["predictor"] * fitted_data$predictor)
+      if (family$family == "truncated_poisson") {
+        fixed_response_mean <- fixed_response_mean / -expm1(-fixed_response_mean)
+      }
+      fixed_zero_probability <- stats::plogis(fitted_coefficients$zi["(Intercept)"] +
+        fitted_coefficients$zi["zero_predictor"] * fitted_data$zero_predictor +
+        fitted_data$zero_offset)
+      expect_equal(simulations$predicted_response,
+                   as.numeric(fixed_response_mean * (1 - fixed_zero_probability)))
+      expect_warning(check <- check_partner_dependence(
+        simulations, dyad = dyad, role = NULL, plot = FALSE
+      ), "Omitted: 1 incomplete dyad, with ID: 2.", fixed = TRUE)
+      expect_identical(check$n_pairs, 239L)
+    }
   }
+})
+
+
+test_that("an inactive zero component does not change response predictions", {
+  skip_if_not_installed("glmmTMB")
+  withr::local_seed(8143)
+  fitting_data <- data.frame(
+    study = factor(rep(seq_len(20), each = 5)),
+    predictor = stats::rnorm(100),
+    zero_offset = rep(c(-0.5, 0.5), times = 50)
+  )
+  fitting_data$outcome <- stats::rpois(100, exp(1 + 0.3 * fitting_data$predictor))
+  # glmmTMB omits the zero mixture without fixed coefficients. Fix its unused variance.
+  model <- glmmTMB::glmmTMB(
+    outcome ~ predictor, ziformula = ~0 + offset(zero_offset) + (1 | study),
+    family = stats::poisson(), data = fitting_data,
+    start = list(thetazi = log(0.5)), map = list(thetazi = factor(NA))
+  )
+  expect_identical(model$fit$convergence, 0L)
+  expect_true(model$sdr$pdHess)
+  expect_identical(ncol(stats::model.matrix(model, component = "zi")), 0L)
+  simulations <- simulate_dyad_responses(model, nsim = 2, seed = 8144)
+  fitted_coefficients <- glmmTMB::fixef(model)$cond
+  expected_response <- exp(fitted_coefficients["(Intercept)"] +
+    fitted_coefficients["predictor"] * fitting_data$predictor)
+  expect_equal(simulations$predicted_response, as.numeric(expected_response))
+  expect_equal(simulations$predicted_response, as.numeric(stats::predict(
+    model, newdata = NULL, type = "response", re.form = NA
+  )))
 })
 
 

@@ -10,7 +10,7 @@
 \item{x}{A \code{dyadMLM_partner_check} object.}
 
 \item{ask}{Whether to pause between figures on an interactive device.
-\code{NULL} (default) pauses when there is more than one figure; \code{TRUE} pauses
+\code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
 and \code{FALSE} draws without pausing. In panel mode, each composition is one
 figure. File devices never pause.}
 

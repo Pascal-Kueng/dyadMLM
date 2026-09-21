@@ -30,7 +30,7 @@
 #'   overall response variances and partner correlations.
 #'   See [simulate_dyad_responses()] for how predictions are defined.
 #' @param ask Whether to pause between figures on an interactive device.
-#'   `NULL` (default) pauses when there is more than one figure; `TRUE` pauses
+#'   `NULL` (default) pauses when there is more than one figure, `TRUE` pauses
 #'   and `FALSE` draws without pausing. In panel mode, each composition is one
 #'   figure. File devices never pause.
 #' @param panels If `TRUE` (default), show each composition in one figure, with
@@ -81,8 +81,6 @@
 #' reproduces the observed variances and partner correlations.
 #'
 #' Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
-#' The warning lists affected dyad IDs and row positions in the fitted data.
-#' Long lists are shortened; counts are also shown when printing the result.
 #'
 #' @section Technical details:
 #' After any centring, paired responses `a` and `b` are used to compute

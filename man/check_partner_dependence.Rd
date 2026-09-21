@@ -42,7 +42,7 @@ overall response variances and partner correlations.
 See \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} for how predictions are defined.}
 
 \item{ask}{Whether to pause between figures on an interactive device.
-\code{NULL} (default) pauses when there is more than one figure; \code{TRUE} pauses
+\code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
 and \code{FALSE} draws without pausing. In panel mode, each composition is one
 figure. File devices never pause.}
 
@@ -109,8 +109,6 @@ used for model comparison. It shows how well the simpler model
 reproduces the observed variances and partner correlations.
 
 Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
-The warning lists affected dyad IDs and row positions in the fitted data.
-Long lists are shortened; counts are also shown when printing the result.
 }
 
 \section{Technical details}{

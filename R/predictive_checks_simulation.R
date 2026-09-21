@@ -43,7 +43,7 @@
 #'
 #' Zero-inflated and hurdle versions are supported where available. Checks
 #' describe the combined response, including zeros, rather than each model
-#' component separately. Random effects in `ziformula` are not yet supported.
+#' component separately.
 #'
 #' The model's fitted link is used for prediction and simulation. Predictions
 #' and simulated responses must be finite.
@@ -54,7 +54,7 @@
 #' Each simulation draws new random effects and then new responses from the
 #' fitted model. Random effects within each block are drawn together using
 #' their fitted variances and correlations. This also applies to random effects
-#' in the dispersion model, if present.
+#' in the zero-inflation and dispersion models, if present.
 #'
 #' Fitted parameters and predictors stay fixed. The model is not refitted, and
 #' uncertainty in parameter estimates is not included. This is a *plug-in
@@ -62,7 +62,11 @@
 #' represent hypothetical new dyads under the same study design.
 #'
 #' `predicted_response` contains predicted mean responses with random effects
-#' in the conditional model set to zero.
+#' in the conditional and zero-inflation models set to zero. For zero-inflated
+#' and hurdle models, this is the conditional response mean multiplied by
+#' one minus the zero-component probability (Brooks et al., 2017, Appendix A;
+#' \doi{10.32614/RJ-2017-066}).
+#'
 #' By default, later checks subtract these same predictions from observed and
 #' simulated responses. Both random effects and observation-level noise still
 #' contribute to response variance. With nonlinear links, setting random effects
@@ -104,11 +108,6 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   if (any(stats::weights(model) != 1)) {
     stop("Predictive checks currently only support unweighted models.", call. = FALSE)
   }
-  # glmmTMB currently keeps zero-inflation random effects in response predictions.
-  if (length(model$obj$env$data$termszi) > 0L) {
-    stop("Predictive checks do not yet support random effects in `ziformula`.",
-         call. = FALSE)
-  }
   if (family$family == "t" && glmmTMB::family_params(model) <= 2) {
     stop("Student-t predictive checks require more than two degrees of freedom ",
          "so that response variances and correlations are defined.", call. = FALSE)
@@ -122,11 +121,29 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
          call. = FALSE)
   }
 
-  # Predicted mean responses (one per fitted row), with random effects in the
-  # conditional model set to zero.
-  # newdata = NULL below prevents na.exclude from padding omitted rows back in.
-  predicted <- as.numeric(stats::predict(model, newdata = NULL,
-                                        type = "response", re.form = NA))
+  zero_inflation_model_matrix <- stats::model.matrix(model, component = "zi")
+  # glmmTMB only uses the zero component when it has fixed-effect coefficients.
+  adjust_zero_inflation_prediction <- ncol(zero_inflation_model_matrix) > 0L &&
+    length(model$obj$env$data$termszi) > 0L
+
+  # newdata = NULL prevents na.exclude from padding omitted rows back in.
+  predicted <- as.numeric(stats::predict(
+    model, newdata = NULL, re.form = NA,
+    type = if (adjust_zero_inflation_prediction) "conditional" else "response"
+  ))
+
+  if (adjust_zero_inflation_prediction) {
+    # glmmTMB's re.form = NA retains zero-inflation random effects, so use its
+    # fitted design and offsets to calculate this component without them.
+    zero_inflation_coefficients <- glmmTMB::fixef(model)$zi[
+      colnames(zero_inflation_model_matrix)
+    ]
+    zero_inflation_linear_predictor <- as.numeric(
+      zero_inflation_model_matrix %*% zero_inflation_coefficients
+    ) + model$obj$env$data$zioffset
+    # plogis(-x) calculates one minus the zero probability directly.
+    predicted <- predicted * stats::plogis(-zero_inflation_linear_predictor)
+  }
 
   # Select components whose random effects should be redrawn.
   components <- c("terms", "termszi", "termsdisp")
