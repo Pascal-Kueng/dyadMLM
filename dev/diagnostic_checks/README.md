@@ -44,6 +44,7 @@ From the repository root:
 ```r
 devtools::test()
 source("dev/diagnostic_checks/check-additional-families.R")
+source("dev/diagnostic_checks/check-ordinal-family.R")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-reference-validation.Rmd")
 ```
@@ -52,6 +53,8 @@ Tests cover Gaussian and generalized calculations, fitted-row alignment,
 simulation-state restoration, pairing, omissions, undefined statistics, and
 printing/plotting. The additional-family script checks native response formats
 and prediction/simulation agreement; Bell models also require `gsl`.
+The ordinal script checks category scores and predictions with logit and probit
+links. It requires a `glmmTMB` version with `ordinal()`.
 These are correctness checks, not calibration or power
 studies. Run the outer simulation report separately when that evidence needs
 updating; its full configuration is intentionally more expensive. For a merge,

@@ -40,10 +40,16 @@
 #' - `glmmTMB::beta_family()`
 #' - `glmmTMB::lognormal()`, `glmmTMB::skewnormal()`
 #' - `glmmTMB::t_family()` with more than two degrees of freedom
+#' - `glmmTMB::ordinal()` where available in the installed `glmmTMB` version
 #'
 #' Zero-inflated and hurdle versions are supported where available. Checks
 #' describe the combined response, including zeros, rather than each model
 #' component separately.
+#'
+#' Ordinal checks use category scores `1, 2, ..., K` in their fitted order,
+#' matching [glmmTMB's predictions][glmmTMB::family_glmmTMB]. The plots compare
+#' variation and partner correlation in these scores. The scores do not measure
+#' distances on an underlying continuous scale.
 #'
 #' The model's fitted link is used for prediction and simulation. Predictions
 #' and simulated responses must be finite.
@@ -99,7 +105,7 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     "gaussian", "poisson", "nbinom1", "nbinom2", "nbinom12", "compois", "genpois",
     "truncated_poisson", "truncated_nbinom1", "truncated_nbinom2",
     "truncated_compois", "truncated_genpois", "tweedie", "Gamma", "beta",
-    "lognormal", "skewnormal", "bell", "t"
+    "lognormal", "skewnormal", "bell", "t", "ordinal"
   )
   if (!family$family %in% supported) {
     stop("Unsupported family. ",
@@ -115,6 +121,10 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
 
   frame <- stats::model.frame(model)
   observed <- stats::model.response(frame) # response variable from frame (vector)
+  if (family$family == "ordinal") {
+    # Match predictions, which use category positions 1, 2, ..., K.
+    observed <- as.numeric(observed)
+  }
   if (!is.numeric(observed) || !is.null(dim(observed)) ||
       any(!is.finite(observed))) {
     stop("Expected one numeric response per fitted row.",
@@ -163,9 +173,14 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   }
 
 
-  # simulate() returns a data frame with one column per draw. Transpose to an
-  # nsim x nrow(frame) matrix.
-  simulated <- t(as.matrix(stats::simulate(model, nsim = nsim)))
+  # simulate() returns a data frame with one column per draw.
+  simulated <- stats::simulate(model, nsim = nsim)
+  if (family$family == "ordinal") {
+    # Convert factor columns to category scores before creating the matrix.
+    simulated[] <- lapply(simulated, as.numeric)
+  }
+  # Transpose to an nsim x nrow(frame) matrix.
+  simulated <- t(as.matrix(simulated))
 
   if (length(predicted) != nrow(frame) || any(!is.finite(predicted)) ||
       !is.numeric(simulated) || any(!is.finite(simulated)) ||

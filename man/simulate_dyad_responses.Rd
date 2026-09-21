@@ -54,11 +54,17 @@ Supports unweighted \code{glmmTMB} models with the following families:
 \item \code{glmmTMB::beta_family()}
 \item \code{glmmTMB::lognormal()}, \code{glmmTMB::skewnormal()}
 \item \code{glmmTMB::t_family()} with more than two degrees of freedom
+\item \code{glmmTMB::ordinal()} where available in the installed \code{glmmTMB} version
 }
 
 Zero-inflated and hurdle versions are supported where available. Checks
 describe the combined response, including zeros, rather than each model
 component separately.
+
+Ordinal checks use category scores \verb{1, 2, ..., K} in their fitted order,
+matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The plots compare
+variation and partner correlation in these scores. The scores do not measure
+distances on an underlying continuous scale.
 
 The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.

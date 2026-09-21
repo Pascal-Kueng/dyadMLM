@@ -287,6 +287,71 @@ test_that("Student-t checks require a finite response variance", {
 })
 
 
+test_that("ordinal checks use category scores in the declared order", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not("ordinal" %in% getNamespaceExports("glmmTMB"),
+              "Ordinal models require a newer glmmTMB version.")
+  withr::local_seed(9241)
+  fitting_data <- data.frame(
+    dyad = factor(rep(seq_len(180), each = 2)),
+    predictor = stats::rnorm(360)
+  )
+  latent_response <- 0.6 * fitting_data$predictor +
+    stats::rnorm(180, sd = 0.9)[fitting_data$dyad] + stats::rlogis(360)
+  category_labels <- c("low", "moderate", "high", "very high")
+  ordered_response <- cut(
+    latent_response, c(-Inf, -1, 0.5, 2, Inf),
+    labels = category_labels, ordered_result = TRUE
+  )
+  ordered_response[1:2] <- NA
+  fitting_data$predictor[9:10] <- NA
+  retained_rows <- setdiff(seq_len(360), c(1, 2, 9, 10))
+
+  for (response in list(ordered_response, as.numeric(ordered_response))) {
+    fitting_data$outcome <- response
+    # glmmTMB warns when interpreting numeric responses as ordinal categories.
+    model <- suppressWarnings(glmmTMB::glmmTMB(
+      outcome ~ predictor + (1 | dyad), data = fitting_data,
+      family = glmmTMB::ordinal(), na.action = stats::na.exclude
+    ))
+    expect_identical(model$fit$convergence, 0L)
+    expect_true(model$sdr$pdHess)
+    category_probabilities <- stats::predict(
+      model, newdata = NULL, type = "probs", re.form = NA
+    )
+    for (number_of_simulations in c(1L, 5L)) {
+      simulations <- simulate_dyad_responses(
+        model, nsim = number_of_simulations, seed = 9242
+      )
+      expect_identical(dim(simulations$simulated_responses),
+                       c(number_of_simulations, 356L))
+      expect_identical(simulations$observed_response,
+                       as.numeric(ordered_response[retained_rows]))
+      expect_equal(simulations$predicted_response,
+                   as.numeric(category_probabilities %*% seq_along(category_labels)))
+      expect_identical(simulations$model_frame, stats::model.frame(model))
+      native_simulations <- stats::simulate(model, nsim = number_of_simulations,
+                                            seed = 9242)
+      if (is.factor(response)) {
+        native_simulations[] <- lapply(native_simulations, function(draw) {
+          match(as.character(draw), category_labels)
+        })
+      }
+      expect_equal(simulations$simulated_responses, t(as.matrix(native_simulations)))
+      expect_true(all(simulations$simulated_responses %in% seq_along(category_labels)))
+      for (response_scale in c("raw", "model-centred")) {
+        check <- check_partner_dependence(
+          simulations, dyad = dyad, role = NULL, response = response_scale,
+          plot = FALSE
+        )
+        expect_identical(check$n_pairs, 178L)
+        expect_true(all(is.finite(as.matrix(check$compositions$statistics[[1]][, -1]))))
+      }
+    }
+  }
+})
+
+
 test_that("unsupported predictive-check inputs fail clearly", {
   skip_if_not_installed("glmmTMB")
   model <- predictive_check_test_model()
