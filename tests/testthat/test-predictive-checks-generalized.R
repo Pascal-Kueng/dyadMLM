@@ -74,8 +74,9 @@ test_that("supported scalar families and alternative links share the response-ch
       simulations, dyad = "dyad", role = "role", plot = FALSE
     )
     expect_identical(result$n_pairs, 60L)
-    expect_identical(dim(result$replicated_statistics), c(20L, 6L))
-    expect_true(all(is.finite(result$replicated_statistics)))
+    simulated_statistics <- as.matrix(result$compositions$statistics[[1]][-1, -1])
+    expect_identical(dim(simulated_statistics), c(20L, 6L))
+    expect_true(all(is.finite(simulated_statistics)))
   }
 })
 
@@ -144,8 +145,9 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
     simulations, dyad = .env$data$dyad, role = "role",
     response = "raw", plot = FALSE
   ), "Undefined simulated summaries")
+  statistics <- result$compositions$statistics[[1]]
   expect_equal(
-    result$replicated_statistics[, "Partner correlation (female and male)"],
+    statistics[["Partner correlation (female and male)"]][-1],
     unname(correlations)
   )
   count <- paste0(length(defined), "/", nrow(simulations$simulated_responses))
@@ -173,7 +175,7 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
   plot(result, ask = FALSE)
   expect_true(any(grepl(count, subtitles, fixed = TRUE)))
   partner_column <- match("Partner correlation (female and male)",
-                          colnames(result$replicated_statistics))
+                          names(statistics)[-1])
   expect_equal(unname(limits[[partner_column]]),
                unname(stats::quantile(defined, c(0.025, 0.975))))
 })

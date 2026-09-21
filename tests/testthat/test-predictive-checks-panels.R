@@ -1,34 +1,42 @@
 partner_check_plot_fixture <- function() {
-  statistic_names <- c(
-    "SD (female)", "SD (male)", "Partner correlation (female and male)",
-    "Dyad-average SD", "Half-difference SD (female minus male)",
-    "Dyad-average/role-difference correlation (female minus male)",
-    rep(c("Common member SD (exchangeable)",
-          "Partner correlation (exchangeable)", "Dyad-average SD",
-          "Half-difference RMS (about zero)"), 2L)
+  exchangeable_statistic_names <- c(
+    "Common member SD (exchangeable)", "Partner correlation (exchangeable)",
+    "Dyad-average SD", "Half-difference RMS (about zero)"
   )
-  observed_statistics <- stats::setNames(
-    c(1.2, 1.0, 0.4, 0.8, 0.7, 0.2, 1.1, 0.35, 0.9, 0.6,
-      1.3, 0.25, 0.8, 0.5), statistic_names
+  statistic_names <- list(
+    c("SD (female)", "SD (male)", "Partner correlation (female and male)",
+      "Dyad-average SD", "Half-difference SD (female minus male)",
+      "Dyad-average/role-difference correlation (female minus male)"),
+    exchangeable_statistic_names, exchangeable_statistic_names
   )
-  simulated_statistics <- outer(
-    seq(-0.2, 0.2, length.out = 80L), observed_statistics, "+"
+  observed_statistics <- list(
+    c(1.2, 1.0, 0.4, 0.8, 0.7, 0.2), c(1.1, 0.35, 0.9, 0.6),
+    c(1.3, 0.25, 0.8, 0.5)
   )
-  colnames(simulated_statistics) <- statistic_names
+  statistics_by_composition <- lapply(seq_len(3), function(composition_index) {
+    composition_observed_statistics <- observed_statistics[[composition_index]]
+    simulated_statistics <- outer(
+      seq(-0.2, 0.2, length.out = 80L), composition_observed_statistics, "+"
+    )
+    composition_statistics <- rbind(composition_observed_statistics, simulated_statistics)
+    colnames(composition_statistics) <- statistic_names[[composition_index]]
+    tibble::tibble(
+      dataset = c("observed", paste0("simulation_", seq_len(80))),
+      tibble::as_tibble(composition_statistics)
+    )
+  })
 
   structure(list(
-    observed_statistics = observed_statistics,
-    replicated_statistics = simulated_statistics,
+    n_simulations = 80L,
     n_pairs = 360L,
     n_incomplete_dyads = 0L,
     n_missing_dyad_rows = 0L,
     n_missing_role_rows = 0L,
     response = "model-centred",
-    compositions = data.frame(
+    compositions = tibble::tibble(
       label = c("female - male", "female - female", "male - male"),
       n_pairs = rep(120L, 3L),
-      first_statistic = c(1L, 7L, 11L),
-      last_statistic = c(6L, 10L, 14L)
+      statistics = statistics_by_composition
     )
   ), class = c("dyadMLM_partner_check", "list"), dyadMLM = list(
     reference = "plug-in predictive", random_effects = "new"
@@ -40,7 +48,7 @@ test_that("panel mode produces one page per composition", {
   skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   check_result <- partner_check_plot_fixture()
   # A small composition stays in the overview but has no plot page.
-  check_result$compositions[4L, ] <- list("mother - child", 2L, NA_integer_, NA_integer_)
+  check_result$compositions[4L, ] <- list("mother - child", 2L, list(NULL))
   check_result$n_pairs <- 362L
 
   for (panels in c(TRUE, FALSE)) {
@@ -69,12 +77,15 @@ test_that("compositions use row-wise panels with clear titles and pair counts", 
   recorded_statistic_titles <- character()
   recorded_panel_positions <- list()
   recorded_figure_text <- character()
+  expected_statistic_titles <- unlist(lapply(
+    check_result$compositions$statistics, function(statistics) names(statistics)[-1]
+  ))
   original_title <- graphics::title
   original_margin_text <- graphics::mtext
   local_mocked_bindings(title = function(main = NULL, sub = NULL, ...) {
     statistic_title <- gsub("\\s+", " ", main)
     if (length(statistic_title) == 1L &&
-        statistic_title %in% names(check_result$observed_statistics)) {
+        statistic_title %in% expected_statistic_titles) {
       recorded_statistic_titles <<- c(recorded_statistic_titles, statistic_title)
       recorded_panel_positions[[length(recorded_panel_positions) + 1L]] <<-
         graphics::par("mfg")
@@ -89,7 +100,7 @@ test_that("compositions use row-wise panels with clear titles and pair counts", 
   visible_result <- withVisible(plot(check_result, ask = FALSE))
   expect_false(visible_result$visible)
   expect_identical(visible_result$value, check_result)
-  expect_identical(recorded_statistic_titles, names(check_result$observed_statistics))
+  expect_identical(recorded_statistic_titles, expected_statistic_titles)
   expected_panel_positions <- rbind(
     cbind(rep(1:2, each = 3L), rep(1:3, 2L), 2L, 3L),
     cbind(rep(1:2, each = 2L), rep(1:2, 2L), 2L, 2L),
@@ -125,11 +136,11 @@ test_that("individual plots identify each composition and its pair counts", {
   expect_length(recorded_plot_text, 14L)
   for (composition_index in seq_len(nrow(check_result$compositions))) {
     composition <- check_result$compositions[composition_index, ]
-    statistic_indices <- seq.int(composition$first_statistic,
-                                 composition$last_statistic)
-    expect_true(all(grepl(composition$label, recorded_plot_text[statistic_indices],
-                         fixed = TRUE)))
-    expect_true(all(grepl("120.*360", recorded_plot_text[statistic_indices])))
+    composition_plot_text <- recorded_plot_text[
+      startsWith(recorded_plot_text, paste0(composition$label, " - "))
+    ]
+    expect_length(composition_plot_text, ncol(composition$statistics[[1]]) - 1L)
+    expect_true(all(grepl("120.*360", composition_plot_text)))
   }
 })
 
@@ -137,9 +148,6 @@ test_that("individual plots identify each composition and its pair counts", {
 test_that("automatic pausing follows the number of figures and device type", {
   check_result <- partner_check_plot_fixture()
   single_composition_check <- check_result
-  single_composition_check$observed_statistics <- check_result$observed_statistics[1:6]
-  single_composition_check$replicated_statistics <-
-    check_result$replicated_statistics[, 1:6, drop = FALSE]
   single_composition_check$compositions <- check_result$compositions[1L, ]
   single_composition_check$n_pairs <- 120L
   grDevices::pdf(NULL, width = 12, height = 8)

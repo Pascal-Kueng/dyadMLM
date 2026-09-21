@@ -38,20 +38,23 @@ test_that("model-centred statistics use aligned pairs and retain simulation sett
   expected <- t(apply(responses, 1, function(y) {
     calculate_partner_pair_statistics(y[pairs[, 1]], y[pairs[, 2]])
   }))
-  draws <- expected[-1, , drop = FALSE]
+  statistics <- result$compositions$statistics[[1]]
 
   expect_s3_class(result, "dyadMLM_partner_check")
-  expect_named(result, c("observed_statistics", "replicated_statistics",
-                        "n_pairs", "compositions", "n_incomplete_dyads", "n_missing_dyad_rows",
+  expect_named(result, c("compositions", "n_pairs", "n_simulations",
+                        "n_incomplete_dyads", "n_missing_dyad_rows",
                         "n_missing_role_rows", "response"))
-  expect_equal(result$observed_statistics, expected[1, ])
-  expect_equal(result$replicated_statistics, draws)
-  expect_identical(colnames(draws), c(
+  expect_s3_class(result$compositions, "tbl_df")
+  expect_named(result$compositions, c("label", "n_pairs", "statistics"))
+  expect_s3_class(statistics, "tbl_df")
+  expect_identical(statistics$dataset, c("observed", paste0("simulation_", 1:4)))
+  expect_equal(as.matrix(statistics[, -1]), expected)
+  expect_identical(names(statistics)[-1], c(
     "Common member SD (exchangeable)", "Partner correlation (exchangeable)",
     "Dyad-average SD", "Half-difference RMS (about zero)"
   ))
-  expect_identical(names(result$observed_statistics), colnames(draws))
   expect_identical(result$n_pairs, 5L)
+  expect_identical(result$n_simulations, 4L)
   expect_identical(result$response, "model-centred")
   expect_identical(attr(result, "dyadMLM"), attr(simulations, "dyadMLM"))
   expect_output(print(result), "Reference: 4 known-parameter oracle", fixed = TRUE)
@@ -79,15 +82,13 @@ test_that("role-specific summaries use the requested responses and orientation",
       c(sd(first), sd(second), cor(first, second), sd(average), sd(difference),
         cor(average, difference))
     }))
-    expect_equal(unname(result$observed_statistics), expected[1, ])
-    expect_equal(unname(result$replicated_statistics), expected[-1, ])
-    expect_identical(colnames(result$replicated_statistics), c(
+    statistics <- result$compositions$statistics[[1]]
+    expect_equal(unname(as.matrix(statistics[, -1])), expected)
+    expect_identical(names(statistics)[-1], c(
       "SD (female)", "SD (male)", "Partner correlation (female and male)",
       "Dyad-average SD", "Half-difference SD (female minus male)",
       "Dyad-average/role-difference correlation (female minus male)"
     ))
-    expect_identical(names(result$observed_statistics),
-                     colnames(result$replicated_statistics))
     expect_identical(result$response, response)
   }
 
@@ -97,11 +98,11 @@ test_that("role-specific summaries use the requested responses and orientation",
   reversed <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
   permutation <- c(2, 1, 3, 4, 5, 6)
   signs <- c(1, 1, 1, 1, 1, -1)
-  expect_equal(unname(reversed$observed_statistics),
-               unname(original$observed_statistics[permutation]) * signs)
-  expect_equal(unname(reversed$replicated_statistics),
-               unname(sweep(original$replicated_statistics[, permutation], 2, signs, "*")))
-  expect_identical(names(reversed$observed_statistics), c(
+  original_statistics <- as.matrix(original$compositions$statistics[[1]][, -1])
+  reversed_statistics <- as.matrix(reversed$compositions$statistics[[1]][, -1])
+  expect_equal(unname(reversed_statistics),
+               unname(sweep(original_statistics[, permutation], 2, signs, "*")))
+  expect_identical(colnames(reversed_statistics), c(
     "SD (male)", "SD (female)", "Partner correlation (male and female)",
     "Dyad-average SD", "Half-difference SD (male minus female)",
     "Dyad-average/role-difference correlation (male minus female)"
@@ -145,7 +146,7 @@ test_that("identifiers accept columns, external vectors, and data-mask selectors
     check_partner_dependence(simulations, .data[[dyad_column]],
                              .data[[role_column]], plot = FALSE)
   )
-  fields <- c("observed_statistics", "replicated_statistics", "n_pairs")
+  fields <- c("compositions", "n_pairs")
   for (result in results) expect_equal(result[fields], expected[fields])
   expect_identical(resolve_fitted_row_argument(rlang::quo(time), "time",
                                                data.frame(time = 1:5)), 1:5)
@@ -173,16 +174,16 @@ test_that("wrappers preserve identifier expressions and an omitted role", {
   expect_warning(expected <- check_partner_dependence(simulations, ids, plot = FALSE),
                  "Omitted:")
   expect_warning(wrapped <- check_from_wrapper(simulations, ids), "Omitted:")
-  fields <- c("observed_statistics", "replicated_statistics", "n_pairs",
+  fields <- c("compositions", "n_pairs",
               "n_missing_dyad_rows", "n_missing_role_rows")
   expect_equal(wrapped[fields], expected[fields])
   expect_identical(wrapped$n_missing_dyad_rows, 1L)
 
   expected <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
-  expect_equal(check_from_wrapper(simulations, dyad, role)$observed_statistics,
-               expected$observed_statistics)
-  expect_equal(check_from_wrapper(simulations, "dyad", "role")$observed_statistics,
-               expected$observed_statistics)
+  expect_equal(check_from_wrapper(simulations, dyad, role)$compositions,
+               expected$compositions)
+  expect_equal(check_from_wrapper(simulations, "dyad", "role")$compositions,
+               expected$compositions)
   # A broken expression must not fall back to the wrapper formal's column name.
   expect_error(check_from_wrapper(simulations, does_not_exist), "does_not_exist")
 })
@@ -306,15 +307,18 @@ test_that("undefined statistics are reported even without plotting", {
 })
 
 
-test_that("one simulation retains every statistic as a matrix column", {
+test_that("one simulation retains every statistic as a table column", {
   simulations <- partner_check_test_simulations()
   simulations$simulated_responses <- simulations$simulated_responses[1, , drop = FALSE]
   expect_output(print(simulations), "1 complete gaussian response dataset", fixed = TRUE)
   for (role in list(NULL, "role")) {
     result <- check_partner_dependence(simulations, "dyad", .env$role, plot = FALSE)
-    expect_identical(dim(result$replicated_statistics),
-                     c(1L, length(result$observed_statistics)))
-    expect_identical(colnames(result$replicated_statistics), names(result$observed_statistics))
+    statistics <- result$compositions$statistics[[1]]
+    n_statistics <- if (is.null(role)) 4L else 6L
+    expect_identical(statistics$dataset, c("observed", "simulation_1"))
+    expect_identical(dim(statistics), c(2L, 1L + n_statistics))
+    expect_identical(dim(as.matrix(statistics[-1, -1])), c(1L, n_statistics))
+    expect_identical(result$n_simulations, 1L)
     expect_output(print(result), "Reference: 1 plug-in predictive", fixed = TRUE)
   }
 })
@@ -374,8 +378,8 @@ test_that("printing describes the check and plots show empirical limits", {
   numeric_roles_check <- check_partner_dependence(
     simulations, "dyad", "role", plot = FALSE
   )
-  expect_identical(names(numeric_roles_check$observed_statistics)[1],
-                   names(numeric_roles_check$observed_statistics)[2])
+  numeric_statistics <- numeric_roles_check$compositions$statistics[[1]]
+  expect_identical(names(numeric_statistics)[2], names(numeric_statistics)[3])
 
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -393,16 +397,18 @@ test_that("printing describes the check and plots show empirical limits", {
     original_segments(x0, y0, x1, y1, ...)
   }, .package = "graphics")
   for (result in list(exchangeable, distinguishable, numeric_roles_check)) {
+    statistics <- result$compositions$statistics[[1]]
+    observed_statistics <- unlist(statistics[1, -1], use.names = TRUE)
     titles <- character()
     limits <- list()
     observed_lines <- numeric()
     plotted <- withVisible(plot(result, ask = FALSE))
     expect_false(plotted$visible)
     expect_identical(plotted$value, result)
-    expect_identical(gsub("\n", " ", titles, fixed = TRUE), names(result$observed_statistics))
-    expect_equal(observed_lines, unname(result$observed_statistics))
+    expect_identical(gsub("\n", " ", titles, fixed = TRUE), names(observed_statistics))
+    expect_equal(observed_lines, unname(observed_statistics))
     expect_equal(unname(do.call(cbind, limits)), unname(apply(
-      result$replicated_statistics, 2, stats::quantile, probs = c(0.025, 0.975)
+      as.matrix(statistics[-1, -1]), 2, stats::quantile, probs = c(0.025, 0.975)
     )))
     expect_equal(graphics::par(names(settings)), settings)
   }
@@ -434,7 +440,7 @@ test_that("explicit NA factor levels are missing dyad IDs and roles", {
   expect_identical(result$n_missing_role_rows, 1L)
   expect_identical(result$n_incomplete_dyads, 1L)
   expect_identical(result$n_pairs, 3L)
-  expect_identical(names(result$observed_statistics)[1:2],
+  expect_identical(names(result$compositions$statistics[[1]])[2:3],
                    c("SD (female)", "SD (male)"))
 })
 
@@ -445,8 +451,7 @@ test_that("distinct numeric dyad IDs remain separate despite rounded labels", {
   simulations$model_frame$dyad <- 1e15 + as.integer(simulations$model_frame$dyad)
   result <- check_partner_dependence(simulations, "dyad", plot = FALSE)
   expect_identical(result$n_pairs, 5L)
-  expect_equal(result$observed_statistics, expected$observed_statistics)
-  expect_equal(result$replicated_statistics, expected$replicated_statistics)
+  expect_equal(result$compositions, expected$compositions)
 })
 
 

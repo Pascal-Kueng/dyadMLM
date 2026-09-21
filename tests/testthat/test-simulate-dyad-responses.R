@@ -43,8 +43,9 @@ test_that("complete response simulations retain fitted-row alignment", {
   result <- check_partner_dependence(simulations, dyad = "dyad", plot = FALSE)
   expect_s3_class(result, "dyadMLM_partner_check")
   expect_identical(result$n_pairs, 20L)
-  expect_identical(dim(result$replicated_statistics), c(5L, 4L))
-  expect_true(all(is.finite(result$replicated_statistics)))
+  simulated_statistics <- as.matrix(result$compositions$statistics[[1]][-1, -1])
+  expect_identical(dim(simulated_statistics), c(5L, 4L))
+  expect_true(all(is.finite(simulated_statistics)))
 
   expect_output(printed <- withVisible(print(simulations)),
                 "5 complete gaussian response datasets")

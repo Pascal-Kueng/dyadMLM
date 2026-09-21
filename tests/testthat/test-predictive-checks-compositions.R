@@ -38,37 +38,38 @@ test_that("mixed compositions match independent raw and centred calculations", {
     )
     values <- if (response == "raw") responses else
       sweep(responses, 2, simulations$predicted_response, "-")
-    expected <- t(apply(values, 1, function(dataset_responses) {
+    for (composition_index in seq_len(3)) {
       # Each ten-row block contains five dyads of one composition.
-      female_pairs <- matrix(dataset_responses[1:10], ncol = 2, byrow = TRUE)
-      mixed_pairs <- matrix(dataset_responses[11:20], ncol = 2, byrow = TRUE)
-      male_pairs <- matrix(dataset_responses[21:30], ncol = 2, byrow = TRUE)
-      exchangeable_moments <- function(pairs) {
+      fitted_rows <- seq_len(10) + (composition_index - 1L) * 10L
+      expected <- t(apply(values[, fitted_rows], 1, function(dataset_responses) {
+        pairs <- matrix(dataset_responses, ncol = 2, byrow = TRUE)
+        if (composition_index == 2L) {
+          dyad_average <- rowMeans(pairs)
+          half_difference <- (pairs[, 1] - pairs[, 2]) / 2
+          return(c(sd(pairs[, 1]), sd(pairs[, 2]), cor(pairs[, 1], pairs[, 2]),
+                   sd(dyad_average), sd(half_difference),
+                   cor(dyad_average, half_difference)))
+        }
         between_dyad_variance <- 2 * var(rowMeans(pairs))
         within_dyad_variance <- sum((pairs[, 1] - pairs[, 2])^2) / (2 * nrow(pairs))
         c(sqrt((between_dyad_variance + within_dyad_variance) / 2),
           (between_dyad_variance - within_dyad_variance) /
             (between_dyad_variance + within_dyad_variance),
           sqrt(between_dyad_variance / 2), sqrt(within_dyad_variance / 2))
-      }
-      dyad_average <- rowMeans(mixed_pairs)
-      half_difference <- (mixed_pairs[, 1] - mixed_pairs[, 2]) / 2
-      c(exchangeable_moments(female_pairs),
-        sd(mixed_pairs[, 1]), sd(mixed_pairs[, 2]),
-        cor(mixed_pairs[, 1], mixed_pairs[, 2]),
-        sd(dyad_average), sd(half_difference), cor(dyad_average, half_difference),
-        exchangeable_moments(male_pairs))
-    }))
-    expect_equal(unname(result$observed_statistics), expected[1, ])
-    expect_equal(unname(result$replicated_statistics), expected[-1, ])
-    expect_identical(names(result$observed_statistics),
-                     colnames(result$replicated_statistics))
+      }))
+      composition_statistics <- result$compositions$statistics[[composition_index]]
+      expect_s3_class(composition_statistics, "tbl_df")
+      expect_identical(composition_statistics$dataset,
+                       c("observed", paste0("simulation_", 1:3)))
+      expect_equal(unname(as.matrix(composition_statistics[-1])), expected)
+    }
+    expect_s3_class(result$compositions, "tbl_df")
+    expect_identical(names(result$compositions), c("label", "n_pairs", "statistics"))
     expect_identical(result$compositions$label,
                      c("female - female", "female - male", "male - male"))
     expect_equal(result$compositions$n_pairs, c(5, 5, 5))
-    expect_equal(result$compositions$first_statistic, c(1, 5, 11))
-    expect_equal(result$compositions$last_statistic, c(4, 10, 14))
     expect_identical(result$n_pairs, 15L)
+    expect_identical(result$n_simulations, 3L)
   }
 })
 
@@ -90,13 +91,15 @@ test_that("composition checks retain fitted rows and respect factor role order",
   expect_identical(reversed$compositions$label,
                    c("male - male", "male - female", "female - female"))
   # Swapping distinct roles exchanges their SDs and reverses the final correlation.
-  expected_column_order <- c(11:14, 6, 5, 7:10, 1:4)
-  expected_signs <- c(rep(1, 9), -1, rep(1, 4))
-  expect_equal(unname(reversed$observed_statistics),
-               unname(original$observed_statistics[expected_column_order]) * expected_signs)
-  expect_equal(unname(reversed$replicated_statistics), unname(sweep(
-    original$replicated_statistics[, expected_column_order], 2, expected_signs, "*"
-  )))
+  expect_equal(reversed$compositions$statistics[[1]], original$compositions$statistics[[3]])
+  expect_equal(reversed$compositions$statistics[[3]], original$compositions$statistics[[1]])
+  expected_mixed_statistics <- as.matrix(original$compositions$statistics[[2]][-1])
+  expected_mixed_statistics <- expected_mixed_statistics[, c(2, 1, 3:6)]
+  expected_mixed_statistics[, 6] <- -expected_mixed_statistics[, 6]
+  expect_equal(unname(as.matrix(reversed$compositions$statistics[[2]][-1])),
+               unname(expected_mixed_statistics))
+  expect_identical(names(reversed$compositions$statistics[[2]])[2:3],
+                   c("SD (male)", "SD (female)"))
 })
 
 
@@ -107,18 +110,18 @@ test_that("additional roles form another distinguishable composition", {
     "female - female", "female - male", "male - male", "mother - child"
   ))
   expect_equal(result$compositions$n_pairs, rep(5, 4))
-  expect_identical(dim(result$replicated_statistics), c(3L, 20L))
-  parent_child_columns <- 15:20
+  parent_child_statistics <- result$compositions$statistics[[4]]
+  expect_identical(dim(parent_child_statistics), c(4L, 7L))
   parent_child_rows <- 31:40
   centred_response <- simulations$observed_response - simulations$predicted_response
   pairs <- matrix(centred_response[parent_child_rows], ncol = 2, byrow = TRUE)
   dyad_average <- rowMeans(pairs)
   half_difference <- (pairs[, 1] - pairs[, 2]) / 2
-  expect_equal(unname(result$observed_statistics[parent_child_columns]), c(
+  expect_equal(unname(unlist(parent_child_statistics[1, -1])), c(
     sd(pairs[, 1]), sd(pairs[, 2]), cor(pairs[, 1], pairs[, 2]),
     sd(dyad_average), sd(half_difference), cor(dyad_average, half_difference)
   ))
-  expect_identical(names(result$observed_statistics)[15:16],
+  expect_identical(names(parent_child_statistics)[2:3],
                    c("SD (mother)", "SD (child)"))
 })
 
@@ -129,10 +132,13 @@ test_that("rounded role labels cannot merge distinct compositions", {
   simulations$model_frame$role <- 1e15 + as.integer(simulations$model_frame$role)
   expect_length(unique(as.character(simulations$model_frame$role)), 1L)
   result <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
-  expect_equal(unname(result$observed_statistics), unname(expected$observed_statistics))
-  expect_equal(unname(result$replicated_statistics), unname(expected$replicated_statistics))
-  expect_equal(result$compositions[c("n_pairs", "first_statistic", "last_statistic")],
-               expected$compositions[c("n_pairs", "first_statistic", "last_statistic")])
+  for (composition_index in seq_len(3)) {
+    expect_equal(unname(as.matrix(result$compositions$statistics[[composition_index]][-1])),
+                 unname(as.matrix(expected$compositions$statistics[[composition_index]][-1])))
+  }
+  mixed_statistic_names <- names(result$compositions$statistics[[2]])
+  expect_identical(mixed_statistic_names[2], mixed_statistic_names[3])
+  expect_equal(result$compositions$n_pairs, expected$compositions$n_pairs)
   expect_identical(result$n_pairs, 15L)
 })
 
@@ -163,10 +169,9 @@ test_that("small compositions and incomplete dyads have separate counts", {
   expect_identical(result$n_missing_dyad_rows, 1L)
   expect_identical(result$n_missing_role_rows, 1L)
   expect_equal(result$compositions$n_pairs, c(2, 4, 4))
-  expect_equal(result$compositions$first_statistic, c(NA, 1, 7))
-  expect_equal(result$compositions$last_statistic, c(NA, 6, 10))
-  expect_length(result$observed_statistics, 10L)
-  expect_identical(ncol(result$replicated_statistics), 10L)
+  expect_null(result$compositions$statistics[[1]])
+  expect_identical(dim(result$compositions$statistics[[2]]), c(4L, 7L))
+  expect_identical(dim(result$compositions$statistics[[3]]), c(4L, 5L))
   expect_output(print(result), "female - female", fixed = TRUE)
 
   simulations <- composition_check_test_simulations()
@@ -193,8 +198,7 @@ test_that("explicit pooling ignores composition and keeps the original moments",
         (between_dyad_variance + within_dyad_variance),
       sqrt(between_dyad_variance / 2), sqrt(within_dyad_variance / 2))
   }))
-  expect_equal(unname(result$observed_statistics), expected[1, ])
-  expect_equal(unname(result$replicated_statistics), expected[-1, ])
+  expect_equal(unname(as.matrix(result$compositions$statistics[[1]][-1])), expected)
   expect_identical(result$compositions$label, "All dyads")
   expect_identical(result$n_pairs, 15L)
   expect_equal(result$compositions$n_pairs, 15)
@@ -234,7 +238,10 @@ test_that("one fitted model checks all 360 dyads within their compositions", {
   result <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
   expect_identical(result$n_pairs, 360L)
   expect_equal(result$compositions$n_pairs, rep(120, 3))
-  expect_identical(dim(result$replicated_statistics), c(5L, 14L))
-  expect_true(all(is.finite(result$observed_statistics)))
-  expect_true(all(is.finite(result$replicated_statistics)))
+  expect_identical(result$n_simulations, 5L)
+  expect_identical(lapply(result$compositions$statistics, dim),
+                   list(c(6L, 5L), c(6L, 7L), c(6L, 5L)))
+  for (composition_statistics in result$compositions$statistics) {
+    expect_true(all(is.finite(as.matrix(composition_statistics[-1]))))
+  }
 })

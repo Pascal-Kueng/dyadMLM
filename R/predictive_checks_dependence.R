@@ -39,9 +39,10 @@
 #'
 #' @return The comparison plots (shown by default) are the main output. The
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
-#'   observed and simulated statistics (one row per simulation), pair and
-#'   omission counts, and settings. The `compositions` table lists the dyad
-#'   compositions and their pair counts. The object can be saved and plotted later.
+#'   `compositions` table with pair counts and a statistics tibble for each
+#'   composition. Each tibble has one observed row followed by one row per
+#'   simulation, identified by `dataset`. The object includes omission counts
+#'   and settings, and can be saved and plotted later.
 #'
 #' @section Reading the plots:
 #' Histograms show simulated summaries. Red lines mark observed values.
@@ -167,88 +168,92 @@ check_partner_dependence <- function(
   response <- match.arg(response)
   fitted_model_frame <- simulations$model_frame
 
-  # partner_row_map$rows has one row per complete dyad and one column per partner.
+  # The pair table identifies both partners' positions in the fitted data.
   partner_row_map <- prepare_partner_pairs(
     resolve_fitted_row_argument(rlang::enquo(dyad), "dyad", fitted_model_frame),
     resolve_fitted_row_argument(rlang::enquo(role), "role", fitted_model_frame,
                                 allow_null = TRUE)
   )
+  compositions <- partner_row_map$compositions
+  checked_composition_indices <- which(compositions$n_pairs >= 3L)
+  skipped_composition_indices <- which(compositions$n_pairs < 3L)
+  compositions$statistics <- vector("list", nrow(compositions))
+  n_simulations <- nrow(simulations$simulated_responses)
 
   # Combine the observed and simulated response vectors into one large matrix.
   responses_by_dataset <- rbind(
     simulations$observed_response, unname(simulations$simulated_responses)
   )
+  if (response == "model-centred") {
+    responses_by_dataset <- sweep(responses_by_dataset, 2, simulations$predicted_response, "-")
+  }
+  dataset_labels <- c("observed", paste0("simulation_", seq_len(n_simulations)))
 
-  # For each response vector we need to compute the test statistic.
-  # First, we reserve one list entry for each response vector for efficiency.
-  statistics_by_dataset <- vector("list", nrow(responses_by_dataset))
-  for (dataset_index in seq_len(nrow(responses_by_dataset))) {
-    dataset_responses <- responses_by_dataset[dataset_index, ]
-    if (response == "model-centred") {
-      dataset_responses <- dataset_responses - simulations$predicted_response
+  # Collect diagnostics so each message covers all compositions.
+  statistic_diagnostics_by_composition <- vector("list", nrow(compositions))
+  for (current_composition_index in checked_composition_indices) {
+    composition_pair_rows <- partner_row_map$pairs |>
+      dplyr::filter(.data$composition_index == current_composition_index)
+    statistics_by_dataset <- vector("list", nrow(responses_by_dataset))
+    for (dataset_index in seq_len(nrow(responses_by_dataset))) {
+      dataset_responses <- responses_by_dataset[dataset_index, ]
+      first_partner_responses <- dataset_responses[composition_pair_rows$first_partner_row]
+      second_partner_responses <- dataset_responses[composition_pair_rows$second_partner_row]
+
+      statistics_by_dataset[[dataset_index]] <- calculate_partner_pair_statistics(
+        first_partner_responses,
+        second_partner_responses,
+        role_order = partner_row_map$role_orders[[current_composition_index]]
+      )
     }
+    composition_statistics <- do.call(rbind, statistics_by_dataset)
+    compositions$statistics[[current_composition_index]] <- composition_statistics |>
+      tibble::as_tibble(.name_repair = "minimal") |>
+      tibble::add_column(dataset = dataset_labels, .before = 1, .name_repair = "minimal") # .name_repair = "minimal" preserves the statistic names exactly, including duplicates that can arise when distinct roles have identical printed labels.
 
-    first_partner_responses <- dataset_responses[partner_row_map$rows[, 1]]
-    second_partner_responses <- dataset_responses[partner_row_map$rows[, 2]]
-
-    statistics_by_dataset[[dataset_index]] <- calculate_partner_pair_statistics(
-      first_partner_responses,
-      second_partner_responses,
-      role_order = partner_row_map$role_order
+    observed_statistics <- composition_statistics[1, ]
+    simulated_statistics <- composition_statistics[-1, , drop = FALSE]
+    statistic_diagnostics_by_composition[[current_composition_index]] <- tibble::tibble(
+      description = paste(compositions$label[current_composition_index],
+                          names(observed_statistics), sep = ": "),
+      observed_is_defined = is.finite(observed_statistics),
+      n_defined_simulations = colSums(is.finite(simulated_statistics))
     )
   }
-
-  # Object is currently:
-  # statistics_by_dataset object is currently a list of 1,001 named vectors
-  # [[1]]                     6 observed statistics
-  # [[2]]                     6 statistics from simulation 1
-  # ...
-  # [[1001]]                  6 statistics from simulation 1,000
-
-  observed_statistics <- statistics_by_dataset[[1]]
-  simulated_statistics <- do.call(rbind, statistics_by_dataset[-1])
-
-  # now, the object is:
-  # observed_statistics         numeric vector of length 6
-  #
-  # simulated_statistics        numeric matrix: 1,000 rows × 6 columns
-  # rows = simulations
-  # 6 or 4 columns = 6 or 4 statistics
+  statistic_diagnostics <- dplyr::bind_rows(statistic_diagnostics_by_composition)
+  statistic_descriptions <- statistic_diagnostics$description
 
   # Undefined correlations are possible (e.g. constant counts).
   ## 1. Stop if any observed statistic is undefined: there is no value to compare.
-  if (any(!is.finite(observed_statistics))) {
+  if (any(!statistic_diagnostics$observed_is_defined)) {
     stop("Observed partner-dependence summaries are undefined: ",
-         paste(names(observed_statistics)[!is.finite(observed_statistics)],
+         paste(statistic_descriptions[!statistic_diagnostics$observed_is_defined],
                collapse = ", "),
          ". This could be due to zero variance.", call. = FALSE)
   }
-  ## 2. Stop if any of the 4 or 6 statistics are **never** defined in any simulation:
+  ## 2. Stop if a statistic is never defined in any simulation:
   ##    there is no simulation reference for comparison.
-  n_defined_by_statistic <- colSums(is.finite(simulated_statistics))
+  n_defined_by_statistic <- statistic_diagnostics$n_defined_simulations
   if (any(n_defined_by_statistic == 0L)) {
     stop("Every simulated value is undefined for: ",
-         paste(names(observed_statistics)[n_defined_by_statistic == 0L],
-               collapse = ", "),
+         paste(statistic_descriptions[n_defined_by_statistic == 0L], collapse = ", "),
          ". A predictive reference cannot be calculated.", call. = FALSE)
   }
-  ## 3. Warn if any of the 4 or 6 statistics have **some** simulated values that
+  ## 3. Warn if any statistics have some simulated values that
   ##    are undefined. Plots are possible and use only the defined values.
-  n_undefined_by_statistic <- nrow(simulated_statistics) - n_defined_by_statistic
+  n_undefined_by_statistic <- n_simulations - n_defined_by_statistic
   if (any(n_undefined_by_statistic > 0L)) {
-    warning("Undefined simulated summaries (counts out of ", nrow(simulated_statistics),
-            "): ", paste(names(observed_statistics)[n_undefined_by_statistic > 0L],
+    warning("Undefined simulated summaries (counts out of ", n_simulations,
+            "): ", paste(statistic_descriptions[n_undefined_by_statistic > 0L],
                          n_undefined_by_statistic[n_undefined_by_statistic > 0L],
                          sep = " = ", collapse = "; "),
             ". Plots use defined values only.", call. = FALSE)
   }
 
-  # Store one observed value per statistic and one simulated value per simulation.
-  # Each observed value and its simulation column share the same statistic name.
   check_result <- list(
-    observed_statistics = observed_statistics, # vector of observed stats
-    replicated_statistics = simulated_statistics, # matrix: rows = simulations, columns = statistics
-    n_pairs = nrow(partner_row_map$rows),
+    compositions = compositions,
+    n_pairs = nrow(partner_row_map$pairs),
+    n_simulations = n_simulations,
     n_incomplete_dyads = length(partner_row_map$incomplete_dyad_ids),
     n_missing_dyad_rows = length(partner_row_map$missing_dyad_rows),
     n_missing_role_rows = length(partner_row_map$missing_role_rows),
@@ -279,12 +284,18 @@ check_partner_dependence <- function(
   if (length(omission_details) > 0L) {
     warning("Omitted: ", paste(omission_details, collapse = "; "), ".", call. = FALSE)
   }
+  if (length(skipped_composition_indices) > 0L) {
+    warning("Not checked (fewer than three complete pairs): ",
+            paste0(compositions$label[skipped_composition_indices], " (n = ",
+                   compositions$n_pairs[skipped_composition_indices], ")",
+                   collapse = "; "), ".", call. = FALSE)
+  }
   if (missing(role)) {
     message("No role supplied: summaries pool partners. Supply `role` to check ",
-            "each role's variance separately, even if the model did not include it. ",
+            "each composition separately, even if the model did not include it. ",
             "Use `role = NULL` to pool without this message.")
   }
-  if (plot) graphics::plot(check_result, ask = ask, panel = panel)
+  if (plot) graphics::plot(check_result, ask = ask, panels = panels)
   return(invisible(check_result))
 }
 
@@ -297,11 +308,10 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
   # Treat missing factor labels as missing values too. (e.g., level = c('male', NA)))
   is_dyad_id_missing <- is.na(dyad_ids) | is.na(as.character(dyad_ids))
 
-  partner_rows <- data.frame(
+  partner_rows <- tibble::tibble(
     fitted_row = seq_along(dyad_ids), # (to later re-align dyads with the response vectors by index)
     dyad_number = match(dyad_ids, unique(dyad_ids)),
-    role = if (is.null(role_values)) rep(NA, length(dyad_ids)) else role_values,
-    row.names = NULL
+    role = if (is.null(role_values)) rep(NA, length(dyad_ids)) else role_values
   )
 
   # Only check for missing roles when the user supplied a role colname or vector
@@ -317,8 +327,9 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
 
   # Remove rows with missing dyad IDs or (if supplied) missing roles.
   # Then keep only dyads with two usable rows.
-  partner_rows <- partner_rows[!is_dyad_id_missing & !is_role_missing, ]
-  partner_rows <- dplyr::filter(partner_rows, dplyr::n() == 2L, .by = "dyad_number")
+  partner_rows <- partner_rows |>
+    dplyr::filter(!is_dyad_id_missing & !is_role_missing) |>
+    dplyr::filter(dplyr::n() == 2L, .by = "dyad_number")
 
   if (nrow(partner_rows) / 2 < 3L) {
     stop("At least three complete dyads are required to check partner dependence.",
@@ -326,38 +337,55 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
      # the responsibility of what is sensible with the user.
   }
 
-  # Role order only matters if supplied. Otherwise role_order also stays NULL throughout
-  role_order <- NULL
+  # Integer role codes keep different values separate even if labels look alike.
+  # Factors keep their level order; other roles use sorted values.
+  ordered_role_values <- sort(unique(partner_rows$role))
+  # Build one row per dyad, with partners in role order (or row order without roles).
+  pairs <- partner_rows |>
+    dplyr::mutate(
+      role_index = if (is.null(role_values)) 0L else match(.data$role, ordered_role_values)
+    ) |>
+    dplyr::arrange(.data$dyad_number, .data$role_index) |>
+    dplyr::summarise(
+      first_partner_row = dplyr::first(.data$fitted_row),
+      second_partner_row = dplyr::last(.data$fitted_row),
+      first_partner_role_index = dplyr::first(.data$role_index),
+      second_partner_role_index = dplyr::last(.data$role_index),
+      .by = "dyad_number"
+    ) |>
+    # Give identical role pairs the same composition number, in role order.
+    dplyr::mutate(composition_index = dplyr::dense_rank(
+      dplyr::pick("first_partner_role_index", "second_partner_role_index")
+    ))
+  compositions <- tibble::tibble(
+    label = "All dyads", # will be overwritten / re-assigned later per composition
+    n_pairs = tabulate(pairs$composition_index)
+  )
+  role_orders <- vector("list", nrow(compositions))
   if (!is.null(role_values)) {
-    # Use factor-level order for factors, otherwise sort the role values.
-    role_order <- sort(unique(partner_rows$role))
-    if (length(role_order) != 2L) {
-      stop("Currently, exactly two role values are required among the complete dyads.", call. = FALSE)
-    }
-    if (any(duplicated(partner_rows[c("dyad_number", "role")]))) {
-      stop("Each complete dyad must contain exactly one row for each role value.",
-           call. = FALSE)
+    for (composition_index in seq_len(nrow(compositions))) {
+      first_pair_index <- match(composition_index, pairs$composition_index)
+      composition_role_indices <- c(pairs$first_partner_role_index[first_pair_index],
+                                    pairs$second_partner_role_index[first_pair_index])
+      composition_roles <- ordered_role_values[composition_role_indices]
+      compositions$label[composition_index] <- paste(composition_roles, collapse = " - ")
+      if (composition_role_indices[1] != composition_role_indices[2]) {
+        role_orders[[composition_index]] <- composition_roles
+      }
+      # Same-role pairs keep NULL, selecting the exchangeable statistics.
     }
   }
-
-  # Put partners next to each other, in role order (or row order without roles).
-  partner_rows <- partner_rows[order(partner_rows$dyad_number, partner_rows$role), ]
-  partner_row_indices <- matrix(partner_rows$fitted_row, ncol = 2L, byrow = TRUE)
-  # This reshapes:
-  # partner_rows$fitted_row
-  # 1 3 4 2
-  #
-  # into: partner_row_indices
-  #      [,1] [,2]
-  #[1,]    1    3
-  #[2,]    4    2
+  if (!any(compositions$n_pairs >= 3L)) {
+    stop("At least one composition must contain three complete dyads.", call. = FALSE)
+  }
 
   # Keep omitted IDs and fitted-row numbers for the warning and omission counts.
   # Include known dyads that lost both rows when missing roles were removed.
   return(list(
-    rows = partner_row_indices, role_order = role_order,
+    pairs = dplyr::select(pairs, "composition_index", "first_partner_row", "second_partner_row"),
+    role_orders = role_orders, compositions = compositions,
     incomplete_dyad_ids = unique(dyad_ids[
-      !is_dyad_id_missing & !dyad_ids %in% dyad_ids[partner_row_indices]
+      !is_dyad_id_missing & !dyad_ids %in% dyad_ids[partner_rows$fitted_row]
     ]),
     missing_dyad_rows = which(is_dyad_id_missing),
     # Report missing roles only on rows with a known dyad ID.
@@ -406,7 +434,7 @@ calculate_partner_pair_statistics <- function(
     return(statistics)
   }
 
-  # In case there is no role provided:
+  # Without distinct roles, use the exchangeable summaries.
 
   # Exchangeability sets the expected half-difference to zero. Its mean square
   # about zero is unchanged by arbitrary within-dyad member swaps.
@@ -446,13 +474,24 @@ calculate_partner_pair_statistics <- function(
 print.dyadMLM_partner_check <- function(x, ...) {
   # Read saved settings; printing does not rerun the check.
   simulation_settings <- attr(x, "dyadMLM")
-  # replicated_statistics is a matrix with one row per simulation.
-  n_simulations <- nrow(x$replicated_statistics)
+  # Each table has one dataset column followed by the statistics.
+  n_statistics <- sum(vapply(x$compositions$statistics,
+    function(statistics) if (is.null(statistics)) 0L else ncol(statistics) - 1L, integer(1)))
   cat("<dyadMLM partner-dependence check>\n")
-  cat(length(x$observed_statistics), "statistics using", x$n_pairs, "complete pairs\n")
+  cat(n_statistics, "statistics;", x$n_pairs, "usable complete pairs\n")
   cat("Response: ", x$response, "\n", sep = "")
-  cat("Reference: ", n_simulations, " ", simulation_settings$reference, " datasets with ",
+  cat("Reference: ", x$n_simulations, " ", simulation_settings$reference, " datasets with ",
       simulation_settings$random_effects, " random effects\n", sep = "")
+
+  for (composition_index in seq_len(nrow(x$compositions))) {
+    composition <- x$compositions[composition_index, ]
+    cat(composition$label, ": ", composition$n_pairs, " of ", x$n_pairs,
+        " usable dyads", sep = "")
+    if (is.null(composition$statistics[[1]])) {
+      cat("; not checked (fewer than three complete pairs)")
+    }
+    cat("\n")
+  }
 
   # A named vector of counts: dyads for the first entry, rows for the others.
   omitted_counts <- c(
@@ -487,8 +526,6 @@ print.dyadMLM_partner_check <- function(x, ...) {
 #' @keywords internal
 #'
 #' @param x A `dyadMLM_partner_check` object.
-#' @param ask `TRUE` pauses before the next plot. `FALSE` draws all plots
-#'   without pausing. `NULL` (default) chooses automatically.
 #' @inheritParams check_partner_dependence
 #' @param ... Additional graphical arguments passed to [graphics::plot()].
 #'   `freq`, `xlim`, `ylim`, `main`, `sub`, and `xlab` are controlled by this
@@ -497,10 +534,19 @@ print.dyadMLM_partner_check <- function(x, ...) {
 #' @return Invisibly, `x`.
 #'
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
-#' example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
+#' example_data <- prepare_dyad_data(
+#'   dyads_cross[dyads_cross$coupleID <= 40, ],
+#'   dyad = coupleID,
+#'   member = personID,
+#'   model_types = "none",
+#'   seed = 123
+#' )
 #'
 #' model <- glmmTMB::glmmTMB(
-#'   closeness ~ 1 + gender + (1 | coupleID),
+#'   closeness ~ 1 +
+#'     us(1 | coupleID) +
+#'     us(0 + .member_contrast_arbitrary | coupleID),
+#'   dispformula = ~ 0,
 #'   data = example_data
 #' )
 #'
@@ -513,82 +559,104 @@ print.dyadMLM_partner_check <- function(x, ...) {
 #' check <- check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
-#'   role = gender,
+#'   role = example_data$gender,
 #'   plot = FALSE
 #' )
 #'
-#' plot(check, panel = TRUE)
+#' plot(check, ask = FALSE)
 #'
 #' @export
-plot.dyadMLM_partner_check <- function(x, ask = NULL, panel = FALSE, ...) {
+plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
 
-  if (panel) {
+  checked_composition_indices <- which(x$compositions$n_pairs >= 3L)
+  number_of_figures <- if (panels) length(checked_composition_indices) else
+    sum(vapply(x$compositions$statistics[checked_composition_indices], ncol, integer(1)) - 1L)
+  if (is.null(ask)) {
+    ask <- number_of_figures > 1L
+  }
+  # File devices and report rendering should never wait for keyboard input.
+  ask <- ask && grDevices::dev.interactive()
+
+  if (panels) {
     previous_graphics_settings <- graphics::par(no.readonly = TRUE)
     on.exit({
       graphics::par(previous_graphics_settings)
       # Restoring the layout resets scaling; scaling changes the plot region.
       graphics::par(previous_graphics_settings[c("cex", "mex", "plt")])
     }, add = TRUE)
-    graphics::par(mfcol = c(ceiling(length(x$observed_statistics) / 2), 2),
-                  mar = c(5.1, 4.1, 2.5, 1), cex.main = 0.9,
-                  cex = min(0.66, grDevices::dev.size("in")[1] / 12))
   }
-
-  if (is.null(ask)) {
-    ask <- !panel && length(x$observed_statistics) > 1L && grDevices::dev.interactive()
-  }
-
   previous_plot_pause_setting <- grDevices::devAskNewPage(ask)
-
   on.exit(grDevices::devAskNewPage(previous_plot_pause_setting), add = TRUE)
 
-  n_simulations <- nrow(x$replicated_statistics)
+  n_simulations <- x$n_simulations
   suggested_histogram_bins <- min(100L, max(20L, round(n_simulations / 5)))
 
-  # Match observed values and simulation columns by position. Names are plot labels.
-  for (statistic_index in seq_along(x$observed_statistics)) {
-    statistic_name <- names(x$observed_statistics)[[statistic_index]]
-    observed_statistic_value <- x$observed_statistics[[statistic_index]]
+  for (composition_index in checked_composition_indices) {
+    composition <- x$compositions[composition_index, ]
+    # The first row is observed; the remaining rows are simulations.
+    composition_statistics <- composition$statistics[[1]][, -1]
+    composition_title <- paste0(composition$label, " - ", composition$n_pairs,
+                                " of ", x$n_pairs, " usable dyads")
+    if (panels) {
+      graphics::par(mfrow = c(2, ncol(composition_statistics) / 2),
+                    mar = c(5.1, 4.1, 4, 1), oma = c(0, 0, 3, 0),
+                    cex = 0.7, cex.main = 1)
+    }
 
-    simulated_statistic_values <-
-      x$replicated_statistics[, statistic_index]
-    simulated_statistic_values <-
-      simulated_statistic_values[is.finite(simulated_statistic_values)]
+    # Match observed values and simulations by position, since names may repeat.
+    for (statistic_index in seq_along(composition_statistics)) {
+      statistic_name <- names(composition_statistics)[[statistic_index]]
+      observed_statistic_value <- composition_statistics[[statistic_index]][1]
 
-    middle_95_simulation_limits <- stats::quantile(
-      simulated_statistic_values, c(0.025, 0.975), names = FALSE
-    )
+      simulated_statistic_values <-
+        composition_statistics[[statistic_index]][-1]
+      simulated_statistic_values <-
+        simulated_statistic_values[is.finite(simulated_statistic_values)]
 
-    simulated_statistic_histogram <- graphics::hist(
-      simulated_statistic_values,
-      breaks = suggested_histogram_bins, plot = FALSE
-    )
+      middle_95_simulation_limits <- stats::quantile(
+        simulated_statistic_values, c(0.025, 0.975), names = FALSE
+      )
 
-    maximum_bin_count <- max(simulated_statistic_histogram$counts)
+      simulated_statistic_histogram <- graphics::hist(
+        simulated_statistic_values,
+        breaks = suggested_histogram_bins, plot = FALSE
+      )
 
-    # Keep complete bars visible and reserve a band above them for the legend.
-    graphics::plot(
-      simulated_statistic_histogram, freq = TRUE,
-      xlim = range(observed_statistic_value, simulated_statistic_histogram$breaks),
-      ylim = c(0, maximum_bin_count * 1.25), main = statistic_name,
-      sub = paste0(x$response, "; ", x$n_pairs, " pairs; ",
-                   length(simulated_statistic_values), "/", n_simulations,
-                   " defined simulations"),
-      xlab = "Summary value", ...
-    )
+      maximum_bin_count <- max(simulated_statistic_histogram$counts)
 
-    graphics::segments(middle_95_simulation_limits, 0, middle_95_simulation_limits,
-                       maximum_bin_count, lty = 2, col = "grey40")
+      # Keep complete bars visible and reserve a band above them for the legend.
+      plot_title <- paste(strwrap(statistic_name, width = if (panels) 30 else 60),
+                          collapse = "\n")
+      if (!panels) plot_title <- paste(composition_title, plot_title, sep = "\n")
+      plot_subtitle <- paste0(length(simulated_statistic_values), "/", n_simulations,
+                              " simulations used")
+      if (!panels) plot_subtitle <- paste(x$response, plot_subtitle, sep = "; ")
+      graphics::plot(
+        simulated_statistic_histogram, freq = TRUE,
+        xlim = range(observed_statistic_value, simulated_statistic_histogram$breaks),
+        ylim = c(0, maximum_bin_count * if (panels) 1.4 else 1.25),
+        main = plot_title,
+        sub = plot_subtitle,
+        xlab = "Summary value", ...
+      )
 
-    graphics::segments(observed_statistic_value, 0,
-                       observed_statistic_value, maximum_bin_count,
-                       lwd = 2.5, col = "red")
+      graphics::segments(middle_95_simulation_limits, 0, middle_95_simulation_limits,
+                         maximum_bin_count, lty = 2, col = "grey40")
 
-    graphics::legend(
-      "top", legend = c("Observed", "Middle 95% of simulations"),
-      lty = c(1, 2), lwd = c(2.5, 1), col = c("red", "grey40"),
-      horiz = TRUE, bty = "n"
-    )
+      graphics::segments(observed_statistic_value, 0,
+                         observed_statistic_value, maximum_bin_count,
+                         lwd = 2.5, col = "red")
+
+      graphics::legend(
+        "top", legend = c("Observed", "Middle 95% of simulations"),
+        lty = c(1, 2), lwd = c(2.5, 1), col = c("red", "grey40"),
+        horiz = !panels, cex = if (panels) 0.85 else 1, bty = "n"
+      )
+    }
+    if (panels) {
+      graphics::mtext(paste(composition_title, x$response, sep = "; "),
+                      side = 3, outer = TRUE, line = 1, cex = 1, font = 2)
+    }
   }
   return(invisible(x))
 }

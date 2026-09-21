@@ -52,9 +52,10 @@ Graphics settings are restored afterwards.}
 \value{
 The comparison plots (shown by default) are the main output. The
 function invisibly returns a \code{dyadMLM_partner_check} object containing the
-observed and simulated statistics (one row per simulation), pair and
-omission counts, and settings. The \code{compositions} table lists the dyad
-compositions and their pair counts. The object can be saved and plotted later.
+\code{compositions} table with pair counts and a statistics tibble for each
+composition. Each tibble has one observed row followed by one row per
+simulation, identified by \code{dataset}. The object includes omission counts
+and settings, and can be saved and plotted later.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -71,7 +72,7 @@ Dashed lines enclose the middle 95\% of simulations (no formal confidence
 intervals).
 The heading shows the dyad composition, its number of usable dyads, and the
 total across all compositions. The top row shows member SDs and partner
-correlation; the bottom row shows the same information using dyad averages
+correlation. The bottom row shows the same information using dyad averages
 and partner differences.
 
 An observed value far from most simulated values may indicate that the
