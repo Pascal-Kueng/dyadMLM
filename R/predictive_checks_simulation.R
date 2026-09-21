@@ -38,9 +38,11 @@
 #' - `glmmTMB::tweedie()`
 #' - `Gamma()`, `glmmTMB::ziGamma()`
 #' - `glmmTMB::beta_family()`
-#' - `glmmTMB::lognormal()`, `glmmTMB::skewnormal()`
+#' - `glmmTMB::lognormal()`
+#' - `glmmTMB::skewnormal()`
 #' - `glmmTMB::t_family()` with more than two degrees of freedom
-#' - `glmmTMB::ordinal()` where available in the installed `glmmTMB` version
+#' - `glmmTMB::ordinal()` (currently only available in the development version
+#'   of `glmmTMB`)
 #'
 #' Zero-inflated and hurdle versions are supported where available. Checks
 #' describe the combined response, including zeros, rather than each model
@@ -124,6 +126,9 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   if (family$family == "ordinal") {
     # Match predictions, which use category positions 1, 2, ..., K.
     observed <- as.numeric(observed)
+    message("Ordinal categories are scored 1, 2, ..., K in both observed and ",
+            "simulated data. The plots show whether the model reproduces ",
+            "variation and partner correlation in these scores.")
   }
   if (!is.numeric(observed) || !is.null(dim(observed)) ||
       any(!is.finite(observed))) {

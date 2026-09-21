@@ -52,9 +52,11 @@ Supports unweighted \code{glmmTMB} models with the following families:
 \item \code{glmmTMB::tweedie()}
 \item \code{Gamma()}, \code{glmmTMB::ziGamma()}
 \item \code{glmmTMB::beta_family()}
-\item \code{glmmTMB::lognormal()}, \code{glmmTMB::skewnormal()}
+\item \code{glmmTMB::lognormal()}
+\item \code{glmmTMB::skewnormal()}
 \item \code{glmmTMB::t_family()} with more than two degrees of freedom
-\item \code{glmmTMB::ordinal()} where available in the installed \code{glmmTMB} version
+\item \code{glmmTMB::ordinal()} (currently only available in the development version
+of \code{glmmTMB})
 }
 
 Zero-inflated and hurdle versions are supported where available. Checks
