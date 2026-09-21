@@ -7,7 +7,7 @@ simulations.
 
 ``` r
 # S3 method for class 'dyadMLM_partner_check'
-plot(x, ask = NULL, panel = FALSE, ...)
+plot(x, ask = NULL, panels = TRUE, ...)
 ```
 
 ## Arguments
@@ -18,14 +18,16 @@ plot(x, ask = NULL, panel = FALSE, ...)
 
 - ask:
 
-  `TRUE` pauses before the next plot. `FALSE` draws all plots without
-  pausing. `NULL` (default) chooses automatically.
+  Whether to pause between figures on an interactive device. `NULL`
+  (default) pauses when there is more than one figure; `TRUE` pauses and
+  `FALSE` draws without pausing. In panel mode, each composition is one
+  figure. File devices never pause.
 
-- panel:
+- panels:
 
-  If `FALSE` (default), draw plots one after another, with pausing
-  controlled by `ask`. If `TRUE`, show all plots together in a
-  two-column panel. Graphics settings are restored afterwards.
+  If `TRUE` (default), show each composition in one figure, with two
+  rows and up to three columns. If `FALSE`, draw each statistic
+  separately. Graphics settings are restored afterwards.
 
 - ...:
 
@@ -47,10 +49,19 @@ for interpretation, panel layouts, and technical details.
 ## Examples
 
 ``` r
-example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
+example_data <- prepare_dyad_data(
+  dyads_cross[dyads_cross$coupleID <= 40, ],
+  dyad = coupleID,
+  member = personID,
+  model_types = "none",
+  seed = 123
+)
 
 model <- glmmTMB::glmmTMB(
-  closeness ~ 1 + gender + (1 | coupleID),
+  closeness ~ 1 +
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~ 0,
   data = example_data
 )
 
@@ -64,8 +75,9 @@ check <- check_partner_dependence(
   simulations,
   dyad = coupleID,
   role = gender,
+  data = example_data,
   plot = FALSE
 )
 
-plot(check, panel = TRUE)
+plot(check, ask = FALSE)
 ```

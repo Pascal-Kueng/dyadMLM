@@ -636,8 +636,7 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#testing-dist
 
 We can check whether the fitted DSM reproduces each role’s response
 variance and the partner correlation by comparing observed and simulated
-data. We supply the original roles because the model uses a role
-contrast instead of `gender`.
+data.
 
 ``` r
 
@@ -645,18 +644,20 @@ dsm_simulations <- dyadMLM::simulate_dyad_responses(dsm_model, seed = 123)
 dyadMLM::check_partner_dependence(
   dsm_simulations,
   dyad = coupleID,
-  role = cross_dsm_data$gender,
-  panel = TRUE
+  role = gender,
+  # Supply the fitting data because gender is not in the model formula.
+  data = cross_dsm_data,
+  panels = TRUE
 )
 ```
 
 ![Six predictive-check histograms for the DSM. Member SDs and partner
-correlation are on the left; dyad-average and half-difference summaries
-are on the right. Red lines mark observed
+correlation are in the top row; dyad-average and half-difference
+summaries are in the bottom row. Red lines mark observed
 values.](dsm_files/figure-html/check-cross-dsm-1.svg)
 
-The left column shows role-specific SDs and partner correlation. The
-right column shows the same information using dyad averages and half the
+The top row shows role-specific SDs and partner correlation. The bottom
+row shows the same information using dyad averages and half the
 differences between partners. Histograms show simulated values and red
 lines mark observed values. A red line far from most simulations
 suggests a mismatch.

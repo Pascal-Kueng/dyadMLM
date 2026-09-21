@@ -542,12 +542,14 @@ their variances separately.</p>
 <span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
 <span>  <span class="va">apim_simulations</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
-<span>  role <span class="op">=</span> <span class="va">apim_distinguishable_data</span><span class="op">$</span><span class="va">gender</span>,</span>
-<span>  panel <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  <span class="co"># Supply the fitting data because gender is not in the model formula.</span></span>
+<span>  data <span class="op">=</span> <span class="va">apim_distinguishable_data</span>,</span>
+<span>  panels <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="apim_files/figure-html/check-cross-apim-1.svg" class="r-plt" alt="Six predictive-check histograms. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values." width="100%"></p>
-<p>The left column shows role-specific SDs and partner correlation. The
-right column shows the same information using dyad averages and half the
+<p><img src="apim_files/figure-html/check-cross-apim-1.svg" class="r-plt" alt="Six predictive-check histograms. Member SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values." width="100%"></p>
+<p>The top row shows role-specific SDs and partner correlation. The
+bottom row shows the same information using dyad averages and half the
 differences between partners. Histograms show simulated values and red
 lines mark observed values. A red line far from most simulations
 suggests a mismatch.</p>

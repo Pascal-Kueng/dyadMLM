@@ -537,8 +537,7 @@ covariance matrix.
 ### Checking partner dependence
 
 We can check whether the fitted DIM reproduces the response variance and
-partner correlation by comparing observed and simulated data. Use
-`role = NULL` here because the members are exchangeable.
+partner correlation by comparing observed and simulated data.
 
 ``` r
 
@@ -546,8 +545,10 @@ dim_simulations <- dyadMLM::simulate_dyad_responses(dim_1, seed = 123)
 dyadMLM::check_partner_dependence(
   dim_simulations,
   dyad = coupleID,
-  role = NULL,
-  panel = TRUE
+  role = gender,
+  # Supply the fitting data because gender is not in the model formula.
+  data = cross_exchangeable_data,
+  panels = TRUE
 )
 ```
 
@@ -556,8 +557,8 @@ SD, partner correlation, dyad-average SD, and half-difference RMS. Red
 lines mark observed
 values.](dim_files/figure-html/check-cross-dim-1.svg)
 
-The left column shows the common member SD and partner correlation. The
-right column shows the same information using dyad averages and half the
+The top row shows the common member SD and partner correlation. The
+bottom row shows the same information using dyad averages and half the
 differences between partners. Histograms show simulated values and red
 lines mark observed values. A red line far from most simulations
 suggests a mismatch.
@@ -748,7 +749,7 @@ summary(dim_ILD)
 #> .provided_support_cwp_dyad_mean        0.481722   0.034760   13.86  < 2e-16 ***
 #> .provided_support_cwp_within_dyad_dev -0.008331   0.035157   -0.24    0.813    
 #> .provided_support_cbp_dyad_mean        1.553466   0.096922   16.03  < 2e-16 ***
-#> .provided_support_cbp_within_dyad_dev  0.844496   0.118504    7.13 1.03e-12 ***
+#> .provided_support_cbp_within_dyad_dev  0.844495   0.118504    7.13 1.03e-12 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

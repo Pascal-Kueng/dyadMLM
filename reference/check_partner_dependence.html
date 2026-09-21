@@ -74,7 +74,8 @@ This helps identify mismatches in the model's assumptions.</p>
 <span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model-centred"</span>, <span class="st">"raw"</span><span class="op">)</span>,</span>
 <span>  ask <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  panel <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  panels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -87,21 +88,23 @@ This helps identify mismatches in the model's assumptions.</p>
 
 
 <dt id="arg-dyad">dyad<a class="anchor" aria-label="anchor" href="#arg-dyad"></a></dt>
-<dd><p>A column name in the fitted data, or a vector
-of dyad IDs in the same row order. Columns take precedence. You may use
-<code>.env$ids</code> to select an external vector explicitly.</p></dd>
+<dd><p>The dyad column name. Looked up first
+in the fitted model frame, then in <code>data</code> if supplied.</p></dd>
 
 
 <dt id="arg-role">role<a class="anchor" aria-label="anchor" href="#arg-role"></a></dt>
-<dd><p>A column name in the fitted data, or a vector of roles in the
-same row order. Use <code>NULL</code> (default) when members should be treated as
-exchangeable. Roles can be supplied even if they were not included
-in the model, to check for mismatches in each role's variance and
-the partner correlation.</p></dd>
+<dd><p>The role column name. Looked up first
+in the fitted model frame, then in <code>data</code> if supplied.
+<code>NULL</code> (default) pools all dyads as exchangeable. Supply roles
+even for an exchangeable model to reveal variance or partner-correlation
+mismatches that pooling may hide. Each role pair is checked separately,
+using exchangeable summaries for same-role pairs and role-specific
+summaries otherwise.</p></dd>
 
 
 <dt id="arg-plot">plot<a class="anchor" aria-label="anchor" href="#arg-plot"></a></dt>
-<dd><p>If <code>TRUE</code> (default), draw the comparison plots for visual checks.</p></dd>
+<dd><p>If <code>TRUE</code> (default), draw the comparison plots for visual checks.
+If <code>FALSE</code>, <code>ask</code> and <code>panels</code> are ignored.</p></dd>
 
 
 <dt id="arg-response">response<a class="anchor" aria-label="anchor" href="#arg-response"></a></dt>
@@ -116,23 +119,32 @@ See <code><a href="simulate_dyad_responses.html">simulate_dyad_responses()</a></
 
 
 <dt id="arg-ask">ask<a class="anchor" aria-label="anchor" href="#arg-ask"></a></dt>
-<dd><p>Whether to pause between plots. <code>NULL</code> (default) chooses
-automatically; <code>TRUE</code> pauses and <code>FALSE</code> draws without pausing.
-Ignored when <code>plot = FALSE</code>.</p></dd>
+<dd><p>Whether to pause between figures on an interactive device.
+<code>NULL</code> (default) pauses when there is more than one figure; <code>TRUE</code> pauses
+and <code>FALSE</code> draws without pausing. In panel mode, each composition is one
+figure. File devices never pause.</p></dd>
 
 
-<dt id="arg-panel">panel<a class="anchor" aria-label="anchor" href="#arg-panel"></a></dt>
-<dd><p>If <code>FALSE</code> (default), draw plots one after another, with pausing
-controlled by <code>ask</code>. If <code>TRUE</code>, show all plots together in a two-column
-panel. Graphics settings are restored afterwards.</p></dd>
+<dt id="arg-panels">panels<a class="anchor" aria-label="anchor" href="#arg-panels"></a></dt>
+<dd><p>If <code>TRUE</code> (default), show each composition in one figure, with
+two rows and up to three columns. If <code>FALSE</code>, draw each statistic separately.
+Graphics settings are restored afterwards.</p></dd>
+
+
+<dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
+<dd><p>Optional data frame used to fit the model. Supply it when <code>dyad</code>
+or <code>role</code> is absent from the fitted model frame. Use the exact unchanged
+data that was passed to the model when fitting.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The comparison plots (shown by default) are the main output. The
 function invisibly returns a <code>dyadMLM_partner_check</code> object containing the
-observed and simulated statistics (one row per simulation), pair and
-omission counts, and settings. Can be saved to plot later.</p>
+<code>compositions</code> table with pair counts and a statistics tibble for each
+composition. Each tibble has one observed row followed by one row per
+simulation, identified by <code>dataset</code>. The object includes omission counts
+and settings, and can be saved and plotted later.</p>
     </div>
     <div class="section level2">
     <h2 id="reading-the-plots">Reading the plots<a class="anchor" aria-label="anchor" href="#reading-the-plots"></a></h2>
@@ -140,8 +152,11 @@ omission counts, and settings. Can be saved to plot later.</p>
 
 <p>Histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95% of simulations (no formal confidence
-intervals).</p>
-<p>Use <code>panel = TRUE</code> to display all plots together: six with roles, four without.</p>
+intervals).
+The heading shows the dyad composition, its number of usable dyads, and the
+total across all compositions. The top row shows member SDs and partner
+correlation. The bottom row shows the same information using dyad averages
+and partner differences.</p>
 <p>An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.</p>
 <p>The first set of plots compares:</p><ul><li><p><strong>Response SDs:</strong> one for each role, or one common SD for exchangeable members.</p></li>
@@ -149,10 +164,10 @@ model does not reproduce that feature of the data well.</p>
 </ul><p>The second set shows <em>the same information</em> using dyad averages and partner
 differences:</p><ul><li><p><strong>Dyad-average SD:</strong> how much dyads differ in their average response.</p></li>
 <li><p><strong>Half-difference SD or RMS:</strong> each partner difference is divided by two.
-With roles, the SD shows how much these signed differences vary across
-dyads. Without roles, the RMS shows their typical size, regardless of
+With distinct roles, the SD shows how much signed differences vary
+across dyads. For exchangeable members, the RMS shows their typical size, regardless of
 partner order.</p></li>
-<li><p><strong>Mean/difference correlation:</strong> plotted only when roles are supplied,
+<li><p><strong>Mean/difference correlation:</strong> plotted only for distinct roles,
 because it depends on how partners are ordered. Positive values indicate
 greater variance for the first named role. Negative values indicate greater
 variance for the second.</p></li>
@@ -171,7 +186,7 @@ Long lists are shortened; counts are also shown when printing the result.</p>
 <p>After any centring, paired responses <code>a</code> and <code>b</code> are used to compute
 dyad averages <code>M = (a + b) / 2</code> and half-differences <code>D = (a - b) / 2</code>.
 Roles follow factor levels or sorted values.</p>
-<p>Without roles, common member variance is <code>var(M) + mean(D^2)</code> and
+<p>For exchangeable members, common member variance is <code>var(M) + mean(D^2)</code> and
 partner covariance is <code>var(M) - mean(D^2)</code>. Partner correlation is
 covariance divided by variance. Half-difference RMS is <code>sqrt(mean(D^2))</code>.</p>
 <p>The variance and covariance calculations for exchangeable dyads follow
@@ -190,44 +205,68 @@ assessment of model fitness via realized discrepancies. <em>Statistica Sinica,
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_data</span> <span class="op">&lt;-</span> <span class="va">dyads_cross</span><span class="op">[</span><span class="va">dyads_cross</span><span class="op">$</span><span class="va">coupleID</span> <span class="op">&lt;=</span> <span class="fl">40</span>, <span class="op">]</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Data contains three compositions: female-female, female-male, and male-male.</span></span></span>
+<span class="r-in"><span><span class="va">example_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">dyads_cross</span>,</span></span>
+<span class="r-in"><span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span></span>
+<span class="r-in"><span>  member <span class="op">=</span> <span class="va">personID</span>,</span></span>
+<span class="r-in"><span>  model_types <span class="op">=</span> <span class="st">"none"</span>,</span></span>
+<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">123</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># This model pools all compositions and treats every dyad as exchangeable.</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">gender</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.member_contrast_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span></span>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="va">example_data</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Fewer simulations for a quick example (the default is 1000).</span></span></span>
 <span class="r-in"><span><span class="va">simulations</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">model</span>,</span></span>
-<span class="r-in"><span>  nsim <span class="op">=</span> <span class="fl">50</span>,</span></span>
+<span class="r-in"><span>  nsim <span class="op">=</span> <span class="fl">100</span>,</span></span>
 <span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">123</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Arrange all six checks in one panel.</span></span></span>
 <span class="r-in"><span><span class="fu">check_partner_dependence</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">simulations</span>,</span></span>
 <span class="r-in"><span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span></span>
 <span class="r-in"><span>  role <span class="op">=</span> <span class="va">gender</span>,</span></span>
-<span class="r-in"><span>  panel <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>  <span class="co"># Supply the fitting data because gender is not in the model formula.</span></span></span>
+<span class="r-in"><span>  data <span class="op">=</span> <span class="va">example_data</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="check_partner_dependence-1.png" alt="" width="768" height="864"></span>
+<span class="r-plt img"><img src="check_partner_dependence-1.png" alt="" width="960" height="624"></span>
+<span class="r-plt img"><img src="check_partner_dependence-2.png" alt="" width="960" height="624"></span>
+<span class="r-plt img"><img src="check_partner_dependence-3.png" alt="" width="960" height="624"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Optionally, suppress plot, store object, and plot later.</span></span></span>
 <span class="r-in"><span><span class="va">check</span> <span class="op">&lt;-</span> <span class="fu">check_partner_dependence</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">simulations</span>,</span></span>
 <span class="r-in"><span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span></span>
 <span class="r-in"><span>  role <span class="op">=</span> <span class="va">gender</span>,</span></span>
+<span class="r-in"><span>  data <span class="op">=</span> <span class="va">example_data</span>,</span></span>
 <span class="r-in"><span>  plot <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">check</span>, panel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Check how well the model reproduces variances and partner correlations</span></span></span>
+<span class="r-in"><span><span class="co"># within each dyad composition.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">check</span>, ask <span class="op">=</span> <span class="cn">FALSE</span>, panels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="check_partner_dependence-4.png" alt="" width="960" height="624"></span>
+<span class="r-plt img"><img src="check_partner_dependence-5.png" alt="" width="960" height="624"></span>
+<span class="r-plt img"><img src="check_partner_dependence-6.png" alt="" width="960" height="624"></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">check</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;dyadMLM partner-dependence check&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 statistics using 40 complete pairs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14 statistics; 360 usable complete pairs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Response: model-centred</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Reference: 50 plug-in predictive datasets with new random effects</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Reference: 100 plug-in predictive datasets with new random effects</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> female - female: 120 of 360 usable dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> female - male: 120 of 360 usable dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> male - male: 120 of 360 usable dyads</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Use plot(x) to view the comparisons.</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

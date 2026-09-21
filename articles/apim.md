@@ -501,18 +501,20 @@ apim_simulations <- dyadMLM::simulate_dyad_responses(
 dyadMLM::check_partner_dependence(
   apim_simulations,
   dyad = coupleID,
-  role = apim_distinguishable_data$gender,
-  panel = TRUE
+  role = gender,
+  # Supply the fitting data because gender is not in the model formula.
+  data = apim_distinguishable_data,
+  panels = TRUE
 )
 ```
 
 ![Six predictive-check histograms. Member SDs and partner correlation
-are on the left; dyad-average and half-difference summaries are on the
-right. Red lines mark observed
+are in the top row; dyad-average and half-difference summaries are in
+the bottom row. Red lines mark observed
 values.](apim_files/figure-html/check-cross-apim-1.svg)
 
-The left column shows role-specific SDs and partner correlation. The
-right column shows the same information using dyad averages and half the
+The top row shows role-specific SDs and partner correlation. The bottom
+row shows the same information using dyad averages and half the
 differences between partners. Histograms show simulated values and red
 lines mark observed values. A red line far from most simulations
 suggests a mismatch.

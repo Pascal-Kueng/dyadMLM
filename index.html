@@ -200,7 +200,6 @@ BibTeX (without version)
 <p>This creates grand-mean-centred actor and partner predictors and a member contrast for the exchangeable model. Inspect the prepared data with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">prepared_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span></span>
 <span><span class="co">#&gt; # dyadMLM data</span></span>
 <span><span class="co">#&gt; # Rows: 240 | Dyads: 120 | Intensive longitudinal: no</span></span>
 <span><span class="co">#&gt; # Structure: dyad = coupleID, member = personID, role = gender</span></span>
@@ -285,12 +284,16 @@ BibTeX (without version)
 <span><span class="fu"><a href="reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
 <span>  <span class="va">simulations</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
-<span>  role <span class="op">=</span> <span class="va">prepared_data</span><span class="op">$</span><span class="va">gender</span>,</span>
-<span>  panel <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  <span class="co"># Supply the fitting data because gender is not in the model formula.</span></span>
+<span>  data <span class="op">=</span> <span class="va">prepared_data</span>,</span>
+<span>  panels <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%"></p>
+<p><img src="reference/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%"></p>
+<p>The function groups the six plots in one figure. Use <code>panels = FALSE</code> to show them separately.</p>
 <p>Here, simulations produce weaker partner correlations and larger SDs of partner half-differences than observed (red lines), suggesting <strong>misfit</strong>.</p>
 <p>A next step is to fit a distinguishable APIM, as shown in the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">APIM vignette</a>. Use <a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html"><code>compare_nested_models()</code></a> to compare the two nested models.</p>
+<p>With mixed dyad compositions, each observed role pair gets its own figure. It can be worthwhile to check plausible role distinctions even when fitting an exchangeable model, since pooling can hide differences in variances or partner correlations. These checks alone do not establish whether fixed effects should be pooled (<a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html">nested model comparisons</a> can help assess those restrictions).</p>
 </div>
 <div class="section level2">
 <h2 id="vignettes-and-examples">Vignettes and examples<a class="anchor" aria-label="anchor" href="#vignettes-and-examples"></a>

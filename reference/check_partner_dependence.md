@@ -17,7 +17,8 @@ check_partner_dependence(
   plot = TRUE,
   response = c("model-centred", "raw"),
   ask = NULL,
-  panel = FALSE
+  panels = TRUE,
+  data = NULL
 )
 ```
 
@@ -30,21 +31,22 @@ check_partner_dependence(
 
 - dyad:
 
-  A column name in the fitted data, or a vector of dyad IDs in the same
-  row order. Columns take precedence. You may use `.env$ids` to select
-  an external vector explicitly.
+  The dyad column name. Looked up first in the fitted model frame, then
+  in `data` if supplied.
 
 - role:
 
-  A column name in the fitted data, or a vector of roles in the same row
-  order. Use `NULL` (default) when members should be treated as
-  exchangeable. Roles can be supplied even if they were not included in
-  the model, to check for mismatches in each role's variance and the
-  partner correlation.
+  The role column name. Looked up first in the fitted model frame, then
+  in `data` if supplied. `NULL` (default) pools all dyads as
+  exchangeable. Supply roles even for an exchangeable model to reveal
+  variance or partner-correlation mismatches that pooling may hide. Each
+  role pair is checked separately, using exchangeable summaries for
+  same-role pairs and role-specific summaries otherwise.
 
 - plot:
 
-  If `TRUE` (default), draw the comparison plots for visual checks.
+  If `TRUE` (default), draw the comparison plots for visual checks. If
+  `FALSE`, `ask` and `panels` are ignored.
 
 - response:
 
@@ -61,31 +63,40 @@ check_partner_dependence(
 
 - ask:
 
-  Whether to pause between plots. `NULL` (default) chooses
-  automatically; `TRUE` pauses and `FALSE` draws without pausing.
-  Ignored when `plot = FALSE`.
+  Whether to pause between figures on an interactive device. `NULL`
+  (default) pauses when there is more than one figure; `TRUE` pauses and
+  `FALSE` draws without pausing. In panel mode, each composition is one
+  figure. File devices never pause.
 
-- panel:
+- panels:
 
-  If `FALSE` (default), draw plots one after another, with pausing
-  controlled by `ask`. If `TRUE`, show all plots together in a
-  two-column panel. Graphics settings are restored afterwards.
+  If `TRUE` (default), show each composition in one figure, with two
+  rows and up to three columns. If `FALSE`, draw each statistic
+  separately. Graphics settings are restored afterwards.
+
+- data:
+
+  Optional data frame used to fit the model. Supply it when `dyad` or
+  `role` is absent from the fitted model frame. Use the exact unchanged
+  data that was passed to the model when fitting.
 
 ## Value
 
 The comparison plots (shown by default) are the main output. The
 function invisibly returns a `dyadMLM_partner_check` object containing
-the observed and simulated statistics (one row per simulation), pair and
-omission counts, and settings. Can be saved to plot later.
+the `compositions` table with pair counts and a statistics tibble for
+each composition. Each tibble has one observed row followed by one row
+per simulation, identified by `dataset`. The object includes omission
+counts and settings, and can be saved and plotted later.
 
 ## Reading the plots
 
 Histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95% of simulations (no formal confidence
-intervals).
-
-Use `panel = TRUE` to display all plots together: six with roles, four
-without.
+intervals). The heading shows the dyad composition, its number of usable
+dyads, and the total across all compositions. The top row shows member
+SDs and partner correlation. The bottom row shows the same information
+using dyad averages and partner differences.
 
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.
@@ -103,11 +114,11 @@ partner differences:
 - **Dyad-average SD:** how much dyads differ in their average response.
 
 - **Half-difference SD or RMS:** each partner difference is divided by
-  two. With roles, the SD shows how much these signed differences vary
-  across dyads. Without roles, the RMS shows their typical size,
-  regardless of partner order.
+  two. With distinct roles, the SD shows how much signed differences
+  vary across dyads. For exchangeable members, the RMS shows their
+  typical size, regardless of partner order.
 
-- **Mean/difference correlation:** plotted only when roles are supplied,
+- **Mean/difference correlation:** plotted only for distinct roles,
   because it depends on how partners are ordered. Positive values
   indicate greater variance for the first named role. Negative values
   indicate greater variance for the second.
@@ -128,8 +139,8 @@ After any centring, paired responses `a` and `b` are used to compute
 dyad averages `M = (a + b) / 2` and half-differences `D = (a - b) / 2`.
 Roles follow factor levels or sorted values.
 
-Without roles, common member variance is `var(M) + mean(D^2)` and
-partner covariance is `var(M) - mean(D^2)`. Partner correlation is
+For exchangeable members, common member variance is `var(M) + mean(D^2)`
+and partner covariance is `var(M) - mean(D^2)`. Partner correlation is
 covariance divided by variance. Half-difference RMS is
 `sqrt(mean(D^2))`.
 
@@ -151,27 +162,40 @@ Sinica, 6*, 733-807.
 ## Examples
 
 ``` r
-example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
+# Data contains three compositions: female-female, female-male, and male-male.
+example_data <- prepare_dyad_data(
+  dyads_cross,
+  dyad = coupleID,
+  member = personID,
+  model_types = "none",
+  seed = 123
+)
 
+# This model pools all compositions and treats every dyad as exchangeable.
 model <- glmmTMB::glmmTMB(
-  closeness ~ 1 + gender + (1 | coupleID),
+  closeness ~ 1 +
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~ 0,
   data = example_data
 )
 
 # Fewer simulations for a quick example (the default is 1000).
 simulations <- simulate_dyad_responses(
   model,
-  nsim = 50,
+  nsim = 100,
   seed = 123
 )
 
-# Arrange all six checks in one panel.
 check_partner_dependence(
   simulations,
   dyad = coupleID,
   role = gender,
-  panel = TRUE
+  # Supply the fitting data because gender is not in the model formula.
+  data = example_data
 )
+
+
 
 
 # Optionally, suppress plot, store object, and plot later.
@@ -179,14 +203,24 @@ check <- check_partner_dependence(
   simulations,
   dyad = coupleID,
   role = gender,
+  data = example_data,
   plot = FALSE
 )
 
-plot(check, panel = TRUE)
+# Check how well the model reproduces variances and partner correlations
+# within each dyad composition.
+plot(check, ask = FALSE, panels = TRUE)
+
+
+
 print(check)
 #> <dyadMLM partner-dependence check>
-#> 6 statistics using 40 complete pairs
+#> 14 statistics; 360 usable complete pairs
 #> Response: model-centred
-#> Reference: 50 plug-in predictive datasets with new random effects
+#> Reference: 100 plug-in predictive datasets with new random effects
+#> female - female: 120 of 360 usable dyads
+#> female - male: 120 of 360 usable dyads
+#> male - male: 120 of 360 usable dyads
 #> Use plot(x) to view the comparisons.
+
 ```

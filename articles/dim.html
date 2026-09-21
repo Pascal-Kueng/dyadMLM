@@ -528,7 +528,7 @@ directly fitted DIM estimates above confirm the equivalence. Both forms
 therefore make the same change in the linear predictor relative to the
 grand-mean reference. The intercept is omitted from both displayed
 equations.</p>
-<div class="interdep-dim-grid interdep-dim-grid--article" id="interdep-dim-grid" data-interdep-dim-grid data-limit="5" data-actor="1.1989776134457817" data-partner="0.35449135900438639" data-mean="1.553468972450168" data-within="0.84448625444139536">
+<div class="interdep-dim-grid interdep-dim-grid--article" id="interdep-dim-grid" data-interdep-dim-grid data-limit="5" data-actor="1.19897761345149" data-partner="0.35449135900247314" data-mean="1.5534689724539632" data-within="0.84448625444901682">
   <div class="wdg-controls">
     <div class="wdg-toolbar">
       <strong>Provided support coordinates</strong>
@@ -603,21 +603,22 @@ and back-transformation to the member-level covariance matrix.</p>
 <h3 id="checking-partner-dependence">Checking partner dependence<a class="anchor" aria-label="anchor" href="#checking-partner-dependence"></a>
 </h3>
 <p>We can check whether the fitted DIM reproduces the response variance
-and partner correlation by comparing observed and simulated data. Use
-<code>role = NULL</code> here because the members are exchangeable.</p>
+and partner correlation by comparing observed and simulated data.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dim_simulations</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">dim_1</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
 <span>  <span class="va">dim_simulations</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
-<span>  role <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  panel <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  <span class="co"># Supply the fitting data because gender is not in the model formula.</span></span>
+<span>  data <span class="op">=</span> <span class="va">cross_exchangeable_data</span>,</span>
+<span>  panels <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="dim_files/figure-html/check-cross-dim-1.svg" class="r-plt" alt="Four predictive-check histograms for exchangeable dyads: common member SD, partner correlation, dyad-average SD, and half-difference RMS. Red lines mark observed values." width="100%"></p>
-<p>The left column shows the common member SD and partner correlation.
-The right column shows the same information using dyad averages and half
-the differences between partners. Histograms show simulated values and
-red lines mark observed values. A red line far from most simulations
+<p>The top row shows the common member SD and partner correlation. The
+bottom row shows the same information using dyad averages and half the
+differences between partners. Histograms show simulated values and red
+lines mark observed values. A red line far from most simulations
 suggests a mismatch.</p>
 <p>By default, the check subtracts the model’s fixed-effect predictions
 from observed and simulated responses. Good agreement is often expected
@@ -803,7 +804,7 @@ trend across the study.</p>
 <span><span class="co">#&gt; .provided_support_cwp_dyad_mean        0.481722   0.034760   13.86  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; .provided_support_cwp_within_dyad_dev -0.008331   0.035157   -0.24    0.813    </span></span>
 <span><span class="co">#&gt; .provided_support_cbp_dyad_mean        1.553466   0.096922   16.03  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_within_dyad_dev  0.844496   0.118504    7.13 1.03e-12 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_dev  0.844495   0.118504    7.13 1.03e-12 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>This concurrent model includes stable dyad-level and same-day partner
