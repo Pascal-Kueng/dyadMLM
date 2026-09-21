@@ -41,17 +41,24 @@ see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 \section{Supported models}{
 
-Currently supports unweighted \code{glmmTMB} models without zero inflation for
-the following families:
+Supports unweighted \code{glmmTMB} models with the following families:
 \itemize{
 \item \code{gaussian()}
-\item \code{poisson()}
-\item \code{glmmTMB::nbinom1()}
-\item \code{glmmTMB::nbinom2()}
+\item \code{poisson()}, \code{glmmTMB::compois()}, \code{glmmTMB::genpois()}, \code{glmmTMB::bell()}
+\item \code{glmmTMB::nbinom1()}, \code{glmmTMB::nbinom2()}, \code{glmmTMB::nbinom12()}
+\item \code{glmmTMB::truncated_poisson()}, \code{glmmTMB::truncated_nbinom1()},
+\code{glmmTMB::truncated_nbinom2()}, \code{glmmTMB::truncated_compois()},
+\code{glmmTMB::truncated_genpois()}
 \item \code{glmmTMB::tweedie()}
-\item \code{Gamma()}
+\item \code{Gamma()}, \code{glmmTMB::ziGamma()}
 \item \code{glmmTMB::beta_family()}
+\item \code{glmmTMB::lognormal()}, \code{glmmTMB::skewnormal()}
+\item \code{glmmTMB::t_family()} with more than two degrees of freedom
 }
+
+Zero-inflated and hurdle versions are supported where available. Checks
+describe the combined response, including zeros, rather than each model
+component separately. Random effects in \code{ziformula} are not yet supported.
 
 The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.

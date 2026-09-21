@@ -28,15 +28,22 @@
 #' the seed.
 #'
 #' @section Supported models:
-#' Currently supports unweighted `glmmTMB` models without zero inflation for
-#' the following families:
+#' Supports unweighted `glmmTMB` models with the following families:
 #' - `gaussian()`
-#' - `poisson()`
-#' - `glmmTMB::nbinom1()`
-#' - `glmmTMB::nbinom2()`
+#' - `poisson()`, `glmmTMB::compois()`, `glmmTMB::genpois()`, `glmmTMB::bell()`
+#' - `glmmTMB::nbinom1()`, `glmmTMB::nbinom2()`, `glmmTMB::nbinom12()`
+#' - `glmmTMB::truncated_poisson()`, `glmmTMB::truncated_nbinom1()`,
+#'   `glmmTMB::truncated_nbinom2()`, `glmmTMB::truncated_compois()`,
+#'   `glmmTMB::truncated_genpois()`
 #' - `glmmTMB::tweedie()`
-#' - `Gamma()`
+#' - `Gamma()`, `glmmTMB::ziGamma()`
 #' - `glmmTMB::beta_family()`
+#' - `glmmTMB::lognormal()`, `glmmTMB::skewnormal()`
+#' - `glmmTMB::t_family()` with more than two degrees of freedom
+#'
+#' Zero-inflated and hurdle versions are supported where available. Checks
+#' describe the combined response, including zeros, rather than each model
+#' component separately. Random effects in `ziformula` are not yet supported.
 #'
 #' The model's fitted link is used for prediction and simulation. Predictions
 #' and simulated responses must be finite.
@@ -84,8 +91,12 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   }
 
   family <- stats::family(model)
-  supported <- c("gaussian", "poisson", "nbinom1", "nbinom2",
-                 "tweedie", "Gamma", "beta")
+  supported <- c(
+    "gaussian", "poisson", "nbinom1", "nbinom2", "nbinom12", "compois", "genpois",
+    "truncated_poisson", "truncated_nbinom1", "truncated_nbinom2",
+    "truncated_compois", "truncated_genpois", "tweedie", "Gamma", "beta",
+    "lognormal", "skewnormal", "bell", "t"
+  )
   if (!family$family %in% supported) {
     stop("Unsupported family. ",
          "See the supported models in ?simulate_dyad_responses.", call. = FALSE)
@@ -93,10 +104,14 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   if (any(stats::weights(model) != 1)) {
     stop("Predictive checks currently only support unweighted models.", call. = FALSE)
   }
-  zi <- stats::terms(stats::formula(model, component = "zi"))
-  if (attr(zi, "intercept") != 0L || length(attr(zi, "term.labels")) ||
-      length(attr(zi, "offset"))) {
-    stop("Predictive checks currently require `ziformula = ~ 0`.", call. = FALSE)
+  # glmmTMB currently keeps zero-inflation random effects in response predictions.
+  if (length(model$obj$env$data$termszi) > 0L) {
+    stop("Predictive checks do not yet support random effects in `ziformula`.",
+         call. = FALSE)
+  }
+  if (family$family == "t" && glmmTMB::family_params(model) <= 2) {
+    stop("Student-t predictive checks require more than two degrees of freedom ",
+         "so that response variances and correlations are defined.", call. = FALSE)
   }
 
   frame <- stats::model.frame(model)

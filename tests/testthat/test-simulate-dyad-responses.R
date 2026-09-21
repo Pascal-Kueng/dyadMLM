@@ -157,6 +157,79 @@ test_that("model simulation settings and RNG are restored after an error", {
 })
 
 
+test_that("zero-inflated and hurdle checks use the combined response", {
+  skip_if_not_installed("glmmTMB")
+  families <- list(stats::poisson(), glmmTMB::ziGamma(link = "log"))
+  for (family in families) {
+    withr::local_seed(8140)
+    fitting_data <- data.frame(
+      dyad = factor(rep(seq_len(240), each = 2)),
+      study = factor(rep(seq_len(40), each = 12)),
+      predictor = stats::rnorm(480),
+      zero_predictor = stats::rnorm(480)
+    )
+    response_mean <- exp(1.7 + 0.25 * fitting_data$predictor +
+      stats::rnorm(240, sd = 0.5)[fitting_data$dyad])
+    zero_probability <- stats::plogis(-0.5 + 0.4 * fitting_data$zero_predictor +
+      stats::rnorm(40, sd = 0.9)[fitting_data$study])
+    fitting_data$outcome <- if (family$family == "poisson") {
+      stats::rpois(480, response_mean)
+    } else {
+      stats::rgamma(480, shape = 4, scale = response_mean / 4)
+    }
+    fitting_data$outcome[stats::runif(480) < zero_probability] <- 0
+    fitting_data$zero_predictor[3] <- NA_real_
+    model <- glmmTMB::glmmTMB(
+      outcome ~ predictor + (1 | dyad),
+      ziformula = ~zero_predictor,
+      family = family, data = fitting_data, na.action = stats::na.exclude
+    )
+    expect_identical(model$fit$convergence, 0L)
+    expect_true(model$sdr$pdHess)
+    expected_draws <- t(as.matrix(stats::simulate(model, nsim = 20, seed = 8141)))
+
+    simulations <- simulate_dyad_responses(model, nsim = 20, seed = 8141)
+    expect_identical(simulations$simulated_responses, expected_draws)
+    expect_identical(simulations$observed_response, fitting_data$outcome[-3])
+    expect_identical(dim(simulations$simulated_responses), c(20L, 479L))
+    fixed_response_mean <- exp(stats::model.matrix(model, component = "cond") %*%
+      glmmTMB::fixef(model)$cond)
+    fixed_zero_probability <- stats::plogis(
+      stats::model.matrix(model, component = "zi") %*% glmmTMB::fixef(model)$zi
+    )
+    expect_equal(simulations$predicted_response,
+                 as.numeric(fixed_response_mean * (1 - fixed_zero_probability)))
+    expect_warning(check <- check_partner_dependence(
+      simulations, dyad = dyad, role = NULL, plot = FALSE
+    ), "Omitted: 1 incomplete dyad, with ID: 2.", fixed = TRUE)
+    expect_identical(check$n_pairs, 239L)
+
+    zero_random_effect_model <- update(model, ziformula = ~zero_predictor + (1 | study))
+    expect_error(simulate_dyad_responses(zero_random_effect_model),
+                 "do not yet support random effects in `ziformula`", fixed = TRUE)
+  }
+})
+
+
+test_that("Student-t checks require a finite response variance", {
+  skip_if_not_installed("glmmTMB")
+  withr::local_seed(8142)
+  fitting_data <- data.frame(outcome = stats::rt(200, df = 6))
+  for (degrees_of_freedom in c(1, 2, 6)) {
+    model <- glmmTMB::glmmTMB(
+      outcome ~ 1, data = fitting_data, family = glmmTMB::t_family(),
+      start = list(psi = log(degrees_of_freedom)), map = list(psi = factor(NA))
+    )
+    if (degrees_of_freedom <= 2) {
+      expect_error(simulate_dyad_responses(model), "more than two degrees of freedom")
+    } else {
+      expect_s3_class(simulate_dyad_responses(model, nsim = 2),
+                       "dyadMLM_response_simulations")
+    }
+  }
+})
+
+
 test_that("unsupported predictive-check inputs fail clearly", {
   skip_if_not_installed("glmmTMB")
   model <- predictive_check_test_model()
@@ -175,13 +248,11 @@ test_that("unsupported predictive-check inputs fail clearly", {
                "supplied seed is not a valid integer")
 
   matrix_response_model <- model
-  matrix_response_model$frame[[1L]] <- cbind(model$frame[[1L]], model$frame[[1L]])
+  # Unit totals avoid glmmTMB treating the matrix as extra trial weights.
+  matrix_response_model$frame[[1L]] <- cbind(rep(1, nrow(model$frame)), 0)
   expect_error(simulate_dyad_responses(matrix_response_model),
                "one numeric response per fitted row")
 
   weighted_model <- predictive_check_test_model(weights = rep(c(1, 2), 20))
   expect_error(simulate_dyad_responses(weighted_model), "unweighted models")
-  zero_inflated_model <- predictive_check_test_model(ziformula = ~1)
-  expect_error(simulate_dyad_responses(zero_inflated_model),
-               "`ziformula = ~ 0`", fixed = TRUE)
 })

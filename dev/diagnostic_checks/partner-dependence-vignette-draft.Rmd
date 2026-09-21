@@ -111,7 +111,7 @@ parameters and predictors fixed. The default check subtracts the same
 prediction with random effects set to zero from each dataset. Under nonlinear
 links, this is a common transformation, not a residual covariance decomposition.
 
-Use unweighted cross-sectional data without zero inflation, with at least
+Use unweighted cross-sectional data, with at least
 three complete dyads and at most two fitted rows per dyad. Missing identifiers
 and incomplete pairs are omitted and counted. If an identifier is absent from
 the model frame, supply the data frame used to fit the model with `data`.

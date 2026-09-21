@@ -19,11 +19,10 @@ them in each development document.
 
 ## Scope and extension
 
-Current checks cover unweighted cross-sectional `glmmTMB` models without zero
-inflation: Gaussian, Poisson, NB1, NB2, Tweedie, Gamma, and beta. The model's
-fitted link is used for prediction and simulation. Binomial and beta-binomial response
-formats need adapters. Nonlinear-link centring is not a residual covariance
-decomposition.
+Current checks cover unweighted cross-sectional `glmmTMB` models, including
+zero-inflated and hurdle models. See `?simulate_dyad_responses` for supported
+families. The model's fitted link is used for prediction and simulation.
+Nonlinear-link centring is not a residual covariance decomposition.
 
 The simulator preserves fitted-row order and restores model simulation settings.
 With a supplied seed, it also restores the caller’s random-number state.
@@ -44,13 +43,16 @@ From the repository root:
 
 ```r
 devtools::test()
+source("dev/diagnostic_checks/check-additional-families.R")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-reference-validation.Rmd")
 ```
 
 Tests cover Gaussian and generalized calculations, fitted-row alignment,
 simulation-state restoration, pairing, omissions, undefined statistics, and
-printing/plotting. These are correctness checks, not calibration or power
+printing/plotting. The additional-family script checks native response formats
+and prediction/simulation agreement; Bell models also require `gsl`.
+These are correctness checks, not calibration or power
 studies. Run the outer simulation report separately when that evidence needs
 updating; its full configuration is intentionally more expensive. For a merge,
 also check the built package and CI on the proposed commit.
