@@ -11,18 +11,19 @@ check_partner_dependence(
   plot = TRUE,
   response = c("model-centred", "raw"),
   ask = NULL,
-  panels = TRUE
+  panels = TRUE,
+  data = NULL
 )
 }
 \arguments{
 \item{simulations}{An object returned by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.}
 
-\item{dyad}{A column name in the fitted data, or a vector
-of dyad IDs in the same row order. Columns take precedence. You may use
-\code{.env$ids} to select an external vector explicitly.}
+\item{dyad}{The dyad column name. Looked up first
+in the fitted model frame, then in \code{data} if supplied.}
 
-\item{role}{A column name in the fitted data, or a role vector in the same
-row order. \code{NULL} (default) pools all dyads as exchangeable. Supply roles
+\item{role}{The role column name. Looked up first
+in the fitted model frame, then in \code{data} if supplied.
+\code{NULL} (default) pools all dyads as exchangeable. Supply roles
 even for an exchangeable model to reveal variance or partner-correlation
 mismatches that pooling may hide. Each role pair is checked separately,
 using exchangeable summaries for same-role pairs and role-specific
@@ -48,6 +49,10 @@ figure. File devices never pause.}
 \item{panels}{If \code{TRUE} (default), show each composition in one figure, with
 two rows and up to three columns. If \code{FALSE}, draw each statistic separately.
 Graphics settings are restored afterwards.}
+
+\item{data}{Optional data frame used to fit the model. Supply it when \code{dyad}
+or \code{role} is absent from the fitted model frame. Use the exact unchanged
+data that was passed to the model when fitting.}
 }
 \value{
 The comparison plots (shown by default) are the main output. The
@@ -152,20 +157,23 @@ simulations <- simulate_dyad_responses(
 check_partner_dependence(
   simulations,
   dyad = coupleID,
-  role = example_data$gender
+  role = gender,
+  # Supply the fitting data because gender is not in the model formula.
+  data = example_data
 )
 
 # Optionally, suppress plot, store object, and plot later.
 check <- check_partner_dependence(
   simulations,
   dyad = coupleID,
-  role = example_data$gender,
+  role = gender,
+  data = example_data,
   plot = FALSE
 )
 
 # Check how well the model reproduces variances and partner correlations
 # within each dyad composition.
-plot(check, ask = FALSE)
+plot(check, ask = FALSE, panels = TRUE)
 print(check)
 
 

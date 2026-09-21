@@ -432,15 +432,16 @@ for the derivation and back-transformation to the member-level covariance matrix
 ### Checking partner dependence
 
 We can check whether the fitted DIM reproduces the response variance and partner
-correlation by comparing observed and simulated data. Use `role = NULL` here
-because the members are exchangeable.
+correlation by comparing observed and simulated data.
 
 ```{r check-cross-dim, eval = has_glmmTMB, fig.width = 8, fig.height = 6, out.width = "100%", fig.alt = "Four predictive-check histograms for exchangeable dyads: common member SD, partner correlation, dyad-average SD, and half-difference RMS. Red lines mark observed values."}
 dim_simulations <- dyadMLM::simulate_dyad_responses(dim_1, seed = 123)
 dyadMLM::check_partner_dependence(
   dim_simulations,
   dyad = coupleID,
-  role = NULL,
+  role = gender,
+  # Supply the fitting data because gender is not in the model formula.
+  data = cross_exchangeable_data,
   panels = TRUE
 )
 ```

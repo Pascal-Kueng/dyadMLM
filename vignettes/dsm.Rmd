@@ -624,15 +624,16 @@ is equivalent to the comparison shown in [Testing distinguishability in the APIM
 ## Checking partner dependence
 
 We can check whether the fitted DSM reproduces each role's response variance and
-the partner correlation by comparing observed and simulated data. We supply the
-original roles because the model uses a role contrast instead of `gender`.
+the partner correlation by comparing observed and simulated data.
 
 ```{r check-cross-dsm, eval = has_glmmTMB, fig.width = 10, fig.height = 6.5, out.width = "100%", fig.alt = "Six predictive-check histograms for the DSM. Member SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values."}
 dsm_simulations <- dyadMLM::simulate_dyad_responses(dsm_model, seed = 123)
 dyadMLM::check_partner_dependence(
   dsm_simulations,
   dyad = coupleID,
-  role = cross_dsm_data$gender,
+  role = gender,
+  # Supply the fitting data because gender is not in the model formula.
+  data = cross_dsm_data,
   panels = TRUE
 )
 ```

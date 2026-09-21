@@ -4,17 +4,10 @@
   [@musanyaks](https://github.com/musanyaks),
   [#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).
 
-* Added experimental checks of whether cross-sectional `glmmTMB` models
-  reproduce response variances and partner correlations, for Gaussian and selected
-  non-Gaussian responses. `simulate_dyad_responses()` generates datasets;
-  `check_partner_dependence()` compares observed and simulated summaries.
-  Undefined simulated statistics are omitted from their individual references
-  with a warning; plot labels show how many draws contribute.
-  Identifier arguments accept fitted columns or aligned external vectors.
-  See the function help for examples, model support, and technical details.
-* `check_partner_dependence()` now checks each dyad composition separately
-  when roles are supplied, with one figure per composition by default.
-  Use `panels = FALSE` for individual plots.
+* Added experimental predictive checks for response variances and partner
+  correlations in cross-sectional `glmmTMB` models with Gaussian or selected
+  non-Gaussian responses. Checks and plots can be shown separately for each
+  dyad composition.
 
 # dyadMLM 0.2.0
 

@@ -178,8 +178,9 @@ test_that("small compositions and incomplete dyads have separate counts", {
   # Six complete dyads still cannot support three separate two-dyad checks.
   small_group_ids <- simulations$model_frame$dyad
   small_group_ids[!small_group_ids %in% c(1, 2, 6, 7, 11, 12)] <- NA
+  simulations$model_frame$dyad <- small_group_ids
   expect_error(suppressWarnings(check_partner_dependence(
-    simulations, small_group_ids, "role", plot = FALSE
+    simulations, "dyad", "role", plot = FALSE
   )), "three complete dyads")
 })
 

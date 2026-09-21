@@ -128,64 +128,183 @@ test_that("exchangeable moments are unchanged by independent member swaps", {
 })
 
 
-test_that("identifiers accept columns, external vectors, and data-mask selectors", {
+test_that("identifiers accept bare and quoted columns and tidy injection", {
   simulations <- partner_check_test_simulations()
-  ids <- simulations$model_frame$dyad
-  roles <- simulations$model_frame$role
   expected <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
   dyad_column <- "dyad"
   role_column <- "role"
-  named_roles <- stats::setNames(roles, rep(NA_character_, length(roles)))
   # Conflicting caller names must not override fitted columns.
   dyad <- role <- rep(NA, 10)
   results <- list(
     check_partner_dependence(simulations, dyad, role, plot = FALSE),
-    check_partner_dependence(simulations, ids, roles, plot = FALSE),
-    check_partner_dependence(simulations, ids, named_roles, plot = FALSE),
-    check_partner_dependence(simulations, .data$dyad, .data$role, plot = FALSE),
-    check_partner_dependence(simulations, .data[[dyad_column]],
-                             .data[[role_column]], plot = FALSE)
+    check_partner_dependence(simulations, !!dyad_column, !!role_column, plot = FALSE),
+    check_partner_dependence(simulations, !!rlang::sym(dyad_column),
+                             !!rlang::sym(role_column), plot = FALSE)
   )
   fields <- c("compositions", "n_pairs")
   for (result in results) expect_equal(result[fields], expected[fields])
   expect_identical(resolve_fitted_row_argument(rlang::quo(time), "time",
                                                data.frame(time = 1:5)), 1:5)
 
-  dyad <- ids
-  role <- roles
-  dyad[1] <- NA
-  role[4] <- NA
-  expect_warning(external <- check_partner_dependence(
-    simulations, .env$dyad, .env$role, plot = FALSE
-  ), "Omitted:")
-  expect_identical(external$n_pairs, 3L)
-  expect_identical(external$n_missing_dyad_rows, 1L)
-  expect_identical(external$n_missing_role_rows, 1L)
+})
+
+
+test_that("missing role columns explain how to supply the fitting data", {
+  simulations <- partner_check_test_simulations()
+  prepared_data <- simulations$model_frame
+  prepared_data$gender <- prepared_data$role
+  expected <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
+  simulations$model_frame$role <- NULL
+
+  for (role_expression in rlang::quos(gender, "gender")) {
+    error <- tryCatch(
+      check_partner_dependence(simulations, "dyad", !!role_expression, plot = FALSE),
+      error = identity
+    )
+    expect_s3_class(error, "error")
+    expect_match(conditionMessage(error), "gender", fixed = TRUE)
+    expect_match(conditionMessage(error), "not used in the model formula", fixed = TRUE)
+    expect_match(conditionMessage(error), "data = your_data", fixed = TRUE)
+    expect_match(conditionMessage(error), "automatically", fixed = TRUE)
+  }
+
+  actual <- check_partner_dependence(
+    simulations, "dyad", role = gender, data = prepared_data, plot = FALSE
+  )
+  expect_equal(actual, expected)
+  expect_error(check_partner_dependence(
+    simulations, "dyad", role = absent, data = prepared_data, plot = FALSE
+  ), "absent.*model frame.*data")
+  expect_error(check_partner_dependence(
+    simulations, "dyad", role = prepared_data$gender, plot = FALSE
+  ), "column name")
+  expect_error(check_partner_dependence(
+    simulations, "dyad", role = !!prepared_data$gender, plot = FALSE
+  ), "column name")
 })
 
 
 test_that("wrappers preserve identifier expressions and an omitted role", {
   simulations <- partner_check_test_simulations()
-  check_from_wrapper <- function(simulations, dyad, role = NULL) {
-    check_partner_dependence(simulations, {{ dyad }}, {{ role }}, plot = FALSE)
+  check_from_wrapper <- function(simulations, dyad, role = NULL, data = NULL) {
+    check_partner_dependence(simulations, {{ dyad }}, {{ role }},
+                             data = data, plot = FALSE)
   }
-  ids <- simulations$model_frame$dyad
-  ids[1] <- NA
-  expect_warning(expected <- check_partner_dependence(simulations, ids, plot = FALSE),
+  simulations$model_frame$dyad[1] <- NA
+  expect_warning(expected <- check_partner_dependence(simulations, dyad, plot = FALSE),
                  "Omitted:")
-  expect_warning(wrapped <- check_from_wrapper(simulations, ids), "Omitted:")
+  expect_warning(wrapped <- check_from_wrapper(simulations, dyad), "Omitted:")
   fields <- c("compositions", "n_pairs",
               "n_missing_dyad_rows", "n_missing_role_rows")
   expect_equal(wrapped[fields], expected[fields])
   expect_identical(wrapped$n_missing_dyad_rows, 1L)
 
+  simulations <- partner_check_test_simulations()
   expected <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
   expect_equal(check_from_wrapper(simulations, dyad, role)$compositions,
                expected$compositions)
   expect_equal(check_from_wrapper(simulations, "dyad", "role")$compositions,
                expected$compositions)
+  fitting_data <- simulations$model_frame
+  simulations$model_frame$role <- NULL
+  expect_equal(check_from_wrapper(simulations, dyad, role, data = fitting_data), expected)
   # A broken expression must not fall back to the wrapper formal's column name.
   expect_error(check_from_wrapper(simulations, does_not_exist), "does_not_exist")
+})
+
+
+test_that("fitted columns take precedence and identifier columns must be vectors", {
+  simulations <- partner_check_test_simulations()
+  expected <- check_partner_dependence(simulations, dyad, role, plot = FALSE)
+  fitting_data <- simulations$model_frame
+  fitting_data$role <- rep("other", nrow(fitting_data))
+  expect_equal(check_partner_dependence(
+    simulations, dyad, role, data = fitting_data, plot = FALSE
+  ), expected)
+
+  for (invalid_column in list(as.list(fitting_data$role), matrix(1, 10, 2))) {
+    simulations$model_frame$role <- invalid_column
+    expect_error(check_partner_dependence(simulations, dyad, role, plot = FALSE),
+                 "one value per fitted row")
+    simulations$model_frame$role <- NULL
+    fitting_data$role <- invalid_column
+    expect_error(check_partner_dependence(
+      simulations, dyad, role, data = fitting_data, plot = FALSE
+    ), "one value per fitted row")
+  }
+  expect_error(check_partner_dependence(
+    simulations, dyad, role, data = list(role = rep("other", 10)), plot = FALSE
+  ), "data frame")
+})
+
+
+test_that("fitting data supplies aligned roles after omissions and subsetting", {
+  skip_if_not_installed("glmmTMB")
+  withr::local_seed(8170)
+  fitting_data <- data.frame(
+    dyad = factor(rep(seq_len(30), each = 2), levels = 1:31),
+    gender = factor(rep(c("female", "male"), 30)),
+    predictor = stats::rnorm(60),
+    dispersion_predictor = stats::rnorm(60)
+  )
+  fitting_data$outcome <- 1 + 0.4 * fitting_data$predictor +
+    stats::rnorm(30, sd = 0.8)[as.integer(fitting_data$dyad)] +
+    stats::rnorm(60, sd = 0.3 * exp(0.1 * fitting_data$dispersion_predictor))
+  fitting_data$outcome[5] <- NA_real_
+  fitting_data$dispersion_predictor[12] <- NA_real_
+  fitting_data$gender[15] <- NA
+  retained_rows <- setdiff(seq_len(nrow(fitting_data)), c(1, 2, 5, 12))
+
+  for (use_tibble in c(FALSE, TRUE)) {
+    if (use_tibble) {
+      fitting_data <- tibble::as_tibble(fitting_data)
+    } else {
+      rownames(fitting_data) <- paste0("person_", seq_len(nrow(fitting_data)))
+    }
+    for (omit_missing in list(stats::na.omit, stats::na.exclude)) {
+      model <- glmmTMB::glmmTMB(
+        outcome ~ predictor + (1 | dyad), dispformula = ~dispersion_predictor,
+        data = fitting_data, subset = dyad != "1", na.action = omit_missing
+      )
+      expect_identical(model$fit$convergence, 0L)
+      expect_true(model$sdr$pdHess)
+      simulations <- simulate_dyad_responses(model, nsim = 3, seed = 8171)
+      expect_identical(rownames(simulations$model_frame), rownames(fitting_data)[retained_rows])
+      expect_false("gender" %in% names(simulations$model_frame))
+      expect_false("31" %in% levels(simulations$model_frame$dyad))
+
+      # Select fitted rows independently, without using row-name matching.
+      with_fitted_roles <- simulations
+      with_fitted_roles$model_frame$gender <- fitting_data$gender[retained_rows]
+      expect_warning(expected <- check_partner_dependence(
+        with_fitted_roles, dyad, gender, plot = FALSE
+      ), "Omitted:")
+      expect_warning(actual <- check_partner_dependence(
+        simulations, dyad, gender, data = fitting_data, plot = FALSE
+      ), "Omitted:")
+      expect_equal(actual, expected)
+      expect_identical(actual$n_pairs, 26L)
+      expect_identical(actual$n_incomplete_dyads, 3L)
+      expect_identical(actual$n_missing_role_rows, 1L)
+
+      incomplete_data <- fitting_data[-retained_rows[1], ]
+      expect_error(check_partner_dependence(
+        simulations, dyad, gender, data = incomplete_data, plot = FALSE
+      ), "match.*fitted rows.*data|data.*does not match.*fitted rows")
+      changed_data <- fitting_data
+      changed_data$outcome[retained_rows[1]] <- changed_data$outcome[retained_rows[1]] + 1
+      expect_error(check_partner_dependence(
+        simulations, dyad, gender, data = changed_data, plot = FALSE
+      ), "outcome.*does not match.*fitted rows")
+      if (use_tibble) {
+        # Tibbles reset row names after reordering, so names alone cannot detect this.
+        reordered_data <- fitting_data[rev(seq_len(nrow(fitting_data))), ]
+        expect_error(check_partner_dependence(
+          simulations, dyad, gender, data = reordered_data, plot = FALSE
+        ), "does not match.*fitted rows")
+      }
+    }
+  }
 })
 
 
@@ -195,9 +314,11 @@ test_that("missing identifiers and incomplete dyads are listed in one warning", 
   roles <- simulations$model_frame$role
   ids[which(ids == "5")[1]] <- NA
   roles[ids == "4"] <- NA
+  simulations$model_frame$dyad <- ids
+  simulations$model_frame$role <- roles
   warnings <- character()
   withCallingHandlers(
-    result <- check_partner_dependence(simulations, ids, roles, plot = FALSE),
+    result <- check_partner_dependence(simulations, dyad, role, plot = FALSE),
     warning = function(warning) {
       warnings <<- c(warnings, conditionMessage(warning))
       invokeRestart("muffleWarning")
@@ -227,8 +348,10 @@ test_that("role omission does not lose an already incomplete dyad", {
   rows <- which(ids == "4")
   ids[rows[1]] <- NA
   roles[rows] <- NA
+  simulations$model_frame$dyad <- ids
+  simulations$model_frame$role <- roles
   # The first row is counted only as a missing ID, even though its role is missing too.
-  expect_warning(result <- check_partner_dependence(simulations, ids, roles, plot = FALSE),
+  expect_warning(result <- check_partner_dependence(simulations, dyad, role, plot = FALSE),
                  paste0(
                    "Omitted: 1 incomplete dyad, with ID: 4; ",
                    "fitted rows with missing dyad IDs (n = 1): 5; ",
@@ -245,10 +368,12 @@ test_that("invalid simulation objects, identifiers, and pair structures fail cle
   simulations <- partner_check_test_simulations()
   expect_error(check_partner_dependence(list(), "dyad"), "must be created by")
   expect_error(check_partner_dependence(simulations), "must identify")
-  expect_error(check_partner_dependence(simulations, "unknown"), "`dyad` must name a column")
+  expect_error(check_partner_dependence(simulations, "unknown"), "unknown.*model frame")
   expect_error(check_partner_dependence(simulations, "dyad", "unknown"),
-               "`role` must name a column")
-  expect_error(check_partner_dependence(simulations, 1:3), "vector of length 10")
+               "unknown.*model frame")
+  expect_error(check_partner_dependence(simulations, 1:3), "column name")
+  expect_error(check_partner_dependence(simulations, .data$dyad), "column name")
+  expect_error(check_partner_dependence(simulations, .env$dyad), "column name")
 
   ids <- as.character(simulations$model_frame$dyad)
   roles <- as.character(simulations$model_frame$role)
@@ -256,20 +381,27 @@ test_that("invalid simulation objects, identifiers, and pair structures fail cle
   extra <- which(ids == "5")[1]
   ids[extra] <- "1"
   roles[extra] <- NA
-  expect_error(check_partner_dependence(simulations, ids, roles),
+  simulations$model_frame$dyad <- ids
+  simulations$model_frame$role <- roles
+  expect_error(check_partner_dependence(simulations, dyad, role),
                "at most two fitted responses")
 
+  simulations <- partner_check_test_simulations()
   ids <- simulations$model_frame$dyad
   ids[ids %in% c("3", "4", "5")] <- NA
-  expect_error(check_partner_dependence(simulations, ids), "At least three complete dyads")
+  simulations$model_frame$dyad <- ids
+  expect_error(check_partner_dependence(simulations, dyad), "At least three complete dyads")
 
+  simulations <- partner_check_test_simulations()
   roles <- as.character(simulations$model_frame$role)
   first_dyad <- which(simulations$model_frame$dyad == "1")
   roles[first_dyad] <- "female"
-  expect_warning(check_partner_dependence(simulations, "dyad", roles, plot = FALSE),
+  simulations$model_frame$role <- roles
+  expect_warning(check_partner_dependence(simulations, dyad, role, plot = FALSE),
                  "Not checked.*female - female")
   roles[first_dyad[1]] <- "other"
-  expect_warning(check_partner_dependence(simulations, "dyad", roles, plot = FALSE),
+  simulations$model_frame$role <- roles
+  expect_warning(check_partner_dependence(simulations, dyad, role, plot = FALSE),
                  "Not checked.*female - other")
 })
 
@@ -283,7 +415,7 @@ test_that("undefined statistics are reported even without plotting", {
       simulations$simulated_responses[1, ] <- constant_responses
       warnings <- character()
       withCallingHandlers(check_partner_dependence(
-        simulations, "dyad", .env$role, response = response, plot = FALSE
+        simulations, "dyad", !!role, response = response, plot = FALSE
       ), warning = function(warning) {
         warnings <<- c(warnings, conditionMessage(warning))
         invokeRestart("muffleWarning")
@@ -293,14 +425,14 @@ test_that("undefined statistics are reported even without plotting", {
 
       simulations$observed_response <- constant_responses
       expect_error(check_partner_dependence(
-        simulations, "dyad", .env$role, response = response, plot = FALSE
+        simulations, "dyad", !!role, response = response, plot = FALSE
       ), "[Oo]bserved.*undefined")
       simulations$observed_response <- partner_check_test_simulations()$observed_response
       simulations$simulated_responses[,] <- rep(
         constant_responses, each = nrow(simulations$simulated_responses)
       )
       expect_error(check_partner_dependence(
-        simulations, "dyad", .env$role, response = response, plot = FALSE
+        simulations, "dyad", !!role, response = response, plot = FALSE
       ), "[Ee]very.*undefined|[Aa]ll.*undefined")
     }
   }
@@ -312,7 +444,7 @@ test_that("one simulation retains every statistic as a table column", {
   simulations$simulated_responses <- simulations$simulated_responses[1, , drop = FALSE]
   expect_output(print(simulations), "1 complete gaussian response dataset", fixed = TRUE)
   for (role in list(NULL, "role")) {
-    result <- check_partner_dependence(simulations, "dyad", .env$role, plot = FALSE)
+    result <- check_partner_dependence(simulations, "dyad", !!role, plot = FALSE)
     statistics <- result$compositions$statistics[[1]]
     n_statistics <- if (is.null(role)) 4L else 6L
     expect_identical(statistics$dataset, c("observed", "simulation_1"))
@@ -428,9 +560,10 @@ test_that("explicit NA factor levels are missing dyad IDs and roles", {
   roles <- as.character(simulations$model_frame$role)
   roles[ids == "4" & roles == "female"] <- NA_character_
   ids[ids == "5"] <- NA_character_
+  simulations$model_frame$dyad <- factor(ids, exclude = NULL)
+  simulations$model_frame$role <- factor(roles, exclude = NULL)
   expect_warning(result <- check_partner_dependence(
-    simulations, dyad = factor(ids, exclude = NULL),
-    role = factor(roles, exclude = NULL), plot = FALSE
+    simulations, dyad, role, plot = FALSE
   ), paste0(
     "Omitted: 1 incomplete dyad, with ID: 4; ",
     "fitted rows with missing dyad IDs (n = 2): 7, 9; ",

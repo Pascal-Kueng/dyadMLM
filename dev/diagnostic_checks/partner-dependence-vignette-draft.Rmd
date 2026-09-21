@@ -113,8 +113,9 @@ links, this is a common transformation, not a residual covariance decomposition.
 
 Use unweighted cross-sectional data without zero inflation, with at least
 three complete dyads and at most two fitted rows per dyad. Missing identifiers
-and incomplete pairs are omitted and counted. Identifier columns must be in
-the fitted model frame; external vectors must match its retained row order.
+and incomplete pairs are omitted and counted. If an identifier is absent from
+the model frame, supply the data frame used to fit the model with `data`.
+Rows excluded during fitting are handled automatically.
 
 Sparse outcomes can produce undefined correlations. The check warns and uses
 only defined simulations for each reference; plot labels show their counts.

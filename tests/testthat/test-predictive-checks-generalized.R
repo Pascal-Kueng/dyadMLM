@@ -142,7 +142,7 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
   expect_gt(length(defined), 0L)
   expect_lt(length(defined), nrow(simulations$simulated_responses))
   expect_warning(result <- check_partner_dependence(
-    simulations, dyad = .env$data$dyad, role = "role",
+    simulations, dyad = dyad, role = "role", data = data,
     response = "raw", plot = FALSE
   ), "Undefined simulated summaries")
   statistics <- result$compositions$statistics[[1]]

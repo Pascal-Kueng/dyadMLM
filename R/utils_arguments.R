@@ -69,18 +69,56 @@ select_dyad_columns <- function(data, cols_quo, arg) {
 }
 
 
-# Look up identifiers in the fitted data first.
-# External vectors must match the retained fitting rows and their order.
+# Use fitted columns first; otherwise match rows in the original fitting data.
 resolve_fitted_row_argument <- function(argument_quo, argument_name, model_frame,
-                                       allow_null = FALSE) {
-  value <- rlang::eval_tidy(argument_quo, data = model_frame)
-  if (is.null(value) && allow_null) return(NULL)
+                                       data = NULL, allow_null = FALSE) {
+  if (allow_null && rlang::quo_is_null(argument_quo)) return(NULL)
+  column_expression <- rlang::quo_get_expr(argument_quo)
+  if (!rlang::is_symbol(column_expression) && !rlang::is_string(column_expression)) {
+    stop("`", argument_name, "` must be a column name, with or without quotes. ",
+         "Supply the fitting data with `data = your_data`, rather than passing a vector.",
+         call. = FALSE)
+  }
+  column_name <- rlang::as_name(column_expression)
 
-  # A single string names a column, e.g. dyad = "coupleID".
-  if (rlang::is_string(value)) value <- model_frame[[value]]
+  if (column_name %in% names(model_frame)) {
+    value <- model_frame[[column_name]]
+  } else {
+    if (is.null(data)) {
+      stop("Column `", column_name, "` was not found in the fitted model frame. ",
+           "Variables not used in the model formula are not retained there. ",
+           "Supply the data frame used to fit the model with `data = your_data`. ",
+           "Rows excluded during fitting will be handled automatically.", call. = FALSE)
+    }
+    if (!is.data.frame(data)) {
+      stop("`data` must be the data frame used to fit the model.", call. = FALSE)
+    }
+    if (!column_name %in% names(data)) {
+      stop("Column `", column_name, "` was not found in the fitted model frame or `data`.",
+           call. = FALSE)
+    }
+
+    # The fitted row names retain the original rows after subsetting and NA removal.
+    fitted_data_rows <- match(row.names(model_frame), row.names(data))
+    if (anyNA(fitted_data_rows)) {
+      stop("Could not match the fitted rows to `data`. ",
+           "Supply the same unchanged data frame used to fit the model.", call. = FALSE)
+    }
+    fitted_data <- data[fitted_data_rows, , drop = FALSE]
+
+    # Catch changed or reordered data when row names alone still appear to match.
+    for (shared_column in intersect(names(model_frame), names(fitted_data))) {
+      if (!isTRUE(all.equal(model_frame[[shared_column]], fitted_data[[shared_column]],
+                            check.attributes = FALSE, tolerance = 0))) {
+        stop("Column `", shared_column, "` in `data` does not match the fitted rows. ",
+             "Supply the same unchanged data frame used to fit the model.", call. = FALSE)
+      }
+    }
+    value <- fitted_data[[column_name]]
+  }
   if (!is.atomic(value) || !is.null(dim(value)) || length(value) != nrow(model_frame)) {
-    stop("`", argument_name, "` must name a column in the fitted model frame or evaluate ",
-         "to a vector of length ", nrow(model_frame), ".", call. = FALSE)
+    stop("Column `", column_name, "` for `", argument_name,
+         "` must contain one value per fitted row.", call. = FALSE)
   }
   value
 }

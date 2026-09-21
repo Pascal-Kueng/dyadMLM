@@ -238,7 +238,9 @@ simulations <- simulate_dyad_responses(model, seed = 123)
 check_partner_dependence(
   simulations,
   dyad = coupleID,
-  role = prepared_data$gender,
+  role = gender,
+  # Supply the fitting data because gender is not in the model formula.
+  data = prepared_data,
   panels = TRUE
 )
 ```
@@ -257,6 +259,14 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
 Use
 [`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
 to compare the two nested models.
+
+With mixed dyad compositions, each observed role pair gets its own
+figure. It can be worthwhile to check plausible role distinctions even
+when fitting an exchangeable model, since pooling can hide differences
+in variances or partner correlations. These checks alone do not
+establish whether fixed effects should be pooled ([nested model
+comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
+can help assess those restrictions).
 
 ## Vignettes and examples
 

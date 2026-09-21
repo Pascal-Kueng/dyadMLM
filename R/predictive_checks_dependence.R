@@ -10,11 +10,11 @@
 #' This helps identify mismatches in the model's assumptions.
 #'
 #' @param simulations An object returned by [simulate_dyad_responses()].
-#' @param dyad A column name in the fitted data, or a vector
-#'   of dyad IDs in the same row order. Columns take precedence. You may use
-#'   `.env$ids` to select an external vector explicitly.
-#' @param role A column name in the fitted data, or a role vector in the same
-#'   row order. `NULL` (default) pools all dyads as exchangeable. Supply roles
+#' @param dyad The dyad column name. Looked up first
+#'   in the fitted model frame, then in `data` if supplied.
+#' @param role The role column name. Looked up first
+#'   in the fitted model frame, then in `data` if supplied.
+#'   `NULL` (default) pools all dyads as exchangeable. Supply roles
 #'   even for an exchangeable model to reveal variance or partner-correlation
 #'   mismatches that pooling may hide. Each role pair is checked separately,
 #'   using exchangeable summaries for same-role pairs and role-specific
@@ -36,6 +36,9 @@
 #' @param panels If `TRUE` (default), show each composition in one figure, with
 #'   two rows and up to three columns. If `FALSE`, draw each statistic separately.
 #'   Graphics settings are restored afterwards.
+#' @param data Optional data frame used to fit the model. Supply it when `dyad`
+#'   or `role` is absent from the fitted model frame. Use the exact unchanged
+#'   data that was passed to the model when fitting.
 #'
 #' @return The comparison plots (shown by default) are the main output. The
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
@@ -122,20 +125,23 @@
 #' check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
-#'   role = example_data$gender
+#'   role = gender,
+#'   # Supply the fitting data because gender is not in the model formula.
+#'   data = example_data
 #' )
 #'
 #' # Optionally, suppress plot, store object, and plot later.
 #' check <- check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
-#'   role = example_data$gender,
+#'   role = gender,
+#'   data = example_data,
 #'   plot = FALSE
 #' )
 #'
 #' # Check how well the model reproduces variances and partner correlations
 #' # within each dyad composition.
-#' plot(check, ask = FALSE)
+#' plot(check, ask = FALSE, panels = TRUE)
 #' print(check)
 #'
 #'
@@ -156,7 +162,8 @@ check_partner_dependence <- function(
   plot = TRUE,
   response = c("model-centred", "raw"),
   ask = NULL,
-  panels = TRUE
+  panels = TRUE,
+  data = NULL
 ) {
   if (!inherits(simulations, "dyadMLM_response_simulations")) {
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
@@ -170,9 +177,9 @@ check_partner_dependence <- function(
 
   # The pair table identifies both partners' positions in the fitted data.
   partner_row_map <- prepare_partner_pairs(
-    resolve_fitted_row_argument(rlang::enquo(dyad), "dyad", fitted_model_frame),
+    resolve_fitted_row_argument(rlang::enquo(dyad), "dyad", fitted_model_frame, data),
     resolve_fitted_row_argument(rlang::enquo(role), "role", fitted_model_frame,
-                                allow_null = TRUE)
+                                data, allow_null = TRUE)
   )
   compositions <- partner_row_map$compositions
   checked_composition_indices <- which(compositions$n_pairs >= 3L)
@@ -314,7 +321,7 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
     role = if (is.null(role_values)) rep(NA, length(dyad_ids)) else role_values
   )
 
-  # Only check for missing roles when the user supplied a role colname or vector
+  # Only check for missing roles when roles were supplied.
   is_role_missing <- !is.null(role_values) &
     (is.na(partner_rows$role) | is.na(as.character(partner_rows$role)))
 
@@ -559,7 +566,8 @@ print.dyadMLM_partner_check <- function(x, ...) {
 #' check <- check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
-#'   role = example_data$gender,
+#'   role = gender,
+#'   data = example_data,
 #'   plot = FALSE
 #' )
 #'

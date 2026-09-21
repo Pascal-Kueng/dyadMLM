@@ -1,9 +1,9 @@
 url: https://pascal-kueng.github.io/dyadMLM/
 
-# Give the six-panel reference examples the same 8-by-9-inch size as the vignettes.
+# Match the six-panel reference figures to the 10-by-6.5-inch vignette figures.
 figures:
-  fig.width: 8
-  fig.asp: 1.125
+  fig.width: 10
+  fig.asp: 0.65
 
 home:
   title: "dyadMLM: Tools for Dyadic Multilevel Models"

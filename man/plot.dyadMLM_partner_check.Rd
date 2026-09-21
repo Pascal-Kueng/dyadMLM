@@ -60,7 +60,8 @@ simulations <- simulate_dyad_responses(
 check <- check_partner_dependence(
   simulations,
   dyad = coupleID,
-  role = example_data$gender,
+  role = gender,
+  data = example_data,
   plot = FALSE
 )
 
