@@ -72,9 +72,9 @@ only:
 print(result)
 }\if{html}{\out{</div>}}
 
-Supply \code{block_pairings} when automatic matching is ambiguous or when a model uses
-custom indicators, multiple covariance levels, or deliberately omitted
-blocks or terms. To specify one pair with a custom difference indicator:
+Supply \code{block_pairings} when automatic matching is ambiguous or when a
+model uses custom indicators or deliberately omitted blocks or terms.
+To specify one pair with a custom difference indicator:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- dyadMLM::recover_exchangeable_covariance(
   model,
@@ -173,9 +173,9 @@ section for the manual calculation.
 In \code{brms}, cross-sectional and same-occasion partner dependence can be
 represented directly with
 \code{unstr(time = member_position, gr = residual_group)}. With Gaussian
-outcomes, \code{sigma ~ 1} supplies the common residual scale. Non-Gaussian
-families have no \code{sigma} parameter here; \code{unstr()} instead estimates a
-common latent residual scale and correlation on the linear-predictor scale.
+outcomes, \code{sigma ~ 1} supplies the common residual scale. For families
+such as Poisson and negative binomial, \code{unstr()} adds a latent residual
+scale and correlation on the linear-predictor scale.
 Here,
 \code{member_position} identifies the same two arbitrary positions within every
 group, and \code{residual_group} identifies dyads in cross-sectional data or

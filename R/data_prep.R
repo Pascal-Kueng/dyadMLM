@@ -43,7 +43,9 @@
 #' @param model_types Model-ready column families to construct. Can contain one
 #'   or more of `"apim"`, `"dim"`, and `"dsm"`. `"apim"` creates
 #'   actor and partner predictors. `"dim"` creates dyad-mean and
-#'   within-dyad member-deviation predictors. `"dsm"` creates dyadic-score model
+#'   within-dyad member-deviation predictors. DIM requires one final
+#'   exchangeable dyad composition, which may result from pooling
+#'   exchangeable compositions. `"dsm"` creates dyadic-score model
 #'   predictor columns. `"none"` skips model-specific predictor
 #'   construction after validation, composition inference, and optional
 #'   temporal predictor decomposition, and must be used alone. `"dim"` and

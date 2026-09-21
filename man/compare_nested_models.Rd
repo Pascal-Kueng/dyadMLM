@@ -54,19 +54,29 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
     # All three observed compositions in `dyads_cross` are detected and retained
     # by default. This example focuses on `female-male` dyads, so we restrict the
     # analysis here.
-    keep_compositions = "female-male"
+    keep_compositions = "female-male",
+    include_arbitrary_member_contrast = TRUE,
+    seed = 123
   )
   full_data <- restricted_data
 
+  # Compare an exchangeable model with a distinguishable model.
   restricted_model <- glmmTMB::glmmTMB(
-    closeness ~ 1 + us(1 | coupleID),
+    closeness ~ 1 +
+      us(1 | coupleID) +
+      us(0 + .member_contrast_arbitrary | coupleID),
+    dispformula = ~ 0,
     data = restricted_data
   )
+
   full_model <- glmmTMB::glmmTMB(
-    closeness ~ gender + us(1 | coupleID),
+    closeness ~ 0 + gender +
+      us(0 + gender | coupleID),
+    dispformula = ~ 0,
     data = full_data
   )
 
+  # Test equal means and residual variances jointly.
   compare_nested_models(restricted_model, full_model)
 }
 
