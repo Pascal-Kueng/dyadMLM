@@ -1,0 +1,168 @@
+---
+title: "Partner-dependence checks across outcome families"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    self_contained: true
+params:
+  results_directory: "results/family-comparison/500-datasets-1000-draws"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+  fig.width = 13, fig.height = 6, dpi = 180, fig.retina = 1, out.width = "100%")
+source("plot-family-comparison.R")
+source("summarise-family-comparison.R")
+results_directory <- params$results_directory
+settings <- read.csv(file.path(results_directory, "settings.csv"))
+saved_summary <- read.csv(file.path(results_directory, "summary.csv"))
+calibration <- read.csv(file.path(results_directory, "calibration.csv"))
+# Recount saved observations and limits, including results from an older running script.
+summary <- lapply(settings$family, function(family_name) {
+  statistics <- read.csv(file.path(results_directory, family_name, "statistics.csv"))
+  completion <- saved_summary |>
+    dplyr::filter(family == family_name) |>
+    dplyr::select(family, condition, n_dyads, target_correlation, attempted,
+      successful, with_warnings, check_errors) |>
+    dplyr::distinct()
+  summarise_family_comparison(statistics, completion)$summary
+}) |> dplyr::bind_rows()
+vignette_families <- c("gaussian", "nbinom2", "ordinal", "lognormal",
+                      "zi_poisson", "hurdle_nbinom2")
+# Refresh completed families from the default study while the remaining families run.
+update_vignette_figures <-
+  all(settings$datasets_per_condition == 500L & settings$reference_draws == 1000L) &&
+  all(summary$attempted == 500L)
+if (update_vignette_figures) dir.create("../figures", showWarnings = FALSE)
+```
+
+## What these plots compare
+
+```{r progress, results='asis'}
+if (nrow(settings) < 22L) {
+  cat("**Study in progress:** Results for ", nrow(settings),
+      " of 22 family/model settings are available. The remaining results are pending.\n\n", sep = "")
+}
+```
+
+The models include actor and partner effects but omit any remaining partner
+dependence. We compare checks that subtract fixed-effect predictions with checks
+of raw outcomes, using the **same datasets, fitted models, and reference simulations**.
+
+- **Coloured lines:** how often the check detects omitted positive correlation.
+  Detection means the observed correlation exceeds the upper limit of the model's
+  middle 95% simulated range. Opposite-direction flags are listed separately.
+- **Black lines:** false alarms when residual correlation is zero. Either tail
+  counts. Solid and dotted lines distinguish the methods; the grey dashed 5% line is a
+  benchmark, not a guaranteed rate.
+
+Read both together: a method that detects more real mismatches may also raise more
+false alarms. These results describe the settings studied, not general power for
+each family. Bars and bands show uncertainty from using a finite number of study
+datasets.
+
+Ordinal checks use category scores 1, 2, and so on. Zero-inflated and hurdle checks
+use the combined outcome, including zeros.
+
+<details>
+<summary>Study details</summary>
+
+Predictors are standard normal with partner correlation 0.3. Actor and partner
+effects are 0.5 and 0.3 on the model's link scale. Correlated normal draws are
+transformed to each outcome distribution (a Gaussian copula), with dependence
+adjusted to give residual correlations of 0, 0.10, 0.30, and 0.50 after subtracting
+the true means given the predictors. Each family section reports its calibration method and checks.
+
+Reference simulations keep fitted parameters and predictors fixed; models are not
+refitted. Their number controls the precision of the 2.5th and 97.5th percentile
+limits. The number of study datasets controls the precision of the plotted rates;
+bars and bands are 95% Wilson intervals for this Monte Carlo uncertainty.
+
+Rates use successful fits and defined correlations. Failed fits and checks are
+excluded without retry, as are ordinal datasets missing a category. Undefined
+simulated correlations are omitted from reference ranges. Reduced check counts
+and exclusion reasons are listed below each family's plots.
+
+The sample-size axis is linear through 500 dyads, with a shortened gap before
+1,000. This report redraws saved results without fitting or simulating. See the
+[study code](compare-centering.R), [plot code](plot-family-comparison.R), and
+[study notes](README.md).
+
+</details>
+
+```{r family-results, results='asis'}
+for (family_index in seq_len(nrow(settings))) {
+  family_settings <- settings[family_index, ]
+  family_summary <- summary[summary$family == family_settings$family, ]
+  family_calibration <- calibration[calibration$family == family_settings$family, ]
+  cat("\n\n## ", family_settings$label, "\n\n", sep = "")
+  cat(family_settings$datasets_per_condition, " generated datasets per condition; ",
+      format(family_settings$reference_draws, big.mark = ","),
+      " reference simulations per fitted model.\n\n", sep = "")
+  figure <- plot_family_comparison(family_summary, family_settings$label,
+    family_settings$datasets_per_condition, family_settings$reference_draws)
+  print(figure)
+  if (update_vignette_figures && family_settings$family %in% vignette_families) {
+    ggplot2::ggsave(file.path("../figures", paste0("family-comparison-", family_settings$family, ".png")),
+      figure, width = 13, height = 6, dpi = 180)
+  }
+  print(plot_family_false_alarms(family_summary, family_settings$label,
+    family_settings$datasets_per_condition, family_settings$reference_draws))
+
+  cat("<details>\n<summary>Model settings and checks</summary>\n\n")
+  cat("**Fitted model:** `", family_settings$formula, "`.\n\n", sep = "")
+  cat("**Mean:** ", family_settings$mean_settings, "\n\n", sep = "")
+  cat("**Dispersion:** ", family_settings$dispersion_settings, "\n\n", sep = "")
+  if (!is.na(family_settings$zero_settings) && nzchar(family_settings$zero_settings)) {
+    cat("**Zero component:** ", family_settings$zero_settings, "\n\n", sep = "")
+  }
+
+  cat("**Population correlations**\n\n")
+  cat(paste(unique(family_calibration$method), collapse = "; "), ".\n\n", sep = "")
+  print(knitr::kable(family_calibration[c("target_correlation", "measured_residual_correlation", "verification_mcse")],
+    col.names = c("Target residual correlation", "Verified correlation", "Monte Carlo SE"),
+    digits = 3, row.names = FALSE))
+
+  cat("\n\n**Opposite-direction flags with positive residual correlation**\n\n")
+  opposite_direction <- family_summary |>
+    dplyr::filter(target_correlation > 0) |>
+    dplyr::group_by(response) |>
+    dplyr::summarise(checked = sum(checked),
+      opposite_direction = sum(opposite_direction), .groups = "drop")
+  print(knitr::kable(opposite_direction,
+    col.names = c("Method", "Datasets checked", "Opposite-direction flags")))
+
+  cat("\n\n**Either-tail flags with zero residual correlation**\n\n")
+  baseline <- family_summary[family_summary$target_correlation == 0,
+    c("n_dyads", "response", "checked", "frequency")]
+  baseline$frequency <- ifelse(is.finite(baseline$frequency),
+    sprintf("%.1f%%", 100 * baseline$frequency), "Not checked")
+  print(knitr::kable(baseline,
+    col.names = c("Dyads", "Method", "Datasets checked", "Flagged")))
+
+  # Fit counts repeat for the two methods; count them only once.
+  fit_counts <- family_summary[family_summary$response == "model-centred", ]
+  cat("\n\n", sum(fit_counts$successful), " of ", sum(fit_counts$attempted),
+      " datasets produced reference simulations.\n\n", sep = "")
+  excluded_fits <- read.csv(file.path(results_directory, family_settings$family, "fits.csv")) |>
+    dplyr::filter(status != "success") |>
+    dplyr::count(status, name = "Datasets")
+  if (nrow(excluded_fits)) {
+    excluded_fits$status <- c(fit_error = "Model fitting failed",
+      fit_problem = "Convergence or Hessian problem", check_error = "Check failed",
+      study_exclusion = "Ordinal category absent")[excluded_fits$status]
+    print(knitr::kable(excluded_fits, col.names = c("Exclusion reason", "Datasets")))
+  }
+  reduced_counts <- family_summary |>
+    dplyr::filter(checked < attempted) |>
+    dplyr::select(n_dyads, target_correlation, response, attempted, checked)
+  if (nrow(reduced_counts)) {
+    cat("\n\n**Conditions with fewer usable checks**\n\n")
+    print(knitr::kable(reduced_counts,
+      col.names = c("Dyads", "Residual correlation", "Method", "Generated", "Checked")))
+  }
+  cat("\n\nCounts for every plotted point are saved in `summary.csv`.\n\n</details>\n\n")
+}
+```

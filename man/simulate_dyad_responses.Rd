@@ -61,7 +61,8 @@ of \code{glmmTMB})
 
 Zero-inflated and hurdle versions are supported where available. Checks
 describe the combined response, including zeros, rather than each model
-component separately.
+component separately. Good agreement does not establish that the zero and
+response components each fit well.
 
 Ordinal checks use category scores \verb{1, 2, ..., K} in their fitted order,
 matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The plots compare

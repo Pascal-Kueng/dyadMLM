@@ -11,7 +11,7 @@ parameters fixed; close agreement alone does not establish good fit.
 | --- | --- |
 | [Vignette candidate](partner-dependence-vignette-draft.Rmd) | One complete workflow and interpretation |
 | [Reference validation](partner-dependence-reference-validation.Rmd) | Independent Woody–Sadler calculations and Dingy cross-check |
-| [Outer simulation study](partner-dependence-outer-simulation-study.Rmd) | Known Gaussian populations, fitted models, and repeated-sample behavior |
+| [Simulation studies](simulation-studies/README.md) | Sensitivity across families, raw versus centred checks, and validation |
 
 The function help is the reference for arguments, output fields, supported
 models, and omission rules. Keep these details there rather than duplicating
@@ -56,6 +56,6 @@ and prediction/simulation agreement; Bell models also require `gsl`.
 The ordinal script checks category scores and predictions with logit and probit
 links. It requires a `glmmTMB` version with `ordinal()`.
 These are correctness checks, not calibration or power
-studies. Run the outer simulation report separately when that evidence needs
-updating; its full configuration is intentionally more expensive. For a merge,
+studies. Run the simulation scripts separately when that evidence needs
+updating; their full configurations are intentionally more expensive. For a merge,
 also check the built package and CI on the proposed commit.

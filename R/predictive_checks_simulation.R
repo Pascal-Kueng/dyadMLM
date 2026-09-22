@@ -46,7 +46,8 @@
 #'
 #' Zero-inflated and hurdle versions are supported where available. Checks
 #' describe the combined response, including zeros, rather than each model
-#' component separately.
+#' component separately. Good agreement does not establish that the zero and
+#' response components each fit well.
 #'
 #' Ordinal checks use category scores `1, 2, ..., K` in their fitted order,
 #' matching [glmmTMB's predictions][glmmTMB::family_glmmTMB]. The plots compare
