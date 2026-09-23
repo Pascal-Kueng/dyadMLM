@@ -53,8 +53,10 @@ Red shows observed data; blue shows simulated references. Ranges contain the mid
 position, not across the whole figure; some departures occur by chance.
 Fitted parameters stay fixed.
 
-In `check_residuals()`, use `predictors = simulations$model_frame[c("x", "z")]`
-for extra predictor panels, or `details = TRUE` for a uniformity summary and
+In `check_residuals()`, use `predictors = c("x", "z")` for extra predictor panels.
+Columns come from the model frame; if absent, supply the original fitting data
+with `data` and excluded rows are handled automatically. `predictors = NULL`
+(default) omits these extra pages. Use `details = TRUE` for a uniformity summary and
 PIT distance across predicted outcomes. "Predicted outcome" means the model's
 prediction with random effects set to zero, not the observed outcome. Additional
 predictor pages use the supplied predictor values. In `check_outcomes()`,

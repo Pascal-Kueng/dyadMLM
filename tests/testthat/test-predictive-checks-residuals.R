@@ -166,6 +166,62 @@ test_that("missing plotting predictors affect only their own panels", {
 })
 
 
+test_that("predictor names plot the same fitted rows as supplied values", {
+  simulations <- distribution_check_fixture()
+  simulations$model_frame$age <- rep(c(20, 20, 40, 40), 3)
+  simulations$model_frame$stress <- factor(rep(c("low", "medium", "high"), 4))
+  fitting_data <- simulations$model_frame
+  grDevices::pdf(NULL, width = 12, height = 10)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  panels <- marks <- list()
+  recording <- FALSE
+  original_title <- graphics::title
+  original_lines <- graphics::lines
+  original_rect <- graphics::rect
+  original_segments <- graphics::segments
+  local_mocked_bindings(title = function(main = NULL, xlab = NULL, ...) {
+    recording <<- !is.null(xlab) && xlab %in% c("age", "stress")
+    if (recording) panels[[length(panels) + 1L]] <<- c(main, xlab)
+    original_title(main = main, xlab = xlab, ...)
+  }, lines = function(x, y, ...) {
+    if (recording && !missing(y)) marks[[length(marks) + 1L]] <<- list(x, y)
+    if (missing(y)) original_lines(x, ...) else original_lines(x, y, ...)
+  }, rect = function(xleft, ybottom, xright, ytop, ...) {
+    if (recording) marks[[length(marks) + 1L]] <<- list(xleft, ybottom, xright, ytop)
+    original_rect(xleft, ybottom, xright, ytop, ...)
+  }, segments = function(x0, y0, x1, y1, ...) {
+    if (recording) marks[[length(marks) + 1L]] <<- list(x0, y0, x1, y1)
+    original_segments(x0, y0, x1, y1, ...)
+  }, .package = "graphics")
+  capture_predictors <- function(predictors, data = NULL) {
+    panels <<- marks <<- list()
+    check_residuals(simulations, predictors = predictors, data = data, ask = FALSE)
+    list(panels = panels, marks = marks)
+  }
+
+  columns <- c("age", "stress")
+  expected <- capture_predictors(as.list(fitting_data[columns]))
+  expect_length(expected$panels, 4)
+  expect_gt(length(expected$marks), 0)
+  expect_identical(capture_predictors(columns), expected)
+  expect_identical(capture_predictors(fitting_data[columns]), expected)
+
+  # Omitted and reordered fitted rows retain their original predictor values.
+  rows <- c(12, 2, 9, 4, 7, 6, 5, 8)
+  simulations$observed_response <- simulations$observed_response[rows]
+  simulations$predicted_response <- simulations$predicted_response[rows]
+  simulations$simulated_responses <- simulations$simulated_responses[, rows]
+  simulations$model_frame <- simulations$model_frame[rows, , drop = FALSE]
+  simulations$model_frame$stress <- NULL
+  expected <- capture_predictors(as.list(fitting_data[rows, columns]))
+  expect_identical(capture_predictors(columns, fitting_data[12:1, ]), expected)
+  expect_error(capture_predictors(columns), "stress.*not found.*data =")
+  expect_error(capture_predictors("missing", fitting_data), "missing.*not found")
+  fitting_data$age[2] <- 99
+  expect_error(capture_predictors(columns, fitting_data), "age.*does not match")
+})
+
+
 test_that("plotting restores graphics settings after success and failure", {
   simulations <- distribution_check_fixture()
   grDevices::pdf(NULL, width = 12, height = 10)
@@ -201,8 +257,12 @@ test_that("role panels and details fit the default graphics device", {
 test_that("overview and optional panels use predictable pages", {
   skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   simulations <- distribution_check_fixture()
+  simulations$model_frame$age <- rep(c(20, 40), 6)
+  simulations$model_frame$stress <- factor(rep(c("low", "high", "medium"), 4))
   cases <- list(
     list(arguments = list(), pages = 1L),
+    list(arguments = list(predictors = NULL), pages = 1L),
+    list(arguments = list(predictors = c("age", "stress")), pages = 3L),
     list(arguments = list(predictors = rep(list(seq_len(12)), 3)), pages = 4L),
     list(arguments = list(details = TRUE), pages = 2L),
     list(arguments = list(dyad = "dyad", role = "role"), pages = 1L)

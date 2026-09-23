@@ -55,7 +55,7 @@ uniformity and PIT-distance page. The call produces three complete panels.
 ```{r residual, fig.alt="Complete panels produced by check_residuals"}
 check_residuals(
   gaussian_simulations, dyad = dyad, role = role, data = tweedie_data,
-  predictors = gaussian_simulations$model_frame["predictor"],
+  predictors = "predictor",
   details = TRUE, seed = 123, ask = FALSE
 )
 ```

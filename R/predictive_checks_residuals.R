@@ -7,10 +7,11 @@
 #'
 #' @param simulations An object from [simulate_dyad_responses()]. At least four
 #'   datasets are required; 1,000 or more are recommended.
-#' @param predictors Optional named list or data frame of additional predictors,
-#'   in fitted-row order, for separate pages. Use `simulations$model_frame` columns
-#'   where possible. Missing or infinite values are omitted only from that
-#'   predictor's plots. Predicted outcomes are always checked.
+#' @param predictors Optional column names, e.g. `c("age", "stress")`, looked up
+#'   in the model frame or `data`. `NULL` (default) omits additional predictor
+#'   pages. A named list or data frame of values in fitted-row order is also
+#'   accepted. Missing or infinite values are omitted only from that predictor's
+#'   plots. Predicted outcomes are always checked.
 #' @param seed Seed for randomized PIT residuals. The caller's random-number
 #'   state is restored afterwards.
 #' @param ask Pause between pages on interactive devices? `NULL` (default) and
@@ -20,7 +21,7 @@
 #'   or `data`. With `role = NULL`, all observations are pooled. Otherwise supply
 #'   `dyad`; also supply `member` for repeated observations. Supplying `dyad`
 #'   without `role` adds the dyad count to the pooled overview.
-#' @param data The unchanged data used to fit the model. Supply it when grouping
+#' @param data The unchanged data used to fit the model. Supply it when required
 #'   columns are absent from the model frame, or to identify compositions using
 #'   partners whose responses were excluded during fitting.
 #' @param details Add a uniformity histogram and PIT-distance plots against
@@ -111,20 +112,28 @@
 #' @seealso [check_outcomes()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
 #' model <- glmmTMB::glmmTMB(
-#'   closeness ~ gender + (1 | coupleID), data = dyads_cross
+#'   closeness ~ gender + provided_support + (1 | coupleID), data = dyads_cross
 #' )
 #' # Use at least 1,000 draws when checking a model.
 #' simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
-#' check_residuals(simulations, dyad = coupleID, role = gender, ask = FALSE)
+#' check_residuals(simulations, dyad = coupleID, role = gender,
+#'                 predictors = "provided_support", ask = FALSE)
 #' @export
 check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL,
-                            predictors = list(),
+                            predictors = NULL,
                             seed = 123, ask = NULL,
                             data = NULL, details = FALSE) {
   if (!inherits(simulations, "dyadMLM_response_simulations"))
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
+  frame <- simulations$model_frame
+  if (is.null(predictors)) predictors <- list()
+  if (is.character(predictors)) {
+    predictors <- stats::setNames(lapply(predictors, function(column) {
+      resolve_fitted_row_argument(rlang::new_quosure(column), "predictors", frame, data)
+    }), predictors)
+  }
   if (!is.list(predictors))
-    stop("`predictors` must be a list or data frame of fitted-row values.", call. = FALSE)
+    stop("`predictors` must be NULL, column names, or a list or data frame of fitted-row values.", call. = FALSE)
   names(predictors) <- rlang::names2(predictors)
   if (!is.null(ask) && !rlang::is_bool(ask))
     stop("`ask` must be NULL, TRUE, or FALSE.", call. = FALSE)
@@ -158,7 +167,6 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   }
   predictors <- predictors[usable_predictors]
 
-  frame <- simulations$model_frame
   compositions <- build_check_groups(
     frame, rlang::enquo(dyad), rlang::enquo(role), rlang::enquo(member), data
   )

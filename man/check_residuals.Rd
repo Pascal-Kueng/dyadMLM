@@ -9,7 +9,7 @@ check_residuals(
   dyad = NULL,
   role = NULL,
   member = NULL,
-  predictors = list(),
+  predictors = NULL,
   seed = 123,
   ask = NULL,
   data = NULL,
@@ -26,10 +26,11 @@ or \code{data}. With \code{role = NULL}, all observations are pooled. Otherwise 
 \code{dyad}; also supply \code{member} for repeated observations. Supplying \code{dyad}
 without \code{role} adds the dyad count to the pooled overview.}
 
-\item{predictors}{Optional named list or data frame of additional predictors,
-in fitted-row order, for separate pages. Use \code{simulations$model_frame} columns
-where possible. Missing or infinite values are omitted only from that
-predictor's plots. Predicted outcomes are always checked.}
+\item{predictors}{Optional column names, e.g. \code{c("age", "stress")}, looked up
+in the model frame or \code{data}. \code{NULL} (default) omits additional predictor
+pages. A named list or data frame of values in fitted-row order is also
+accepted. Missing or infinite values are omitted only from that predictor's
+plots. Predicted outcomes are always checked.}
 
 \item{seed}{Seed for randomized PIT residuals. The caller's random-number
 state is restored afterwards.}
@@ -37,7 +38,7 @@ state is restored afterwards.}
 \item{ask}{Pause between pages on interactive devices? \code{NULL} (default) and
 \code{TRUE} pause; \code{FALSE} does not. File devices never pause.}
 
-\item{data}{The unchanged data used to fit the model. Supply it when grouping
+\item{data}{The unchanged data used to fit the model. Supply it when required
 columns are absent from the model frame, or to identify compositions using
 partners whose responses were excluded during fitting.}
 
@@ -134,11 +135,12 @@ mixtures of both. A finite simulation bank approximates the model's PIT.
 \examples{
 \dontshow{if (requireNamespace("glmmTMB", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 model <- glmmTMB::glmmTMB(
-  closeness ~ gender + (1 | coupleID), data = dyads_cross
+  closeness ~ gender + provided_support + (1 | coupleID), data = dyads_cross
 )
 # Use at least 1,000 draws when checking a model.
 simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
-check_residuals(simulations, dyad = coupleID, role = gender, ask = FALSE)
+check_residuals(simulations, dyad = coupleID, role = gender,
+                predictors = "provided_support", ask = FALSE)
 \dontshow{\}) # examplesIf}
 }
 \references{

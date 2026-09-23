@@ -34,7 +34,7 @@ model predictions from observed and simulated outcomes? Default: \code{FALSE}.}
 \item{ask}{Pause between pages on interactive devices? \code{NULL} (default) and
 \code{TRUE} pause; \code{FALSE} does not. File devices never pause.}
 
-\item{data}{The unchanged data used to fit the model. Supply it when grouping
+\item{data}{The unchanged data used to fit the model. Supply it when required
 columns are absent from the model frame, or to identify compositions using
 partners whose responses were excluded during fitting.}
 }
