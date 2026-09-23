@@ -2,6 +2,12 @@
 
 * Changed the package license from MIT to GPL-3.
 
+* Added experimental `check_residuals()`, reusing complete response
+  simulations for distribution, outlier, variability, zero-count, and predictor
+  checks. Plots retain simulated partner and time dependence in their references,
+  separate dyad compositions and roles, and report no p-values. Each overview
+  combines four plot rows with a summary table; detailed plots are optional.
+
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),
   [#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).

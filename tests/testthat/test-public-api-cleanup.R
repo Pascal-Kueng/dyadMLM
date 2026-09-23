@@ -21,7 +21,8 @@ test_that("the public API and metadata use only the cleaned names", {
       "compare_nested_models",
       "recover_exchangeable_covariance",
       "simulate_dyad_responses",
-      "check_partner_dependence"
+      "check_partner_dependence",
+      "check_residuals"
     )
   )
   expect_false(exists(

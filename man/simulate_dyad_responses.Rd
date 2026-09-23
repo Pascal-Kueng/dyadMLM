@@ -17,7 +17,7 @@ after the function returns, or when it stops after an error.}
 }
 \value{
 A \code{dyadMLM_response_simulations} object for use with
-\code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+\code{\link[=check_partner_dependence]{check_partner_dependence()}} and \code{\link[=check_residuals]{check_residuals()}}.
 
 The result keeps all components in fitted-row order (after missing-data
 exclusions):
@@ -36,8 +36,8 @@ the seed.
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Generates new response datasets for the same observations and predictors.
-Reuse them with \code{\link[=check_partner_dependence]{check_partner_dependence()}} to check whether a fitted
-model reproduces features of the observed data. For a complete example
+Reuse them with \code{\link[=check_partner_dependence]{check_partner_dependence()}} or \code{\link[=check_residuals]{check_residuals()}} to
+check whether a fitted model reproduces features of the observed data. For a complete example
 see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 \section{Supported models}{

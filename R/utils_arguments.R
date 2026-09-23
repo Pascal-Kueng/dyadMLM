@@ -69,6 +69,28 @@ select_dyad_columns <- function(data, cols_quo, arg) {
 }
 
 
+# Match original rows after subsetting and NA removal, checking for changed data.
+match_fitted_rows <- function(model_frame, data) {
+  if (!is.data.frame(data)) {
+    stop("`data` must be the data frame used to fit the model.", call. = FALSE)
+  }
+  fitted_rows <- match(row.names(model_frame), row.names(data))
+  if (anyNA(fitted_rows)) {
+    stop("Could not match the fitted rows to `data`. ",
+         "Supply the same unchanged data frame used to fit the model.", call. = FALSE)
+  }
+  fitted_data <- data[fitted_rows, , drop = FALSE]
+  for (column in intersect(names(model_frame), names(fitted_data))) {
+    if (!isTRUE(all.equal(model_frame[[column]], fitted_data[[column]],
+                          check.attributes = FALSE, tolerance = 0))) {
+      stop("Column `", column, "` in `data` does not match the fitted rows. ",
+           "Supply the same unchanged data frame used to fit the model.", call. = FALSE)
+    }
+  }
+  fitted_rows
+}
+
+
 # Use fitted columns first; otherwise match rows in the original fitting data.
 resolve_fitted_row_argument <- function(argument_quo, argument_name, model_frame,
                                        data = NULL, allow_null = FALSE) {
@@ -90,29 +112,10 @@ resolve_fitted_row_argument <- function(argument_quo, argument_name, model_frame
            "Supply the data frame used to fit the model with `data = your_data`. ",
            "Rows excluded during fitting will be handled automatically.", call. = FALSE)
     }
-    if (!is.data.frame(data)) {
-      stop("`data` must be the data frame used to fit the model.", call. = FALSE)
-    }
+    fitted_data <- data[match_fitted_rows(model_frame, data), , drop = FALSE]
     if (!column_name %in% names(data)) {
       stop("Column `", column_name, "` was not found in the fitted model frame or `data`.",
            call. = FALSE)
-    }
-
-    # The fitted row names retain the original rows after subsetting and NA removal.
-    fitted_data_rows <- match(row.names(model_frame), row.names(data))
-    if (anyNA(fitted_data_rows)) {
-      stop("Could not match the fitted rows to `data`. ",
-           "Supply the same unchanged data frame used to fit the model.", call. = FALSE)
-    }
-    fitted_data <- data[fitted_data_rows, , drop = FALSE]
-
-    # Catch changed or reordered data when row names alone still appear to match.
-    for (shared_column in intersect(names(model_frame), names(fitted_data))) {
-      if (!isTRUE(all.equal(model_frame[[shared_column]], fitted_data[[shared_column]],
-                            check.attributes = FALSE, tolerance = 0))) {
-        stop("Column `", shared_column, "` in `data` does not match the fitted rows. ",
-             "Supply the same unchanged data frame used to fit the model.", call. = FALSE)
-      }
     }
     value <- fitted_data[[column_name]]
   }
