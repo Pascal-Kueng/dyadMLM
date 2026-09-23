@@ -1,3 +1,51 @@
+check_colours <- list(observed = "#a12b35", observed_fill = "#f2d3d6",
+                      simulated = "#bcd7e8", simulation_line = "#7fa7be",
+                      reference = "grey40")
+
+plot_check_caption <- function(text) {
+  graphics::mtext(text, side = 1, line = 4.8, cex = .875 * graphics::par("cex"))
+}
+
+plot_check_empty <- function(title, label = "No fitted observations") {
+  graphics::plot.new()
+  graphics::title(main = title)
+  graphics::text(.5, .5, label)
+}
+
+# The first value is observed; the remaining values are simulated summaries.
+plot_check_statistic <- function(values, title, xlab = "Summary value",
+                                 counts = FALSE, sub = NULL, caption = TRUE, ...,
+                                 col = check_colours$simulated, border = "white",
+                                 ylab = "Simulated datasets", ylim = NULL,
+                                 xaxt = if (counts) "n" else "s") {
+  simulated <- values[-1]
+  simulated <- simulated[is.finite(simulated)]
+  if (!is.finite(values[1]) || !length(simulated))
+    return(plot_check_empty(title, "Not enough observations or variation"))
+  breaks <- if (counts && diff(range(simulated)) < 20)
+    seq(min(simulated) - .5, max(simulated) + .5, by = 1) else 20
+  histogram <- graphics::hist(simulated, breaks = breaks, plot = FALSE)
+  if (!caption && is.null(ylim)) ylim <- c(0, max(histogram$counts) * 1.25)
+  graphics::plot(histogram, freq = TRUE, xlim = range(values[1], histogram$breaks),
+                  col = col, border = border, main = title, ylim = ylim,
+                  sub = if (!caption) sub,
+                  xlab = xlab, ylab = ylab, xaxt = xaxt, ...)
+  if (counts) {
+    ticks <- pretty(range(values, finite = TRUE))
+    graphics::axis(1, ticks[ticks >= 0 & ticks %% 1 == 0])
+  }
+  graphics::abline(v = stats::quantile(simulated, c(.025, .975)),
+                   lty = 2, col = check_colours$reference)
+  graphics::abline(v = values[1], col = check_colours$observed, lwd = 2)
+  if (caption) {
+    guide <- "Compare the red value with the blue distribution.\nDashed lines mark its middle 95%."
+    if (!is.null(sub)) guide <- paste(guide, sub)
+    plot_check_caption(guide)
+  } else graphics::legend("top", c("Observed", "Middle 95% of simulations"),
+    lty = c(1, 2), lwd = c(2, 1), col = c(check_colours$observed, check_colours$reference),
+    horiz = TRUE, bty = "n")
+}
+
 # Draw one composition page. `draw` is evaluated inside the temporary layout;
 # column headings are optional because not every check arranges panels by role.
 plot_check_page <- function(composition, title, panels, draw,

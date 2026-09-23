@@ -51,7 +51,7 @@
 #'   be saved and plotted later.
 #'
 #' @section Reading the plots:
-#' Histograms show simulated summaries. Red lines mark observed values.
+#' Blue histograms show simulated summaries. Red lines mark observed values.
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
 #' The composition heading follows the same layout as [check_residuals()].
@@ -601,7 +601,7 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
 #' @param x A `dyadMLM_partner_check` object.
 #' @inheritParams check_partner_dependence
 #' @param ... Additional graphical arguments passed to [graphics::plot()].
-#'   `freq`, `xlim`, `ylim`, `main`, `sub`, and `xlab` are controlled by this
+#'   `freq`, `xlim`, `main`, and `sub` are controlled by this
 #'   method.
 #'
 #' @return Invisibly, `x`.
@@ -656,7 +656,6 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
   on.exit(grDevices::devAskNewPage(previous_plot_pause_setting), add = TRUE)
 
   n_simulations <- x$n_simulations
-  suggested_histogram_bins <- min(100L, max(20L, round(n_simulations / 5)))
 
   for (composition_index in checked_composition_indices) {
     composition <- x$compositions[composition_index, ]
@@ -668,50 +667,16 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
       # Match observed values and simulations by position, since names may repeat.
       for (statistic_index in seq_along(composition_statistics)) {
         statistic_name <- names(composition_statistics)[[statistic_index]]
-        observed_statistic_value <- composition_statistics[[statistic_index]][1]
-
-        simulated_statistic_values <-
-          composition_statistics[[statistic_index]][-1]
-        simulated_statistic_values <-
-          simulated_statistic_values[is.finite(simulated_statistic_values)]
-
-        middle_95_simulation_limits <- simulated_middle_95(simulated_statistic_values)
-
-        simulated_statistic_histogram <- graphics::hist(
-          simulated_statistic_values,
-          breaks = suggested_histogram_bins, plot = FALSE
-        )
-
-        maximum_bin_count <- max(simulated_statistic_histogram$counts)
-
-        # Keep complete bars visible and reserve a band above them for the legend.
+        values <- composition_statistics[[statistic_index]]
+        simulations_used <- sum(is.finite(values[-1]))
         plot_title <- paste(strwrap(statistic_name, width = if (panels) 30 else 60),
                             collapse = "\n")
         if (!panels) plot_title <- paste(composition_title, plot_title, sep = "\n")
-        plot_subtitle <- paste0(length(simulated_statistic_values), "/", n_simulations,
+        plot_subtitle <- paste0(simulations_used, "/", n_simulations,
                                 " simulations used")
         if (!panels) plot_subtitle <- paste(x$response, plot_subtitle, sep = "; ")
-        graphics::plot(
-          simulated_statistic_histogram, freq = TRUE,
-          xlim = range(observed_statistic_value, simulated_statistic_histogram$breaks),
-          ylim = c(0, maximum_bin_count * if (panels) 1.4 else 1.25),
-          main = plot_title,
-          sub = plot_subtitle,
-          xlab = "Summary value", ...
-        )
-
-        graphics::segments(middle_95_simulation_limits, 0, middle_95_simulation_limits,
-                           maximum_bin_count, lty = 2, col = "grey40")
-
-        graphics::segments(observed_statistic_value, 0,
-                           observed_statistic_value, maximum_bin_count,
-                           lwd = 2.5, col = "red")
-
-        graphics::legend(
-          "top", legend = c("Observed", "Middle 95% of simulations"),
-          lty = c(1, 2), lwd = c(2.5, 1), col = c("red", "grey40"),
-          horiz = !panels, cex = if (panels) 0.85 else 1, bty = "n"
-        )
+        else if (simulations_used == n_simulations) plot_subtitle <- NULL
+        plot_check_statistic(values, plot_title, sub = plot_subtitle, caption = panels, ...)
       }
     }
     if (panels) {
@@ -719,7 +684,9 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
         paste("Partner dependence", paste0(composition$n_pairs, " of ", x$n_pairs,
               " usable dyads"), x$response, sep = " - "),
         c(2, ncol(composition_statistics) / 2), draw_statistics(),
-        mar = c(5.1, 4.1, 4, 1))
+        footer = paste0(n_simulations, " simulations. Red: observed. Blue: simulations. ",
+                         "Dashed lines: middle 95%. No significance tests."),
+        mar = c(6.8, 4.5, 4, .8))
     } else draw_statistics()
   }
   return(invisible(x))

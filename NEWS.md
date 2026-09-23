@@ -2,12 +2,11 @@
 
 * Changed the package license from MIT to GPL-3.
 
-* Added experimental `check_residuals()`, reusing complete response
-  simulations for distribution, outlier, variability, zero-count, and predictor
-  checks. Plots retain simulated partner and time dependence in their references,
-  separate dyad compositions and roles, and report no p-values. Each overview
-  has four plot rows, followed by histograms comparing observed summaries with
-  simulated values. Further detailed plots are optional.
+* Added experimental `check_residuals()` for DHARMa PIT residuals and
+  `check_outcomes()` for response distributions, variability, extremes, and
+  zero counts. Both reuse complete simulated datasets, retain partner and time
+  dependence in their references, separate dyad compositions and roles, and
+  report no p-values. Additional predictor and detailed residual plots are optional.
 
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),

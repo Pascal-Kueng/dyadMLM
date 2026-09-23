@@ -19,7 +19,7 @@ two rows and up to three columns. If \code{FALSE}, draw each statistic separatel
 Graphics settings are restored afterwards.}
 
 \item{...}{Additional graphical arguments passed to \code{\link[graphics:plot]{graphics::plot()}}.
-\code{freq}, \code{xlim}, \code{ylim}, \code{main}, \code{sub}, and \code{xlab} are controlled by this
+\code{freq}, \code{xlim}, \code{main}, and \code{sub} are controlled by this
 method.}
 }
 \value{

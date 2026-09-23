@@ -2,7 +2,7 @@
 % Please edit documentation in R/predictive_checks_residuals.R
 \name{check_residuals}
 \alias{check_residuals}
-\title{Check response distributions and residual patterns}
+\title{Check residual distributions and patterns}
 \usage{
 check_residuals(
   simulations,
@@ -10,9 +10,7 @@ check_residuals(
   role = NULL,
   member = NULL,
   predictors = list(),
-  check_zeros = NULL,
   seed = 123,
-  centred_overlay = FALSE,
   ask = NULL,
   data = NULL,
   details = FALSE
@@ -33,14 +31,8 @@ in fitted-row order, for separate pages. Use \code{simulations$model_frame} colu
 where possible. Missing or infinite values are omitted only from that
 predictor's plots. Fitted predictions are always checked.}
 
-\item{check_zeros}{Include zero counts? \code{NULL} (default) includes them wherever
-the observed or simulated group contains zeros.}
-
 \item{seed}{Seed for randomized PIT residuals. The caller's random-number
 state is restored afterwards.}
-
-\item{centred_overlay}{Add an outcome overlay after subtracting the same
-model predictions from observed and simulated outcomes? Default: \code{FALSE}.}
 
 \item{ask}{Pause between pages on interactive devices? \code{NULL} (default) and
 \code{TRUE} pause; \code{FALSE} does not. File devices never pause.}
@@ -53,16 +45,16 @@ partners whose responses were excluded during fitting.}
 fitted values? Default: \code{FALSE}.}
 }
 \value{
-Plots, with an overview and a summary page per composition, plus
-optional predictor pages.
+One page per composition, plus optional predictor and detail pages.
 Invisibly returns PIT residuals for all fitted observations: rows are
 observations; columns are observed data followed by the second half of the
 simulations. Graphics settings are restored afterwards.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Compare observed outcomes with complete datasets from
-\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Requires the optional package \code{DHARMa}.
+Compare PIT residuals with complete datasets from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
+Requires the optional package \code{DHARMa}. For checks on the outcome scale,
+use \code{\link[=check_outcomes]{check_outcomes()}}.
 }
 \section{Reading the plots}{
 
@@ -73,22 +65,17 @@ treats partners as exchangeable. Available responses are retained when the
 composition is known; unknown compositions are omitted with a warning.
 
 \strong{Red shows observed data; blue shows simulated references.} The four rows
-show uniform QQ, PIT histogram, the outcome distribution, and PIT quartiles
-against fitted predictions. Outcome plots use category frequencies for ordinal
-responses and counts with up to 20 observed or simulated values; otherwise,
-they overlay cumulative distributions from up to 30 simulated datasets.
+show uniform QQ, a PIT histogram, PIT quartiles against fitted predictions,
+and the number of outcomes outside their simulated range (PIT endpoints).
 Use a tall plotting window or save a large figure to keep all rows readable.
 
 PIT residuals rank each outcome from 0 (low) to 1 (high) relative to its own
 simulated values. Blue ranges contain the middle 95\% at each plotted position,
 not across the whole plot. Some red points can fall outside by chance.
-The next page plots response variability (variance of outcome minus prediction),
-outcomes outside the simulated range (PIT endpoints), largest absolute deviation
-from prediction, and zero counts where relevant. Each blue histogram shows
-simulated values; the red line shows the observed value. A red line far to the
-right or left means more or less than the model usually produces. Dashed lines
-mark the middle 95\%. Variance needs at least two observations.
-\code{details = TRUE} adds uniformity (KS distance) and fitted-value PIT-distance plots.
+For out-of-range counts, the blue histogram shows simulated counts and the red
+line shows the observed count; dashed lines mark the middle 95\%.
+\code{details = TRUE} adds a page with uniformity (KS distance) and fitted-value
+PIT-distance plots.
 
 Each additional predictor gets a page with quartile and distance plots. Numeric
 predictors with many values use up to eight bins, chosen within each role.
@@ -116,12 +103,9 @@ stay fixed, and the observed data were used to fit them; parameter uncertainty
 is not included. Check partner and time dependence separately.
 
 Fitted values are response predictions with random effects set to zero, which
-differ from averages over random effects for nonlinear links. Variability
-includes random effects and is not a family dispersion parameter. Uses the
-families and fitted rows supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}: missing
-responses are not imputed, and time gaps follow the fitted model. Observations
-have equal weight. Ordinal response summaries use category scores; zero-inflated
-checks describe the combined response distribution.
+differ from averages over random effects for nonlinear links. Uses the families
+and fitted rows supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}: missing responses are
+not imputed, and time gaps follow the fitted model. Observations have equal weight.
 }
 
 \examples{
@@ -135,5 +119,5 @@ check_residuals(simulations, dyad = coupleID, role = gender, ask = FALSE)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=check_partner_dependence]{check_partner_dependence()}}
+\code{\link[=check_outcomes]{check_outcomes()}}, \code{\link[=check_partner_dependence]{check_partner_dependence()}}
 }

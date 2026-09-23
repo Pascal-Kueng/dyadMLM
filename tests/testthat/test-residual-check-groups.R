@@ -1,6 +1,6 @@
 residual_check_groups <- function(frame, dyad = NULL, role = NULL, member = NULL,
                                   data = NULL) {
-  build_residual_check_groups(frame, rlang::enquo(dyad), rlang::enquo(role),
+  build_check_groups(frame, rlang::enquo(dyad), rlang::enquo(role),
                               rlang::enquo(member), data)
 }
 

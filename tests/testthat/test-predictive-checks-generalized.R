@@ -169,26 +169,27 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
 
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
-  subtitles <- character()
+  captions <- character()
   limits <- list()
-  original_segments <- graphics::segments
-  original_title <- graphics::title
+  original_abline <- graphics::abline
+  original_mtext <- graphics::mtext
   testthat::local_mocked_bindings(
-    title = function(main = NULL, sub = NULL, ...) {
-      subtitles <<- c(subtitles, sub)
-      original_title(main = main, sub = sub, ...)
+    mtext = function(text, ...) {
+      captions <<- c(captions, text)
+      original_mtext(text, ...)
     },
     .package = "graphics"
   )
   testthat::local_mocked_bindings(
-    segments = function(x0, y0, x1, y1, ...) {
-      if (identical(list(...)$lty, 2)) limits[[length(limits) + 1L]] <<- x0
-      original_segments(x0, y0, x1, y1, ...)
+    abline = function(...) {
+      arguments <- list(...)
+      if (identical(arguments$lty, 2)) limits[[length(limits) + 1L]] <<- arguments$v
+      original_abline(...)
     },
     .package = "graphics"
   )
   plot(result, ask = FALSE)
-  expect_true(any(grepl(count, subtitles, fixed = TRUE)))
+  expect_true(any(grepl(count, captions, fixed = TRUE)))
   partner_column <- match("Partner correlation (female and male)",
                           names(statistics)[-1])
   expect_equal(unname(limits[[partner_column]]),

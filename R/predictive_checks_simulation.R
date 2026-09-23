@@ -2,9 +2,9 @@
 #'
 #' `r lifecycle::badge("experimental")`
 #' Generates new response datasets for the same observations and predictors.
-#' Reuse them with [check_partner_dependence()] or [check_residuals()] to
-#' check whether a fitted model reproduces features of the observed data. For a complete example
-#' see [check_partner_dependence()].
+#' Reuse them with [check_partner_dependence()], [check_residuals()], or
+#' [check_outcomes()] to check whether a fitted model reproduces features of
+#' the observed data. For a complete example see [check_partner_dependence()].
 #'
 #' @param model A fitted `glmmTMB` model.
 #' @param nsim Number of complete response datasets to simulate. Default: 1000.
@@ -13,7 +13,7 @@
 #'   after the function returns, or when it stops after an error.
 #'
 #' @return A `dyadMLM_response_simulations` object for use with
-#'   [check_partner_dependence()] and [check_residuals()].
+#'   [check_partner_dependence()], [check_residuals()], and [check_outcomes()].
 #'
 #' The result keeps all components in fitted-row order (after missing-data
 #' exclusions):

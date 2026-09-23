@@ -5,8 +5,9 @@ library(glmmTMB)
 source("R/predictive_checks_simulation.R")
 source("R/utils_arguments.R")
 source("R/predictive_checks_plot.R")
-source("R/predictive_checks_residual_groups.R")
+source("R/predictive_checks_groups.R")
 source("R/predictive_checks_residuals.R")
+source("R/predictive_checks_outcomes.R")
 
 output <- "dev/diagnostic_checks/distribution-diagnostics/results"
 dir.create(output, showWarnings = FALSE)
@@ -68,17 +69,21 @@ for (scenario in names(responses)) {
   predicted <- simulations$predicted_response
   message(scenario, ": plotting diagnostics")
 
-  grDevices::svg(file.path(output, paste0(scenario, "-panel-%02d.svg")),
+  grDevices::svg(file.path(output, paste0(scenario, "-residual-%02d.svg")),
                  width = 12, height = 18, onefile = FALSE)
   check_residuals(simulations, dyad = dyad, role = member,
     member = person, data = data, predictors = list(x = data$x), ask = FALSE)
   dev.off()
 
-  # Match the dashboard's evaluation half for the numerical tail summary.
-  reference_rows <- seq_len(floor(nrow(simulations$simulated_responses) / 2))
-  replicated <- simulations$simulated_responses[-reference_rows, , drop = FALSE]
+  grDevices::svg(file.path(output, paste0(scenario, "-outcome-%02d.svg")),
+                 width = 12, height = 18, onefile = FALSE)
+  check_outcomes(simulations, dyad = dyad, role = member,
+    member = person, data = data, ask = FALSE)
+  dev.off()
+
+  # Use all simulations for the numerical tail summary, as check_outcomes() does.
   centred_observed <- observed - predicted
-  centred_replicated <- sweep(replicated, 2, predicted)
+  centred_replicated <- sweep(simulations$simulated_responses, 2, predicted)
   simulated_tails <- apply(centred_replicated, 1, tail_ratio)
   variance <- VarCorr(fit)$cond
   results[[scenario]] <- data.frame(scenario, n = nrow(data),

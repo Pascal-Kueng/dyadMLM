@@ -1,5 +1,5 @@
 # Map fitted observations to compositions without requiring complete observed pairs.
-build_residual_check_groups <- function(model_frame, dyad_quo, role_quo,
+build_check_groups <- function(model_frame, dyad_quo, role_quo,
                                        member_quo, data = NULL) {
   fitted_rows <- seq_len(nrow(model_frame))
   if (rlang::quo_is_null(role_quo)) {

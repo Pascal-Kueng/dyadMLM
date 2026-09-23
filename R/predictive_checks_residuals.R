@@ -1,8 +1,9 @@
-#' Check response distributions and residual patterns
+#' Check residual distributions and patterns
 #'
 #' `r lifecycle::badge("experimental")`
-#' Compare observed outcomes with complete datasets from
-#' [simulate_dyad_responses()]. Requires the optional package \code{DHARMa}.
+#' Compare PIT residuals with complete datasets from [simulate_dyad_responses()].
+#' Requires the optional package \code{DHARMa}. For checks on the outcome scale,
+#' use [check_outcomes()].
 #'
 #' @param simulations An object from [simulate_dyad_responses()]. At least four
 #'   datasets are required; 1,000 or more are recommended.
@@ -10,12 +11,8 @@
 #'   in fitted-row order, for separate pages. Use `simulations$model_frame` columns
 #'   where possible. Missing or infinite values are omitted only from that
 #'   predictor's plots. Fitted predictions are always checked.
-#' @param check_zeros Include zero counts? `NULL` (default) includes them wherever
-#'   the observed or simulated group contains zeros.
 #' @param seed Seed for randomized PIT residuals. The caller's random-number
 #'   state is restored afterwards.
-#' @param centred_overlay Add an outcome overlay after subtracting the same
-#'   model predictions from observed and simulated outcomes? Default: `FALSE`.
 #' @param ask Pause between pages on interactive devices? `NULL` (default) and
 #'   `TRUE` pause; `FALSE` does not. File devices never pause.
 #' @param dyad,role,member Column names, with or without quotes, identifying
@@ -29,8 +26,7 @@
 #' @param details Add a uniformity histogram and PIT-distance plots against
 #'   fitted values? Default: `FALSE`.
 #'
-#' @return Plots, with an overview and a summary page per composition, plus
-#'   optional predictor pages.
+#' @return One page per composition, plus optional predictor and detail pages.
 #'   Invisibly returns PIT residuals for all fitted observations: rows are
 #'   observations; columns are observed data followed by the second half of the
 #'   simulations. Graphics settings are restored afterwards.
@@ -43,22 +39,17 @@
 #' composition is known; unknown compositions are omitted with a warning.
 #'
 #' **Red shows observed data; blue shows simulated references.** The four rows
-#' show uniform QQ, PIT histogram, the outcome distribution, and PIT quartiles
-#' against fitted predictions. Outcome plots use category frequencies for ordinal
-#' responses and counts with up to 20 observed or simulated values; otherwise,
-#' they overlay cumulative distributions from up to 30 simulated datasets.
+#' show uniform QQ, a PIT histogram, PIT quartiles against fitted predictions,
+#' and the number of outcomes outside their simulated range (PIT endpoints).
 #' Use a tall plotting window or save a large figure to keep all rows readable.
 #'
 #' PIT residuals rank each outcome from 0 (low) to 1 (high) relative to its own
 #' simulated values. Blue ranges contain the middle 95% at each plotted position,
 #' not across the whole plot. Some red points can fall outside by chance.
-#' The next page plots response variability (variance of outcome minus prediction),
-#' outcomes outside the simulated range (PIT endpoints), largest absolute deviation
-#' from prediction, and zero counts where relevant. Each blue histogram shows
-#' simulated values; the red line shows the observed value. A red line far to the
-#' right or left means more or less than the model usually produces. Dashed lines
-#' mark the middle 95%. Variance needs at least two observations.
-#' `details = TRUE` adds uniformity (KS distance) and fitted-value PIT-distance plots.
+#' For out-of-range counts, the blue histogram shows simulated counts and the red
+#' line shows the observed count; dashed lines mark the middle 95%.
+#' `details = TRUE` adds a page with uniformity (KS distance) and fitted-value
+#' PIT-distance plots.
 #'
 #' Each additional predictor gets a page with quartile and distance plots. Numeric
 #' predictors with many values use up to eight bins, chosen within each role.
@@ -84,14 +75,11 @@
 #' is not included. Check partner and time dependence separately.
 #'
 #' Fitted values are response predictions with random effects set to zero, which
-#' differ from averages over random effects for nonlinear links. Variability
-#' includes random effects and is not a family dispersion parameter. Uses the
-#' families and fitted rows supported by [simulate_dyad_responses()]: missing
-#' responses are not imputed, and time gaps follow the fitted model. Observations
-#' have equal weight. Ordinal response summaries use category scores; zero-inflated
-#' checks describe the combined response distribution.
+#' differ from averages over random effects for nonlinear links. Uses the families
+#' and fitted rows supported by [simulate_dyad_responses()]: missing responses are
+#' not imputed, and time gaps follow the fitted model. Observations have equal weight.
 #'
-#' @seealso [check_partner_dependence()]
+#' @seealso [check_outcomes()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE) && requireNamespace("DHARMa", quietly = TRUE)
 #' model <- glmmTMB::glmmTMB(
 #'   closeness ~ gender + (1 | coupleID), data = dyads_cross
@@ -102,8 +90,7 @@
 #' @export
 check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL,
                             predictors = list(),
-                            check_zeros = NULL, seed = 123,
-                            centred_overlay = FALSE, ask = NULL,
+                            seed = 123, ask = NULL,
                             data = NULL, details = FALSE) {
   if (!inherits(simulations, "dyadMLM_response_simulations"))
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
@@ -112,10 +99,6 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   if (!is.list(predictors))
     stop("`predictors` must be a list or data frame of fitted-row values.", call. = FALSE)
   names(predictors) <- rlang::names2(predictors)
-  if (!rlang::is_bool(centred_overlay))
-    stop("`centred_overlay` must be TRUE or FALSE.", call. = FALSE)
-  if (!is.null(check_zeros) && !rlang::is_bool(check_zeros))
-    stop("`check_zeros` must be NULL, TRUE, or FALSE.", call. = FALSE)
   if (!is.null(ask) && !rlang::is_bool(ask))
     stop("`ask` must be NULL, TRUE, or FALSE.", call. = FALSE)
   if (!rlang::is_bool(details))
@@ -149,7 +132,7 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   predictors <- predictors[usable_predictors]
 
   frame <- simulations$model_frame
-  compositions <- build_residual_check_groups(
+  compositions <- build_check_groups(
     frame, rlang::enquo(dyad), rlang::enquo(role), rlang::enquo(member), data
   )
 
@@ -162,7 +145,6 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   pit <- apply(responses, 2, function(response) {
     DHARMa::getQuantile(reference, response, method = "PIT", integerResponse = FALSE)
   })
-  centred <- sweep(responses, 1, predicted, "-")
 
 
   # Matrices retain complete datasets in columns; subset only their rows.
@@ -178,87 +160,27 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
                       c(.025, .975), na.rm = TRUE)
       if (connect && (!quartiles || smooth) && all(is.finite(bounds)))
         graphics::polygon(c(x, rev(x)), c(bounds[1, ], rev(bounds[2, ])),
-                          col = if (smooth) "#bcd7e840" else "#bcd7e8", border = NA)
+                          col = if (smooth) paste0(check_colours$simulated, "40") else check_colours$simulated, border = NA)
       if (smooth) {
-        graphics::lines(x, bounds[1, ], col = "#7fa7be", lty = line_types[curve_index])
-        graphics::lines(x, bounds[2, ], col = "#7fa7be", lty = line_types[curve_index])
+        graphics::lines(x, bounds[1, ], col = check_colours$simulation_line, lty = line_types[curve_index])
+        graphics::lines(x, bounds[2, ], col = check_colours$simulation_line, lty = line_types[curve_index])
       } else {
         interval_x <- x + offsets[curve_index]
         graphics::segments(interval_x, bounds[1, ], interval_x, bounds[2, ],
-                           col = "#bcd7e8", lwd = 3)
+                           col = check_colours$simulated, lwd = 3)
       }
     }
     if (boxes) {
       observed_quartiles <- do.call(cbind, lapply(curves, function(values) values[, 1]))
       graphics::rect(x - .18, observed_quartiles[, 1], x + .18, observed_quartiles[, 3],
-                     border = "#a12b35", lwd = 1.5)
+                     border = check_colours$observed, lwd = 1.5)
       graphics::segments(x - .18, observed_quartiles[, 2], x + .18, observed_quartiles[, 2],
-                         col = "#a12b35", lwd = 2)
+                         col = check_colours$observed, lwd = 2)
     } else for (curve_index in seq_along(curves))
       graphics::lines(x + offsets[curve_index], curves[[curve_index]][, 1],
                       type = if (smooth) "l" else if (connect) "b" else "p",
                       pch = 16, cex = .65, lty = line_types[curve_index],
-                      lwd = if (quartiles && curve_index == 2) 2 else 1, col = "#a12b35")
-  }
-  caption <- function(text) {
-    graphics::mtext(text, side = 1, line = 4.8, cex = .875 * graphics::par("cex"))
-  }
-  empty_plot <- function(title, label = "No fitted observations") {
-    graphics::plot.new()
-    graphics::title(main = title)
-    graphics::text(.5, .5, label)
-  }
-  draw_statistic <- function(values, title) {
-    if (anyNA(values)) return(empty_plot(title, "Needs at least two observations"))
-    simulated <- values[-1]
-    counts <- title %in% c("Outside simulated range", "Number of zeros")
-    breaks <- if (counts && diff(range(simulated)) < 20)
-      seq(min(simulated) - .5, max(simulated) + .5, by = 1) else 20
-    histogram <- graphics::hist(simulated, breaks = breaks, plot = FALSE)
-    label <- switch(title,
-      "Response variability" = "Variance of outcome minus prediction",
-      "Largest absolute deviation" = "Absolute difference from prediction",
-      "Uniformity" = "Distance from uniform residuals",
-      "Number of observations")
-    graphics::plot(histogram, xlim = range(values[1], histogram$breaks),
-                   col = "#bcd7e8", border = "white", main = title, xlab = label,
-                   ylab = "Simulated datasets", xaxt = if (counts) "n" else "s")
-    if (counts) {
-      ticks <- pretty(range(values))
-      graphics::axis(1, ticks[ticks >= 0 & ticks %% 1 == 0])
-    }
-    graphics::abline(v = stats::quantile(simulated, c(.025, .975)), lty = 2, col = "grey40")
-    graphics::abline(v = values[1], col = "#a12b35", lwd = 2)
-    caption("Compare the red value with the blue distribution.\nDashed lines mark its middle 95%.")
-  }
-  draw_predictive <- function(values, limits, support = NULL, labels = support,
-                              label = "Outcome") {
-    if (!is.null(support)) {
-      frequencies <- matrix(vapply(seq_len(ncol(values)), function(dataset) {
-        tabulate(match(values[, dataset], support), nbins = length(support)) / nrow(values)
-      }, numeric(length(support))), nrow = length(support))
-      positions <- graphics::barplot(frequencies[, 1], names.arg = labels,
-        col = "#f2d3d6", border = "#a12b35", ylim = c(0, max(frequencies, .01)),
-        main = "Outcome frequencies", xlab = "Outcome", ylab = "Proportion")
-      draw_envelopes(as.vector(positions), list(frequencies), connect = FALSE)
-      caption("Red proportions should resemble simulations.\nCompare each with its blue range.")
-    } else {
-      shown <- values[, seq_len(min(ncol(values), 31)), drop = FALSE]
-      graphics::plot(limits, c(0, 1), type = "n", main = "Outcome overlay",
-                     xlab = label, ylab = "Cumulative proportion")
-      # One step path keeps vector exports small while retaining every ECDF jump.
-      draw_ecdf <- function(response, ...) {
-        empirical <- stats::ecdf(response)
-        knots <- stats::knots(empirical)
-        graphics::lines(c(graphics::par("usr")[1], knots, graphics::par("usr")[2]),
-                        c(0, empirical(knots), 1), type = "s", ...)
-      }
-      for (dataset in 2:ncol(shown))
-        draw_ecdf(shown[, dataset], col = "#bcd7e8")
-      draw_ecdf(shown[, 1], col = "#a12b35", lwd = 2)
-      graphics::abline(h = c(0, 1), col = "grey70", lty = 2)
-      caption("The red curve should resemble\nthe blue simulated curves.")
-    }
+                      lwd = if (quartiles && curve_index == 2) 2 else 1, col = check_colours$observed)
   }
   draw_pattern <- function(rows, predictor, name, role_rows, distance = FALSE) {
     available <- available_predictor(predictor)
@@ -266,7 +188,7 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     composition_rows <- composition_rows[available[composition_rows]]
     rows <- rows[available[rows]]
     title <- paste("PIT", if (distance) "distance" else "quantiles", "by", name)
-    if (!length(rows)) return(empty_plot(title, "No available predictor values"))
+    if (!length(rows)) return(plot_check_empty(title, "No available predictor values"))
     available_values <- predictor[composition_rows]
     binned <- is.numeric(predictor) && length(unique(available_values)) > 8
     # Role-specific bins avoid sparsely populated edges caused by pooling roles.
@@ -294,7 +216,7 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
       ylab = if (distance) "PIT distance" else "PIT quantiles")
     if (!binned) graphics::axis(1, positions, labels, cex.axis = .8)
     graphics::axis(2, c(0, .25, .5, .75, 1))
-    graphics::abline(h = c(.25, .5, .75), lty = 2, col = "grey60")
+    graphics::abline(h = c(.25, .5, .75), lty = 2, col = check_colours$reference)
     values <- if (distance) 2 * abs(pit - .5) else pit
     quartiles <- lapply(rows_by_group, function(group_rows) {
       apply(values[intersect(rows, group_rows), , drop = FALSE], 2,
@@ -312,11 +234,11 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
       # Smooth complete datasets first; their envelopes are computed afterwards.
       curves <- lapply(curves, function(values) weights %*% values)
       positions <- grid
-      graphics::points(predictor[rows], values[rows, 1], pch = 16, cex = .4, col = "#00000020")
+      graphics::points(predictor[rows], values[rows, 1], pch = 16, cex = .4, col = paste0(check_colours$observed, "20"))
     }
     draw_envelopes(positions, curves, connect = is.numeric(predictor),
                    boxes = !is.numeric(predictor), smooth = smooth)
-    caption(if (smooth)
+    plot_check_caption(if (smooth)
       "25th: dashed; median: bold; 75th: dotted.\nCompare each red curve with its matching blue band."
       else "Quartiles: 25th, median (bold), 75th, left to right.\nEach should track its dashed line and blue ranges.")
   }
@@ -324,20 +246,6 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     ordered <- sort(x)
     ranks <- seq_along(x)
     max(ranks / length(x) - ordered, ordered - (ranks - 1) / length(x))
-  }
-  summarize_checks <- function(rows) {
-    if (!length(rows)) return(NULL)
-    values <- pit[rows, , drop = FALSE]
-    statistics <- rbind(
-      Uniformity = apply(values, 2, ks_distance),
-      `Response variability` = apply(centred[rows, , drop = FALSE], 2, stats::var),
-      `Outside simulated range` = colSums(values == 0 | values == 1),
-      `Largest absolute deviation` = apply(abs(centred[rows, , drop = FALSE]), 2, max)
-    )
-    include_zeros <- if (is.null(check_zeros))
-      any(responses[rows, ] == 0) || any(reference[rows, ] == 0) else check_zeros
-    if (include_zeros) statistics <- rbind(statistics, `Number of zeros` = colSums(responses[rows, , drop = FALSE] == 0))
-    statistics
   }
   old_ask <- grDevices::devAskNewPage((is.null(ask) || ask) && grDevices::dev.interactive())
   on.exit(grDevices::devAskNewPage(old_ask), add = TRUE)
@@ -347,33 +255,17 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     plot_check_page(composition$label, paste(title, counts, sep = " - "),
       c(rows, length(composition$rows)), draw,
       column_titles = paste0(names(composition$rows), " (n = ", lengths(composition$rows), ")"),
-      footer = "Red: observed. Blue: simulations; ranges are pointwise middle 95%. Some departures occur by chance.\nOverlays: up to 30 datasets. Parameters fixed; no significance tests.")
+      footer = "Red: observed. Blue: simulations; ranges are pointwise middle 95%. Some departures occur by chance.\nParameters fixed; no significance tests.")
   }
   probabilities <- seq(0, 1, length.out = 201)
   breaks <- seq(0, 1, length.out = 21)
-  family <- attr(simulations, "dyadMLM")$family
-  count_families <- c("poisson", "compois", "genpois", "bell", "nbinom1", "nbinom2", "nbinom12",
-                     "truncated_poisson", "truncated_nbinom1", "truncated_nbinom2",
-                     "truncated_compois", "truncated_genpois")
   for (composition in compositions) {
     role_rows <- composition$rows
-    composition_rows <- unlist(role_rows, use.names = FALSE)
-    statistics <- lapply(role_rows, summarize_checks)
-    support <- NULL
-    if (family %in% c("ordinal", count_families))
-      support <- sort(unique(c(responses[composition_rows, ], reference[composition_rows, ])))
-    category_labels <- support
-    if (identical(family, "ordinal") && is.factor(frame[[1]])) {
-      support <- seq_along(levels(frame[[1]]))
-      category_labels <- levels(frame[[1]])
-    } else if (!(identical(family, "ordinal") ||
-                 (family %in% count_families && length(support) <= 20))) support <- NULL
-    outcome_limits <- range(responses[composition_rows, ])
     page(4, "Residual checks", {
-      for (panel in c("Uniform QQ", "PIT histogram", "Outcomes", "Fitted")) {
+      for (panel in c("Uniform QQ", "PIT histogram", "Fitted", "Outside simulated range")) {
         for (rows in role_rows) {
           if (!length(rows)) {
-            empty_plot(panel)
+            plot_check_empty(panel)
             next
           }
           if (panel == "Uniform QQ") {
@@ -381,8 +273,8 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
             graphics::plot(probabilities, probabilities, type = "n", main = panel,
                            xlab = "Uniform quantile", ylab = "PIT quantile")
             draw_envelopes(probabilities, list(qq))
-            graphics::abline(0, 1, lty = 2, col = "grey40")
-            caption("The red curve should follow the diagonal,\nallowing for the blue variation.")
+            graphics::abline(0, 1, lty = 2, col = check_colours$reference)
+            plot_check_caption("The red curve should follow the diagonal,\nallowing for the blue variation.")
           } else if (panel == "PIT histogram") {
             densities <- apply(pit[rows, , drop = FALSE], 2,
                                function(x) graphics::hist(x, breaks, plot = FALSE)$density)
@@ -390,21 +282,16 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
             graphics::plot(midpoints, densities[, 1], type = "n", ylim = c(0, max(densities)),
                            main = panel, xlab = "PIT", ylab = "Density")
             draw_envelopes(midpoints, list(densities), connect = FALSE)
-            graphics::abline(h = 1, lty = 2, col = "grey40")
-            caption("Red frequencies should be roughly flat.\nCompare each point with its blue range.")
-          } else if (panel == "Outcomes") {
-            draw_predictive(responses[rows, , drop = FALSE], outcome_limits, support, category_labels)
-          } else draw_pattern(rows, predicted, "Fitted", role_rows)
+            graphics::abline(h = 1, lty = 2, col = check_colours$reference)
+            plot_check_caption("Red frequencies should be roughly flat.\nCompare each point with its blue range.")
+          } else if (panel == "Fitted") {
+            draw_pattern(rows, predicted, "Fitted", role_rows)
+          } else {
+            values <- pit[rows, , drop = FALSE]
+            plot_check_statistic(colSums(values == 0 | values == 1), panel,
+                                 xlab = "Number of observations", counts = TRUE)
+          }
         }
-      }
-    })
-
-    statistic_names <- unique(unlist(lapply(statistics, rownames)))
-    if (!details) statistic_names <- setdiff(statistic_names, "Uniformity")
-    page(length(statistic_names), "Spread and extremes", {
-      for (name in statistic_names) for (values in statistics) {
-        if (is.null(values) || !name %in% rownames(values)) empty_plot(name, "Not applicable")
-        else draw_statistic(values[name, ], name)
       }
     })
 
@@ -416,17 +303,13 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
       })
     }
     if (details) {
-      page(1, "PIT distance", {
-        for (rows in role_rows) draw_pattern(rows, predicted, "Fitted", role_rows, TRUE)
-      })
-    }
-    if (centred_overlay) {
-      page(1, "Outcomes minus predictions", {
+      page(2, "Residual details", {
         for (rows in role_rows) {
-          if (!length(rows)) empty_plot("Centred outcome overlay")
-          else draw_predictive(centred[rows, , drop = FALSE], range(centred[composition_rows, ]),
-                               label = "Outcome minus prediction")
+          if (!length(rows)) plot_check_empty("Uniformity")
+          else plot_check_statistic(apply(pit[rows, , drop = FALSE], 2, ks_distance),
+                                    "Uniformity", xlab = "Distance from uniform residuals")
         }
+        for (rows in role_rows) draw_pattern(rows, predicted, "Fitted", role_rows, TRUE)
       })
     }
   }
