@@ -64,7 +64,10 @@ See `?check_residuals` and `?check_outcomes` for plot meanings and limits.
 ## Reproduce the examples
 
 The [full Tweedie-to-Gaussian example](results/tweedie-gaussian/index.html) shows
-all three checks, including optional pages and raw partner summaries. It uses
+the exact calls to all three checks followed by every complete panel they produce,
+including optional pages and raw partner summaries. The
+[executable example](../tweedie-gaussian-example.Rmd) is also included directly
+in the development vignette. It uses
 the earlier study's first Tweedie dataset (120 dyads, seed 100104) and 2,000
 simulations from an exchangeable Gaussian model without the difference random
 effect. Run [tweedie-gaussian.R](tweedie-gaussian.R) to reproduce it.

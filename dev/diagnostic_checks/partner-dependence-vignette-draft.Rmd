@@ -16,7 +16,7 @@ when both models can be fitted reliably.
 ```{r setup, include=FALSE}
 devtools::load_all(file.path("..", ".."), quiet = TRUE)
 knitr::opts_chunk$set(
-  message = FALSE, fig.width = 10, fig.height = 6.5, out.width = "100%"
+  message = FALSE, dev = "svg", fig.width = 10, fig.height = 6.5, out.width = "100%"
 )
 ```
 
@@ -136,74 +136,8 @@ and the
 [covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
 report every family, sample size, and false-alarm rate.
 
-## A model can reproduce correlation but miss other features
-
-These simulated Tweedie outcomes are nonnegative and skewed, with some zeros
-and different variability for women and men. We deliberately fit a Gaussian
-model with the same effects and variance for both roles. Its shared dyad
-intercept allows positive partner correlation; there is no member-difference
-random effect, but observation-level variance is still estimated.
-
-Read the saved dataset of 120 female-male dyads, fit the model, and simulate
-once for all three checks. Supply the original fitting data because `role`
-is not part of this model. The role labels split the plots; they do not change
-the fitted assumptions.
-
-```{r tweedie-gaussian-checks, eval=FALSE}
-tweedie_data <- read.csv(
-  "distribution-diagnostics/results/tweedie-gaussian/data.csv",
-  colClasses = c(dyad = "factor", role = "factor")
-)
-gaussian_model <- glmmTMB::glmmTMB(
-  outcome ~ predictor + (1 | dyad),
-  family = gaussian(), dispformula = ~1, data = tweedie_data
-)
-gaussian_simulations <- simulate_dyad_responses(
-  gaussian_model, nsim = 2000, seed = 100105
-)
-check_residuals(
-  gaussian_simulations, dyad = dyad, role = role,
-  data = tweedie_data, seed = 123, ask = FALSE
-)
-check_outcomes(
-  gaussian_simulations, dyad = dyad, role = role,
-  data = tweedie_data, check_zeros = TRUE, ask = FALSE
-)
-check_partner_dependence(
-  gaussian_simulations, dyad = dyad, role = role,
-  data = tweedie_data, ask = FALSE
-)
+```{r tweedie-example, child="tweedie-gaussian-example.Rmd"}
 ```
-
-**Residuals:** the QQ curves and PIT histogram reveal a distribution mismatch.
-Five male outcomes fall outside all their reference simulations, compared with
-a usual simulated count of zero to one. In the quantile plot, *predicted
-outcome* means the model prediction with random effects set to zero, not the
-observed outcome. Red quartiles should roughly follow the horizontal lines
-at 0.25, 0.50 and 0.75 and usually remain within their blue bands.
-
-![Residual checks for the Gaussian model fitted to Tweedie outcomes](distribution-diagnostics/results/tweedie-gaussian/residual-01.svg)
-
-**Outcomes:** the Gaussian model generates negative values, misses the male
-zeros, and understates the largest deviations from predictions. The common
-variance is too large for female responses and too small for male responses.
-
-![Outcome checks for the Gaussian model fitted to Tweedie outcomes](distribution-diagnostics/results/tweedie-gaussian/outcome-01.svg)
-
-**Partner dependence:** the role SDs and mean–difference correlation reveal
-the unequal variability, while the partner correlation agrees reasonably
-well. Omitting the difference random effect does not by itself force a
-mismatch: the shared intercept and observation-level noise can reproduce
-positive partner correlation.
-
-![Partner dependence checks for the Gaussian model fitted to Tweedie outcomes](distribution-diagnostics/results/tweedie-gaussian/partner-01.svg)
-
-Several assumptions are wrong here, so a failed check does not identify a
-single cause. Blue ranges describe the middle 95% of simulated results at
-each comparison, not across all plots; these are descriptive checks, not
-significance tests. The [full seven-page example](distribution-diagnostics/results/tweedie-gaussian/index.html)
-adds predictor checks and other views. Its [reproduction script](distribution-diagnostics/tweedie-gaussian.R)
-also generates the dataset.
 
 ## Other options
 

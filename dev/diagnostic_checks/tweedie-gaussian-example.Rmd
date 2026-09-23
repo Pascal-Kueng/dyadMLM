@@ -1,0 +1,115 @@
+---
+title: "Tweedie outcomes checked with a Gaussian model"
+output: html_document
+---
+
+```{r tweedie-setup, include=FALSE}
+pkgload::load_all(file.path("..", ".."), quiet = TRUE)
+knitr::opts_chunk$set(
+  message = FALSE, dev = "svg", fig.width = 12, fig.height = 14,
+  out.width = "100%",
+  fig.path = "distribution-diagnostics/results/tweedie-gaussian/"
+)
+```
+
+## A model can reproduce correlation but miss other features
+
+These simulated Tweedie outcomes are nonnegative and skewed, with some zeros
+and different variability for women and men. We deliberately fit an exchangeable
+Gaussian model: the same effects and variance for both roles. Its shared dyad
+intercept allows positive partner correlation; there is no member-difference
+random effect, but observation-level variance is still estimated.
+
+Every code chunk below runs when this document is rendered. Each check is
+followed by all the complete panels it produces, in their original order.
+
+### Fit the model and simulate once
+
+Run from `dev/diagnostic_checks/` to read the saved dataset of 120 female-male
+dyads. All checks reuse the same 2,000 simulated datasets.
+
+```{r tweedie-fit}
+library(dyadMLM)
+tweedie_data <- read.csv(
+  "distribution-diagnostics/results/tweedie-gaussian/data.csv",
+  colClasses = c(role = "factor")
+)
+tweedie_data$dyad <- factor(tweedie_data$dyad)
+gaussian_model <- glmmTMB::glmmTMB(
+  outcome ~ predictor + (1 | dyad),
+  family = gaussian(), dispformula = ~1, data = tweedie_data
+)
+gaussian_simulations <- simulate_dyad_responses(
+  gaussian_model, nsim = 2000, seed = 100105
+)
+```
+
+Supply the fitting data because `role` is absent from the model frame. Roles
+split the plots without changing the fitted model's assumptions.
+
+### Check residuals
+
+`predictors` adds a page for the named predictor; `details = TRUE` adds the
+uniformity and PIT-distance page. The call produces three complete panels.
+
+```{r residual, fig.alt="Complete panels produced by check_residuals"}
+check_residuals(
+  gaussian_simulations, dyad = dyad, role = role, data = tweedie_data,
+  predictors = gaussian_simulations$model_frame["predictor"],
+  details = TRUE, seed = 123, ask = FALSE
+)
+```
+
+The QQ curves and PIT histogram reveal a distribution mismatch. Five male
+outcomes fall outside all their reference simulations, compared with a usual
+simulated count of zero to one. *Predicted outcome* means the model prediction
+with random effects set to zero. The separate predictor page uses the supplied
+predictor values. Red quartiles should roughly follow the horizontal lines at
+0.25, 0.50 and 0.75, usually within their matching blue bands.
+
+### Check outcomes
+
+`check_zeros = TRUE` includes zero counts; `centred_overlay = TRUE` adds the
+distribution after subtracting predictions. The call produces two complete panels.
+
+```{r outcome, fig.alt="Complete panels produced by check_outcomes"}
+check_outcomes(
+  gaussian_simulations, dyad = dyad, role = role, data = tweedie_data,
+  check_zeros = TRUE, centred_overlay = TRUE, ask = FALSE
+)
+```
+
+The Gaussian model generates negative values, misses the male zeros, and
+understates the largest deviations from predictions. Its common variance is
+too large for female responses and too small for male responses.
+
+### Check partner dependence
+
+The default check subtracts the same predictions from observed and simulated
+outcomes. It produces one complete panel for this composition.
+
+```{r partner, fig.height=8, fig.alt="Complete panel produced by check_partner_dependence"}
+check_partner_dependence(
+  gaussian_simulations, dyad = dyad, role = role,
+  data = tweedie_data, ask = FALSE
+)
+```
+
+The role SDs and mean–difference correlation reveal unequal variability, while
+the partner correlation agrees reasonably well. Omitting the difference random
+effect does not by itself force a mismatch: the shared intercept and
+observation-level noise can reproduce positive partner correlation.
+
+For comparison, request the same panel for raw outcomes:
+
+```{r partner-raw, fig.height=8, fig.alt="Complete raw-outcome panel produced by check_partner_dependence"}
+check_partner_dependence(
+  gaussian_simulations, dyad = dyad, role = role, data = tweedie_data,
+  response = "raw", ask = FALSE
+)
+```
+
+This includes variation explained by the predictor; the role-variance mismatch
+remains visible. Several assumptions are wrong here, so a failed check does not
+identify a single cause. Blue ranges describe the middle 95% at each comparison,
+not across all plots. These are descriptive checks, not significance tests.
