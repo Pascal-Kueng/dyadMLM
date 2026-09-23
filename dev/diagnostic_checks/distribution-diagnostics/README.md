@@ -51,11 +51,11 @@ OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 Rscript dev/diagnostic_checks/distribut
 Run [composition-layout.R](composition-layout.R) the same way for the three
 compositions:
 
-| Composition | Overview | Summary checks |
-|---|---|---|
-| Female-female | [Plots](results/composition-01.svg) | [Plots](results/composition-02.svg) |
-| Female-male | [Plots](results/composition-03.svg) | [Plots](results/composition-04.svg) |
-| Male-male | [Plots](results/composition-05.svg) | [Plots](results/composition-06.svg) |
+| Composition | Overview | Summary checks | Partner dependence |
+|---|---|---|---|
+| Female-female | [Plots](results/composition-01.svg) | [Plots](results/composition-02.svg) | [Plots](results/partner-composition-01.svg) |
+| Female-male | [Plots](results/composition-03.svg) | [Plots](results/composition-04.svg) | [Plots](results/partner-composition-02.svg) |
+| Male-male | [Plots](results/composition-05.svg) | [Plots](results/composition-06.svg) | [Plots](results/partner-composition-03.svg) |
 
 The tail-shape script fits Gaussian models to four datasets:
 

@@ -194,7 +194,7 @@ test_that("plotting restores graphics settings after success and failure", {
   on.exit(grDevices::dev.off(), add = TRUE)
   graphics::par(mfrow = c(2, 1), mar = c(4, 3, 2, 1), cex = .9, mex = 1.2, las = 2)
   graphics::par(plt = c(.2, .8, .2, .8))
-  settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "mfg", "las", "plt"))
+  settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "cex.main", "mfg", "las", "plt", "new"))
   grDevices::devAskNewPage(TRUE)
 
   check_residuals(simulations, ask = FALSE)
@@ -213,7 +213,7 @@ test_that("role panels and details fit the default graphics device", {
   simulations <- distribution_check_fixture()
   grDevices::pdf(NULL, width = 7, height = 7)
   on.exit(grDevices::dev.off(), add = TRUE)
-  settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "mfg", "las", "plt"))
+  settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "cex.main", "mfg", "las", "plt", "new"))
 
   expect_no_error(check_residuals(simulations, dyad = "dyad", role = "role",
                                  check_zeros = TRUE, details = TRUE, ask = FALSE))
@@ -245,21 +245,49 @@ test_that("overview and optional panels use predictable pages", {
 })
 
 
-test_that("different dyad compositions have their own overview and statistic pages", {
+test_that("every residual page identifies its composition and page contents", {
   skip_if_not_installed("DHARMa")
   skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   simulations <- distribution_check_fixture()
   simulations$model_frame$role <- rep(c("A", "A", "A", "B", "B", "B"), 2)
-  pdf_path <- tempfile(fileext = ".pdf")
-  grDevices::pdf(pdf_path, width = 12, height = 10)
-  pit <- tryCatch(check_residuals(simulations, dyad = "dyad", role = "role",
-                                 member = "member", ask = FALSE),
-                  finally = grDevices::dev.off())
-  information <- system2("pdfinfo", shQuote(pdf_path), stdout = TRUE)
-  unlink(pdf_path)
-  pages <- as.integer(sub("^Pages:\\s+", "", information[grepl("^Pages:", information)]))
-  expect_equal(pages, 6L)
-  expect_equal(dim(pit), c(12L, 21L))
+  compositions <- c("A - A", "A - B", "B - B")
+  margins <- list()
+  original_mtext <- graphics::mtext
+  local_mocked_bindings(mtext = function(text, ...) {
+    margins[[length(margins) + 1L]] <<- c(list(text = text), list(...))
+    original_mtext(text, ...)
+  }, .package = "graphics")
+  cases <- list(
+    list(arguments = list(), pages = c("Residual checks", "Spread and extremes")),
+    list(arguments = list(predictors = list(X = seq_len(12)), details = TRUE,
+                          centred_overlay = TRUE),
+         pages = c("Residual checks", "Spread and extremes", "X", "PIT distance",
+                   "Outcomes minus predictions"))
+  )
+  for (case in cases) {
+    margins <- list()
+    pdf_path <- tempfile(fileext = ".pdf")
+    grDevices::pdf(pdf_path, width = 12, height = 10)
+    pit <- tryCatch(do.call(check_residuals, c(list(simulations, dyad = "dyad",
+      role = "role", member = "member", ask = FALSE), case$arguments)),
+      finally = grDevices::dev.off())
+    information <- system2("pdfinfo", shQuote(pdf_path), stdout = TRUE)
+    unlink(pdf_path)
+    pages <- as.integer(sub("^Pages:\\s+", "", information[grepl("^Pages:", information)]))
+    expect_equal(pages, 3 * length(case$pages))
+    expect_equal(dim(pit), c(12L, 21L))
+    headings <- Filter(function(text) isTRUE(text$outer) && isTRUE(text$side == 3) &&
+      length(text$text) == 1L && text$text %in% compositions, margins)
+    subtitles <- Filter(function(text) isTRUE(text$outer) && isTRUE(text$side == 3) &&
+      length(text$text) == 1L && grepl("2.*dyads.*4.*observations", text$text), margins)
+    expect_identical(vapply(headings, `[[`, "", "text"),
+                     rep(compositions, each = length(case$pages)))
+    expect_length(subtitles, pages)
+    expect_true(all(vapply(headings, `[[`, 0, "font") == 2))
+    expect_true(all(vapply(headings, `[[`, 0, "cex") > vapply(subtitles, `[[`, 0, "cex")))
+    expect_true(all(mapply(function(page, subtitle) grepl(page, subtitle, fixed = TRUE),
+      rep(case$pages, 3), vapply(subtitles, `[[`, "", "text"))))
+  }
 })
 
 

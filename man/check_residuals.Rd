@@ -67,7 +67,8 @@ Compare observed outcomes with complete datasets from
 \section{Reading the plots}{
 
 Each composition gets one pooled column for same-role partners, or separate
-columns for distinct roles. Roles define the display even if the fitted model
+columns for distinct roles. Every page repeats the composition heading.
+Roles define the display even if the fitted model
 treats partners as exchangeable. Available responses are retained when the
 composition is known; unknown compositions are omitted with a warning.
 

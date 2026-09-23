@@ -4,6 +4,7 @@
 library(glmmTMB)
 source("R/predictive_checks_simulation.R")
 source("R/utils_arguments.R")
+source("R/predictive_checks_plot.R")
 source("R/predictive_checks_residual_groups.R")
 source("R/predictive_checks_residuals.R")
 

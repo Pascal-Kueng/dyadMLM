@@ -54,9 +54,9 @@
 #' Histograms show simulated summaries. Red lines mark observed values.
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
-#' The heading shows the dyad composition, its number of usable dyads, and the
-#' total across all compositions. The top row shows member SDs and partner
-#' correlation. The bottom row shows the same information using dyad averages
+#' The composition heading follows the same layout as [check_residuals()].
+#' Below it are the number of usable dyads and the total across all compositions.
+#' The top row shows member SDs and partner correlation. The bottom row shows the same information using dyad averages
 #' and partner differences.
 #'
 #' An observed value far from most simulated values may indicate that the
@@ -652,14 +652,6 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
   # orNone = TRUE also pauses when the first plot will open an interactive device.
   ask <- ask && grDevices::dev.interactive(orNone = TRUE)
 
-  if (panels) {
-    previous_graphics_settings <- graphics::par(no.readonly = TRUE)
-    on.exit({
-      graphics::par(previous_graphics_settings)
-      # Restoring the layout resets scaling; scaling changes the plot region.
-      graphics::par(previous_graphics_settings[c("cex", "mex", "plt")])
-    }, add = TRUE)
-  }
   previous_plot_pause_setting <- grDevices::devAskNewPage(ask)
   on.exit(grDevices::devAskNewPage(previous_plot_pause_setting), add = TRUE)
 
@@ -672,64 +664,63 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
     composition_statistics <- composition$statistics[[1]][, -1]
     composition_title <- paste0(composition$label, " - ", composition$n_pairs,
                                 " of ", x$n_pairs, " usable dyads")
-    if (panels) {
-      graphics::par(mfrow = c(2, ncol(composition_statistics) / 2),
-                    mar = c(5.1, 4.1, 4, 1), oma = c(0, 0, 3, 0),
-                    cex = 0.7, cex.main = 1)
-    }
+    draw_statistics <- function() {
+      # Match observed values and simulations by position, since names may repeat.
+      for (statistic_index in seq_along(composition_statistics)) {
+        statistic_name <- names(composition_statistics)[[statistic_index]]
+        observed_statistic_value <- composition_statistics[[statistic_index]][1]
 
-    # Match observed values and simulations by position, since names may repeat.
-    for (statistic_index in seq_along(composition_statistics)) {
-      statistic_name <- names(composition_statistics)[[statistic_index]]
-      observed_statistic_value <- composition_statistics[[statistic_index]][1]
+        simulated_statistic_values <-
+          composition_statistics[[statistic_index]][-1]
+        simulated_statistic_values <-
+          simulated_statistic_values[is.finite(simulated_statistic_values)]
 
-      simulated_statistic_values <-
-        composition_statistics[[statistic_index]][-1]
-      simulated_statistic_values <-
-        simulated_statistic_values[is.finite(simulated_statistic_values)]
+        middle_95_simulation_limits <- simulated_middle_95(simulated_statistic_values)
 
-      middle_95_simulation_limits <- simulated_middle_95(simulated_statistic_values)
+        simulated_statistic_histogram <- graphics::hist(
+          simulated_statistic_values,
+          breaks = suggested_histogram_bins, plot = FALSE
+        )
 
-      simulated_statistic_histogram <- graphics::hist(
-        simulated_statistic_values,
-        breaks = suggested_histogram_bins, plot = FALSE
-      )
+        maximum_bin_count <- max(simulated_statistic_histogram$counts)
 
-      maximum_bin_count <- max(simulated_statistic_histogram$counts)
+        # Keep complete bars visible and reserve a band above them for the legend.
+        plot_title <- paste(strwrap(statistic_name, width = if (panels) 30 else 60),
+                            collapse = "\n")
+        if (!panels) plot_title <- paste(composition_title, plot_title, sep = "\n")
+        plot_subtitle <- paste0(length(simulated_statistic_values), "/", n_simulations,
+                                " simulations used")
+        if (!panels) plot_subtitle <- paste(x$response, plot_subtitle, sep = "; ")
+        graphics::plot(
+          simulated_statistic_histogram, freq = TRUE,
+          xlim = range(observed_statistic_value, simulated_statistic_histogram$breaks),
+          ylim = c(0, maximum_bin_count * if (panels) 1.4 else 1.25),
+          main = plot_title,
+          sub = plot_subtitle,
+          xlab = "Summary value", ...
+        )
 
-      # Keep complete bars visible and reserve a band above them for the legend.
-      plot_title <- paste(strwrap(statistic_name, width = if (panels) 30 else 60),
-                          collapse = "\n")
-      if (!panels) plot_title <- paste(composition_title, plot_title, sep = "\n")
-      plot_subtitle <- paste0(length(simulated_statistic_values), "/", n_simulations,
-                              " simulations used")
-      if (!panels) plot_subtitle <- paste(x$response, plot_subtitle, sep = "; ")
-      graphics::plot(
-        simulated_statistic_histogram, freq = TRUE,
-        xlim = range(observed_statistic_value, simulated_statistic_histogram$breaks),
-        ylim = c(0, maximum_bin_count * if (panels) 1.4 else 1.25),
-        main = plot_title,
-        sub = plot_subtitle,
-        xlab = "Summary value", ...
-      )
+        graphics::segments(middle_95_simulation_limits, 0, middle_95_simulation_limits,
+                           maximum_bin_count, lty = 2, col = "grey40")
 
-      graphics::segments(middle_95_simulation_limits, 0, middle_95_simulation_limits,
-                         maximum_bin_count, lty = 2, col = "grey40")
+        graphics::segments(observed_statistic_value, 0,
+                           observed_statistic_value, maximum_bin_count,
+                           lwd = 2.5, col = "red")
 
-      graphics::segments(observed_statistic_value, 0,
-                         observed_statistic_value, maximum_bin_count,
-                         lwd = 2.5, col = "red")
-
-      graphics::legend(
-        "top", legend = c("Observed", "Middle 95% of simulations"),
-        lty = c(1, 2), lwd = c(2.5, 1), col = c("red", "grey40"),
-        horiz = !panels, cex = if (panels) 0.85 else 1, bty = "n"
-      )
+        graphics::legend(
+          "top", legend = c("Observed", "Middle 95% of simulations"),
+          lty = c(1, 2), lwd = c(2.5, 1), col = c("red", "grey40"),
+          horiz = !panels, cex = if (panels) 0.85 else 1, bty = "n"
+        )
+      }
     }
     if (panels) {
-      graphics::mtext(paste(composition_title, x$response, sep = "; "),
-                      side = 3, outer = TRUE, line = 1, cex = 1, font = 2)
-    }
+      plot_check_page(composition$label,
+        paste("Partner dependence", paste0(composition$n_pairs, " of ", x$n_pairs,
+              " usable dyads"), x$response, sep = " - "),
+        c(2, ncol(composition_statistics) / 2), draw_statistics(),
+        mar = c(5.1, 4.1, 4, 1))
+    } else draw_statistics()
   }
   return(invisible(x))
 }

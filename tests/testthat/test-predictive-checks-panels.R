@@ -76,7 +76,7 @@ test_that("compositions use row-wise panels with clear titles and pair counts", 
   on.exit(grDevices::dev.off(), add = TRUE)
   recorded_statistic_titles <- character()
   recorded_panel_positions <- list()
-  recorded_figure_text <- character()
+  recorded_margin_text <- list()
   expected_statistic_titles <- unlist(lapply(
     check_result$compositions$statistics, function(statistics) names(statistics)[-1]
   ))
@@ -90,10 +90,9 @@ test_that("compositions use row-wise panels with clear titles and pair counts", 
       recorded_panel_positions[[length(recorded_panel_positions) + 1L]] <<-
         graphics::par("mfg")
     }
-    recorded_figure_text <<- c(recorded_figure_text, main, sub)
     original_title(main = main, sub = sub, ...)
   }, mtext = function(text, ...) {
-    recorded_figure_text <<- c(recorded_figure_text, text)
+    recorded_margin_text[[length(recorded_margin_text) + 1L]] <<- c(list(text = text), list(...))
     original_margin_text(text, ...)
   }, .package = "graphics")
 
@@ -107,13 +106,41 @@ test_that("compositions use row-wise panels with clear titles and pair counts", 
     cbind(rep(1:2, each = 2L), rep(1:2, 2L), 2L, 2L)
   )
   expect_equal(do.call(rbind, recorded_panel_positions), expected_panel_positions)
-  for (composition_label in check_result$compositions$label) {
-    composition_titles <- recorded_figure_text[
-      grepl(composition_label, recorded_figure_text, fixed = TRUE)
-    ]
-    expect_true(length(composition_titles) >= 1L)
-    expect_true(any(grepl("120.*360", composition_titles)))
-  }
+  headings <- Filter(function(text) isTRUE(text$outer) && isTRUE(text$side == 3) &&
+    length(text$text) == 1L && text$text %in% check_result$compositions$label,
+    recorded_margin_text)
+  subtitles <- Filter(function(text) isTRUE(text$outer) && isTRUE(text$side == 3) &&
+    length(text$text) == 1L && grepl("120.*360", text$text), recorded_margin_text)
+  expect_identical(vapply(headings, `[[`, "", "text"), check_result$compositions$label)
+  expect_length(subtitles, 3)
+  expect_true(all(vapply(headings, `[[`, 0, "font") == 2))
+  expect_true(all(vapply(headings, `[[`, 0, "cex") > vapply(subtitles, `[[`, 0, "cex")))
+  expect_true(all(grepl("model-centred", vapply(subtitles, `[[`, "", "text"))))
+})
+
+
+test_that("long composition headings fit and retain their size across page layouts", {
+  grDevices::pdf(NULL, width = 12, height = 8)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  composition <- paste(rep("a detailed partner role", 6), collapse = " - ")
+  headings <- list()
+  original_mtext <- graphics::mtext
+  local_mocked_bindings(mtext = function(text, ...) {
+    arguments <- list(...)
+    if (identical(text, composition)) headings[[length(headings) + 1L]] <<- c(
+      size = arguments$cex,
+      width = graphics::strwidth(text, "inches", font = arguments$font,
+                                 cex = arguments$cex / graphics::par("cex"))
+    )
+    original_mtext(text, ...)
+  }, .package = "graphics")
+  for (rows in c(2, 4)) plot_check_page(composition, "Residual checks", c(rows, 2), {
+    for (panel in seq_len(rows * 2)) graphics::plot.new()
+  })
+  expect_length(headings, 2)
+  expect_equal(headings[[1]], headings[[2]])
+  expect_lt(headings[[1]]["size"], 1.4)
+  expect_lte(headings[[1]]["width"], .95 * grDevices::dev.size("in")[1])
 })
 
 
@@ -194,7 +221,7 @@ test_that("panel plotting restores graphics settings after success and errors", 
                 cex = 0.9, mex = 1.2, cex.main = 1.1)
   graphics::par(plt = c(0.2, 0.8, 0.2, 0.8))
   previous_graphics_settings <- graphics::par(
-    c("mfcol", "mfg", "mar", "oma", "cex", "mex", "cex.main", "plt")
+    c("mfcol", "mfg", "mar", "oma", "cex", "mex", "cex.main", "mgp", "las", "plt", "new")
   )
   # Use the real pause setting: restoring par() can overwrite it too.
   grDevices::devAskNewPage(TRUE)

@@ -37,7 +37,8 @@
 #'
 #' @section Reading the plots:
 #' Each composition gets one pooled column for same-role partners, or separate
-#' columns for distinct roles. Roles define the display even if the fitted model
+#' columns for distinct roles. Every page repeats the composition heading.
+#' Roles define the display even if the fitted model
 #' treats partners as exchangeable. Available responses are retained when the
 #' composition is known; unknown compositions are omitted with a warning.
 #'
@@ -200,7 +201,7 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
                       lwd = if (quartiles && curve_index == 2) 2 else 1, col = "#a12b35")
   }
   caption <- function(text) {
-    graphics::mtext(text, side = 1, line = 4.8, cex = .7 * plot_scale)
+    graphics::mtext(text, side = 1, line = 4.8, cex = .875 * graphics::par("cex"))
   }
   empty_plot <- function(title, label = "No fitted observations") {
     graphics::plot.new()
@@ -338,27 +339,15 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     if (include_zeros) statistics <- rbind(statistics, `Number of zeros` = colSums(responses[rows, , drop = FALSE] == 0))
     statistics
   }
-  old_par <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "mfg", "las", "plt"))
-  on.exit(graphics::par(old_par), add = TRUE)
   old_ask <- grDevices::devAskNewPage((is.null(ask) || ask) && grDevices::dev.interactive())
   on.exit(grDevices::devAskNewPage(old_ask), add = TRUE)
-  plot_scale <- 1
-  start_page <- function(rows, columns) {
-    # Fit the complete panel on smaller devices; use a tall device for larger text.
-    plot_scale <<- min(1, grDevices::dev.size("in") / c(5 * columns, 3 * rows + 1))
-    graphics::par(mfrow = c(rows, columns), mar = c(6.8, 4.5, 2, .8),
-                  oma = c(4, 0, 4, 0), mgp = c(2.5, .6, 0), cex = .8 * plot_scale, las = 1)
-  }
-  finish_page <- function(composition, title) {
+  page <- function(rows, title, draw) {
     counts <- paste(length(unlist(composition$rows)), "observations")
     if (!is.null(composition$n_dyads)) counts <- paste(composition$n_dyads, "dyads;", counts)
-    graphics::mtext(paste(composition$label, "-", title, "-", counts),
-                    outer = TRUE, side = 3, line = 2.3, font = 2, cex = .9 * plot_scale)
-    graphics::mtext(paste0(names(composition$rows), " (n = ", lengths(composition$rows), ")"),
-      at = (seq_along(composition$rows) - .5) / length(composition$rows),
-      outer = TRUE, side = 3, line = .5, font = 2, cex = .9 * plot_scale)
-    graphics::mtext("Red: observed. Blue: simulations; ranges are pointwise middle 95%. Some departures occur by chance.\nOverlays: up to 30 datasets. Parameters fixed; no significance tests.",
-                    outer = TRUE, side = 1, line = 1.7, cex = .75 * plot_scale)
+    plot_check_page(composition$label, paste(title, counts, sep = " - "),
+      c(rows, length(composition$rows)), draw,
+      column_titles = paste0(names(composition$rows), " (n = ", lengths(composition$rows), ")"),
+      footer = "Red: observed. Blue: simulations; ranges are pointwise middle 95%. Some departures occur by chance.\nOverlays: up to 30 datasets. Parameters fixed; no significance tests.")
   }
   probabilities <- seq(0, 1, length.out = 201)
   breaks <- seq(0, 1, length.out = 21)
@@ -380,65 +369,65 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     } else if (!(identical(family, "ordinal") ||
                  (family %in% count_families && length(support) <= 20))) support <- NULL
     outcome_limits <- range(responses[composition_rows, ])
-    start_page(4, length(role_rows))
-    for (panel in c("Uniform QQ", "PIT histogram", "Outcomes", "Fitted")) {
-      for (rows in role_rows) {
-        if (!length(rows)) {
-          empty_plot(panel)
-          next
+    page(4, "Residual checks", {
+      for (panel in c("Uniform QQ", "PIT histogram", "Outcomes", "Fitted")) {
+        for (rows in role_rows) {
+          if (!length(rows)) {
+            empty_plot(panel)
+            next
+          }
+          if (panel == "Uniform QQ") {
+            qq <- apply(pit[rows, , drop = FALSE], 2, stats::quantile, probs = probabilities)
+            graphics::plot(probabilities, probabilities, type = "n", main = panel,
+                           xlab = "Uniform quantile", ylab = "PIT quantile")
+            draw_envelopes(probabilities, list(qq))
+            graphics::abline(0, 1, lty = 2, col = "grey40")
+            caption("The red curve should follow the diagonal,\nallowing for the blue variation.")
+          } else if (panel == "PIT histogram") {
+            densities <- apply(pit[rows, , drop = FALSE], 2,
+                               function(x) graphics::hist(x, breaks, plot = FALSE)$density)
+            midpoints <- utils::head(breaks, -1) + diff(breaks) / 2
+            graphics::plot(midpoints, densities[, 1], type = "n", ylim = c(0, max(densities)),
+                           main = panel, xlab = "PIT", ylab = "Density")
+            draw_envelopes(midpoints, list(densities), connect = FALSE)
+            graphics::abline(h = 1, lty = 2, col = "grey40")
+            caption("Red frequencies should be roughly flat.\nCompare each point with its blue range.")
+          } else if (panel == "Outcomes") {
+            draw_predictive(responses[rows, , drop = FALSE], outcome_limits, support, category_labels)
+          } else draw_pattern(rows, predicted, "Fitted", role_rows)
         }
-        if (panel == "Uniform QQ") {
-          qq <- apply(pit[rows, , drop = FALSE], 2, stats::quantile, probs = probabilities)
-          graphics::plot(probabilities, probabilities, type = "n", main = panel,
-                         xlab = "Uniform quantile", ylab = "PIT quantile")
-          draw_envelopes(probabilities, list(qq))
-          graphics::abline(0, 1, lty = 2, col = "grey40")
-          caption("The red curve should follow the diagonal,\nallowing for the blue variation.")
-        } else if (panel == "PIT histogram") {
-          densities <- apply(pit[rows, , drop = FALSE], 2,
-                             function(x) graphics::hist(x, breaks, plot = FALSE)$density)
-          midpoints <- utils::head(breaks, -1) + diff(breaks) / 2
-          graphics::plot(midpoints, densities[, 1], type = "n", ylim = c(0, max(densities)),
-                         main = panel, xlab = "PIT", ylab = "Density")
-          draw_envelopes(midpoints, list(densities), connect = FALSE)
-          graphics::abline(h = 1, lty = 2, col = "grey40")
-          caption("Red frequencies should be roughly flat.\nCompare each point with its blue range.")
-        } else if (panel == "Outcomes") {
-          draw_predictive(responses[rows, , drop = FALSE], outcome_limits, support, category_labels)
-        } else draw_pattern(rows, predicted, "Fitted", role_rows)
       }
-    }
-    finish_page(composition, "Residual checks")
+    })
 
     statistic_names <- unique(unlist(lapply(statistics, rownames)))
     if (!details) statistic_names <- setdiff(statistic_names, "Uniformity")
-    start_page(length(statistic_names), length(role_rows))
-    for (name in statistic_names) for (values in statistics) {
-      if (is.null(values) || !name %in% rownames(values)) empty_plot(name, "Not applicable")
-      else draw_statistic(values[name, ], name)
-    }
-    finish_page(composition, "Spread and extremes")
+    page(length(statistic_names), "Spread and extremes", {
+      for (name in statistic_names) for (values in statistics) {
+        if (is.null(values) || !name %in% rownames(values)) empty_plot(name, "Not applicable")
+        else draw_statistic(values[name, ], name)
+      }
+    })
 
     for (predictor_index in seq_along(predictors)) {
-      start_page(2, length(role_rows))
-      for (distance in c(FALSE, TRUE)) for (rows in role_rows)
-        draw_pattern(rows, predictors[[predictor_index]], names(predictors)[predictor_index],
-                     role_rows, distance)
-      finish_page(composition, names(predictors)[predictor_index])
+      page(2, names(predictors)[predictor_index], {
+        for (distance in c(FALSE, TRUE)) for (rows in role_rows)
+          draw_pattern(rows, predictors[[predictor_index]], names(predictors)[predictor_index],
+                       role_rows, distance)
+      })
     }
     if (details) {
-      start_page(1, length(role_rows))
-      for (rows in role_rows) draw_pattern(rows, predicted, "Fitted", role_rows, TRUE)
-      finish_page(composition, "PIT distance")
+      page(1, "PIT distance", {
+        for (rows in role_rows) draw_pattern(rows, predicted, "Fitted", role_rows, TRUE)
+      })
     }
     if (centred_overlay) {
-      start_page(1, length(role_rows))
-      for (rows in role_rows) {
-        if (!length(rows)) empty_plot("Centred outcome overlay")
-        else draw_predictive(centred[rows, , drop = FALSE], range(centred[composition_rows, ]),
-                             label = "Outcome minus prediction")
-      }
-      finish_page(composition, "Outcomes minus predictions")
+      page(1, "Outcomes minus predictions", {
+        for (rows in role_rows) {
+          if (!length(rows)) empty_plot("Centred outcome overlay")
+          else draw_predictive(centred[rows, , drop = FALSE], range(centred[composition_rows, ]),
+                               label = "Outcome minus prediction")
+        }
+      })
     }
   }
   invisible(pit)
