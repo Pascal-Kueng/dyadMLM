@@ -25,7 +25,7 @@ Description: Provides tools for dyadic multilevel modeling with linear and
     <doi:10.1177/0265407517725407>; the multilevel sum-and-difference
     random-effects implementation for exchangeable dyads adapts del Rosario
     and West (2025) <doi:10.1177/25152459251351286>.
-License: MIT + file LICENSE
+License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0

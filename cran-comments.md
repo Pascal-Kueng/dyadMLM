@@ -1,3 +1,7 @@
+## License change
+
+The package license has changed from MIT + file LICENSE to GPL-3.
+
 ## Test environments
 
 * Fedora Linux 44, R 4.6.1 (2026-06-24), `R CMD check --as-cran`
