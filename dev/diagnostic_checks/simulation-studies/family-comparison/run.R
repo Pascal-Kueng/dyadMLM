@@ -2,10 +2,9 @@
 # The last argument optionally selects comma-separated family names.
 devtools::load_all(quiet = TRUE)
 study_directory <- "dev/diagnostic_checks/simulation-studies"
-script_file <- sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE))
-source(file.path(dirname(script_file), "family-margins.R"))
-source(file.path(dirname(script_file), "plot-family-comparison.R"))
-source(file.path(dirname(script_file), "summarise-family-comparison.R"))
+source(file.path(study_directory, "shared/family-margins.R"))
+source(file.path(study_directory, "family-comparison/plot.R"))
+source(file.path(study_directory, "family-comparison/summarise.R"))
 arguments <- commandArgs(trailingOnly = TRUE)
 repetitions <- if (length(arguments) >= 1L) as.integer(arguments[1]) else 500L
 reference_draws <- if (length(arguments) >= 2L) as.integer(arguments[2]) else 1000L
@@ -224,7 +223,7 @@ for (family_name in selected_families) {
 saved_settings <- read.csv(file.path(output_directory, "settings.csv"))
 if (!plot_only && repetitions == 500L && reference_draws == 1000L &&
     all(family_names %in% saved_settings$family)) {
-  source(file.path(study_directory, "export-report-data.R"))
+  source(file.path(study_directory, "family-comparison/export-report-data.R"))
   rmarkdown::render("vignettes/articles/partner-dependence-simulation.Rmd", quiet = TRUE)
   rmarkdown::render(file.path(study_directory, "../partner-dependence-vignette-draft.Rmd"), quiet = TRUE)
 }

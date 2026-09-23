@@ -64,6 +64,7 @@ articles:
 - title: Predictive checks
   contents:
   - articles/partner-dependence-simulation
+  - articles/covariance-pooling
 
 reference:
 - title: Main functions

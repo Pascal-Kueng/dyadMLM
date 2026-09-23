@@ -87,6 +87,12 @@ with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partne
 illustrates how sample size affects detection when residual partner
 correlation is omitted.
 
+Checking each composition can reveal differences hidden by pooling.
+Flags can occur by chance, especially when checking several summaries.
+They invite investigation, not formal rejection of the model. The
+\href{https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html}{covariance-pooling study}
+illustrates detection and false alarms when checking each composition.
+
 The first set of plots compares:
 \itemize{
 \item \strong{Response SDs:} one for each role, or one common SD for exchangeable members.

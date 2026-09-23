@@ -30,7 +30,7 @@ false-positive rate. Agreement does not establish negligible omitted dependence.
 
 ## Raw versus model-centred APIM checks
 
-The [comparison script](compare-centering.R) uses the same 22,000 datasets, fitted
+The [comparison script](../family-comparison/run.R) uses the same 22,000 datasets, fitted
 models, and 499 reference simulations per fit for both methods. All fits and
 44,000 checks succeeded without warnings. Every model-centred observed correlation,
 reference boundary, and flag matched the original study exactly.
@@ -64,7 +64,7 @@ completed Gaussian results excludes 11 model-centred and one raw opposite-direct
 flags across 16,500 positive-correlation checks per method. The largest change at
 any point is 1.2 percentage points. No models or simulations needed to be rerun.
 
-[Implementation checks](check-family-comparison.R) passed for all 20 families plus
+[Implementation checks](../family-comparison/check.R) passed for all 20 families plus
 zero-inflated Poisson and hurdle NB2. At three predictor values, generated means
 and distribution probabilities agreed with native glmmTMB simulations; response
 predictions differed by at most 2.20e-14. The study's correlation calculation agreed
@@ -100,7 +100,7 @@ At 200 dyads with a second/first SD ratio of 1.25 and independent partners:
 
 This is why the consolidated script retains the mean/difference summaries. The
 comparison also depends on the chosen means, spreads, and category probabilities.
-The [study description](README.md#sensitivity) specifies them.
+The [study description](../README.md#earlier-validation-and-fitting-examples) specifies them.
 
 ## Compact validation
 
@@ -126,4 +126,4 @@ Neither example's observed correlation lies outside its reference range. These
 single datasets illustrate a fitting mechanism, not its frequency. Both reproduce
 the original examples' correlation summaries; numerical accuracy checks pass.
 The full historical studies and their aggregate findings remain in the local
-archive described in [README.md](README.md#saved-results-and-previous-investigations).
+archive described in [README.md](../README.md#earlier-validation-and-fitting-examples).

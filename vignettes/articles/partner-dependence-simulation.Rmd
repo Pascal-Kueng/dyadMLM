@@ -8,13 +8,13 @@ output:
     toc_float: true
     self_contained: true
 params:
-  results_directory: "../../dev/diagnostic_checks/simulation-studies/report-data"
+  results_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/family-comparison"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
   fig.width = 13, fig.height = 6, dpi = 180, fig.retina = 1, out.width = "100%")
-source("../../dev/diagnostic_checks/simulation-studies/plot-family-comparison.R")
+source("../../dev/diagnostic_checks/simulation-studies/family-comparison/plot.R")
 results_directory <- params$results_directory
 settings <- read.csv(file.path(results_directory, "settings.csv")) |>
   dplyr::mutate(dplyr::across(c(mean_settings, dispersion_settings, zero_settings),
@@ -83,7 +83,7 @@ random draws.
 The [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md#tweedie-simulation-repair) give the version, patch, and checks.
 
 The report uses saved results. See the
-[study code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/compare-centering.R), [plot code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/plot-family-comparison.R), and
+[study code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/family-comparison/run.R), [plot code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/family-comparison/plot.R), and
 [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md).
 
 </details>
@@ -147,6 +147,6 @@ for (family_index in seq_len(nrow(settings))) {
     print(knitr::kable(reduced_counts,
       col.names = c("Dyads", "Residual correlation", "Methods", "Generated", "Checked")))
   }
-  cat("\n\nCounts for every plotted point are saved in the [summary table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/summary.csv).\n\n</details>\n\n")
+  cat("\n\nCounts for every plotted point are saved in the [summary table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/family-comparison/summary.csv).\n\n</details>\n\n")
 }
 ```

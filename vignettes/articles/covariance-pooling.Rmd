@@ -1,0 +1,271 @@
+---
+title: "Checking covariance pooling across dyad compositions"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    self_contained: true
+params:
+  results_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/covariance-pooling"
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+  fig.width = 12, fig.height = 6, dpi = 160, out.width = "100%")
+read_results <- function(filename) {
+  read.csv(file.path(params$results_directory, filename))
+}
+conditions <- read_results("conditions.csv")
+summary <- read_results("summary.csv") |> left_join(conditions, by = "condition")
+fit_counts <- read_results("fits.csv")
+scenario_labels <- c(null = "Correct pooling",
+  variance_small = "Female/male SD ratio 1.25", variance_large = "Female/male SD ratio 1.50",
+  correlation_small = "Correlations 0.10 / 0.30 / 0.50",
+  correlation_large = "Correlations -0.10 / 0.30 / 0.70")
+summary <- summary |> mutate(scenario = factor(scenario, levels = names(scenario_labels),
+  labels = scenario_labels))
+statistic_summary <- read_results("stats-summary.csv") |>
+  left_join(conditions, by = "condition") |>
+  mutate(scenario = factor(scenario, levels = names(scenario_labels), labels = scenario_labels))
+false_alarm_results <- summary |> filter(allocation == "balanced", scenario == "Correct pooling")
+false_alarm_rates_at_100 <- false_alarm_results |> filter(n_dyads == 100) |>
+  select(method, rate) |> tibble::deframe()
+plot_rates <- function(results, methods, y_label, y_maximum = 1) {
+  results <- results |> filter(method %in% names(methods)) |>
+    mutate(method = factor(method, levels = names(methods), labels = methods))
+  ggplot(results, aes(n_dyads, rate, colour = method, linetype = method)) +
+    geom_line() +
+    geom_errorbar(aes(ymin = lower, ymax = upper), width = 5, show.legend = FALSE) +
+    geom_point(size = 2, show.legend = FALSE) +
+    scale_x_continuous(breaks = c(40, 60, 100, 200, 400)) +
+    scale_y_continuous(labels = scales::label_percent(), limits = c(0, y_maximum)) +
+    labs(x = "Total number of dyads", y = y_label, colour = NULL,
+      linetype = NULL) +
+    theme_bw(base_size = 12) +
+    theme(legend.position = "bottom", legend.key.width = grid::unit(1.5, "cm"),
+      panel.grid.minor = element_blank())
+}
+percentage_table <- function(results, methods, identifiers) {
+  results |> filter(method %in% names(methods)) |>
+    mutate(method = factor(method, levels = names(methods), labels = methods),
+      percentage = ifelse(checked > 0, sprintf("%.1f", 100 * rate), "—")) |>
+    arrange(scenario, n_dyads, method) |>
+    select(all_of(identifiers), method, percentage) |>
+    tidyr::pivot_wider(names_from = method, values_from = percentage) |>
+    rename(Scenario = scenario, any_of(c("Total dyads" = "n_dyads", "Allocation" = "allocation"))) |>
+    knitr::kable()
+}
+```
+
+```{r preliminary, results='asis'}
+if (any(conditions$repetitions < 1000)) {
+  cat("> **Preliminary run.** These few datasets check that the study works. ",
+    "The rates are too imprecise to interpret. The planned study uses 1,000 datasets per condition.\n\n")
+}
+```
+
+## What the study asks
+
+Can checking each dyad composition reveal covariance differences that an overall
+check misses?
+We simulate Gaussian outcomes for female-female, female-male, and male-male dyads.
+Both models correctly allow different means and actor and partner effects for
+each role and composition. **Only the covariance assumptions differ.**
+
+The simpler model uses one exchangeable covariance across all dyads. The fuller
+model estimates a separate covariance for each composition, allowing unequal role
+variances in female-male dyads. We compare their fit and check whether the simpler
+model reproduces the observed summaries, both pooled and by composition.
+
+Each condition uses `r unique(conditions$repetitions)` generated datasets and
+`r unique(conditions$reference_draws)` reference simulations per pooled model.
+
+Composition checks can reveal differences hidden by pooling. They can also raise
+more false alarms, so higher detection rates alone do not establish a better
+formal test. Read the false-alarm and detection results together.
+
+## False alarms when pooling is correct
+
+A flag means at least one observed summary lies outside its middle 95% simulated
+range. There are four pooled summaries and 14 composition summaries. Inspecting
+more summaries creates more opportunities for a flag, so neither overall rate is
+guaranteed to be 5%. The model comparison uses a likelihood-ratio test at 5%.
+
+```{r false-alarms, fig.alt="False-alarm rates for pooled checks, composition checks, and the likelihood-ratio test, by total number of dyads."}
+false_alarm_methods <- c(pooled_any = "Pooled check", composition_any = "Composition checks",
+  likelihood_ratio = "Model comparison")
+false_alarm_axis_maximum <- false_alarm_results |>
+  filter(method %in% names(false_alarm_methods)) |>
+  summarise(upper = max(upper, na.rm = TRUE)) |>
+  pull(upper)
+false_alarm_axis_maximum <- max(0.1, ceiling(false_alarm_axis_maximum * 10) / 10)
+plot_rates(false_alarm_results, false_alarm_methods, "False-alarm rate", false_alarm_axis_maximum) +
+  geom_hline(yintercept = 0.05, colour = "grey60", linetype = "dashed") +
+  annotate("text", x = 400, y = 0.05, label = "5%", hjust = 1, vjust = 1.3, colour = "grey40") +
+  scale_colour_manual(values = rep("black", 3)) +
+  scale_linetype_manual(values = c("solid", "dotted", "longdash"))
+```
+
+At 100 total dyads, the composition checks raised a false alarm in
+`r scales::percent(false_alarm_rates_at_100[["composition_any"]], accuracy = 0.1)`
+of datasets. The model comparison did so in
+`r scales::percent(false_alarm_rates_at_100[["likelihood_ratio"]], accuracy = 0.1)`.
+
+Points use only datasets with a usable fit and check. Missing results do not count
+as agreement. Bars show 95% intervals for uncertainty from the finite number of
+study datasets. Fit counts are below.
+
+## When covariance pooling is wrong
+
+We vary either the female/male residual SD ratio within female-male dyads or the
+partner correlations across compositions. These differences leave the pooled
+covariance unchanged, so the pooled check has no population mismatch to detect.
+Correlation labels list female-female, female-male, and male-male dyads, in that order.
+
+For composition checks, detection requires a flag on a truly affected summary
+**in the correct direction**. The model comparison tests the covariance restrictions
+together and does not identify a direction. At 100 total dyads, each composition
+contains about 33 dyads.
+
+```{r alternatives, fig.height=8, fig.alt="Correct-direction detection by composition checks and rejection by the model comparison, across sample sizes and four covariance conditions."}
+summary |> filter(allocation == "balanced", scenario != "Correct pooling") |>
+  plot_rates(c(expected_direction = "Composition checks (correct direction)",
+    likelihood_ratio = "Model comparison"), "Datasets with a detected mismatch") +
+  facet_wrap(~scenario, ncol = 2) +
+  scale_colour_manual(values = c("#D55E00", "#009E73")) +
+  scale_linetype_manual(values = c("solid", "dashed"))
+```
+
+<details>
+<summary>Direction and additional flags</summary>
+
+Opposite-direction flags concern affected summaries but point the wrong way.
+A dataset can have both correct- and opposite-direction flags.
+
+The last two columns count any composition flag when the other method did not
+flag, using datasets where both methods were available. All entries are percentages.
+
+```{r directions}
+summary |> filter(allocation == "balanced", scenario != "Correct pooling",
+  n_dyads %in% c(100, 400)) |>
+  percentage_table(c(expected_direction = "Correct direction",
+    opposite_direction = "Opposite direction",
+    composition_without_pooled = "Composition only: vs pooled",
+    composition_without_lrt = "Composition only: vs comparison"), c("scenario", "n_dyads"))
+```
+
+</details>
+
+### Which summaries are flagged?
+
+This plot counts **any flag for each summary**, in either direction, at 100 total
+dyads. Outlines mark quantities that truly differ from the pooled model.
+A darker cell means more frequent flags.
+
+```{r localization, fig.height=7, fig.alt="Any-direction flag rates for each composition summary at 100 total dyads. Outlined cells identify quantities that truly differ from the pooled model."}
+localization_results <- statistic_summary |> filter(allocation == "balanced", n_dyads == 100,
+  scenario != "Correct pooling", composition != "All dyads") |>
+  mutate(statistic = sub(" \\((exchangeable|about zero|female minus male|female and male)\\)$", "", statistic),
+    statistic = sub("Dyad-average/role-difference", "Average/difference", statistic))
+ggplot(localization_results, aes(scenario, statistic, fill = rate)) + geom_tile(colour = "white") +
+  geom_tile(data = filter(localization_results, expected_direction != 0),
+    fill = NA, colour = "grey35", linewidth = 0.5) +
+  geom_text(aes(label = sprintf("%.0f%%", 100 * rate), colour = rate > 0.6), size = 3.5) +
+  facet_grid(composition ~ ., scales = "free_y", space = "free_y") +
+  scale_x_discrete(labels = function(x) sub("(SD ratio |Correlations )", "\\1\n", x)) +
+  scale_fill_gradient(low = "white", high = "#0072B2", limits = c(0, 1),
+    labels = scales::label_percent(), name = "Any flag for each summary") +
+  scale_colour_manual(values = c("black", "white"), guide = "none") +
+  labs(x = NULL, y = NULL) + theme_minimal(base_size = 11) +
+  theme(panel.grid = element_blank(), legend.position = "bottom")
+```
+
+## Unequal composition sizes
+
+At 100 total dyads, we also compare roughly equal groups with 20 female-female,
+60 female-male, and 20 male-male dyads. Total sample size can hide how little
+information is available for a particular composition.
+
+<details>
+<summary>Results with equal and unequal group sizes</summary>
+
+Entries are percentages. A dash means that no rate is available. Correct-direction
+flags do not apply when pooling is correct.
+
+```{r allocation}
+summary |> filter(n_dyads == 100) |>
+  percentage_table(c(composition_any = "Any composition flag",
+    expected_direction = "Correct direction", likelihood_ratio = "Model comparison"),
+    c("scenario", "allocation"))
+```
+
+</details>
+
+## Study details
+
+<details>
+<summary>Data, models, and interpretation</summary>
+
+Every generated dataset is prepared with `prepare_dyad_data()`. Both models use
+the package's covariance structures and `dispformula = ~0`. The pooled model has
+one shared dyad effect and one arbitrary member-contrast effect. The fuller model
+has separate shared and contrast effects for each same-role composition and an
+unstructured female-male block. They estimate two and seven covariance parameters,
+respectively. The likelihood-ratio test uses five degrees of freedom.
+
+Predictors are standard normal, with partner correlation 0.3. Residual errors are
+independent of predictors. The true mean coefficients are:
+
+| Composition | Role | Intercept | Actor effect | Partner effect |
+| --- | --- | ---: | ---: | ---: |
+| Female-female | Female | 0.2 | 0.5 | 0.3 |
+| Female-male | Female | 0.4 | 0.6 | 0.2 |
+| Female-male | Male | -0.2 | 0.4 | 0.4 |
+| Male-male | Male | -0.1 | 0.3 | 0.2 |
+
+Balanced allocations use these counts:
+
+```{r composition-counts}
+conditions |> filter(allocation == "balanced") |>
+  distinct(n_dyads, female_female_dyads, female_male_dyads, male_male_dyads) |>
+  knitr::kable(col.names = c("Total dyads", "Female-female", "Female-male", "Male-male"))
+```
+
+All residual SDs are 1 and correlations are 0.3 under correct pooling. In the SD
+conditions, female-male variances sum to 2 and their covariance remains 0.3.
+Holding covariance fixed while changing the SDs also slightly changes their correlation.
+Every condition retains a pooled population variance of 1 and covariance of 0.3.
+
+Checks subtract fitted fixed-effect predictions. Pooled and composition checks use
+the same reference simulations with parameters held fixed, without refitting.
+The fully flexible covariance model is used for model comparison, not checked
+against the same moments it estimates. This follows the rationale for choosing
+informative summaries in the
+[Stan guide](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html#which-statistics-to-test).
+
+These results assume a correct mean model. In practice, omitted predictors can
+also cause mismatches. Agreement does not show that fixed effects can be pooled
+or that the model fits well in every respect.
+
+</details>
+
+<details>
+<summary>Fitting and saved results</summary>
+
+```{r fitting}
+fit_counts |> group_by(model) |>
+  summarise(across(c(attempted, usable, with_warnings, check_failures,
+    comparison_failures), sum), .groups = "drop") |>
+  knitr::kable(col.names = c("Model", "Attempted", "Usable", "Warnings",
+    "Check failures", "Comparison failures"))
+```
+
+Rates exclude failed fits, convergence or Hessian problems, and unavailable
+checks. Warnings are counted separately and do not necessarily invalidate a fit.
+The [study script](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/covariance-pooling/run.R) records per-dataset results and exports
+the tables used here. Re-rendering this report changes no fitted models or results.
+
+</details>

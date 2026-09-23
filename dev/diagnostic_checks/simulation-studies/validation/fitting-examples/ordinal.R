@@ -1,4 +1,4 @@
-# Run from the repository root: Rscript dev/diagnostic_checks/simulation-studies/fitting-examples/ordinal.R
+# Run from the repository root: Rscript dev/diagnostic_checks/simulation-studies/validation/fitting-examples/ordinal.R
 # One original balanced dataset illustrates a fitting approximation, not flag rates.
 # Both fits use the same ordinal model with one shared normal effect per dyad.
 pkgload::load_all(quiet = TRUE)

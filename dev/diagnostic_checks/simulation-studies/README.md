@@ -1,164 +1,177 @@
 # Partner-dependence studies
 
-Start with `compare-centering.R` for the current family comparison. `sensitivity.R`
-retains the earlier study of omitted correlation and unequal SDs; the other scripts
-answer narrower validation questions.
-These are descriptive predictive checks, not calibrated significance tests.
+These studies assess descriptive predictive checks, not calibrated significance
+tests. Each study has its own script folder and compact tables in `report-data/`.
+Public report sources stay in `vignettes/articles/`.
 
-| Script | Purpose |
-| --- | --- |
-| [sensitivity.R](sensitivity.R) | Sensitivity to omitted positive or negative correlation and unequal SDs |
-| [compare-centering.R](compare-centering.R) | Compare raw and model-centred checks across all supported families |
-| [check-family-comparison.R](check-family-comparison.R) | Verify family generators and the study's correlation calculation |
-| [family-margins.R](family-margins.R) | Generate each response distribution and calibrate residual correlation |
-| [Report source](../../../vignettes/articles/partner-dependence-simulation.Rmd) | Render all family plots and settings from saved summary tables |
-| [export-report-data.R](export-report-data.R) | Export the completed study's summary tables for the website |
-| [plot-family-comparison.R](plot-family-comparison.R) | Draw detection and false-alarm plots from saved summary tables |
-| [summarise-family-comparison.R](summarise-family-comparison.R) | Count expected-direction detections and opposite-direction flags |
-| [validation.R](validation.R) | Known-parameter references and correct versus restricted covariance models |
-| [fitting-examples/ordinal.R](fitting-examples/ordinal.R) | Compare Laplace fitting with more accurate quadrature |
-| [fitting-examples/lognormal.R](fitting-examples/lognormal.R) | Compare Laplace fitting with direct likelihood integration |
+| Folder | Purpose | Report |
+| --- | --- | --- |
+| [family-comparison](family-comparison/run.R) | Raw versus model-centred correlation checks across response families | [Full report](../../../vignettes/articles/partner-dependence-simulation.Rmd) |
+| [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
+| [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | Running; [draft source](generalized-covariance-pooling/report-draft.Rmd) |
+| [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
-The [full family report](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html) describes the current study;
-[recorded earlier results](results-summary.md) cover the historical investigations.
-The separate
-[family checks](../README.md#validation) and package tests protect implementation
-correctness, including category scoring, fitted-row alignment, and zero components.
+[Shared family generators](shared/family-margins.R) are used by both family studies.
+The separate [family checks](../README.md#validation) and package tests check
+implementation details such as category scoring and fitted-row alignment.
 
-## Sensitivity
+## Saved results and reproduction
 
-This retained study uses intercept-only Gaussian, NB2, ordinal, and lognormal
-models at 50, 200, and 1,000 dyads, with the original generation and seeds.
-Its defaults remain **200 datasets per condition and 499 simulations per fit**
-to reproduce the historical results. The current family comparison below uses
-500 datasets and 1,000 simulations.
-
-The correlation sweep uses copula correlations -0.25, 0, 0.10, 0.25, and 0.50.
-The SD sweep uses second/first SD ratios 1.10, 1.25, and 1.50 with independent
-partners. One combined condition uses correlation 0.25 and SD ratio 1.25.
-
-The family examples have these marginal distributions before changing the second SD:
-
-| Family | Mean | SD | Generation |
-| --- | ---: | ---: | --- |
-| Gaussian | 0 | 1 | Normal responses |
-| NB2 | 3 | 2 | `size = mean^2 / (SD^2 - mean)` |
-| Ordinal | 2.5 | 0.8 | Four scores; probabilities `p, 0.5-p, 0.5-p, p`, with `p = (SD^2-0.25)/4` |
-| Lognormal | 3 | 2 | Log variance `log(1 + SD^2 / mean^2)` |
-
-Correlated normal draws are transformed to these distributions. Copula correlation
-is generally different from response correlation. These intercept-only examples
-are not directly comparable with the current family comparison, which includes
-actor and partner effects.
-
-The checks use raw responses and first/second role labels. Each fit assumes
-independent partners and equal role variances. New runs save all six panel
-statistics and summarise whether either role SD is flagged, so a separate SD
-follow-up is unnecessary.
-
-A flag means the observed statistic falls outside its middle 95% simulated range.
-The zero-correlation baseline is measured rather than assumed to be 5%. Simulations
-keep fitted parameters fixed and are not refitted. Fits with convergence or Hessian
-problems are recorded and excluded without retry; missing ordinal categories are
-recorded as study exclusions. Undefined reference draws and warnings are retained.
-
-Run from the repository root:
+Run commands below from the repository root. Limit numerical libraries to one
+thread per worker, and use at most ten workers across jobs. On Windows, use one
+worker. Seeds do not depend on worker count.
 
 ```sh
-Rscript dev/diagnostic_checks/simulation-studies/sensitivity.R
-Rscript dev/diagnostic_checks/simulation-studies/sensitivity.R 200 499 4 plot
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
 ```
 
-Optional arguments are datasets per condition, reference draws, workers, and `plot`.
-The second command refreshes saved summaries without refitting. Use one worker on
-Windows. Seeds do not depend on worker count. A glmmTMB version with `ordinal()`
-is required. Summary tables include 95% Wilson intervals; with 200 datasets, the
-maximum Monte Carlo SE is about 3.5 percentage points.
+Git keeps the scripts, report sources, and compact aggregate tables under
+`report-data/<study>/`. Local outputs under `results/` are ignored, including
+checkpoints, logs, archives, and local libraries. Rendered files are ignored too.
+Checkpoints save per-dataset statistics, fit diagnostics, and seeds, plus covariance
+recovery for screening. They do not save complete fitted model objects.
+
+The family comparison and covariance studies resume saved runs. Reports rebuild
+from exported tables without refitting. New diagnostics may require refitting;
+changes to the study design require a new run. Failed fits remain recorded and
+are excluded from check rates. Reference simulations keep fitted parameters fixed.
+Reported rate intervals are 95% Wilson intervals.
+
+## Gaussian covariance pooling
+
+Both models use the package's data preparation and covariance terms, with the
+same correctly specified, distinguishable fixed effects. Five settings cover
+correct pooling, two sizes of role SD differences, and two sizes of correlation
+differences between compositions. All retain the same pooled population variance
+and covariance. Samples contain 40, 60, 100, 200, or 400 dyads. A further 100-dyad
+setting contains 20 female-female, 60 female-male, and 20 male-male dyads.
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/covariance-pooling/run.R 1000 1000 4 run
+```
+
+Arguments are datasets per condition, reference simulations per fit, workers, and
+`run` or `summarise`; the command shows the defaults. Progress is saved every ten
+datasets under `results/covariance-pooling/`. `summarise` refreshes tables without
+refitting. A complete default run exports four tables to
+`report-data/covariance-pooling/` and renders the standalone report.
+
+For a short development run, use `5 1000 4 run`. Render the report source with
+`rmarkdown::render()` and its absolute output directory as `results_directory`.
+Treat those results as preliminary.
+
+## Generalized covariance pooling
+
+This study is running. Its report remains a development draft until the results
+are reviewed. The [screen](generalized-covariance-pooling/screen-families.R) uses
+50 datasets per setting at 40, 100, and 400 dyads. It covers correct pooling,
+a latent role SD ratio of 1.5, and latent correlations of -0.1, 0.3, and 0.7 across
+compositions. Both fitted models retain dependence and distinguishable fixed effects.
+
+Selection requires at least 90% usable fits for both models in every setting at
+400 dyads. Across the full model's compositions and settings, median relative
+variance bias must be at most 25%, median absolute relative variance error at most
+50%, and absolute median correlation bias at most 0.15. Passing these practical
+criteria does not guarantee reliable fitting in other settings.
+
+Ordinal-probit and skew-normal models are excluded before numerical screening.
+The full latent structure leaves the ordinal scale unidentified. For skew-normal
+responses, Gaussian variation can move between the response distribution and
+latent effects. These limits concern this parameterization, not package support.
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/generalized-covariance-pooling/screen-families.R 50 10
+Rscript dev/diagnostic_checks/simulation-studies/generalized-covariance-pooling/check.R
+Rscript dev/diagnostic_checks/simulation-studies/generalized-covariance-pooling/run.R 500 1000 10
+```
+
+The [known-parameter check](generalized-covariance-pooling/check.R) compares the
+generators' response moments with native glmmTMB simulations. The main study uses
+fresh seeds, 500 datasets per condition, 1,000 reference simulations per fitted
+model, and the same three sample sizes. It checks pooled and full models across
+all five covariance settings. Family dispersion, where present, is estimated in
+both. Flags concern response summaries, so their direction is not inferred from
+latent covariance changes.
+
+Both runners save progress every five datasets. Screening tables go to
+`report-data/generalized-covariance-screening/`; main-study tables go to
+`report-data/generalized-covariance-pooling/` only after the complete default run,
+which also renders the local report. The [helpers](generalized-covariance-pooling/helpers.R) reuse Gaussian preparation
+and the shared family generators. Bell requires `gsl`. If Tweedie is selected,
+use the isolated sampler repair described below.
 
 ## Raw versus model-centred checks
 
-`compare-centering.R` covers the 20 supported families, plus zero-inflated Poisson
-and hurdle NB2 models. Both checks use the same fitted model and reference
-simulations for each dataset; only subtraction of the fixed-effect predictions
-changes. The Gaussian example retains the original APIM data and seeds.
+This completed study covers 20 supported families, zero-inflated Poisson, and
+hurdle NB2. Both checks use the same fitted model and reference simulations. Only
+subtraction of fixed-effect predictions differs. Actor and partner effects are
+0.5 and 0.3, with standard normal predictors correlated at 0.3. Models include
+these effects but omit the remaining partner dependence.
 
-Actor and partner effects are 0.5 and 0.3. Predictors are standard normal with
-partner correlation 0.3. Fitted models include these effects but omit the remaining
-partner dependence. [family-margins.R](family-margins.R) specifies each distribution
-and calibrates residual correlations of 0, 0.10, 0.30, and 0.50 **after subtracting
-the true conditional response means**. Independent checks of these correlations
-are saved alongside the results. Ordinal checks use category scores; zero-inflated
-and hurdle checks use the combined outcome, including zeros.
+The [generators](shared/family-margins.R) calibrate residual correlations of
+0, 0.10, 0.30, and 0.50 after subtracting the true conditional response means.
+Independent calibration checks are saved. Ordinal outcomes use category scores;
+zero-inflated and hurdle outcomes include zeros. Sample sizes are 20, 40, 60, 80,
+100, 150, 200, 300, 400, 500, and 1,000 dyads.
 
-The study saves paired plots, detection rates, paired differences, and fitting failures.
-For positive residual correlations, detection requires the observed correlation to
-exceed the upper 97.5th percentile of its simulated reference. Opposite-direction
-flags are reported separately. Zero-correlation conditions count either tail,
-showing how often the check flags a mismatch when no dependence was omitted.
-Each family also has a false-alarm plot with black solid and dotted lines
-for the two methods. Its 5% reference line is a benchmark, not a guaranteed rate.
+For positive correlations, detection requires exceeding the reference's 97.5th
+percentile. Opposite-direction flags are reported separately. At zero correlation,
+either tail counts as a false alarm. The 5% plot line is a benchmark, not a
+promised rate. The study also records paired differences and fitting failures.
 
 ```sh
-Rscript dev/diagnostic_checks/simulation-studies/compare-centering.R
+Rscript dev/diagnostic_checks/simulation-studies/family-comparison/run.R 500 1000 8 run
+Rscript dev/diagnostic_checks/simulation-studies/family-comparison/run.R 500 1000 8 plot
 ```
 
-Optional arguments are generated datasets per condition, reference simulations
-per fit, workers, `run` or `plot`, and comma-separated family names. Defaults are
-`500 1000 8 run`, using all families. For example:
+Arguments are datasets per condition, reference simulations per fit, workers,
+`run` or `plot`, and optional comma-separated families, such as
+`gaussian,nbinom2,zi_poisson,hurdle_nbinom2`. The first command shows the defaults.
+Progress is saved every 25 datasets under `results/family-comparison/<settings>/`.
+`plot` redraws saved results. Full runs require `gsl` and glmmTMB with `ordinal()`.
+COM-Poisson settings can be slow.
+
+A complete default run exports four tables to `report-data/family-comparison/`,
+renders the report, and updates selected figures in the
+[vignette draft](../partner-dependence-vignette-draft.Rmd). The folder also contains
+[plotting](family-comparison/plot.R), [summarising](family-comparison/summarise.R),
+and [export](family-comparison/export-report-data.R) helpers.
+
+## Rebuild completed reports
+
+After changing text or plots, rebuild from the compact tables without simulations:
+
+```r
+pkgdown::build_article("articles/partner-dependence-simulation")
+pkgdown::build_article("articles/covariance-pooling")
+```
+
+After updating saved family-comparison results, first refresh its exported tables:
 
 ```sh
-Rscript dev/diagnostic_checks/simulation-studies/compare-centering.R 500 1000 8 run gaussian,nbinom2,zi_poisson,hurdle_nbinom2
-Rscript dev/diagnostic_checks/simulation-studies/compare-centering.R 500 1000 8 plot
+Rscript dev/diagnostic_checks/simulation-studies/family-comparison/export-report-data.R
 ```
 
-Use one worker on Windows. Seeds do not depend on worker count. Progress is saved
-every 25 datasets and at the end of each condition; rerunning resumes from the last
-saved dataset. Outputs are in `results/family-comparison/<settings>/`. The `plot`
-option redraws saved results without fitting models.
-
-The complete default run exports the report tables, renders the [full report](../../../vignettes/articles/partner-dependence-simulation.Rmd), and
-updates the selected figures in the [vignette draft](../partner-dependence-vignette-draft.Rmd).
-The report uses four small tables in `report-data/`, which are kept in Git.
-It can be built without the full simulation results. To change text, layout,
-colours, or axes, edit the report or [plotting helper](plot-family-comparison.R)
-and rebuild from the repository root:
-
-```sh
-Rscript -e 'pkgdown::build_article("articles/partner-dependence-simulation")'
-```
-
-This does not generate data, fit models, or simulate responses. After updating the
-completed study results, refresh the report tables before rebuilding:
-
-```sh
-Rscript dev/diagnostic_checks/simulation-studies/export-report-data.R
-```
-
-Changing the study design or recomputing a different check requires a new run.
-
-Increasing reference simulations improves each fitted model's reference range;
-increasing generated datasets improves the precision of the plotted detection rates.
-The defaults are 1,000 reference simulations and 500 generated datasets per point.
-The full run needs a glmmTMB version with `ordinal()` and the `gsl` package for Bell
-simulations. Some families, especially COM-Poisson, take much longer to simulate.
+More reference simulations refine each fit's reference range. More generated
+datasets improve the precision of the plotted flag rates. They serve different
+purposes; the family study uses 1,000 and 500, respectively.
 
 ## Tweedie simulation repair
 
-The full run used glmmTMB commit `93c774717c0f10b600c25dd21f393d03155efc3f`.
-Four Tweedie conditions stalled when fitted power approached 2: its sampler tried
-to add millions of Gamma draws for each response. The two-line
-[sampler patch](tweedie-sampler.patch) replaces that sum with one Gamma draw whose
-shape is multiplied by the number of terms, matching TMB 1.9.25. This preserves
-the distribution and fitting code, but changes random-number realizations.
+The family comparison used glmmTMB commit
+`93c774717c0f10b600c25dd21f393d03155efc3f`. Four Tweedie conditions stalled when
+fitted power approached 2 because the sampler added millions of Gamma draws per
+response. The two-line [patch](family-comparison/tweedie-sampler.patch) replaces
+that sum with one Gamma draw with its shape multiplied by the number of terms,
+matching TMB 1.9.25. The distribution and fitting code are unchanged, but random
+realizations differ.
 
-The remaining 1,450 datasets in those conditions used the repaired sampler;
-completed results were retained. Checks confirmed unchanged fitted parameters
-and the expected simulation moments and zero probabilities. The patch, resumed
-repetition ranges, and validation results are saved under
-`results/family-comparison/tweedie-repair/`.
+The remaining 1,450 datasets in those conditions used the repair; completed
+results were retained. Checks confirmed unchanged estimates and expected response
+moments and zero probabilities. Resumed repetition ranges and validation results
+are saved in `results/family-comparison/tweedie-repair/`.
 
-To build the same repair separately from the normal user library, run from the
-repository root with TMB 1.9.25 and glmmTMB's build dependencies installed:
+To build the repair separately, with TMB 1.9.25 and glmmTMB build dependencies:
 
 ```sh
 study_directory="$PWD/dev/diagnostic_checks/simulation-studies"
@@ -166,60 +179,53 @@ tweedie_library="$study_directory/results/tweedie-library"
 mkdir -p "$tweedie_library"
 git clone https://github.com/glmmTMB/glmmTMB.git "$study_directory/results/tweedie-source"
 git -C "$study_directory/results/tweedie-source" checkout 93c774717c0f10b600c25dd21f393d03155efc3f
-patch -d "$study_directory/results/tweedie-source" -p1 < "$study_directory/tweedie-sampler.patch"
+patch -d "$study_directory/results/tweedie-source" -p1 < "$study_directory/family-comparison/tweedie-sampler.patch"
 R CMD INSTALL --library="$tweedie_library" "$study_directory/results/tweedie-source/glmmTMB"
-R_LIBS="$tweedie_library" Rscript dev/diagnostic_checks/simulation-studies/compare-centering.R 500 1000 10 run tweedie
+R_LIBS="$tweedie_library" Rscript dev/diagnostic_checks/simulation-studies/family-comparison/run.R 500 1000 10 run tweedie
 ```
 
-`R_LIBS` selects the local repair for this command while keeping the normal user
-library available. It does not replace the normal glmmTMB installation. The saved
+`R_LIBS` selects this repair without replacing the normal installation. The saved
 study combines both samplers, so a fresh run will not reproduce every draw exactly.
 
-## Validation and fitting examples
+## Earlier validation and fitting examples
+
+The retained [sensitivity study](validation/sensitivity.R) uses intercept-only
+Gaussian, NB2, ordinal, and lognormal models at 50, 200, and 1,000 dyads. Defaults
+remain 200 datasets and 499 reference simulations to reproduce earlier results.
+Copula correlations are -0.25, 0, 0.10, 0.25, and 0.50. Separate SD settings use
+second/first ratios of 1.10, 1.25, and 1.50 with independent partners; one combined
+setting uses correlation 0.25 and ratio 1.25.
+
+Before changing the second SD, Gaussian responses have mean 0 and SD 1; NB2 and
+lognormal responses have mean 3 and SD 2. Ordinal scores have mean 2.5 and SD 0.8.
+Correlated normal draws are transformed to these distributions. Copula correlation
+usually differs from response correlation. Checks use raw responses and first/second
+roles. These intercept-only settings are not directly comparable with the family
+study above. New runs save all six summary statistics.
 
 ```sh
-Rscript dev/diagnostic_checks/simulation-studies/check-family-comparison.R
-Rscript dev/diagnostic_checks/simulation-studies/validation.R
-Rscript dev/diagnostic_checks/simulation-studies/fitting-examples/ordinal.R
-Rscript dev/diagnostic_checks/simulation-studies/fitting-examples/lognormal.R
+Rscript dev/diagnostic_checks/simulation-studies/validation/sensitivity.R 200 499 4
+Rscript dev/diagnostic_checks/simulation-studies/validation/sensitivity.R 200 499 4 plot
+Rscript dev/diagnostic_checks/simulation-studies/family-comparison/check.R
+Rscript dev/diagnostic_checks/simulation-studies/validation/validation.R 20 199 200
+Rscript dev/diagnostic_checks/simulation-studies/validation/fitting-examples/ordinal.R
+Rscript dev/diagnostic_checks/simulation-studies/validation/fitting-examples/lognormal.R
 ```
 
-Validation defaults to 20 datasets, 199 reference simulations, and 200 dyads;
-these are its three optional arguments. It checks positive and negative Gaussian
-correlation, unequal SDs, exchangeable and role-specific summaries, and a reference
-using the true parameters. Focused zero-inflated and hurdle examples compare both
-dyad effects present with both omitted. It records all statistics on raw and
-model-centred scales. These short runs check behavior, not precise flag rates.
+For sensitivity, `plot` refreshes saved summaries without refitting. Fits with
+convergence or Hessian problems are excluded without retry. Absent ordinal
+categories are recorded as study exclusions. Warnings and undefined draws remain
+saved. With 200 datasets, the maximum Monte Carlo SE is about 3.5 percentage points.
 
-Each fitting example uses one original dataset and the same random draws across
-fitting methods. The ordinal example requires `ordinal` and a glmmTMB version with
-`ordinal()`. The lognormal example retains integration-accuracy and optimizer checks.
-They illustrate fitting discrepancies; they do not reproduce the old repeated-study
-frequencies or establish how often a problem occurs.
+`validation.R` takes datasets, reference simulations, and dyads; defaults are shown
+above. It checks known-parameter references, Gaussian covariance restrictions,
+and omission of response and zero-component dyad effects. These short runs check
+behavior, not precise flag rates. Fitting examples use one original dataset and
+shared random draws. Ordinal fitting requires the `ordinal` package. These examples
+illustrate fitting discrepancies without establishing their frequency.
 
-## Saved results and previous investigations
-
-Generated outputs are ignored under `results/`, with settings-specific folders for
-sensitivity, family comparison, and validation. Fitting examples have their own
-result folders. Family comparisons resume saved runs; the other scripts replace
-their outputs when rerun with the same settings. The completed sensitivity results
-were moved without refitting: they saved three statistics, with the other three
-available for the SD follow-up. New sensitivity runs save all six throughout.
-Historical population-correlation estimates are also preserved alongside these results.
-
-The family comparison explicitly saves per-condition RDS checkpoints, per-dataset
-statistics and fit diagnostics, summary tables, calibration, seeds, and session
-information. The website report reads the exported `report-data/` tables rather
-than a knitr cache. Interrupted runs can resume, and report edits do not invalidate
-the results.
-
-The complete previous collection, including source, reports, seeds, and results,
-is preserved locally in `results/before-consolidation-20260921.tar.gz`. Every archived
-file was verified against its source before cleanup. This ignored archive retains
-the larger studies, component-specific omissions, sparse-category controls, and
-exploratory numerical probes without adding them to routine code review.
-
-The superseded Gaussian APIM script mode and figure are archived with their saved
-results in `results/before-apim-retirement-20260923.tar.gz`. Archived files were
-verified against their originals before removal; `compare-centering.R` now covers
-that design.
+Validation and fitting examples replace outputs for the same settings. Historical
+results and retired scripts remain in ignored archives
+`results/before-consolidation-20260921.tar.gz` and
+`results/before-apim-retirement-20260923.tar.gz`. Their contents were verified before
+cleanup. See [recorded findings](validation/results-summary.md) for context.

@@ -1,12 +1,12 @@
 # Run from the repository root. These checks validate the study implementation.
 devtools::load_all(quiet = TRUE)
 study_directory <- "dev/diagnostic_checks/simulation-studies"
-source(file.path(study_directory, "family-margins.R"))
+source(file.path(study_directory, "shared/family-margins.R"))
 output_directory <- file.path(study_directory, "results/family-comparison/implementation-checks")
 dir.create(output_directory, recursive = TRUE, showWarnings = FALSE)
 
 # Load the actual shortcut without starting the simulation study.
-study_expressions <- parse(file.path(study_directory, "compare-centering.R"))
+study_expressions <- parse(file.path(study_directory, "family-comparison/run.R"))
 for (expression in study_expressions) {
   if (is.call(expression) && identical(expression[[1]], as.name("<-")) &&
       identical(expression[[2]], as.name("partner_correlations"))) eval(expression)

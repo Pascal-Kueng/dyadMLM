@@ -157,6 +157,11 @@ support_adjusted_check <- check_partner_dependence(
 Supplying roles checks variability and association within each composition. It
 does not test whether role means or predictor effects can be pooled.
 
+The [Gaussian covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
+found that checking each composition revealed differences hidden by pooling.
+These checks often detected more mismatches than model comparison, but also raised
+more false alarms. Flags invite investigation, not formal rejection of the model.
+
 ## How much dependence can the check reveal?
 
 These examples compare checks that subtract the fitted fixed-effect predictions
@@ -190,8 +195,10 @@ for (figure_index in which(available_figures)) {
 }
 ```
 
-In the Gaussian example, the default check detected a residual correlation of
-0.30 in about 48% of datasets with 40 dyads and 86% with 100 dyads. A mismatch
+Subtracting fitted predictions generally detected more omitted dependence than
+checking raw outcomes. In the Gaussian example, the default check detected a
+residual correlation of 0.30 in about 48% of datasets with 40 dyads and 86% with
+100 dyads. A mismatch
 can therefore remain unnoticed, especially in smaller samples.
 
 For ordinal outcomes, the check compares category scores 1, 2, and so on;

@@ -1,4 +1,4 @@
-# Run from the repository root: Rscript dev/diagnostic_checks/simulation-studies/fitting-examples/lognormal.R
+# Run from the repository root: Rscript dev/diagnostic_checks/simulation-studies/validation/fitting-examples/lognormal.R
 # One original 200-dyad dataset illustrates fitting, not repeated-study flag rates.
 # Direct integration fits the same model; it is not a proposed package fitting method.
 pkgload::load_all(quiet = TRUE)

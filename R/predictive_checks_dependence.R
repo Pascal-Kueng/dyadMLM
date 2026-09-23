@@ -63,6 +63,12 @@
 #' illustrates how sample size affects detection when residual partner
 #' correlation is omitted.
 #'
+#' Checking each composition can reveal differences hidden by pooling.
+#' Flags can occur by chance, especially when checking several summaries.
+#' They invite investigation, not formal rejection of the model. The
+#' [covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
+#' illustrates detection and false alarms when checking each composition.
+#'
 #' The first set of plots compares:
 #' - **Response SDs:** one for each role, or one common SD for exchangeable members.
 #' - **Partner correlation:** how strongly partners' responses are related.
