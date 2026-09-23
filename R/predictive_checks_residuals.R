@@ -9,13 +9,15 @@
 #'   datasets are required; 1,000 or more are recommended.
 #' @param predictors Optional column names, e.g. `c("age", "stress")`, looked up
 #'   in the model frame or `data`. `NULL` (default) omits additional predictor
-#'   pages. A named list or data frame of values in fitted-row order is also
-#'   accepted. Missing or infinite values are omitted only from that predictor's
+#'   pages. Missing or infinite values are omitted only from that predictor's
 #'   plots. Predicted outcomes are always checked.
 #' @param seed Seed for randomized PIT residuals. The caller's random-number
 #'   state is restored afterwards.
-#' @param ask Pause between pages on interactive devices? `NULL` (default) and
-#'   `TRUE` pause; `FALSE` does not. File devices never pause.
+#' @inheritParams check_partner_dependence
+#' @param panels If `TRUE` (default), arrange checks in complete panels by
+#'   composition, with one column per role or a pooled column. If `FALSE`, draw
+#'   each check and role separately, retaining headings and interpretation tips.
+#'   Only the arrangement changes; results and checks stay the same.
 #' @param dyad,role,member Column names, with or without quotes, identifying
 #'   dyads, roles, and members within dyads. Looked up in the fitted model frame
 #'   or `data`. With `role = NULL`, all observations are pooled. Otherwise supply
@@ -24,13 +26,12 @@
 #' @param data The unchanged data used to fit the model. Supply it when required
 #'   columns are absent from the model frame, or to identify compositions using
 #'   partners whose responses were excluded during fitting.
-#' @param details Add a uniformity histogram and PIT-distance plots against
-#'   predicted outcomes? Default: `FALSE`.
 #'
-#' @return One page per composition, plus optional predictor and detail pages.
-#'   Invisibly returns PIT residuals for all fitted observations: rows are
-#'   observations; columns are observed data followed by the second half of the
-#'   simulations. Graphics settings are restored afterwards.
+#' @return Invisibly returns a `dyadMLM_residual_check` list with the `pit` matrix
+#'   and calculated summaries in `compositions`. PIT rows are fitted observations;
+#'   columns are observed data followed by the second half of the simulations.
+#'   Save it with `plot = FALSE` and draw it later with `plot(result)`.
+#'   Graphics settings are restored afterwards.
 #'
 #' @section Reading the plots:
 #' A composition is the combination of partners' roles. Each composition gets
@@ -41,9 +42,10 @@
 #' are retained when the composition is known; unknown compositions are omitted
 #' with a warning.
 #'
-#' **Red shows observed data; blue shows simulated references.** The four rows
-#' show uniform QQ, a PIT histogram, PIT quartiles against predicted outcomes,
-#' and the number of outcomes outside their simulated range (PIT endpoints).
+#' **Red shows observed data; blue shows simulated references.** The six rows
+#' show uniform QQ, a PIT histogram, PIT quartiles and distance against predicted
+#' outcomes, counts outside the simulated range (PIT endpoints), and overall
+#' departure from uniformity (KS distance).
 #' Use a tall plotting window or save a large figure to keep all rows readable.
 #'
 #' PIT (probability integral transform) residuals rank each outcome from 0 (low)
@@ -54,9 +56,7 @@
 #' not across the whole plot. Some red points can fall outside by chance.
 #' For out-of-range counts, the blue histogram shows simulated counts and the red
 #' line shows the observed count; dashed lines mark the middle 95%.
-#' `details = TRUE` adds a page with overall departure from uniformity (KS
-#' distance) and PIT-distance plots against predicted outcomes.
-#' In these plots, red quartiles should roughly follow the horizontal lines at
+#' In the quartile and distance plots, red curves should roughly follow the lines at
 #' 0.25, 0.50 and 0.75, allowing for the variation in their matching blue bands.
 #'
 #' Each additional predictor gets a page with quartile and distance plots. Numeric
@@ -118,27 +118,21 @@
 #' simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
 #' check_residuals(simulations, dyad = coupleID, role = gender,
 #'                 predictors = "provided_support", ask = FALSE)
+#' # Save the same checks without drawing, then plot individual figures.
+#' result <- check_residuals(simulations, predictors = "provided_support", plot = FALSE)
+#' plot(result, panels = FALSE, ask = FALSE)
 #' @export
 check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL,
-                            predictors = NULL,
-                            seed = 123, ask = NULL,
-                            data = NULL, details = FALSE) {
+                            predictors = NULL, plot = TRUE,
+                            seed = 123, ask = NULL, panels = TRUE, data = NULL) {
   if (!inherits(simulations, "dyadMLM_response_simulations"))
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
   frame <- simulations$model_frame
-  if (is.null(predictors)) predictors <- list()
-  if (is.character(predictors)) {
-    predictors <- stats::setNames(lapply(predictors, function(column) {
-      resolve_fitted_row_argument(rlang::new_quosure(column), "predictors", frame, data)
-    }), predictors)
-  }
-  if (!is.list(predictors))
-    stop("`predictors` must be NULL, column names, or a list or data frame of fitted-row values.", call. = FALSE)
-  names(predictors) <- rlang::names2(predictors)
-  if (!is.null(ask) && !rlang::is_bool(ask))
-    stop("`ask` must be NULL, TRUE, or FALSE.", call. = FALSE)
-  if (!rlang::is_bool(details))
-    stop("`details` must be TRUE or FALSE.", call. = FALSE)
+  if (!is.null(predictors) && !is.character(predictors))
+    stop("`predictors` must be NULL or a character vector of column names.", call. = FALSE)
+  predictors <- stats::setNames(lapply(predictors, function(column) {
+    resolve_fitted_row_argument(rlang::new_quosure(column), "predictors", frame, data)
+  }), predictors)
   withr::local_seed(seed)
   observed <- simulations$observed_response
   predicted <- simulations$predicted_response
@@ -147,20 +141,13 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   if (length(observed) < 2 || nrow(draws) < 4)
     stop("Use at least two observations and four simulated datasets; 1,000 draws are recommended.", call. = FALSE)
 
-  available_predictor <- function(x) {
-    if (is.numeric(x)) is.finite(x) else !is.na(as.character(x))
-  }
   usable_predictors <- logical(length(predictors))
   for (i in seq_along(predictors)) {
     predictor <- predictors[[i]]
     if (!(is.numeric(predictor) || is.factor(predictor) ||
           is.character(predictor) || is.logical(predictor)))
       stop("Each predictor must be numeric or categorical.", call. = FALSE)
-    if (length(predictor) != length(observed) || !is.null(dim(predictor)))
-      stop("Each predictor must contain one value per observation used in the fit.", call. = FALSE)
-    if (names(predictors)[i] == "")
-      names(predictors)[i] <- paste("Predictor", i)
-    available <- available_predictor(predictor)
+    available <- available_check_predictor(predictor)
     usable_predictors[i] <- any(available)
     if (any(!available)) warning(names(predictors)[i], ": omitted ", sum(!available),
       " missing or non-finite values from this predictor's panels.", call. = FALSE)
@@ -181,6 +168,113 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   })
 
   # Matrices retain complete datasets in columns; subset only their rows.
+  probabilities <- seq(0, 1, length.out = 201)
+  breaks <- seq(0, 1, length.out = 21)
+  ks_distance <- function(x) {
+    ordered <- sort(x)
+    ranks <- seq_along(x)
+    max(ranks / length(x) - ordered, ordered - (ranks - 1) / length(x))
+  }
+  for (i in seq_along(compositions)) {
+    role_rows <- compositions[[i]]$rows
+    compositions[[i]]$statistics <- lapply(role_rows, function(rows) {
+      if (!length(rows)) return(NULL)
+      values <- pit[rows, , drop = FALSE]
+      list(
+        qq = residual_curve_summary(apply(values, 2, stats::quantile, probs = probabilities)),
+        histogram = residual_curve_summary(apply(values, 2, function(x)
+          graphics::hist(x, breaks, plot = FALSE)$density)),
+        outliers = colSums(values == 0 | values == 1),
+        uniformity = apply(values, 2, ks_distance)
+      )
+    })
+    compositions[[i]]$patterns <- lapply(c(list(predicted), predictors), function(predictor) {
+      lapply(role_rows, function(rows)
+        calculate_residual_pattern(pit, predictor, rows, role_rows))
+    })
+  }
+  result <- list(pit = pit, compositions = compositions, predictors = names(predictors))
+  attr(result, "dyadMLM") <- attr(simulations, "dyadMLM")
+  class(result) <- c("dyadMLM_residual_check", "list")
+  if (plot) graphics::plot(result, ask = ask, panels = panels)
+  invisible(result)
+}
+
+available_check_predictor <- function(x) {
+  if (is.numeric(x)) is.finite(x) else !is.na(as.character(x))
+}
+
+# Summarize complete reference curves after applying the same smoothing as observed.
+residual_curve_summary <- function(values) {
+  bounds <- apply(values[, -1, drop = FALSE], 1, stats::quantile, c(.025, .975), na.rm = TRUE)
+  list(observed = values[, 1], lower = bounds[1, ], upper = bounds[2, ])
+}
+
+calculate_residual_pattern <- function(pit, predictor, rows, role_rows) {
+  available <- available_check_predictor(predictor)
+  composition_rows <- unlist(role_rows, use.names = FALSE)
+  composition_rows <- composition_rows[available[composition_rows]]
+  rows <- rows[available[rows]]
+  if (!length(rows)) return(NULL)
+  available_values <- predictor[composition_rows]
+  binned <- is.numeric(predictor) && length(unique(available_values)) > 8
+  # Role-specific bins avoid sparsely populated edges caused by pooling roles.
+  grouping_rows <- if (binned) rows else composition_rows
+  groups <- if (binned) {
+    bins <- max(1, min(8, floor(length(rows) / 20)))
+    cuts <- unique(stats::quantile(predictor[rows], seq(0, 1, length.out = bins + 1)))
+    if (length(cuts) > 1) cut(predictor[rows], cuts, include.lowest = TRUE)
+    else factor(predictor[rows])
+  } else factor(available_values)
+  rows_by_group <- split(grouping_rows, groups, drop = TRUE)
+  positions <- if (is.numeric(predictor)) {
+    vapply(rows_by_group, function(rows) mean(predictor[rows]), numeric(1))
+  } else seq_along(rows_by_group)
+  labels <- if (is.numeric(predictor)) format(positions, trim = TRUE) else names(rows_by_group)
+  limits <- if (is.numeric(predictor)) range(available_values) else range(positions)
+  padding <- if (is.numeric(predictor)) {
+    if (!binned && length(positions) > 1) .2 * min(diff(positions)) else 0
+  } else .45
+  smooth <- binned && length(positions) >= 4
+  if (smooth) {
+    grid <- seq(min(predictor[rows]), max(predictor[rows]), length.out = 101)
+    # Fixed positive weights keep quartiles ordered and within 0--1.
+    log_weights <- -.5 * (outer(grid, positions, "-") / stats::median(diff(positions)))^2
+    weights <- exp(log_weights - apply(log_weights, 1, max))
+    weights <- weights / rowSums(weights)
+  }
+  curves <- lapply(list(quantiles = pit, distance = 2 * abs(pit - .5)), function(values) {
+    quartiles <- lapply(rows_by_group, function(group_rows) {
+      apply(values[intersect(rows, group_rows), , drop = FALSE], 2,
+            stats::quantile, probs = c(.25, .5, .75))
+    })
+    lapply(1:3, function(i) {
+      values <- do.call(rbind, lapply(quartiles, function(group) group[i, ]))
+      if (smooth) values <- weights %*% values
+      residual_curve_summary(values)
+    })
+  })
+  list(positions = if (smooth) grid else positions, labels = labels,
+       limits = limits + c(-padding, padding), binned = binned, smooth = smooth,
+       numeric = is.numeric(predictor),
+       points = data.frame(predictor = predictor[rows], pit = pit[rows, 1]),
+       quantiles = curves$quantiles, distance = curves$distance)
+}
+
+#' Plot saved residual checks
+#'
+#' Draw the checks calculated by [check_residuals()] without recalculating PIT.
+#' @param x A result from [check_residuals()].
+#' @inheritParams check_residuals
+#' @param ... Unused.
+#' @return `x`, invisibly.
+#' @keywords internal
+#' @export
+plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
+  local_check_paging(ask, panels, if (panels)
+    length(x$compositions) * (1L + length(x$predictors)) else
+    sum(vapply(x$compositions, function(composition) length(composition$rows), integer(1))) *
+      (6L + 2L * length(x$predictors)))
   draw_envelopes <- function(x, curves, connect = TRUE, boxes = FALSE, smooth = FALSE) {
     quartiles <- length(curves) == 3L
     spacing <- min(diff(x), diff(graphics::par("usr")[1:2]) / 4)
@@ -188,9 +282,8 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     offsets <- offsets * if (boxes) .1 else .12 * spacing
     line_types <- if (smooth) c(2, 1, 3) else rep(1, length(curves))
     for (curve_index in seq_along(curves)) {
-      values <- curves[[curve_index]]
-      bounds <- apply(values[, -1, drop = FALSE], 1, stats::quantile,
-                      c(.025, .975), na.rm = TRUE)
+      curve <- curves[[curve_index]]
+      bounds <- rbind(curve$lower, curve$upper)
       if (connect && (!quartiles || smooth) && all(is.finite(bounds)))
         graphics::polygon(c(x, rev(x)), c(bounds[1, ], rev(bounds[2, ])),
                           col = if (smooth) paste0(check_colours$simulated, "40") else check_colours$simulated, border = NA)
@@ -204,157 +297,95 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
       }
     }
     if (boxes) {
-      observed_quartiles <- do.call(cbind, lapply(curves, function(values) values[, 1]))
+      observed_quartiles <- do.call(cbind, lapply(curves, `[[`, "observed"))
       graphics::rect(x - .18, observed_quartiles[, 1], x + .18, observed_quartiles[, 3],
                      border = check_colours$observed, lwd = 1.5)
       graphics::segments(x - .18, observed_quartiles[, 2], x + .18, observed_quartiles[, 2],
                          col = check_colours$observed, lwd = 2)
     } else for (curve_index in seq_along(curves))
-      graphics::lines(x + offsets[curve_index], curves[[curve_index]][, 1],
+      graphics::lines(x + offsets[curve_index], curves[[curve_index]]$observed,
                       type = if (smooth) "l" else if (connect) "b" else "p",
                       pch = 16, cex = .65, lty = line_types[curve_index],
                       lwd = if (quartiles && curve_index == 2) 2 else 1, col = check_colours$observed)
   }
-  draw_pattern <- function(rows, predictor, name, role_rows, distance = FALSE) {
-    available <- available_predictor(predictor)
-    composition_rows <- unlist(role_rows, use.names = FALSE)
-    composition_rows <- composition_rows[available[composition_rows]]
-    rows <- rows[available[rows]]
+  draw_pattern <- function(pattern, name = NULL, distance = FALSE) {
     title <- paste("PIT", if (distance) "distance" else "quantiles")
     title <- if (is.null(name)) paste0(title, "\n(",
       if (distance) "residual extremes" else "fit", " across predicted outcomes)")
       else paste0(title, " by ", name, "\n(",
         if (distance) "residual extremes" else "fit", " across predictor values)")
-    if (!length(rows)) return(plot_check_empty(title, "No available predictor values"))
-    available_values <- predictor[composition_rows]
-    binned <- is.numeric(predictor) && length(unique(available_values)) > 8
-    # Role-specific bins avoid sparsely populated edges caused by pooling roles.
-    grouping_rows <- if (binned) rows else composition_rows
-    groups <- if (binned) {
-      bins <- max(1, min(8, floor(length(rows) / 20)))
-      cuts <- unique(stats::quantile(predictor[rows], seq(0, 1, length.out = bins + 1)))
-      if (length(cuts) > 1) cut(predictor[rows], cuts, include.lowest = TRUE)
-      else factor(predictor[rows])
-    } else factor(available_values)
-    rows_by_group <- split(grouping_rows, groups, drop = TRUE)
-    positions <- if (is.numeric(predictor)) {
-      vapply(rows_by_group, function(rows) mean(predictor[rows]), numeric(1))
-    } else seq_along(rows_by_group)
-    labels <- if (is.numeric(predictor)) format(positions, trim = TRUE) else names(rows_by_group)
-    predictor_label <- if (is.null(name)) "Predicted outcome" else name
-    limits <- if (is.numeric(predictor)) range(available_values) else range(positions)
-    padding <- if (is.numeric(predictor)) {
-      if (!binned && length(positions) > 1) .2 * min(diff(positions)) else 0
-    } else .45
-    graphics::plot(positions, rep(.5, length(positions)), type = "n", ylim = c(0, 1),
-      xlim = limits + c(-padding, padding),
-      xaxt = if (binned) "s" else "n", yaxt = "n", main = title,
-      xlab = predictor_label,
+    if (is.null(pattern)) return(plot_check_empty(title, "No available predictor values"))
+    curves <- if (distance) pattern$distance else pattern$quantiles
+    graphics::plot(pattern$positions, rep(.5, length(pattern$positions)), type = "n", ylim = c(0, 1),
+      xlim = pattern$limits, xaxt = if (pattern$binned) "s" else "n", yaxt = "n", main = title,
+      xlab = if (is.null(name)) "Predicted outcome" else name,
       ylab = if (distance) "PIT distance" else "PIT quantiles")
-    if (!binned) graphics::axis(1, positions, labels, cex.axis = .8)
+    if (!pattern$binned) graphics::axis(1, pattern$positions, pattern$labels, cex.axis = .8)
     graphics::axis(2, c(0, .25, .5, .75, 1))
     graphics::abline(h = c(.25, .5, .75), lty = 2, col = check_colours$reference)
-    values <- if (distance) 2 * abs(pit - .5) else pit
-    quartiles <- lapply(rows_by_group, function(group_rows) {
-      apply(values[intersect(rows, group_rows), , drop = FALSE], 2,
-            stats::quantile, probs = c(.25, .5, .75))
-    })
-    curves <- lapply(1:3, function(i) do.call(rbind,
-      lapply(quartiles, function(group) group[i, ])))
-    smooth <- binned && length(positions) >= 4
-    if (smooth) {
-      grid <- seq(min(predictor[rows]), max(predictor[rows]), length.out = 101)
-      # Fixed positive weights keep quartiles ordered and within 0--1.
-      log_weights <- -.5 * (outer(grid, positions, "-") / stats::median(diff(positions)))^2
-      weights <- exp(log_weights - apply(log_weights, 1, max))
-      weights <- weights / rowSums(weights)
-      # Smooth complete datasets first; their envelopes are computed afterwards.
-      curves <- lapply(curves, function(values) weights %*% values)
-      positions <- grid
-      graphics::points(predictor[rows], values[rows, 1], pch = 16, cex = .4, col = paste0(check_colours$observed, "20"))
+    if (pattern$smooth) {
+      observed <- pattern$points$pit
+      if (distance) observed <- 2 * abs(observed - .5)
+      graphics::points(pattern$points$predictor, observed, pch = 16, cex = .4,
+                        col = paste0(check_colours$observed, "20"))
     }
-    draw_envelopes(positions, curves, connect = is.numeric(predictor),
-                   boxes = !is.numeric(predictor), smooth = smooth)
+    draw_envelopes(pattern$positions, curves, connect = pattern$numeric,
+                   boxes = !pattern$numeric, smooth = pattern$smooth)
     guide <- if (distance)
       "Red quartiles should roughly follow the horizontal lines within blue ranges.\nAbove a range: more extreme residuals; below: more central residuals."
       else "Red quartiles should roughly follow the horizontal lines within blue ranges.\nPersistent departures suggest patterns the model does not reproduce."
-    key <- if (smooth) "25th: dashed; median: bold; 75th: dotted."
-      else if (is.numeric(predictor)) "Quartiles: 25th, median (bold), 75th, left to right."
+    key <- if (pattern$smooth) "25th: dashed; median: bold; 75th: dotted."
+      else if (pattern$numeric) "Quartiles: 25th, median (bold), 75th, left to right."
       else "Red: box edges and median. Blue: 25th, median, 75th, left to right."
     plot_check_caption(paste(guide, key, sep = "\n"))
   }
-  ks_distance <- function(x) {
-    ordered <- sort(x)
-    ranks <- seq_along(x)
-    max(ranks / length(x) - ordered, ordered - (ranks - 1) / length(x))
-  }
-  old_ask <- grDevices::devAskNewPage((is.null(ask) || ask) && grDevices::dev.interactive())
-  on.exit(grDevices::devAskNewPage(old_ask), add = TRUE)
-  probabilities <- seq(0, 1, length.out = 201)
-  breaks <- seq(0, 1, length.out = 21)
-  for (composition in compositions) {
-    role_rows <- composition$rows
-    plot_check_role_page(composition, 4, "Residual checks", {
-      for (panel in c("Uniform QQ", "PIT histogram", "Fitted", "Outside simulated range")) {
-        title <- switch(panel,
-          "Uniform QQ" = "Uniform QQ\n(overall residual distribution)",
-          "PIT histogram" = "PIT histogram\n(how residuals are distributed)",
-          "Fitted" = "PIT quantiles\n(fit across predicted outcomes)",
-          "Outside simulated range" = "Outside simulated range (outliers)")
-        for (rows in role_rows) {
-          if (!length(rows)) {
-            plot_check_empty(title)
-            next
-          }
-          if (panel == "Uniform QQ") {
-            qq <- apply(pit[rows, , drop = FALSE], 2, stats::quantile, probs = probabilities)
-            graphics::plot(probabilities, probabilities, type = "n", main = title,
-                           xlab = "Uniform quantile", ylab = "PIT quantile")
-            draw_envelopes(probabilities, list(qq))
-            graphics::abline(0, 1, lty = 2, col = check_colours$reference)
-            plot_check_caption("The red curve should roughly follow the diagonal.\nSustained departures outside the blue band suggest a distribution mismatch.")
-          } else if (panel == "PIT histogram") {
-            densities <- apply(pit[rows, , drop = FALSE], 2,
-                               function(x) graphics::hist(x, breaks, plot = FALSE)$density)
-            midpoints <- utils::head(breaks, -1) + diff(breaks) / 2
-            graphics::plot(midpoints, densities[, 1], type = "n", ylim = c(0, max(densities)),
-                           main = title, xlab = "PIT", ylab = "Density")
-            draw_envelopes(midpoints, list(densities), connect = FALSE)
-            graphics::abline(h = 1, lty = 2, col = check_colours$reference)
-            plot_check_caption("Red points should be roughly level near 1, usually within blue ranges.\nPeaks and gaps show more or fewer residuals than expected in each bin.")
-          } else if (panel == "Fitted") {
-            draw_pattern(rows, predicted, NULL, role_rows)
-          } else {
-            values <- pit[rows, , drop = FALSE]
-            plot_check_statistic(colSums(values == 0 | values == 1), title,
-              xlab = "Number of observations", counts = TRUE,
-              sub = "Counts outcomes below or above all their reference simulations.\nRed beyond the right dashed limit means more such outcomes\nthan the model usually produces.")
-          }
-        }
+  for (composition in x$compositions) {
+    draw_check <- function(check, role) {
+      statistics <- composition$statistics[[role]]
+      title <- switch(check,
+        qq = "Uniform QQ\n(overall residual distribution)",
+        histogram = "PIT histogram\n(how residuals are distributed)",
+        quantiles = "PIT quantiles\n(fit across predicted outcomes)",
+        distance = "PIT distance\n(residual extremes across predicted outcomes)",
+        outliers = "Outside simulated range (outliers)",
+        uniformity = "Uniformity: KS distance\n(overall residual mismatch)")
+      if (is.null(statistics)) return(plot_check_empty(title))
+      if (check == "qq") {
+        probabilities <- seq(0, 1, length.out = length(statistics$qq$observed))
+        graphics::plot(probabilities, probabilities, type = "n", main = title,
+                       xlab = "Uniform quantile", ylab = "PIT quantile")
+        draw_envelopes(probabilities, list(statistics$qq))
+        graphics::abline(0, 1, lty = 2, col = check_colours$reference)
+        plot_check_caption("The red curve should roughly follow the diagonal.\nSustained departures outside the blue band suggest a distribution mismatch.")
+      } else if (check == "histogram") {
+        density <- statistics$histogram
+        midpoints <- seq(.025, .975, length.out = length(density$observed))
+        graphics::plot(midpoints, density$observed, type = "n", ylim = c(0, max(unlist(density))),
+                       main = title, xlab = "PIT", ylab = "Density")
+        draw_envelopes(midpoints, list(density), connect = FALSE)
+        graphics::abline(h = 1, lty = 2, col = check_colours$reference)
+        plot_check_caption("Red points should be roughly level near 1, usually within blue ranges.\nPeaks and gaps show more or fewer residuals than expected in each bin.")
+      } else if (check %in% c("quantiles", "distance")) {
+        draw_pattern(composition$patterns[[1]][[role]], distance = check == "distance")
+      } else if (check == "outliers") {
+        plot_check_statistic(statistics$outliers, title,
+          xlab = "Number of observations", counts = TRUE,
+          sub = "Counts outcomes below or above all their reference simulations.\nRed beyond the right dashed limit means more such outcomes\nthan the model usually produces.")
+      } else {
+        plot_check_statistic(statistics$uniformity, title, xlab = "Distance from uniform residuals",
+          sub = "Larger values mean a greater departure from evenly spread PIT residuals.\nRed beyond the right dashed limit means more departure\nthan the model usually produces.")
       }
-    })
-
-    for (predictor_index in seq_along(predictors)) {
-      plot_check_role_page(composition, 2, names(predictors)[predictor_index], {
-        for (distance in c(FALSE, TRUE)) for (rows in role_rows)
-          draw_pattern(rows, predictors[[predictor_index]], names(predictors)[predictor_index],
-                       role_rows, distance)
-      })
     }
-    if (details) {
-      plot_check_role_page(composition, 2, "Residual details", {
-        title <- "Uniformity: KS distance\n(overall residual mismatch)"
-        for (rows in role_rows) {
-          if (!length(rows)) plot_check_empty(title)
-          else plot_check_statistic(apply(pit[rows, , drop = FALSE], 2, ks_distance),
-            title, xlab = "Distance from uniform residuals",
-            sub = "Larger values mean a greater departure from evenly spread PIT residuals.\nRed beyond the right dashed limit means more departure\nthan the model usually produces.")
-        }
-        for (rows in role_rows) draw_pattern(rows, predicted, NULL, role_rows, TRUE)
-      })
+    plot_check_role_panels(composition,
+      c("qq", "histogram", "quantiles", "distance", "outliers", "uniformity"),
+      "Residual checks", draw_check, panels)
+    for (i in seq_along(x$predictors)) {
+      plot_check_role_panels(composition, c(FALSE, TRUE), x$predictors[i],
+        function(distance, role) draw_pattern(composition$patterns[[i + 1L]][[role]],
+                                             x$predictors[i], distance), panels)
     }
   }
-  invisible(pit)
+  invisible(x)
 }
 
 # Reference rows are observations, columns are simulations; see the method above.

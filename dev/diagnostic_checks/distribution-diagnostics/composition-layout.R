@@ -16,7 +16,7 @@ stopifnot(model$fit$convergence == 0, model$sdr$pdHess)
 simulations <- simulate_dyad_responses(model, nsim = 1000, seed = 123)
 output <- "dev/diagnostic_checks/distribution-diagnostics/results"
 grDevices::svg(file.path(output, "residual-composition-%02d.svg"),
-               width = 12, height = 18, onefile = FALSE)
+               width = 12, height = 20, onefile = FALSE)
 check_residuals(simulations, dyad = coupleID, role = gender, ask = FALSE)
 dev.off()
 

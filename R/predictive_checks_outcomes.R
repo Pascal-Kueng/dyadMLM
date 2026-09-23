@@ -8,15 +8,13 @@
 #' @param simulations An object from [simulate_dyad_responses()]. Use 1,000 or
 #'   more simulated datasets for stable comparisons.
 #' @inheritParams check_residuals
-#' @param check_zeros Include zero counts? `NULL` (default) includes them wherever
-#'   the observed or simulated group contains zeros.
-#' @param centred_overlay Add an outcome overlay after subtracting the same
-#'   model predictions from observed and simulated outcomes? Default: `FALSE`.
+#' @param check_zeros Include zero counts? `NULL` (default) includes them for all
+#'   roles in a composition if any observed or simulated outcome there is zero.
 #'
-#' @return One page per composition, plus an optional centred-outcome page.
-#'   Invisibly returns a list of summary matrices, grouped by composition and
-#'   role. Rows are statistics; columns are observed data followed by simulations.
-#'   Graphics settings are restored afterwards.
+#' @return Invisibly returns a `dyadMLM_outcome_check` list containing compositions,
+#'   role-specific summary matrices, and outcome distributions. Matrix columns
+#'   are observed data followed by simulations. Save it with `plot = FALSE` and
+#'   draw it later with `plot(result)`. Graphics settings are restored afterwards.
 #'
 #' @section Reading the plots:
 #' Each combination of partners' roles gets one pooled column for same-role
@@ -64,16 +62,12 @@
 #' check_outcomes(simulations, dyad = coupleID, role = gender, ask = FALSE)
 #' @export
 check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
-                            check_zeros = NULL, centred_overlay = FALSE,
-                            ask = NULL, data = NULL) {
+                            check_zeros = NULL, plot = TRUE, ask = NULL,
+                            panels = TRUE, data = NULL) {
   if (!inherits(simulations, "dyadMLM_response_simulations"))
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
   if (!is.null(check_zeros) && !rlang::is_bool(check_zeros))
     stop("`check_zeros` must be NULL, TRUE, or FALSE.", call. = FALSE)
-  if (!rlang::is_bool(centred_overlay))
-    stop("`centred_overlay` must be TRUE or FALSE.", call. = FALSE)
-  if (!is.null(ask) && !rlang::is_bool(ask))
-    stop("`ask` must be NULL, TRUE, or FALSE.", call. = FALSE)
   frame <- simulations$model_frame
   compositions <- build_check_groups(
     frame, rlang::enquo(dyad), rlang::enquo(role), rlang::enquo(member), data
@@ -82,71 +76,24 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
   responses <- cbind(observed = simulations$observed_response,
                      t(simulations$simulated_responses))
   centred <- sweep(responses, 1, simulations$predicted_response, "-")
-  summaries <- lapply(compositions, function(composition) {
-    lapply(composition$rows, function(rows) {
+  family <- attr(simulations, "dyadMLM")$family
+  count_families <- c("poisson", "compois", "genpois", "bell", "nbinom1", "nbinom2", "nbinom12",
+                     "truncated_poisson", "truncated_nbinom1", "truncated_nbinom2",
+                     "truncated_compois", "truncated_genpois")
+  compositions <- lapply(compositions, function(composition) {
+    composition_rows <- unlist(composition$rows, use.names = FALSE)
+    include_zeros <- if (is.null(check_zeros))
+      any(responses[composition_rows, ] == 0) else check_zeros
+    composition$statistics <- lapply(composition$rows, function(rows) {
       if (!length(rows)) return(NULL)
       statistics <- rbind(
         `Response variability` = apply(centred[rows, , drop = FALSE], 2, stats::var),
         `Largest absolute deviation` = apply(abs(centred[rows, , drop = FALSE]), 2, max)
       )
-      include_zeros <- if (is.null(check_zeros)) any(responses[rows, ] == 0) else check_zeros
       if (include_zeros) statistics <- rbind(statistics,
         `Number of zeros` = colSums(responses[rows, , drop = FALSE] == 0))
       statistics
     })
-  })
-  names(summaries) <- vapply(compositions, `[[`, character(1), "label")
-
-  draw_distribution <- function(values, limits, support = NULL, labels = support,
-                                 label = "Outcome", centred = FALSE) {
-    if (!is.null(support)) {
-      frequencies <- matrix(vapply(seq_len(ncol(values)), function(dataset) {
-        tabulate(match(values[, dataset], support), nbins = length(support)) / nrow(values)
-      }, numeric(length(support))), nrow = length(support))
-      positions <- graphics::barplot(frequencies[, 1], names.arg = labels,
-        col = check_colours$observed_fill, border = check_colours$observed,
-        ylim = c(0, max(frequencies, .01)),
-        main = "Outcome frequencies\n(category proportions)", xlab = "Outcome", ylab = "Proportion")
-      bounds <- apply(frequencies[, -1, drop = FALSE], 1, stats::quantile, c(.025, .975))
-      graphics::segments(positions, bounds[1, ], positions, bounds[2, ],
-                         col = check_colours$simulated, lwd = 3)
-      graphics::points(positions, frequencies[, 1], col = check_colours$observed,
-                       pch = 16, cex = .65)
-      plot_check_caption(paste("Red proportions should usually lie within the blue ranges.",
-        "Above: more observations in that category; below: fewer.", sep = "\n"))
-    } else {
-      shown <- values[, seq_len(min(ncol(values), 31)), drop = FALSE]
-      graphics::plot(limits, c(0, 1), type = "n",
-        main = if (centred) "Centred outcome ECDF\n(distribution after prediction)" else
-          "Outcome ECDF\n(distribution shape)",
-        xlab = label, ylab = "Proportion at or below this value")
-      # One step path retains every ECDF jump while keeping vector exports small.
-      draw_ecdf <- function(response, ...) {
-        empirical <- stats::ecdf(response)
-        knots <- stats::knots(empirical)
-        graphics::lines(c(graphics::par("usr")[1], knots, graphics::par("usr")[2]),
-                        c(0, empirical(knots), 1), type = "s", ...)
-      }
-      for (dataset in 2:ncol(shown))
-        draw_ecdf(shown[, dataset], col = check_colours$simulated)
-      draw_ecdf(shown[, 1], col = check_colours$observed, lwd = 2)
-      graphics::abline(h = c(0, 1), col = check_colours$reference, lty = 2)
-      plot_check_caption(paste("The red curve should run among the blue curves.",
-        "Long stretches outside suggest a distribution mismatch.", sep = "\n"))
-    }
-  }
-  family <- attr(simulations, "dyadMLM")$family
-  count_families <- c("poisson", "compois", "genpois", "bell", "nbinom1", "nbinom2", "nbinom12",
-                     "truncated_poisson", "truncated_nbinom1", "truncated_nbinom2",
-                     "truncated_compois", "truncated_genpois")
-  old_ask <- grDevices::devAskNewPage((is.null(ask) || ask) && grDevices::dev.interactive())
-  on.exit(grDevices::devAskNewPage(old_ask), add = TRUE)
-  for (i in seq_along(compositions)) {
-    composition <- compositions[[i]]
-    role_rows <- composition$rows
-    composition_rows <- unlist(role_rows, use.names = FALSE)
-    statistics <- summaries[[i]]
-    statistic_names <- unique(unlist(lapply(statistics, rownames)))
     support <- category_labels <- NULL
     if (identical(family, "ordinal") && is.factor(frame[[1]])) {
       category_labels <- levels(frame[[1]])
@@ -156,37 +103,100 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
       if (family != "ordinal" && length(support) > 20) support <- NULL
       category_labels <- support
     }
-    plot_check_role_page(composition, 1 + length(statistic_names), "Outcome checks", {
-      for (rows in role_rows) {
-        if (!length(rows)) plot_check_empty("Outcomes")
-        else draw_distribution(responses[rows, , drop = FALSE],
-                                range(responses[composition_rows, ]), support, category_labels)
-      }
-      for (name in statistic_names) for (values in statistics) {
-        if (is.null(values) || !name %in% rownames(values)) plot_check_empty(name, "Not applicable")
-        else plot_check_statistic(values[name, ], switch(name,
+    # Store plain plotting data, so the saved check needs no model or simulation object.
+    composition$distribution <- list(
+      limits = range(responses[composition_rows, ]), labels = category_labels,
+      roles = lapply(composition$rows, function(rows) {
+        if (!length(rows)) return(NULL)
+        values <- responses[rows, , drop = FALSE]
+        if (!is.null(support)) {
+          frequencies <- vapply(seq_len(ncol(values)), function(dataset)
+            tabulate(match(values[, dataset], support), nbins = length(support)) / nrow(values),
+            numeric(length(support)))
+          frequencies <- matrix(frequencies, nrow = length(support))
+          list(observed = frequencies[, 1],
+               bounds = apply(frequencies[, -1, drop = FALSE], 1, stats::quantile, c(.025, .975)),
+               maximum = max(frequencies, .01))
+        } else {
+          lapply(seq_len(min(ncol(values), 31)), function(dataset) {
+            empirical <- stats::ecdf(values[, dataset])
+            knots <- stats::knots(empirical)
+            list(x = knots, y = empirical(knots))
+          })
+        }
+      }))
+    composition
+  })
+  result <- structure(list(compositions = compositions), class = c("dyadMLM_outcome_check", "list"))
+  if (plot) graphics::plot(result, ask = ask, panels = panels)
+  invisible(result)
+}
+
+#' Plot saved outcome checks
+#'
+#' @param x An object returned by [check_outcomes()].
+#' @inheritParams check_residuals
+#' @param ... Unused.
+#' @return Invisibly returns `x`.
+#' @keywords internal
+#' @export
+plot.dyadMLM_outcome_check <- function(x, ask = NULL, panels = TRUE, ...) {
+  checks <- lapply(x$compositions, function(composition)
+    c("distribution", unique(unlist(lapply(composition$statistics, rownames)))))
+  number_of_figures <- if (panels) length(x$compositions) else
+    sum(lengths(checks) * vapply(x$compositions, function(composition) length(composition$rows), integer(1)))
+  local_check_paging(ask, panels, number_of_figures)
+  for (i in seq_along(x$compositions)) {
+    composition <- x$compositions[[i]]
+    draw <- function(check, role) {
+      if (!length(composition$rows[[role]])) return(plot_check_empty(
+        if (check == "distribution") "Outcomes" else check))
+      if (check == "distribution") {
+        plot_outcome_distribution(composition$distribution, role)
+      } else {
+        plot_check_statistic(composition$statistics[[role]][check, ], switch(check,
           "Response variability" = "Response variance\n(variation after subtracting predictions)",
           "Largest absolute deviation" = "Largest absolute deviation\n(biggest gap from prediction)",
           "Number of zeros\n(excess or missing zeros)"),
-          xlab = switch(name,
-          "Response variability" = "Variance of outcome minus prediction",
-          "Largest absolute deviation" = "Absolute difference from prediction",
-          "Number of observations"), counts = name == "Number of zeros",
-          sub = paste("Red should usually lie between the dashed limits.", switch(name,
+          xlab = switch(check,
+            "Response variability" = "Variance of outcome minus prediction",
+            "Largest absolute deviation" = "Absolute difference from prediction",
+            "Number of observations"), counts = check == "Number of zeros",
+          sub = paste("Red should usually lie between the dashed limits.", switch(check,
             "Response variability" = "Beyond right: more remaining variation; left: less.",
             "Largest absolute deviation" = "Beyond right: a bigger gap than the model usually produces.",
             "Beyond right: more zeros than predicted; left: fewer."), sep = "\n"))
       }
-    })
-    if (centred_overlay) {
-      plot_check_role_page(composition, 1, "Outcomes minus predictions", {
-        for (rows in role_rows) {
-          if (!length(rows)) plot_check_empty("Centred outcome overlay")
-          else draw_distribution(centred[rows, , drop = FALSE], range(centred[composition_rows, ]),
-                                  label = "Outcome minus prediction", centred = TRUE)
-        }
-      })
     }
+    plot_check_role_panels(composition, checks[[i]], "Outcome checks", draw, panels)
   }
-  invisible(summaries)
+  invisible(x)
+}
+
+plot_outcome_distribution <- function(distribution, role) {
+  values <- distribution$roles[[role]]
+  if (!is.null(distribution$labels)) {
+    positions <- graphics::barplot(values$observed, names.arg = distribution$labels,
+      col = check_colours$observed_fill, border = check_colours$observed,
+      ylim = c(0, values$maximum), main = "Outcome frequencies\n(category proportions)",
+      xlab = "Outcome", ylab = "Proportion")
+    graphics::segments(positions, values$bounds[1, ], positions, values$bounds[2, ],
+                       col = check_colours$simulated, lwd = 3)
+    graphics::points(positions, values$observed, col = check_colours$observed, pch = 16, cex = .65)
+    plot_check_caption(paste("Red proportions should usually lie within the blue ranges.",
+      "Above: more observations in that category; below: fewer.", sep = "\n"))
+  } else {
+    graphics::plot(distribution$limits, c(0, 1), type = "n", main = "Outcome ECDF\n(distribution shape)",
+      xlab = "Outcome", ylab = "Proportion at or below this value")
+    # One step path retains every ECDF jump while keeping vector exports small.
+    draw_ecdf <- function(path, ...) {
+      graphics::lines(c(graphics::par("usr")[1], path$x, graphics::par("usr")[2]),
+                      c(0, path$y, 1), type = "s", ...)
+    }
+    for (dataset in 2:length(values)) draw_ecdf(values[[dataset]], col = check_colours$simulated)
+    draw_ecdf(values[[1]], col = check_colours$observed, lwd = 2)
+    graphics::abline(h = c(0, 1), col = check_colours$reference, lty = 2)
+    plot_check_caption(paste("The red curve should run among the blue curves.",
+      "Long stretches outside suggest a distribution mismatch.", sep = "\n"))
+  }
 }

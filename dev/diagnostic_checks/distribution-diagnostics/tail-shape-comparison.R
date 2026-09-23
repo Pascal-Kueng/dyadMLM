@@ -70,9 +70,9 @@ for (scenario in names(responses)) {
   message(scenario, ": plotting diagnostics")
 
   grDevices::svg(file.path(output, paste0(scenario, "-residual-%02d.svg")),
-                 width = 12, height = 18, onefile = FALSE)
+                 width = 12, height = 20, onefile = FALSE)
   check_residuals(simulations, dyad = dyad, role = member,
-    member = person, data = data, predictors = list(x = data$x), ask = FALSE)
+    member = person, data = data, predictors = "x", ask = FALSE)
   dev.off()
 
   grDevices::svg(file.path(output, paste0(scenario, "-outcome-%02d.svg")),

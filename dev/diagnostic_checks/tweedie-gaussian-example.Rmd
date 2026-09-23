@@ -49,14 +49,14 @@ split the plots without changing the fitted model's assumptions.
 
 ### Check residuals
 
-`predictors` adds a page for the named predictor; `details = TRUE` adds the
-uniformity and PIT-distance page. The call produces three complete panels.
+The default panel contains all six residual checks. `predictors` adds a page
+for the named predictor, giving two complete panels here.
 
-```{r residual, fig.alt="Complete panels produced by check_residuals"}
+```{r residual, fig.height=20, fig.alt="Complete panels produced by check_residuals"}
 check_residuals(
   gaussian_simulations, dyad = dyad, role = role, data = tweedie_data,
   predictors = "predictor",
-  details = TRUE, seed = 123, ask = FALSE
+  seed = 123, ask = FALSE
 )
 ```
 
@@ -69,13 +69,14 @@ predictor values. Red quartiles should roughly follow the horizontal lines at
 
 ### Check outcomes
 
-`check_zeros = TRUE` includes zero counts; `centred_overlay = TRUE` adds the
-distribution after subtracting predictions. The call produces two complete panels.
+`check_zeros = TRUE` includes zero counts. The call produces one complete panel:
+the raw outcome distribution, variability and largest deviations after
+subtracting predictions, and zero counts.
 
 ```{r outcome, fig.alt="Complete panels produced by check_outcomes"}
 check_outcomes(
   gaussian_simulations, dyad = dyad, role = role, data = tweedie_data,
-  check_zeros = TRUE, centred_overlay = TRUE, ask = FALSE
+  check_zeros = TRUE, ask = FALSE
 )
 ```
 

@@ -33,8 +33,7 @@
 #'   See [simulate_dyad_responses()] for how predictions are defined.
 #' @param ask Whether to pause between figures on an interactive device.
 #'   `NULL` (default) pauses when there is more than one figure, `TRUE` pauses
-#'   and `FALSE` draws without pausing. In panel mode, each composition is one
-#'   figure. File devices never pause.
+#'   and `FALSE` draws without pausing. File devices never pause.
 #' @param panels If `TRUE` (default), show each composition in one figure, with
 #'   two rows and up to three columns. If `FALSE`, draw each statistic separately.
 #'   Graphics settings are restored afterwards.
@@ -643,17 +642,8 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
 plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
 
   checked_composition_indices <- which(x$compositions$n_pairs >= 3L)
-  number_of_figures <- if (panels) length(checked_composition_indices) else
-    sum(vapply(x$compositions$statistics[checked_composition_indices], ncol, integer(1)) - 1L)
-  if (is.null(ask)) {
-    ask <- number_of_figures > 1L
-  }
-  # File devices and report rendering should never wait for keyboard input.
-  # orNone = TRUE also pauses when the first plot will open an interactive device.
-  ask <- ask && grDevices::dev.interactive(orNone = TRUE)
-
-  previous_plot_pause_setting <- grDevices::devAskNewPage(ask)
-  on.exit(grDevices::devAskNewPage(previous_plot_pause_setting), add = TRUE)
+  local_check_paging(ask, panels, if (panels) length(checked_composition_indices) else
+    sum(vapply(x$compositions$statistics[checked_composition_indices], ncol, integer(1)) - 1L))
 
   n_simulations <- x$n_simulations
 
@@ -661,8 +651,10 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
     composition <- x$compositions[composition_index, ]
     # The first row is observed; the remaining rows are simulations.
     composition_statistics <- composition$statistics[[1]][, -1]
-    composition_title <- paste0(composition$label, " - ", composition$n_pairs,
-                                " of ", x$n_pairs, " usable dyads")
+    page_title <- paste("Partner dependence", paste0(composition$n_pairs, " of ", x$n_pairs,
+                        " usable dyads"), x$response, sep = " - ")
+    footer <- paste0(n_simulations, " simulations. Red: observed. Blue: simulations. ",
+                     "Dashed lines: middle 95%. No significance tests.")
     draw_statistics <- function() {
       # Match observed values and simulations by position, since names may repeat.
       for (statistic_index in seq_along(composition_statistics)) {
@@ -688,27 +680,19 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
             paste0("Positive: ", sub("^SD \\((.*)\\)$", "\\1", names(composition_statistics)[1]),
               " varies more;\nnegative: ",
               sub("^SD \\((.*)\\)$", "\\1", names(composition_statistics)[2]), " varies more.")))
-        plot_title <- labels[1]
-        if (!panels) plot_title <- paste(composition_title, plot_title, sep = "\n")
-        plot_subtitle <- paste0(simulations_used, "/", n_simulations,
-                                " simulations used")
-        if (!panels) plot_subtitle <- paste(x$response, plot_subtitle, sep = "; ")
-        else {
-          guide <- paste("Red should usually lie between dashed limits.", labels[2], sep = "\n")
-          plot_subtitle <- if (simulations_used == n_simulations) guide else
-            paste(guide, plot_subtitle, sep = "\n")
-        }
-        plot_check_statistic(values, plot_title, sub = plot_subtitle, caption = panels, ...)
+        guide <- paste("Red should usually lie between dashed limits.", labels[2], sep = "\n")
+        if (simulations_used != n_simulations) guide <- paste(guide,
+          paste0(simulations_used, "/", n_simulations, " simulations used"), sep = "\n")
+        if (panels) plot_check_statistic(values, labels[1], sub = guide, ...)
+        else plot_check_page(composition$label, page_title, c(1, 1),
+          plot_check_statistic(values, labels[1], sub = guide, ...), footer = footer,
+          mar = c(7.8, 4.5, 4, .8))
       }
     }
     if (panels) {
-      plot_check_page(composition$label,
-        paste("Partner dependence", paste0(composition$n_pairs, " of ", x$n_pairs,
-              " usable dyads"), x$response, sep = " - "),
+      plot_check_page(composition$label, page_title,
         c(2, ncol(composition_statistics) / 2), draw_statistics(),
-        footer = paste0(n_simulations, " simulations. Red: observed. Blue: simulations. ",
-                         "Dashed lines: middle 95%. No significance tests."),
-        mar = c(7.8, 4.5, 4, .8))
+        footer = footer, mar = c(7.8, 4.5, 4, .8))
     } else draw_statistics()
   }
   return(invisible(x))

@@ -2,6 +2,18 @@ check_colours <- list(observed = "#a12b35", observed_fill = "#f2d3d6",
                       simulated = "#bcd7e8", simulation_line = "#7fa7be",
                       reference = "grey40")
 
+# Restore paging in the calling plot method, including after a plotting error.
+local_check_paging <- function(ask, panels, number_of_figures) {
+  if (!is.null(ask) && !rlang::is_bool(ask))
+    stop("`ask` must be NULL, TRUE, or FALSE.", call. = FALSE)
+  if (!rlang::is_bool(panels))
+    stop("`panels` must be TRUE or FALSE.", call. = FALSE)
+  if (is.null(ask)) ask <- number_of_figures > 1L
+  # orNone = TRUE also pauses when the first plot will open an interactive device.
+  previous <- grDevices::devAskNewPage(ask && grDevices::dev.interactive(orNone = TRUE))
+  withr::defer(grDevices::devAskNewPage(previous), envir = parent.frame())
+}
+
 plot_check_caption <- function(text) {
   graphics::mtext(text, side = 1, line = 4.2, padj = 1,
                   cex = .875 * graphics::par("cex"))
@@ -15,7 +27,7 @@ plot_check_empty <- function(title, label = "No fitted observations") {
 
 # The first value is observed; the remaining values are simulated summaries.
 plot_check_statistic <- function(values, title, xlab = "Summary value",
-                                 counts = FALSE, sub = NULL, caption = TRUE, ...,
+                                 counts = FALSE, sub = NULL, ...,
                                  col = check_colours$simulated, border = "white",
                                  ylab = "Simulated datasets", ylim = NULL,
                                  xaxt = if (counts) "n" else "s") {
@@ -26,10 +38,8 @@ plot_check_statistic <- function(values, title, xlab = "Summary value",
   breaks <- if (counts && diff(range(simulated)) < 20)
     seq(min(simulated) - .5, max(simulated) + .5, by = 1) else 20
   histogram <- graphics::hist(simulated, breaks = breaks, plot = FALSE)
-  if (!caption && is.null(ylim)) ylim <- c(0, max(histogram$counts) * 1.25)
   graphics::plot(histogram, freq = TRUE, xlim = range(values[1], histogram$breaks),
                   col = col, border = border, main = title, ylim = ylim,
-                  sub = if (!caption) sub,
                   xlab = xlab, ylab = ylab, xaxt = xaxt, ...)
   if (counts) {
     ticks <- pretty(range(values, finite = TRUE))
@@ -38,13 +48,24 @@ plot_check_statistic <- function(values, title, xlab = "Summary value",
   graphics::abline(v = stats::quantile(simulated, c(.025, .975)),
                    lty = 2, col = check_colours$reference)
   graphics::abline(v = values[1], col = check_colours$observed, lwd = 2)
-  if (caption) {
-    guide <- if (is.null(sub))
-      "The red line should usually lie between the dashed limits.\nOutside means an unusually low or high value for this model." else sub
-    plot_check_caption(guide)
-  } else graphics::legend("top", c("Observed", "Middle 95% of simulations"),
-    lty = c(1, 2), lwd = c(2, 1), col = c(check_colours$observed, check_colours$reference),
-    horiz = TRUE, bty = "n")
+  guide <- if (is.null(sub))
+    "The red line should usually lie between the dashed limits.\nOutside means an unusually low or high value for this model." else sub
+  plot_check_caption(guide)
+}
+
+# Arrange the same checks together or individually, with context on every figure.
+plot_check_role_panels <- function(composition, checks, title, draw, panels = TRUE) {
+  if (panels) {
+    plot_check_role_page(composition, length(checks), title, {
+      for (check in checks) for (role in seq_along(composition$rows)) draw(check, role)
+    })
+  } else {
+    for (check in checks) for (role in seq_along(composition$rows)) {
+      individual <- composition
+      individual$rows <- composition$rows[role]
+      plot_check_role_page(individual, 1, title, draw(check, role))
+    }
+  }
 }
 
 # Add the shared counts and role headings to a composition page.

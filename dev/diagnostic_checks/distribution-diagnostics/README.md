@@ -34,9 +34,10 @@ can be established from the fitting data.
 Roles determine the display; simulations retain the fitted model's assumptions,
 including its partner dependence and any role-specific variability.
 
-Residual pages show a PIT QQ plot, PIT histogram, PIT quartiles across predicted
-outcomes, and the number of PIT endpoints (outcomes outside their simulation
-reference range). Outcome pages show the raw response distribution, variability,
+Residual pages show a PIT QQ plot, PIT histogram, PIT quartiles and distance
+across predicted outcomes, the number of outcomes outside their simulation
+reference range, and overall uniformity (KS distance).
+Outcome pages show the raw response distribution, variability,
 largest deviations, and relevant zero counts. Variability and deviations are
 calculated after subtracting the same model predictions from each dataset.
 They include random effects, so variability does not isolate the model's residual
@@ -56,18 +57,28 @@ Fitted parameters stay fixed.
 In `check_residuals()`, use `predictors = c("x", "z")` for extra predictor panels.
 Columns come from the model frame; if absent, supply the original fitting data
 with `data` and excluded rows are handled automatically. `predictors = NULL`
-(default) omits these extra pages. Use `details = TRUE` for a uniformity summary and
-PIT distance across predicted outcomes. "Predicted outcome" means the model's
+(default) omits these extra pages. Each supplied predictor gets quartile and
+PIT-distance plots. "Predicted outcome" means the model's
 prediction with random effects set to zero, not the observed outcome. Additional
-predictor pages use the supplied predictor values. In `check_outcomes()`,
-`centred_overlay = TRUE` adds an outcome overlay after subtracting model predictions.
+predictor pages use the supplied predictor values.
 See `?check_residuals` and `?check_outcomes` for plot meanings and limits.
+
+All three checks can be saved without plotting, then displayed later:
+
+```r
+residual_check <- check_residuals(simulations, plot = FALSE)
+plot(residual_check, ask = FALSE)
+```
+
+`panels = FALSE` shows one plot per figure, retaining composition and role labels.
+It changes the layout, not which checks are shown. By default, plots pause only
+when there are multiple figures on an interactive device; file output never pauses.
 
 ## Reproduce the examples
 
 The [full Tweedie-to-Gaussian example](results/tweedie-gaussian/index.html) shows
 the exact calls to all three checks followed by every complete panel they produce,
-including optional pages and raw partner summaries. The
+including predictor pages and raw partner summaries. The
 [executable example](../tweedie-gaussian-example.Rmd) is also included directly
 in the development vignette. It uses
 the earlier study's first Tweedie dataset (120 dyads, seed 100104) and 2,000

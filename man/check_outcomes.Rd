@@ -10,8 +10,9 @@ check_outcomes(
   role = NULL,
   member = NULL,
   check_zeros = NULL,
-  centred_overlay = FALSE,
+  plot = TRUE,
   ask = NULL,
+  panels = TRUE,
   data = NULL
 )
 }
@@ -25,24 +26,30 @@ or \code{data}. With \code{role = NULL}, all observations are pooled. Otherwise 
 \code{dyad}; also supply \code{member} for repeated observations. Supplying \code{dyad}
 without \code{role} adds the dyad count to the pooled overview.}
 
-\item{check_zeros}{Include zero counts? \code{NULL} (default) includes them wherever
-the observed or simulated group contains zeros.}
+\item{check_zeros}{Include zero counts? \code{NULL} (default) includes them for all
+roles in a composition if any observed or simulated outcome there is zero.}
 
-\item{centred_overlay}{Add an outcome overlay after subtracting the same
-model predictions from observed and simulated outcomes? Default: \code{FALSE}.}
+\item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
+If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
 
-\item{ask}{Pause between pages on interactive devices? \code{NULL} (default) and
-\code{TRUE} pause; \code{FALSE} does not. File devices never pause.}
+\item{ask}{Whether to pause between figures on an interactive device.
+\code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
+and \code{FALSE} draws without pausing. File devices never pause.}
+
+\item{panels}{If \code{TRUE} (default), arrange checks in complete panels by
+composition, with one column per role or a pooled column. If \code{FALSE}, draw
+each check and role separately, retaining headings and interpretation tips.
+Only the arrangement changes; results and checks stay the same.}
 
 \item{data}{The unchanged data used to fit the model. Supply it when required
 columns are absent from the model frame, or to identify compositions using
 partners whose responses were excluded during fitting.}
 }
 \value{
-One page per composition, plus an optional centred-outcome page.
-Invisibly returns a list of summary matrices, grouped by composition and
-role. Rows are statistics; columns are observed data followed by simulations.
-Graphics settings are restored afterwards.
+Invisibly returns a \code{dyadMLM_outcome_check} list containing compositions,
+role-specific summary matrices, and outcome distributions. Matrix columns
+are observed data followed by simulations. Save it with \code{plot = FALSE} and
+draw it later with \code{plot(result)}. Graphics settings are restored afterwards.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}

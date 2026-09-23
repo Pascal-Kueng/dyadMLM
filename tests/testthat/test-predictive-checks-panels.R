@@ -153,17 +153,22 @@ test_that("long composition headings fit and retain their size across page layou
 })
 
 
-test_that("individual plots identify each composition and its pair counts", {
+test_that("individual plots retain composition, pair counts and interpretation", {
   check_result <- partner_check_plot_fixture()
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   graphics::par(mfcol = c(1, 2), plt = c(0.2, 0.8, 0.2, 0.8))
   previous_graphics_settings <- graphics::par(c("mfcol", "mar", "plt"))
   recorded_plot_text <- character()
+  recorded_margin_text <- character()
   original_title <- graphics::title
+  original_mtext <- graphics::mtext
   local_mocked_bindings(title = function(main = NULL, sub = NULL, ...) {
     recorded_plot_text <<- c(recorded_plot_text, paste(main, sub, collapse = " "))
     original_title(main = main, sub = sub, ...)
+  }, mtext = function(text, ...) {
+    recorded_margin_text <<- c(recorded_margin_text, text)
+    original_mtext(text, ...)
   }, .package = "graphics")
 
   plot(check_result, panels = FALSE, ask = FALSE)
@@ -172,12 +177,11 @@ test_that("individual plots identify each composition and its pair counts", {
   expect_length(recorded_plot_text, 14L)
   for (composition_index in seq_len(nrow(check_result$compositions))) {
     composition <- check_result$compositions[composition_index, ]
-    composition_plot_text <- recorded_plot_text[
-      startsWith(recorded_plot_text, paste0(composition$label, " - "))
-    ]
-    expect_length(composition_plot_text, ncol(composition$statistics[[1]]) - 1L)
-    expect_true(all(grepl("120.*360", composition_plot_text)))
+    expect_equal(sum(recorded_margin_text == composition$label),
+                 ncol(composition$statistics[[1]]) - 1L)
   }
+  expect_equal(sum(grepl("120.*360", recorded_margin_text)), 14)
+  expect_equal(sum(grepl("Red should usually lie between dashed limits", recorded_margin_text)), 14)
 })
 
 

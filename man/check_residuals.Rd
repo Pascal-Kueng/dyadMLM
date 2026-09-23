@@ -10,10 +10,11 @@ check_residuals(
   role = NULL,
   member = NULL,
   predictors = NULL,
+  plot = TRUE,
   seed = 123,
   ask = NULL,
-  data = NULL,
-  details = FALSE
+  panels = TRUE,
+  data = NULL
 )
 }
 \arguments{
@@ -28,28 +29,34 @@ without \code{role} adds the dyad count to the pooled overview.}
 
 \item{predictors}{Optional column names, e.g. \code{c("age", "stress")}, looked up
 in the model frame or \code{data}. \code{NULL} (default) omits additional predictor
-pages. A named list or data frame of values in fitted-row order is also
-accepted. Missing or infinite values are omitted only from that predictor's
+pages. Missing or infinite values are omitted only from that predictor's
 plots. Predicted outcomes are always checked.}
+
+\item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
+If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
 
 \item{seed}{Seed for randomized PIT residuals. The caller's random-number
 state is restored afterwards.}
 
-\item{ask}{Pause between pages on interactive devices? \code{NULL} (default) and
-\code{TRUE} pause; \code{FALSE} does not. File devices never pause.}
+\item{ask}{Whether to pause between figures on an interactive device.
+\code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
+and \code{FALSE} draws without pausing. File devices never pause.}
+
+\item{panels}{If \code{TRUE} (default), arrange checks in complete panels by
+composition, with one column per role or a pooled column. If \code{FALSE}, draw
+each check and role separately, retaining headings and interpretation tips.
+Only the arrangement changes; results and checks stay the same.}
 
 \item{data}{The unchanged data used to fit the model. Supply it when required
 columns are absent from the model frame, or to identify compositions using
 partners whose responses were excluded during fitting.}
-
-\item{details}{Add a uniformity histogram and PIT-distance plots against
-predicted outcomes? Default: \code{FALSE}.}
 }
 \value{
-One page per composition, plus optional predictor and detail pages.
-Invisibly returns PIT residuals for all fitted observations: rows are
-observations; columns are observed data followed by the second half of the
-simulations. Graphics settings are restored afterwards.
+Invisibly returns a \code{dyadMLM_residual_check} list with the \code{pit} matrix
+and calculated summaries in \code{compositions}. PIT rows are fitted observations;
+columns are observed data followed by the second half of the simulations.
+Save it with \code{plot = FALSE} and draw it later with \code{plot(result)}.
+Graphics settings are restored afterwards.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -67,9 +74,10 @@ supplying roles does not change the model's assumptions. Available responses
 are retained when the composition is known; unknown compositions are omitted
 with a warning.
 
-\strong{Red shows observed data; blue shows simulated references.} The four rows
-show uniform QQ, a PIT histogram, PIT quartiles against predicted outcomes,
-and the number of outcomes outside their simulated range (PIT endpoints).
+\strong{Red shows observed data; blue shows simulated references.} The six rows
+show uniform QQ, a PIT histogram, PIT quartiles and distance against predicted
+outcomes, counts outside the simulated range (PIT endpoints), and overall
+departure from uniformity (KS distance).
 Use a tall plotting window or save a large figure to keep all rows readable.
 
 PIT (probability integral transform) residuals rank each outcome from 0 (low)
@@ -80,9 +88,7 @@ Blue ranges contain the middle 95\% at each plotted position,
 not across the whole plot. Some red points can fall outside by chance.
 For out-of-range counts, the blue histogram shows simulated counts and the red
 line shows the observed count; dashed lines mark the middle 95\%.
-\code{details = TRUE} adds a page with overall departure from uniformity (KS
-distance) and PIT-distance plots against predicted outcomes.
-In these plots, red quartiles should roughly follow the horizontal lines at
+In the quartile and distance plots, red curves should roughly follow the lines at
 0.25, 0.50 and 0.75, allowing for the variation in their matching blue bands.
 
 Each additional predictor gets a page with quartile and distance plots. Numeric
@@ -141,6 +147,9 @@ model <- glmmTMB::glmmTMB(
 simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
 check_residuals(simulations, dyad = coupleID, role = gender,
                 predictors = "provided_support", ask = FALSE)
+# Save the same checks without drawing, then plot individual figures.
+result <- check_residuals(simulations, predictors = "provided_support", plot = FALSE)
+plot(result, panels = FALSE, ask = FALSE)
 \dontshow{\}) # examplesIf}
 }
 \references{

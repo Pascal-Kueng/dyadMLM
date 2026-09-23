@@ -6,7 +6,8 @@
   `check_outcomes()` for response distributions, variability, extremes, and
   zero counts. Both reuse complete simulated datasets, retain partner and time
   dependence in their references, separate dyad compositions and roles, and
-  report no p-values. Additional predictor and detailed residual plots are optional.
+  report no p-values. Residual panels include all six checks; additional predictor
+  plots are optional. Checks can be saved with `plot = FALSE` and plotted later.
   PIT calculations are internal, following Florian Hartig's DHARMa approach and
   Dunn and Smyth's (1996) randomized quantile residuals; DHARMa is not required.
 

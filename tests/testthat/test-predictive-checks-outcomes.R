@@ -30,8 +30,9 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
 
   result <- withVisible(check_outcomes(simulations, dyad = "dyad", role = "role", ask = FALSE))
   expect_false(result$visible)
-  expect_named(result$value, "A - B")
-  expect_named(result$value[[1]], c("A", "B"))
+  expect_s3_class(result$value, "dyadMLM_outcome_check")
+  expect_identical(result$value$compositions[[1]]$label, "A - B")
+  expect_named(result$value$compositions[[1]]$statistics, c("A", "B"))
   expect_identical(.Random.seed, random_state)
   checks <- c("Response variability", "Largest absolute deviation")
   expect_identical(vapply(histograms, `[[`, "", "name"),
@@ -42,8 +43,8 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
     responses <- rbind(simulations$observed_response[rows], simulations$simulated_responses[, rows])
     deviations <- sweep(responses, 2, simulations$predicted_response[rows])
     expected <- rbind(apply(deviations, 1, var), apply(abs(deviations), 1, max))
-    expect_identical(rownames(result$value[[1]][[i]]), checks)
-    expect_equal(unname(result$value[[1]][[i]]), unname(expected))
+    expect_identical(rownames(result$value$compositions[[1]]$statistics[[i]]), checks)
+    expect_equal(unname(result$value$compositions[[1]]$statistics[[i]]), unname(expected))
     for (j in seq_along(checks)) {
       histogram <- histograms[[2 * (j - 1) + i]]
       expect_equal(unname(histogram$values), unname(expected[j, -1]))
@@ -67,7 +68,7 @@ test_that("outcome pages retain composition headings and restore graphics settin
       headings <<- c(headings, text)
     original_mtext(text, ...)
   }, .package = "graphics")
-  for (centred in c(FALSE, TRUE)) {
+  for (panels in c(TRUE, FALSE)) {
     headings <- character()
     pdf_path <- tempfile(fileext = ".pdf")
     grDevices::pdf(pdf_path, width = 7, height = 7)
@@ -76,17 +77,18 @@ test_that("outcome pages retain composition headings and restore graphics settin
     grDevices::devAskNewPage(TRUE)
     result <- tryCatch({
       result <- check_outcomes(simulations, dyad = "dyad", role = "role",
-                               centred_overlay = centred, ask = FALSE)
+                               panels = panels, ask = FALSE)
       expect_equal(graphics::par(names(settings)), settings)
       expect_true(grDevices::devAskNewPage())
       result
     }, finally = grDevices::dev.off())
-    expect_named(result, c("A - A", "A - B", "B - B"))
-    expect_identical(headings, rep(names(result), each = 1 + centred))
+    labels <- vapply(result$compositions, `[[`, "", "label")
+    expect_identical(labels, c("A - A", "A - B", "B - B"))
+    expect_identical(headings, rep(labels, if (panels) 1 else c(3, 6, 3)))
     information <- system2("pdfinfo", shQuote(pdf_path), stdout = TRUE)
     unlink(pdf_path)
     pages <- as.integer(sub("^Pages:\\s+", "", information[grepl("^Pages:", information)]))
-    expect_equal(pages, 3 * (1 + centred))
+    expect_equal(pages, if (panels) 3 else 12)
   }
 })
 
@@ -118,10 +120,10 @@ test_that("outcome checks retain lone responses and accept one simulated dataset
     subset$model_frame <- simulations$model_frame[rows, , drop = FALSE]
     expect_no_error(result <- check_outcomes(subset, dyad = "dyad", role = "role",
                                               data = fitting_data, ask = FALSE))
-    expect_named(result[[1]], c("A", "B"))
-    expect_equal(ncol(result[[1]]$A), 2)
-    if (length(rows) <= 2) expect_true(all(is.na(result[[1]]$A["Response variability", ])))
-    if (!2 %in% rows) expect_null(result[[1]]$B)
+    expect_named(result$compositions[[1]]$statistics, c("A", "B"))
+    expect_equal(ncol(result$compositions[[1]]$statistics$A), 2)
+    if (length(rows) <= 2) expect_true(all(is.na(result$compositions[[1]]$statistics$A["Response variability", ])))
+    if (!2 %in% rows) expect_null(result$compositions[[1]]$statistics$B)
   }
   expect_error(check_outcomes(unclass(simulations)), "simulate_dyad_responses")
   expect_error(check_outcomes(simulations, check_zeros = NA), "check_zeros")
@@ -210,8 +212,8 @@ test_that("outcome ECDF paths retain ties, constant samples, and both tails", {
     if (missing(y)) original_lines(x, ...) else original_lines(x, y, ...)
   }, .package = "graphics")
 
-  check_outcomes(simulations, centred_overlay = TRUE, ask = FALSE)
-  expect_length(paths, 62)
+  check_outcomes(simulations, ask = FALSE)
+  expect_length(paths, 31)
   expect_true(all(vapply(paths, `[[`, "", "type") == "s"))
   limits <- paths[[1]]$limits
   # Each constant simulated sample jumps from zero to one exactly at two.
@@ -221,13 +223,7 @@ test_that("outcome ECDF paths retain ties, constant samples, and both tails", {
   expect_equal(paths[[31]]$x, c(limits[1], -2, 1, 4, limits[2]))
   expect_equal(paths[[31]]$y, c(0, .25, .75, 1, 1))
   expect_true(limits[1] < -2 && limits[2] > 4)
-  # The optional overlay subtracts the same fitted predictions from every dataset.
-  limits <- paths[[32]]$limits
-  expect_equal(paths[[32]]$x,
-    c(limits[1], sort(2 - simulations$predicted_response), limits[2]))
-  expect_equal(paths[[62]]$x,
-    c(limits[1], sort(simulations$observed_response - simulations$predicted_response), limits[2]))
-  expect_equal(paths[[62]]$y, c(0, seq_len(12) / 12, 1))
+
 })
 
 
@@ -279,4 +275,42 @@ test_that("discrete outcome panels show role-specific proportions and category l
   check_outcomes(simulations, ask = FALSE)
   expect_identical(bars[[3]]$labels, categories)
   expect_equal(unname(bars[[3]]$values[5]), 0)
+})
+
+
+test_that("zero-count inclusion is shared across roles within each composition", {
+  simulations <- distribution_check_fixture()
+  simulations$model_frame$role <- rep(c("A", "A", "A", "B", "B", "B"), 2)
+  for (source in c("observed", "simulated")) {
+    changed <- simulations
+    if (source == "observed") changed$observed_response[3] <- 0
+    else changed$simulated_responses[1, 3] <- 0
+    result <- check_outcomes(changed, dyad = "dyad", role = "role", plot = FALSE)
+    statistics <- lapply(result$compositions, `[[`, "statistics")
+    expect_false("Number of zeros" %in% rownames(statistics[[1]][[1]]))
+    expect_false("Number of zeros" %in% rownames(statistics[[3]][[1]]))
+    expect_true(all(vapply(statistics[[2]], function(role)
+      "Number of zeros" %in% rownames(role), logical(1))))
+    expect_equal(unname(statistics[[2]]$B["Number of zeros", ]), rep(0, 41))
+  }
+})
+
+
+test_that("outcome results can be calculated without graphics and plotted later", {
+  simulations <- distribution_check_fixture()
+  device <- grDevices::dev.cur()
+  result <- with_mocked_bindings(
+    check_outcomes(simulations, plot = FALSE, ask = "ignored", panels = "ignored"),
+    plot.new = function(...) stop("Unexpected drawing"), .package = "graphics"
+  )
+  expect_identical(grDevices::dev.cur(), device)
+  expect_s3_class(result, "dyadMLM_outcome_check")
+  # Saved checks contain plain data, including every overlay path and comparison.
+  saved <- unserialize(serialize(result, NULL))
+  grDevices::pdf(NULL, width = 12, height = 10)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_identical(check_outcomes(simulations, ask = FALSE), result)
+  expect_identical(check_outcomes(simulations, panels = FALSE, ask = FALSE), result)
+  expect_identical(plot(saved, ask = FALSE), result)
+  expect_identical(plot(saved, panels = FALSE, ask = FALSE), result)
 })
