@@ -277,7 +277,7 @@ test_that("role columns use their own observations and simulated references", {
   original_abline <- graphics::abline
   local_mocked_bindings(title = function(main = NULL, ...) {
     panel <<- if (is.null(main)) "" else as.character(main)[1]
-    if (panel == "Outside simulated range")
+    if (panel == "Outside simulated range (outliers)")
       histograms[[length(histograms) + 1L]] <<- list(
         name = panel, values = histogram_values, limits = graphics::par("usr")[1:2],
         breaks = histogram_breaks
@@ -309,7 +309,7 @@ test_that("role columns use their own observations and simulated references", {
   rows_by_role <- split(seq_len(12), simulations$model_frame$role)
   expect_length(observed_qq, 2)
   expect_length(simulated_qq, 2)
-  expect_identical(vapply(histograms, `[[`, "", "name"), rep("Outside simulated range", 2))
+  expect_identical(vapply(histograms, `[[`, "", "name"), rep("Outside simulated range (outliers)", 2))
   for (i in seq_along(rows_by_role)) {
     rows <- rows_by_role[[i]]
     expected_qq <- apply(pit[rows, , drop = FALSE], 2, quantile,
@@ -359,7 +359,7 @@ test_that("predictor groups absent in one role leave gaps on shared axes", {
   original_lines <- graphics::lines
   original_polygon <- graphics::polygon
   local_mocked_bindings(title = function(main = NULL, ...) {
-    recording <<- identical(main, "PIT quantiles by Separated")
+    recording <<- identical(main, "PIT quantiles by Separated\n(fit across predictor values)")
     original_title(main = main, ...)
   }, lines = function(x, y, ...) {
     if (recording && !missing(y))
@@ -401,7 +401,7 @@ test_that("numeric patterns use each role's bins and identical smoothing for ref
   original_lines <- graphics::lines
   original_polygon <- graphics::polygon
   local_mocked_bindings(title = function(main = NULL, ...) {
-    recording <<- identical(main, "PIT quantiles by Dense")
+    recording <<- identical(main, "PIT quantiles by Dense\n(fit across predictor values)")
     original_title(main = main, ...)
   }, lines = function(x, y, ...) {
     if (recording && !missing(y) && identical(list(...)$col, "#a12b35"))
@@ -490,7 +490,7 @@ test_that("fallback quartile offsets stay visible on small and clustered scales"
     all(x >= limits[1] & x <= limits[2])
   }
   local_mocked_bindings(title = function(main = NULL, ...) {
-    recording <<- identical(main, "PIT quantiles by Edge")
+    recording <<- identical(main, "PIT quantiles by Edge\n(fit across predictor values)")
     original_title(main = main, ...)
   }, lines = function(x, y, ...) {
     if (recording && !missing(y) && identical(list(...)$col, "#a12b35")) {

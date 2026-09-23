@@ -98,7 +98,7 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
   names(summaries) <- vapply(compositions, `[[`, character(1), "label")
 
   draw_distribution <- function(values, limits, support = NULL, labels = support,
-                                 label = "Outcome") {
+                                 label = "Outcome", centred = FALSE) {
     if (!is.null(support)) {
       frequencies <- matrix(vapply(seq_len(ncol(values)), function(dataset) {
         tabulate(match(values[, dataset], support), nbins = length(support)) / nrow(values)
@@ -106,17 +106,20 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
       positions <- graphics::barplot(frequencies[, 1], names.arg = labels,
         col = check_colours$observed_fill, border = check_colours$observed,
         ylim = c(0, max(frequencies, .01)),
-        main = "Outcome frequencies", xlab = "Outcome", ylab = "Proportion")
+        main = "Outcome frequencies\n(category proportions)", xlab = "Outcome", ylab = "Proportion")
       bounds <- apply(frequencies[, -1, drop = FALSE], 1, stats::quantile, c(.025, .975))
       graphics::segments(positions, bounds[1, ], positions, bounds[2, ],
                          col = check_colours$simulated, lwd = 3)
       graphics::points(positions, frequencies[, 1], col = check_colours$observed,
                        pch = 16, cex = .65)
-      plot_check_caption("Red proportions should resemble simulations.\nCompare each with its blue range.")
+      plot_check_caption(paste("Red proportions should usually lie within the blue ranges.",
+        "Above: more observations in that category; below: fewer.", sep = "\n"))
     } else {
       shown <- values[, seq_len(min(ncol(values), 31)), drop = FALSE]
-      graphics::plot(limits, c(0, 1), type = "n", main = "Outcome overlay",
-                     xlab = label, ylab = "Cumulative proportion")
+      graphics::plot(limits, c(0, 1), type = "n",
+        main = if (centred) "Centred outcome ECDF\n(distribution after prediction)" else
+          "Outcome ECDF\n(distribution shape)",
+        xlab = label, ylab = "Proportion at or below this value")
       # One step path retains every ECDF jump while keeping vector exports small.
       draw_ecdf <- function(response, ...) {
         empirical <- stats::ecdf(response)
@@ -128,7 +131,8 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
         draw_ecdf(shown[, dataset], col = check_colours$simulated)
       draw_ecdf(shown[, 1], col = check_colours$observed, lwd = 2)
       graphics::abline(h = c(0, 1), col = check_colours$reference, lty = 2)
-      plot_check_caption("The red curve should resemble the blue curves.\nUp to 30 simulated datasets are shown.")
+      plot_check_caption(paste("The red curve should run among the blue curves.",
+        "Long stretches outside suggest a distribution mismatch.", sep = "\n"))
     }
   }
   family <- attr(simulations, "dyadMLM")$family
@@ -160,10 +164,18 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
       }
       for (name in statistic_names) for (values in statistics) {
         if (is.null(values) || !name %in% rownames(values)) plot_check_empty(name, "Not applicable")
-        else plot_check_statistic(values[name, ], name, xlab = switch(name,
+        else plot_check_statistic(values[name, ], switch(name,
+          "Response variability" = "Response variance\n(variation after subtracting predictions)",
+          "Largest absolute deviation" = "Largest absolute deviation\n(biggest gap from prediction)",
+          "Number of zeros\n(excess or missing zeros)"),
+          xlab = switch(name,
           "Response variability" = "Variance of outcome minus prediction",
           "Largest absolute deviation" = "Absolute difference from prediction",
-          "Number of observations"), counts = name == "Number of zeros")
+          "Number of observations"), counts = name == "Number of zeros",
+          sub = paste("Red should usually lie between the dashed limits.", switch(name,
+            "Response variability" = "Beyond right: more remaining variation; left: less.",
+            "Largest absolute deviation" = "Beyond right: a bigger gap than the model usually produces.",
+            "Beyond right: more zeros than predicted; left: fewer."), sep = "\n"))
       }
     })
     if (centred_overlay) {
@@ -171,7 +183,7 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
         for (rows in role_rows) {
           if (!length(rows)) plot_check_empty("Centred outcome overlay")
           else draw_distribution(centred[rows, , drop = FALSE], range(centred[composition_rows, ]),
-                                  label = "Outcome minus prediction")
+                                  label = "Outcome minus prediction", centred = TRUE)
         }
       })
     }

@@ -29,7 +29,7 @@ without \code{role} adds the dyad count to the pooled overview.}
 \item{predictors}{Optional named list or data frame of additional predictors,
 in fitted-row order, for separate pages. Use \code{simulations$model_frame} columns
 where possible. Missing or infinite values are omitted only from that
-predictor's plots. Fitted predictions are always checked.}
+predictor's plots. Predicted outcomes are always checked.}
 
 \item{seed}{Seed for randomized PIT residuals. The caller's random-number
 state is restored afterwards.}
@@ -42,7 +42,7 @@ columns are absent from the model frame, or to identify compositions using
 partners whose responses were excluded during fitting.}
 
 \item{details}{Add a uniformity histogram and PIT-distance plots against
-fitted values? Default: \code{FALSE}.}
+predicted outcomes? Default: \code{FALSE}.}
 }
 \value{
 One page per composition, plus optional predictor and detail pages.
@@ -67,7 +67,7 @@ are retained when the composition is known; unknown compositions are omitted
 with a warning.
 
 \strong{Red shows observed data; blue shows simulated references.} The four rows
-show uniform QQ, a PIT histogram, PIT quartiles against fitted predictions,
+show uniform QQ, a PIT histogram, PIT quartiles against predicted outcomes,
 and the number of outcomes outside their simulated range (PIT endpoints).
 Use a tall plotting window or save a large figure to keep all rows readable.
 
@@ -80,7 +80,9 @@ not across the whole plot. Some red points can fall outside by chance.
 For out-of-range counts, the blue histogram shows simulated counts and the red
 line shows the observed count; dashed lines mark the middle 95\%.
 \code{details = TRUE} adds a page with overall departure from uniformity (KS
-distance) and fitted-value PIT-distance plots.
+distance) and PIT-distance plots against predicted outcomes.
+In these plots, red quartiles should roughly follow the horizontal lines at
+0.25, 0.50 and 0.75, allowing for the variation in their matching blue bands.
 
 Each additional predictor gets a page with quartile and distance plots. Numeric
 predictors with many values use up to eight bins, chosen within each role.
@@ -108,8 +110,10 @@ They are dyadMLM's descriptive checks, not DHARMa's plots or tests. Parameters
 stay fixed, and the observed data were used to fit them; parameter uncertainty
 is not included. Check partner and time dependence separately.
 
-Fitted values are response predictions with random effects set to zero, which
-differ from averages over random effects for nonlinear links. Uses the families
+The "Predicted outcome" axis shows model predictions, not observed outcomes
+or predictions of residuals. Random effects are set to zero, which differs
+from averaging over random effects for nonlinear links. Additional predictor
+plots use the supplied predictor values instead. Uses the families
 and fitted rows supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}: missing responses are
 not imputed, and time gaps follow the fitted model. Observations have equal weight.
 }

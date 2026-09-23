@@ -669,13 +669,35 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
         statistic_name <- names(composition_statistics)[[statistic_index]]
         values <- composition_statistics[[statistic_index]]
         simulations_used <- sum(is.finite(values[-1]))
-        plot_title <- paste(strwrap(statistic_name, width = if (panels) 30 else 60),
-                            collapse = "\n")
+        statistic_type <- sub(" \\(.*", "", statistic_name)
+        labels <- switch(statistic_type,
+          "SD" = c(paste0(statistic_name, "\n(variability within this role)"),
+            "Beyond right: more variability in this role; left: less."),
+          "Common member SD" = c("Common member SD\n(pooled variability)",
+            "Beyond right: more pooled variability; left: less."),
+          "Partner correlation" = c("Partner correlation\n(how partners vary together)",
+            "Beyond right: more positive than predicted;\nbeyond left: more negative."),
+          "Dyad-average SD" = c("Dyad-average SD\n(variation between dyad averages)",
+            "Beyond right: dyad averages vary more; left: less."),
+          "Half-difference SD" = c("Half-difference SD\n(variation in partner differences)",
+            "Beyond right: partner differences vary more; left: less."),
+          "Half-difference RMS" = c("Half-difference RMS\n(size of partner differences)",
+            "Beyond right: larger partner differences; left: smaller."),
+          "Dyad-average/role-difference correlation" = c(
+            "Mean-difference correlation\n(which role varies more)",
+            paste0("Positive: ", sub("^SD \\((.*)\\)$", "\\1", names(composition_statistics)[1]),
+              " varies more;\nnegative: ",
+              sub("^SD \\((.*)\\)$", "\\1", names(composition_statistics)[2]), " varies more.")))
+        plot_title <- labels[1]
         if (!panels) plot_title <- paste(composition_title, plot_title, sep = "\n")
         plot_subtitle <- paste0(simulations_used, "/", n_simulations,
                                 " simulations used")
         if (!panels) plot_subtitle <- paste(x$response, plot_subtitle, sep = "; ")
-        else if (simulations_used == n_simulations) plot_subtitle <- NULL
+        else {
+          guide <- paste("Red should usually lie between dashed limits.", labels[2], sep = "\n")
+          plot_subtitle <- if (simulations_used == n_simulations) guide else
+            paste(guide, plot_subtitle, sep = "\n")
+        }
         plot_check_statistic(values, plot_title, sub = plot_subtitle, caption = panels, ...)
       }
     }
@@ -686,7 +708,7 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
         c(2, ncol(composition_statistics) / 2), draw_statistics(),
         footer = paste0(n_simulations, " simulations. Red: observed. Blue: simulations. ",
                          "Dashed lines: middle 95%. No significance tests."),
-        mar = c(6.8, 4.5, 4, .8))
+        mar = c(7.8, 4.5, 4, .8))
     } else draw_statistics()
   }
   return(invisible(x))

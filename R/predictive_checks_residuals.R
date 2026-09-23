@@ -10,7 +10,7 @@
 #' @param predictors Optional named list or data frame of additional predictors,
 #'   in fitted-row order, for separate pages. Use `simulations$model_frame` columns
 #'   where possible. Missing or infinite values are omitted only from that
-#'   predictor's plots. Fitted predictions are always checked.
+#'   predictor's plots. Predicted outcomes are always checked.
 #' @param seed Seed for randomized PIT residuals. The caller's random-number
 #'   state is restored afterwards.
 #' @param ask Pause between pages on interactive devices? `NULL` (default) and
@@ -24,7 +24,7 @@
 #'   columns are absent from the model frame, or to identify compositions using
 #'   partners whose responses were excluded during fitting.
 #' @param details Add a uniformity histogram and PIT-distance plots against
-#'   fitted values? Default: `FALSE`.
+#'   predicted outcomes? Default: `FALSE`.
 #'
 #' @return One page per composition, plus optional predictor and detail pages.
 #'   Invisibly returns PIT residuals for all fitted observations: rows are
@@ -41,7 +41,7 @@
 #' with a warning.
 #'
 #' **Red shows observed data; blue shows simulated references.** The four rows
-#' show uniform QQ, a PIT histogram, PIT quartiles against fitted predictions,
+#' show uniform QQ, a PIT histogram, PIT quartiles against predicted outcomes,
 #' and the number of outcomes outside their simulated range (PIT endpoints).
 #' Use a tall plotting window or save a large figure to keep all rows readable.
 #'
@@ -54,7 +54,9 @@
 #' For out-of-range counts, the blue histogram shows simulated counts and the red
 #' line shows the observed count; dashed lines mark the middle 95%.
 #' `details = TRUE` adds a page with overall departure from uniformity (KS
-#' distance) and fitted-value PIT-distance plots.
+#' distance) and PIT-distance plots against predicted outcomes.
+#' In these plots, red quartiles should roughly follow the horizontal lines at
+#' 0.25, 0.50 and 0.75, allowing for the variation in their matching blue bands.
 #'
 #' Each additional predictor gets a page with quartile and distance plots. Numeric
 #' predictors with many values use up to eight bins, chosen within each role.
@@ -80,8 +82,10 @@
 #' stay fixed, and the observed data were used to fit them; parameter uncertainty
 #' is not included. Check partner and time dependence separately.
 #'
-#' Fitted values are response predictions with random effects set to zero, which
-#' differ from averages over random effects for nonlinear links. Uses the families
+#' The "Predicted outcome" axis shows model predictions, not observed outcomes
+#' or predictions of residuals. Random effects are set to zero, which differs
+#' from averaging over random effects for nonlinear links. Additional predictor
+#' plots use the supplied predictor values instead. Uses the families
 #' and fitted rows supported by [simulate_dyad_responses()]: missing responses are
 #' not imputed, and time gaps follow the fitted model. Observations have equal weight.
 #'
@@ -208,7 +212,11 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     composition_rows <- unlist(role_rows, use.names = FALSE)
     composition_rows <- composition_rows[available[composition_rows]]
     rows <- rows[available[rows]]
-    title <- paste("PIT", if (distance) "distance" else "quantiles", "by", name)
+    title <- paste("PIT", if (distance) "distance" else "quantiles")
+    title <- if (is.null(name)) paste0(title, "\n(",
+      if (distance) "residual extremes" else "fit", " across predicted outcomes)")
+      else paste0(title, " by ", name, "\n(",
+        if (distance) "residual extremes" else "fit", " across predictor values)")
     if (!length(rows)) return(plot_check_empty(title, "No available predictor values"))
     available_values <- predictor[composition_rows]
     binned <- is.numeric(predictor) && length(unique(available_values)) > 8
@@ -225,7 +233,7 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
       vapply(rows_by_group, function(rows) mean(predictor[rows]), numeric(1))
     } else seq_along(rows_by_group)
     labels <- if (is.numeric(predictor)) format(positions, trim = TRUE) else names(rows_by_group)
-    predictor_label <- if (name == "Fitted") "Predicted response" else name
+    predictor_label <- if (is.null(name)) "Predicted outcome" else name
     limits <- if (is.numeric(predictor)) range(available_values) else range(positions)
     padding <- if (is.numeric(predictor)) {
       if (!binned && length(positions) > 1) .2 * min(diff(positions)) else 0
@@ -259,9 +267,13 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     }
     draw_envelopes(positions, curves, connect = is.numeric(predictor),
                    boxes = !is.numeric(predictor), smooth = smooth)
-    plot_check_caption(if (smooth)
-      "25th: dashed; median: bold; 75th: dotted.\nCompare each red curve with its matching blue band."
-      else "Quartiles: 25th, median (bold), 75th, left to right.\nEach should track its dashed line and blue ranges.")
+    guide <- if (distance)
+      "Red quartiles should roughly follow the horizontal lines within blue ranges.\nAbove a range: more extreme residuals; below: more central residuals."
+      else "Red quartiles should roughly follow the horizontal lines within blue ranges.\nPersistent departures suggest patterns the model does not reproduce."
+    key <- if (smooth) "25th: dashed; median: bold; 75th: dotted."
+      else if (is.numeric(predictor)) "Quartiles: 25th, median (bold), 75th, left to right."
+      else "Red: box edges and median. Blue: 25th, median, 75th, left to right."
+    plot_check_caption(paste(guide, key, sep = "\n"))
   }
   ks_distance <- function(x) {
     ordered <- sort(x)
@@ -276,33 +288,39 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     role_rows <- composition$rows
     plot_check_role_page(composition, 4, "Residual checks", {
       for (panel in c("Uniform QQ", "PIT histogram", "Fitted", "Outside simulated range")) {
+        title <- switch(panel,
+          "Uniform QQ" = "Uniform QQ\n(overall residual distribution)",
+          "PIT histogram" = "PIT histogram\n(how residuals are distributed)",
+          "Fitted" = "PIT quantiles\n(fit across predicted outcomes)",
+          "Outside simulated range" = "Outside simulated range (outliers)")
         for (rows in role_rows) {
           if (!length(rows)) {
-            plot_check_empty(panel)
+            plot_check_empty(title)
             next
           }
           if (panel == "Uniform QQ") {
             qq <- apply(pit[rows, , drop = FALSE], 2, stats::quantile, probs = probabilities)
-            graphics::plot(probabilities, probabilities, type = "n", main = panel,
+            graphics::plot(probabilities, probabilities, type = "n", main = title,
                            xlab = "Uniform quantile", ylab = "PIT quantile")
             draw_envelopes(probabilities, list(qq))
             graphics::abline(0, 1, lty = 2, col = check_colours$reference)
-            plot_check_caption("The red curve should follow the diagonal,\nallowing for the blue variation.")
+            plot_check_caption("The red curve should roughly follow the diagonal.\nSustained departures outside the blue band suggest a distribution mismatch.")
           } else if (panel == "PIT histogram") {
             densities <- apply(pit[rows, , drop = FALSE], 2,
                                function(x) graphics::hist(x, breaks, plot = FALSE)$density)
             midpoints <- utils::head(breaks, -1) + diff(breaks) / 2
             graphics::plot(midpoints, densities[, 1], type = "n", ylim = c(0, max(densities)),
-                           main = panel, xlab = "PIT", ylab = "Density")
+                           main = title, xlab = "PIT", ylab = "Density")
             draw_envelopes(midpoints, list(densities), connect = FALSE)
             graphics::abline(h = 1, lty = 2, col = check_colours$reference)
-            plot_check_caption("Red frequencies should be roughly flat.\nCompare each point with its blue range.")
+            plot_check_caption("Red points should be roughly level near 1, usually within blue ranges.\nPeaks and gaps show more or fewer residuals than expected in each bin.")
           } else if (panel == "Fitted") {
-            draw_pattern(rows, predicted, "Fitted", role_rows)
+            draw_pattern(rows, predicted, NULL, role_rows)
           } else {
             values <- pit[rows, , drop = FALSE]
-            plot_check_statistic(colSums(values == 0 | values == 1), panel,
-                                 xlab = "Number of observations", counts = TRUE)
+            plot_check_statistic(colSums(values == 0 | values == 1), title,
+              xlab = "Number of observations", counts = TRUE,
+              sub = "Counts outcomes below or above all their reference simulations.\nRed beyond the right dashed limit means more such outcomes\nthan the model usually produces.")
           }
         }
       }
@@ -317,12 +335,14 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     }
     if (details) {
       plot_check_role_page(composition, 2, "Residual details", {
+        title <- "Uniformity: KS distance\n(overall residual mismatch)"
         for (rows in role_rows) {
-          if (!length(rows)) plot_check_empty("Uniformity")
+          if (!length(rows)) plot_check_empty(title)
           else plot_check_statistic(apply(pit[rows, , drop = FALSE], 2, ks_distance),
-                                    "Uniformity", xlab = "Distance from uniform residuals")
+            title, xlab = "Distance from uniform residuals",
+            sub = "Larger values mean a greater departure from evenly spread PIT residuals.\nRed beyond the right dashed limit means more departure\nthan the model usually produces.")
         }
-        for (rows in role_rows) draw_pattern(rows, predicted, "Fitted", role_rows, TRUE)
+        for (rows in role_rows) draw_pattern(rows, predicted, NULL, role_rows, TRUE)
       })
     }
   }

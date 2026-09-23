@@ -538,7 +538,12 @@ test_that("printing describes the check and plots show empirical limits", {
     plotted <- withVisible(plot(result, ask = FALSE))
     expect_false(plotted$visible)
     expect_identical(plotted$value, result)
-    expect_identical(gsub("\n", " ", titles, fixed = TRUE), names(observed_statistics))
+    expected_titles <- names(observed_statistics)
+    role_sd <- startsWith(expected_titles, "SD (")
+    expected_titles[!role_sd] <- sub(" \\(.*", "", expected_titles[!role_sd])
+    expected_titles <- sub("Dyad-average/role-difference correlation",
+                          "Mean-difference correlation", expected_titles, fixed = TRUE)
+    expect_identical(sub("\n.*", "", titles), expected_titles)
     expect_equal(observed_lines, unname(observed_statistics))
     expect_equal(unname(do.call(cbind, limits)), unname(apply(
       as.matrix(statistics[-1, -1]), 2, stats::quantile, probs = c(0.025, 0.975)

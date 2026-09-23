@@ -3,7 +3,8 @@ check_colours <- list(observed = "#a12b35", observed_fill = "#f2d3d6",
                       reference = "grey40")
 
 plot_check_caption <- function(text) {
-  graphics::mtext(text, side = 1, line = 4.8, cex = .875 * graphics::par("cex"))
+  graphics::mtext(text, side = 1, line = 4.2, padj = 1,
+                  cex = .875 * graphics::par("cex"))
 }
 
 plot_check_empty <- function(title, label = "No fitted observations") {
@@ -38,8 +39,8 @@ plot_check_statistic <- function(values, title, xlab = "Summary value",
                    lty = 2, col = check_colours$reference)
   graphics::abline(v = values[1], col = check_colours$observed, lwd = 2)
   if (caption) {
-    guide <- "Compare the red value with the blue distribution.\nDashed lines mark its middle 95%."
-    if (!is.null(sub)) guide <- paste(guide, sub)
+    guide <- if (is.null(sub))
+      "The red line should usually lie between the dashed limits.\nOutside means an unusually low or high value for this model." else sub
     plot_check_caption(guide)
   } else graphics::legend("top", c("Observed", "Middle 95% of simulations"),
     lty = c(1, 2), lwd = c(2, 1), col = c(check_colours$observed, check_colours$reference),
@@ -54,14 +55,14 @@ plot_check_role_page <- function(composition, rows, title, draw) {
   plot_check_page(composition$label, paste(title, counts, sep = " - "),
     c(rows, length(role_rows)), draw,
     column_titles = paste0(names(role_rows), " (n = ", lengths(role_rows), ")"),
-    footer = "Red: observed. Blue: simulations; ranges are pointwise middle 95%. Some departures occur by chance.\nParameters fixed; no significance tests.")
+    footer = "Red: observed data. Blue: model simulations. Ranges and dashed histogram limits contain the middle 95%.\nSome departures occur by chance; these are descriptive checks, not significance tests.")
 }
 
 # Draw one composition page. `draw` is evaluated inside the temporary layout;
 # column headings are optional because not every check arranges panels by role.
 plot_check_page <- function(composition, title, panels, draw,
                             column_titles = NULL, footer = NULL,
-                            mar = c(6.8, 4.5, 2, .8)) {
+                            mar = c(7.8, 4.5, 3.2, .8)) {
   previous <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex",
                               "mfg", "las", "plt", "cex.main", "new"))
   on.exit({

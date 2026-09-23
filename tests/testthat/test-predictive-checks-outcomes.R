@@ -10,9 +10,10 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
   original_hist <- graphics::hist
   original_abline <- graphics::abline
   local_mocked_bindings(title = function(main = NULL, ...) {
-    if (!is.null(main) && main %in% c("Response variability", "Largest absolute deviation"))
+    title <- sub("\n.*", "", main)
+    if (!is.null(main) && title %in% c("Response variance", "Largest absolute deviation"))
       histograms[[length(histograms) + 1L]] <<- list(
-        name = main, values = histogram_values, limits = graphics::par("usr")[1:2]
+        name = title, values = histogram_values, limits = graphics::par("usr")[1:2]
       )
     original_title(main = main, ...)
   }, hist = function(x, ...) {
@@ -33,7 +34,8 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
   expect_named(result$value[[1]], c("A", "B"))
   expect_identical(.Random.seed, random_state)
   checks <- c("Response variability", "Largest absolute deviation")
-  expect_identical(vapply(histograms, `[[`, "", "name"), rep(checks, each = 2))
+  expect_identical(vapply(histograms, `[[`, "", "name"),
+    rep(c("Response variance", "Largest absolute deviation"), each = 2))
   rows_by_role <- split(seq_len(12), simulations$model_frame$role)
   for (i in seq_along(rows_by_role)) {
     rows <- rows_by_role[[i]]
@@ -136,9 +138,10 @@ test_that("zero-count panels are automatic and handle constant references", {
   original_hist <- graphics::hist
   original_abline <- graphics::abline
   local_mocked_bindings(title = function(main = NULL, ...) {
-    if (!is.null(main) && main %in% c("Response variability", "Largest absolute deviation", "Number of zeros"))
+    title <- sub("\n.*", "", main)
+    if (!is.null(main) && title %in% c("Response variance", "Largest absolute deviation", "Number of zeros"))
       histograms[[length(histograms) + 1L]] <<- list(
-        name = main, values = histogram_values, limits = graphics::par("usr")[1:2],
+        name = title, values = histogram_values, limits = graphics::par("usr")[1:2],
         breaks = histogram_breaks
       )
     original_title(main = main, ...)
@@ -162,7 +165,7 @@ test_that("zero-count panels are automatic and handle constant references", {
   # The default call needs no plot flags, and continuous data need no zero panel.
   expect_length(zero_panels(simulations), 0)
   expect_identical(vapply(histograms, `[[`, "", "name"),
-    c("Response variability", "Largest absolute deviation"))
+    c("Response variance", "Largest absolute deviation"))
   observed_zero <- simulations
   observed_zero$observed_response[1] <- 0
   panel <- zero_panels(observed_zero)[[1]]
@@ -198,7 +201,7 @@ test_that("outcome ECDF paths retain ties, constant samples, and both tails", {
   original_title <- graphics::title
   original_lines <- graphics::lines
   local_mocked_bindings(title = function(main = NULL, ...) {
-    recording <<- identical(main, "Outcome overlay")
+    recording <<- !is.null(main) && grepl("outcome ECDF", main, ignore.case = TRUE)
     original_title(main = main, ...)
   }, lines = function(x, y, ...) {
     if (recording) paths[[length(paths) + 1L]] <<- list(
@@ -244,7 +247,7 @@ test_that("discrete outcome panels show role-specific proportions and category l
     bars[[length(bars) + 1L]] <<- list(values = height, labels = names.arg)
     original_barplot(height, names.arg = names.arg, ...)
   }, title = function(main = NULL, ...) {
-    recording <<- identical(main, "Outcome frequencies")
+    recording <<- identical(main, "Outcome frequencies\n(category proportions)")
     original_title(main = main, ...)
   }, segments = function(x0, y0, x1, y1, ...) {
     if (recording) bounds[[length(bounds) + 1L]] <<- unname(rbind(y0, y1))

@@ -77,9 +77,18 @@ test_that("compositions use row-wise panels with clear titles and pair counts", 
   recorded_statistic_titles <- character()
   recorded_panel_positions <- list()
   recorded_margin_text <- list()
-  expected_statistic_titles <- unlist(lapply(
-    check_result$compositions$statistics, function(statistics) names(statistics)[-1]
-  ))
+  expected_statistic_titles <- c(
+    "SD (female) (variability within this role)",
+    "SD (male) (variability within this role)",
+    "Partner correlation (how partners vary together)",
+    "Dyad-average SD (variation between dyad averages)",
+    "Half-difference SD (variation in partner differences)",
+    "Mean-difference correlation (which role varies more)",
+    rep(c("Common member SD (pooled variability)",
+          "Partner correlation (how partners vary together)",
+          "Dyad-average SD (variation between dyad averages)",
+          "Half-difference RMS (size of partner differences)"), 2)
+  )
   original_title <- graphics::title
   original_margin_text <- graphics::mtext
   local_mocked_bindings(title = function(main = NULL, sub = NULL, ...) {

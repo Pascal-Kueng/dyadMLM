@@ -34,8 +34,8 @@ can be established from the fitting data.
 Roles determine the display; simulations retain the fitted model's assumptions,
 including its partner dependence and any role-specific variability.
 
-Residual pages show a PIT QQ plot, PIT histogram, PIT quartiles across fitted
-predictions, and the number of PIT endpoints (outcomes outside their simulation
+Residual pages show a PIT QQ plot, PIT histogram, PIT quartiles across predicted
+outcomes, and the number of PIT endpoints (outcomes outside their simulation
 reference range). Outcome pages show the raw response distribution, variability,
 largest deviations, and relevant zero counts. Variability and deviations are
 calculated after subtracting the same model predictions from each dataset.
@@ -55,7 +55,9 @@ Fitted parameters stay fixed.
 
 In `check_residuals()`, use `predictors = simulations$model_frame[c("x", "z")]`
 for extra predictor panels, or `details = TRUE` for a uniformity summary and
-PIT distance across fitted predictions. In `check_outcomes()`,
+PIT distance across predicted outcomes. "Predicted outcome" means the model's
+prediction with random effects set to zero, not the observed outcome. Additional
+predictor pages use the supplied predictor values. In `check_outcomes()`,
 `centred_overlay = TRUE` adds an outcome overlay after subtracting model predictions.
 See `?check_residuals` and `?check_outcomes` for plot meanings and limits.
 
