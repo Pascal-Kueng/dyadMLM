@@ -1,12 +1,13 @@
 # Partner-dependence studies
 
-Start with `compare-centering.R` for the family comparison. `sensitivity.R` preserves
-the earlier studies; the other scripts answer narrower validation questions.
+Start with `compare-centering.R` for the current family comparison. `sensitivity.R`
+retains the earlier study of omitted correlation and unequal SDs; the other scripts
+answer narrower validation questions.
 These are descriptive predictive checks, not calibrated significance tests.
 
 | Script | Purpose |
 | --- | --- |
-| [sensitivity.R](sensitivity.R) | Sample-size curves and sensitivity to omitted correlation or unequal SDs |
+| [sensitivity.R](sensitivity.R) | Sensitivity to omitted positive or negative correlation and unequal SDs |
 | [compare-centering.R](compare-centering.R) | Compare raw and model-centred checks across all supported families |
 | [check-family-comparison.R](check-family-comparison.R) | Verify family generators and the study's correlation calculation |
 | [family-margins.R](family-margins.R) | Generate each response distribution and calibrate residual correlation |
@@ -17,24 +18,23 @@ These are descriptive predictive checks, not calibrated significance tests.
 | [fitting-examples/ordinal.R](fitting-examples/ordinal.R) | Compare Laplace fitting with more accurate quadrature |
 | [fitting-examples/lognormal.R](fitting-examples/lognormal.R) | Compare Laplace fitting with direct likelihood integration |
 
-[Recorded results](results-summary.md) give the main findings. The separate
+The [full family report](family-comparison.Rmd) describes the current study;
+[recorded earlier results](results-summary.md) cover the historical investigations.
+The separate
 [family checks](../README.md#validation) and package tests protect implementation
 correctness, including category scoring, fitted-row alignment, and zero components.
 
 ## Sensitivity
 
-One script runs two existing designs, with their original data generation and seeds:
+This retained study uses intercept-only Gaussian, NB2, ordinal, and lognormal
+models at 50, 200, and 1,000 dyads, with the original generation and seeds.
+Its defaults remain **200 datasets per condition and 499 simulations per fit**
+to reproduce the historical results. The current family comparison below uses
+500 datasets and 1,000 simulations.
 
-- **`apim`:** Gaussian APIM with actor slope 0.5, partner slope 0.3, predictor SDs 1
-  and partner correlation 0.3, and residual SDs 1. The fitted model includes both
-  predictors but omits residual correlation. Correlations are 0, 0.10, 0.30, and
-  0.50; sample sizes are 20, 40, 60, 80, 100, 150, 200, 300, 400, 500, and 1,000 dyads.
-  Defaults: 500 datasets per condition and 499 simulations per fit.
-- **`families`:** Intercept-only Gaussian, NB2, ordinal, and lognormal examples at
-  50, 200, and 1,000 dyads. Defaults: 200 datasets per condition and 499 simulations.
-  The correlation sweep uses copula correlations -0.25, 0, 0.10, 0.25, and 0.50.
-  The SD sweep uses second/first SD ratios 1.10, 1.25, and 1.50 with independent
-  partners. One combined condition uses correlation 0.25 and SD ratio 1.25.
+The correlation sweep uses copula correlations -0.25, 0, 0.10, 0.25, and 0.50.
+The SD sweep uses second/first SD ratios 1.10, 1.25, and 1.50 with independent
+partners. One combined condition uses correlation 0.25 and SD ratio 1.25.
 
 The family examples have these marginal distributions before changing the second SD:
 
@@ -47,13 +47,13 @@ The family examples have these marginal distributions before changing the second
 
 Correlated normal draws are transformed to these distributions. Copula correlation
 is generally different from response correlation. These intercept-only examples
-are not directly comparable with the APIM curves. The newer comparison below
-extends the APIM design to all supported families.
+are not directly comparable with the current family comparison, which includes
+actor and partner effects.
 
-Both designs supply first/second role labels. APIM checks use model-centred
-responses; family checks use raw responses. Each fit assumes independent partners
-and equal role variances. New runs save all six panel statistics and summarise
-whether either role SD is flagged, so a separate SD follow-up is unnecessary.
+The checks use raw responses and first/second role labels. Each fit assumes
+independent partners and equal role variances. New runs save all six panel
+statistics and summarise whether either role SD is flagged, so a separate SD
+follow-up is unnecessary.
 
 A flag means the observed statistic falls outside its middle 95% simulated range.
 The zero-correlation baseline is measured rather than assumed to be 5%. Simulations
@@ -64,20 +64,15 @@ recorded as study exclusions. Undefined reference draws and warnings are retaine
 Run from the repository root:
 
 ```sh
-Rscript dev/diagnostic_checks/simulation-studies/sensitivity.R apim
-Rscript dev/diagnostic_checks/simulation-studies/sensitivity.R families
+Rscript dev/diagnostic_checks/simulation-studies/sensitivity.R
+Rscript dev/diagnostic_checks/simulation-studies/sensitivity.R 200 499 4 plot
 ```
 
-After the design name, optional arguments are datasets per condition, reference
-draws, workers, and `plot`. For example, `apim 2 99 4` is a short execution check;
-`apim 500 499 4 plot` redraws the full saved figure without refitting. Use one worker
-on Windows. Seeds do not depend on worker count. Only the full APIM settings update
-the saved `figures/apim-sample-size.png` figure.
-The family run requires a glmmTMB version with `ordinal()`.
-All plotted sample sizes are labelled, with linear spacing through 500 dyads and a
-marked break before 1,000. Shading and bars show 95% Wilson intervals for Monte
-Carlo uncertainty. The maximum Monte Carlo SE is about 2.2
-percentage points with 500 datasets, or 3.5 points with 200.
+Optional arguments are datasets per condition, reference draws, workers, and `plot`.
+The second command refreshes saved summaries without refitting. Use one worker on
+Windows. Seeds do not depend on worker count. A glmmTMB version with `ordinal()`
+is required. Summary tables include 95% Wilson intervals; with 200 datasets, the
+maximum Monte Carlo SE is about 3.5 percentage points.
 
 ## Raw versus model-centred checks
 
@@ -122,7 +117,7 @@ option redraws saved results without fitting models.
 
 The complete default run renders the [full report](family-comparison.Rmd) and
 updates the selected figures in the [vignette draft](../partner-dependence-vignette-draft.Rmd).
-The report rebuilds its plots from saved statistics. To change text, layout, colours,
+The report rebuilds its plots from saved summary tables. To change text, layout, colours,
 or axes, edit the report or [plotting helper](plot-family-comparison.R) and render again:
 
 ```sh
@@ -139,6 +134,39 @@ increasing generated datasets improves the precision of the plotted detection ra
 The defaults are 1,000 reference simulations and 500 generated datasets per point.
 The full run needs a glmmTMB version with `ordinal()` and the `gsl` package for Bell
 simulations. Some families, especially COM-Poisson, take much longer to simulate.
+
+## Tweedie simulation repair
+
+The full run used glmmTMB commit `93c774717c0f10b600c25dd21f393d03155efc3f`.
+Four Tweedie conditions stalled when fitted power approached 2: its sampler tried
+to add millions of Gamma draws for each response. The two-line
+[sampler patch](tweedie-sampler.patch) replaces that sum with one Gamma draw whose
+shape is multiplied by the number of terms, matching TMB 1.9.25. This preserves
+the distribution and fitting code, but changes random-number realizations.
+
+The remaining 1,450 datasets in those conditions used the repaired sampler;
+completed results were retained. Checks confirmed unchanged fitted parameters
+and the expected simulation moments and zero probabilities. The patch, resumed
+repetition ranges, and validation results are saved under
+`results/family-comparison/tweedie-repair/`.
+
+To build the same repair separately from the normal user library, run from the
+repository root with TMB 1.9.25 and glmmTMB's build dependencies installed:
+
+```sh
+study_directory="$PWD/dev/diagnostic_checks/simulation-studies"
+tweedie_library="$study_directory/results/tweedie-library"
+mkdir -p "$tweedie_library"
+git clone https://github.com/glmmTMB/glmmTMB.git "$study_directory/results/tweedie-source"
+git -C "$study_directory/results/tweedie-source" checkout 93c774717c0f10b600c25dd21f393d03155efc3f
+patch -d "$study_directory/results/tweedie-source" -p1 < "$study_directory/tweedie-sampler.patch"
+R CMD INSTALL --library="$tweedie_library" "$study_directory/results/tweedie-source/glmmTMB"
+R_LIBS="$tweedie_library" Rscript dev/diagnostic_checks/simulation-studies/compare-centering.R 500 1000 10 run tweedie
+```
+
+`R_LIBS` selects the local repair for this command while keeping the normal user
+library available. It does not replace the normal glmmTMB installation. The saved
+study combines both samplers, so a fresh run will not reproduce every draw exactly.
 
 ## Validation and fitting examples
 
@@ -167,11 +195,10 @@ frequencies or establish how often a problem occurs.
 Generated outputs are ignored under `results/`, with settings-specific folders for
 sensitivity, family comparison, and validation. Fitting examples have their own
 result folders. Family comparisons resume saved runs; the other scripts replace
-their outputs when rerun with the same settings. The completed sensitivity results were
-moved without refitting: the original APIM run saved correlation only; the family
-run saved three statistics, with the other three available for its SD follow-up.
-New sensitivity runs save all six throughout. Historical population-correlation estimates are
-also preserved alongside the family results.
+their outputs when rerun with the same settings. The completed sensitivity results
+were moved without refitting: they saved three statistics, with the other three
+available for the SD follow-up. New sensitivity runs save all six throughout.
+Historical population-correlation estimates are also preserved alongside these results.
 
 The family comparison explicitly saves per-condition RDS checkpoints, per-dataset
 statistics and fit diagnostics, summary tables, calibration, seeds, and session
@@ -183,3 +210,8 @@ is preserved locally in `results/before-consolidation-20260921.tar.gz`. Every ar
 file was verified against its source before cleanup. This ignored archive retains
 the larger studies, component-specific omissions, sparse-category controls, and
 exploratory numerical probes without adding them to routine code review.
+
+The superseded Gaussian APIM script mode and figure are archived with their saved
+results in `results/before-apim-retirement-20260923.tar.gz`. Archived files were
+verified against their originals before removal; `compare-centering.R` now covers
+that design.

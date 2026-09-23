@@ -14,24 +14,17 @@ params:
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
   fig.width = 13, fig.height = 6, dpi = 180, fig.retina = 1, out.width = "100%")
 source("plot-family-comparison.R")
-source("summarise-family-comparison.R")
 results_directory <- params$results_directory
 settings <- read.csv(file.path(results_directory, "settings.csv"))
-saved_summary <- read.csv(file.path(results_directory, "summary.csv"))
+figure_descriptions <- as.vector(rbind(
+  paste0(settings$label, ": detection of omitted partner correlation by number of dyads."),
+  paste0(settings$label, ": false alarms with no residual partner correlation by number of dyads.")
+))
+summary <- read.csv(file.path(results_directory, "summary.csv"))
 calibration <- read.csv(file.path(results_directory, "calibration.csv"))
-# Recount saved observations and limits, including results from an older running script.
-summary <- lapply(settings$family, function(family_name) {
-  statistics <- read.csv(file.path(results_directory, family_name, "statistics.csv"))
-  completion <- saved_summary |>
-    dplyr::filter(family == family_name) |>
-    dplyr::select(family, condition, n_dyads, target_correlation, attempted,
-      successful, with_warnings, check_errors) |>
-    dplyr::distinct()
-  summarise_family_comparison(statistics, completion)$summary
-}) |> dplyr::bind_rows()
 vignette_families <- c("gaussian", "nbinom2", "ordinal", "lognormal",
                       "zi_poisson", "hurdle_nbinom2")
-# Refresh completed families from the default study while the remaining families run.
+# Update the selected vignette figures from the full study settings.
 update_vignette_figures <-
   all(settings$datasets_per_condition == 500L & settings$reference_draws == 1000L) &&
   all(summary$attempted == 500L)
@@ -61,7 +54,8 @@ of raw outcomes, using the **same datasets, fitted models, and reference simulat
 Read both together: a method that detects more real mismatches may also raise more
 false alarms. These results describe the settings studied, not general power for
 each family. Bars and bands show uncertainty from using a finite number of study
-datasets.
+datasets. Rates describe usable fits; fitting exclusions were substantial for
+skew-normal models and small Student t samples.
 
 Ordinal checks use category scores 1, 2, and so on. Zero-inflated and hurdle checks
 use the combined outcome, including zeros.
@@ -85,6 +79,11 @@ excluded without retry, as are ordinal datasets missing a category. Undefined
 simulated correlations are omitted from reference ranges. Reduced check counts
 and exclusion reasons are listed below each family's plots.
 
+For 1,450 resumed Tweedie datasets, an isolated glmmTMB build used TMB's equivalent
+single-Gamma sampler to avoid extremely slow simulation when fitted power was close
+to 2. Fitted models and response distributions were unchanged; random draws differed.
+The [study notes](README.md#tweedie-simulation-repair) give the version, patch, and checks.
+
 The sample-size axis is linear through 500 dyads, with a shortened gap before
 1,000. This report redraws saved results without fitting or simulating. See the
 [study code](compare-centering.R), [plot code](plot-family-comparison.R), and
@@ -92,7 +91,7 @@ The sample-size axis is linear through 500 dyads, with a shortened gap before
 
 </details>
 
-```{r family-results, results='asis'}
+```{r family-results, results='asis', fig.alt=figure_descriptions}
 for (family_index in seq_len(nrow(settings))) {
   family_settings <- settings[family_index, ]
   family_summary <- summary[summary$family == family_settings$family, ]

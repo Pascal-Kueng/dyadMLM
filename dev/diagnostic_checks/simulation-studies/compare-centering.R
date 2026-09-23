@@ -25,15 +25,17 @@ dir.create(output_directory, recursive = TRUE, showWarnings = FALSE)
 conditions <- expand.grid(n_dyads = c(20L, 40L, 60L, 80L, 100L, 150L, 200L, 300L, 400L, 500L, 1000L),
   target_correlation = c(0, 0.1, 0.3, 0.5)) |>
   dplyr::mutate(condition = dplyr::row_number())
-calibration_file <- file.path(study_directory, "results/family-comparison/calibration.csv")
-calibration <- if (file.exists(calibration_file)) read.csv(calibration_file) else data.frame()
-missing_families <- setdiff(selected_families, calibration$family)
-for (family_name in missing_families) {
-  family_calibration <- calibrate_family_correlations(family_name,
-    seed = 32000000L + 100L * match(family_name, family_names))
-  family_calibration$verified <- TRUE
-  calibration <- dplyr::bind_rows(calibration, family_calibration)
-  write.csv(calibration, calibration_file, row.names = FALSE)
+if (!plot_only) {
+  calibration_file <- file.path(study_directory, "results/family-comparison/calibration.csv")
+  calibration <- if (file.exists(calibration_file)) read.csv(calibration_file) else data.frame()
+  missing_families <- setdiff(selected_families, calibration$family)
+  for (family_name in missing_families) {
+    family_calibration <- calibrate_family_correlations(family_name,
+      seed = 32000000L + 100L * match(family_name, family_names))
+    family_calibration$verified <- TRUE
+    calibration <- dplyr::bind_rows(calibration, family_calibration)
+    write.csv(calibration, calibration_file, row.names = FALSE)
+  }
 }
 
 # The study always places partners in alternating columns. This is Pearson correlation,
@@ -175,12 +177,12 @@ if (!plot_only) {
     file.path(output_directory, "session-info.txt"))
 }
 for (family_name in selected_families) {
-  margin <- make_family_margin(family_name)
   family_directory <- file.path(output_directory, family_name)
-  dir.create(family_directory, showWarnings = FALSE)
-  family_calibration <- calibration[calibration$family == family_name, ]
-  stopifnot(nrow(family_calibration) == 4L)
   if (!plot_only) {
+    margin <- make_family_margin(family_name)
+    dir.create(family_directory, showWarnings = FALSE)
+    family_calibration <- calibration[calibration$family == family_name, ]
+    stopifnot(nrow(family_calibration) == 4L)
     completed <- parallel::mclapply(order(conditions$n_dyads, decreasing = TRUE), run_condition,
       mc.cores = workers, mc.set.seed = FALSE, mc.preschedule = FALSE)
     stopifnot(!any(vapply(completed, inherits, logical(1), "try-error")))
@@ -191,27 +193,31 @@ for (family_name in selected_families) {
     ggplot2::ggsave(file.path(output_directory, paste0(family_name, ".", extension)),
       figure, width = 13, height = 6, dpi = 180)
   }
-  family_settings <- data.frame(family = family_name, label = family_labels[[family_name]],
-    formula = "outcome ~ actor_predictor + partner_predictor",
-    mean_settings = paste0("Actor effect 0.5; partner effect 0.3; ", margin$family$link,
-      " link; intercept ", signif(margin$mean_intercept, 3), "."),
-    dispersion_settings = margin$settings,
-    zero_settings = if (margin$zero_probability > 0) "Constant zero component, probability 0.25; fitted with ziformula = ~1." else "",
-    datasets_per_condition = repetitions, reference_draws = reference_draws)
-  write.csv(family_settings, file.path(family_directory, "settings.csv"), row.names = FALSE)
+  if (!plot_only) {
+    family_settings <- data.frame(family = family_name, label = family_labels[[family_name]],
+      formula = "outcome ~ actor_predictor + partner_predictor",
+      mean_settings = paste0("Actor effect 0.5; partner effect 0.3; ", margin$family$link,
+        " link; intercept ", signif(margin$mean_intercept, 3), "."),
+      dispersion_settings = margin$settings,
+      zero_settings = if (margin$zero_probability > 0) "Constant zero component, probability 0.25; fitted with ziformula = ~1." else "",
+      datasets_per_condition = repetitions, reference_draws = reference_draws)
+    write.csv(family_settings, file.path(family_directory, "settings.csv"), row.names = FALSE)
+  }
   # Refresh the combined report data after each family, without fitting during rendering.
   for (filename in c("summary", "settings")) {
     saved_files <- file.path(output_directory, family_names, paste0(filename, ".csv"))
     combined <- dplyr::bind_rows(lapply(saved_files[file.exists(saved_files)], read.csv))
     write.csv(combined, file.path(output_directory, paste0(filename, ".csv")), row.names = FALSE)
   }
-  write.csv(calibration, file.path(output_directory, "calibration.csv"), row.names = FALSE)
+  if (!plot_only) {
+    write.csv(calibration, file.path(output_directory, "calibration.csv"), row.names = FALSE)
+  }
   message("Completed ", family_name, ": ", sum(summary$attempted[summary$response == "raw"]), " datasets")
 }
 
-# Update the draft only when all full-study results are available.
+# Render both documents after a complete run. Plot mode only updates saved results.
 saved_settings <- read.csv(file.path(output_directory, "settings.csv"))
-if (repetitions == 500L && reference_draws == 1000L &&
+if (!plot_only && repetitions == 500L && reference_draws == 1000L &&
     all(family_names %in% saved_settings$family)) {
   report_results_directory <- normalizePath(output_directory)
   rmarkdown::render(file.path(study_directory, "family-comparison.Rmd"),

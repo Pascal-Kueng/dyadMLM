@@ -92,16 +92,21 @@ the positive dependence omitted from the model. Shading and bars show how precis
 these percentages are estimated from the generated datasets.
 
 ```{r selected-family-plots, echo=FALSE, results='asis'}
-selected_families <- c("gaussian", "nbinom2", "ordinal", "lognormal",
-                      "zi_poisson", "hurdle_nbinom2")
+selected_families <- c(
+  "Gaussian" = "gaussian", "Negative binomial (NB2)" = "nbinom2",
+  "Ordinal" = "ordinal", "Lognormal" = "lognormal",
+  "Zero-inflated Poisson" = "zi_poisson", "Hurdle negative binomial (NB2)" = "hurdle_nbinom2"
+)
 figure_files <- file.path("figures", paste0("family-comparison-", selected_families, ".png"))
 available_figures <- file.exists(figure_files)
 if (!all(available_figures)) {
   cat("*Study in progress: ", sum(available_figures), " of ", length(selected_families),
       " selected family results are available.*\n\n", sep = "")
 }
-for (figure_file in figure_files[available_figures]) {
-  cat("\n\n![Detection of omitted partner correlation](", figure_file, ")\n\n", sep = "")
+for (figure_index in which(available_figures)) {
+  cat("\n\n![", names(selected_families)[figure_index],
+      ": detection of omitted partner correlation by number of dyads](",
+      figure_files[figure_index], ")\n\n", sep = "")
 }
 ```
 
