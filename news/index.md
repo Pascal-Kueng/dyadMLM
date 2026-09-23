@@ -2,6 +2,8 @@
 
 ## dyadMLM (development version)
 
+- Changed the package license from MIT to GPL-3.
+
 - Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),
   [\#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).
