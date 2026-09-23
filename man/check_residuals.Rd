@@ -52,29 +52,35 @@ simulations. Graphics settings are restored afterwards.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Compare PIT residuals with complete datasets from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
+Check where each observed outcome falls among its simulated values, using
+complete datasets from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
 For checks on the outcome scale, use \code{\link[=check_outcomes]{check_outcomes()}}.
 }
 \section{Reading the plots}{
 
-Each composition gets one pooled column for same-role partners, or separate
-columns for distinct roles. Every page repeats the composition heading.
-Roles define the display even if the fitted model
-treats partners as exchangeable. Available responses are retained when the
-composition is known; unknown compositions are omitted with a warning.
+A composition is the combination of partners' roles. Each composition gets
+one pooled column for same-role partners, or separate columns for distinct
+roles. Every page repeats the composition heading.
+Roles define the display even if the model treats partners as exchangeable;
+supplying roles does not change the model's assumptions. Available responses
+are retained when the composition is known; unknown compositions are omitted
+with a warning.
 
 \strong{Red shows observed data; blue shows simulated references.} The four rows
 show uniform QQ, a PIT histogram, PIT quartiles against fitted predictions,
 and the number of outcomes outside their simulated range (PIT endpoints).
 Use a tall plotting window or save a large figure to keep all rows readable.
 
-PIT residuals rank each outcome from 0 (low) to 1 (high) relative to its own
-simulated values. Blue ranges contain the middle 95\% at each plotted position,
+PIT (probability integral transform) residuals rank each outcome from 0 (low)
+to 1 (high) relative to its own simulated values. A suitable model should
+produce ranks roughly evenly spread between 0 and 1, allowing for the
+variation shown in blue.
+Blue ranges contain the middle 95\% at each plotted position,
 not across the whole plot. Some red points can fall outside by chance.
 For out-of-range counts, the blue histogram shows simulated counts and the red
 line shows the observed count; dashed lines mark the middle 95\%.
-\code{details = TRUE} adds a page with uniformity (KS distance) and fitted-value
-PIT-distance plots.
+\code{details = TRUE} adds a page with overall departure from uniformity (KS
+distance) and fitted-value PIT-distance plots.
 
 Each additional predictor gets a page with quartile and distance plots. Numeric
 predictors with many values use up to eight bins, chosen within each role.
@@ -96,7 +102,8 @@ and bins can hide interactions or finer patterns.
 
 The first half of simulations defines PIT; the other half provides complete
 reference datasets, transformed and grouped just like the observations. These
-envelopes account for fitted partner and time dependence without whitening.
+envelopes retain the fitted partner and time dependence and any modelled
+differences in variability between roles, without whitening.
 They are dyadMLM's descriptive checks, not DHARMa's plots or tests. Parameters
 stay fixed, and the observed data were used to fit them; parameter uncertainty
 is not included. Check partner and time dependence separately.

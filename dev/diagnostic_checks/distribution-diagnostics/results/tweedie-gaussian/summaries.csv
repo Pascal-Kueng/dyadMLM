@@ -1,0 +1,23 @@
+"check","group","statistic","observed","lower","upper"
+"Outcome","female","Response variability",4.18773477148537,4.76578818055477,7.92563805528652
+"Outcome","female","Largest absolute deviation",9.68067158657657,5.39381423599865,9.23231192304188
+"Outcome","female","Number of zeros",0,0,0
+"Residual","female","PIT endpoints",1,0,2
+"Outcome","female","Negative outcomes",0,9,23
+"Outcome","male","Response variability",8.26101376700759,4.67475907293005,7.85292614324912
+"Outcome","male","Largest absolute deviation",11.9900692037078,5.35769054209896,9.30108590375856
+"Outcome","male","Number of zeros",2,0,0
+"Residual","male","PIT endpoints",5,0,1
+"Outcome","male","Negative outcomes",0,9,23
+"Partner model-centred","female - male","SD (female)",2.04639555596795,2.18306842783196,2.81525097170267
+"Partner model-centred","female - male","SD (male)",2.87419793455628,2.16211910579555,2.80230728864124
+"Partner model-centred","female - male","Partner correlation (female and male)",0.58380403980651,0.405379553137133,0.657905521197193
+"Partner model-centred","female - male","Dyad-average SD",2.19751692544684,1.91398382962432,2.45806273381455
+"Partner model-centred","female - male","Half-difference SD (female minus male)",1.18122547873856,1.03099588463535,1.34417195931392
+"Partner model-centred","female - male","Dyad-average/role-difference correlation (female minus male)",-0.392300743875863,-0.175823539977488,0.171444185397779
+"Partner raw","female - male","SD (female)",2.17548990642825,2.24500124233218,2.89725007985269
+"Partner raw","female - male","SD (male)",2.94734770969216,2.23320848768517,2.87756793967402
+"Partner raw","female - male","Partner correlation (female and male)",0.568651588178328,0.374131992612239,0.630872054486301
+"Partner raw","female - male","Dyad-average SD",2.27551739960124,1.9543933451088,2.50724853705378
+"Partner raw","female - male","Half-difference SD (female minus male)",1.23767038888042,1.1002643137271,1.42890030209905
+"Partner raw","female - male","Dyad-average/role-difference correlation (female minus male)",-0.350996459946956,-0.171841733181951,0.178789480410102

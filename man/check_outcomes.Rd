@@ -52,34 +52,38 @@ For PIT residual patterns, use \code{\link[=check_residuals]{check_residuals()}}
 }
 \section{Reading the plots}{
 
-Each composition gets one pooled column for same-role partners, or separate
-columns for distinct roles, as in \code{\link[=check_residuals]{check_residuals()}}. Every page repeats its
-composition heading. Available responses are retained when the composition is
-known; unknown compositions are omitted with a warning.
+Each combination of partners' roles gets one pooled column for same-role
+partners, or separate columns for distinct roles, as in \code{\link[=check_residuals]{check_residuals()}}.
+Roles define the display without changing the model's assumptions.
+Every page repeats its composition heading. Available responses are retained
+when the composition is known; unknown compositions are omitted with a warning.
 
 \strong{Red shows observed data; blue shows simulations.} The first row compares
-outcome distributions. Ordinal responses and counts with up to 20 observed or
-simulated values use category frequencies; other outcomes use cumulative
-distributions from up to 30 simulated datasets.
+outcome distributions. Ordinal responses and counts with up to 20 distinct
+observed or simulated values use category frequencies. Other outcomes show
+the proportion at or below each outcome value, for the observations and up to
+30 simulated datasets.
 
 The remaining rows compare response variability (variance of outcome minus
 prediction), the largest absolute deviation from prediction, and zero counts
 where relevant. Each blue histogram shows simulated values; the red line shows
 the observed value. A red line far to the right or left means more or less than
 the model usually produces. Dashed lines mark the middle 95\%.
-Variance needs at least two observations. Use a tall plotting window to keep
-all rows readable.
+Some departures occur by chance. Variance needs at least two observations.
+Use a tall plotting window to keep all rows readable.
 }
 
 \section{Scope}{
 
 These are descriptive predictive checks, not significance tests. Complete
-simulations retain fitted partner and time dependence. Parameters stay fixed;
+simulations retain fitted partner and time dependence and any modelled
+differences in variability between roles. Parameters stay fixed;
 the observed data were used to fit them, and parameter uncertainty is not included.
 
 Predictions have random effects set to zero; for nonlinear links they differ
-from averages over random effects. Variability includes random effects and is
-not a family dispersion parameter. Ordinal summaries use category scores;
+from averages over random effects. Variability includes random effects; it does
+not isolate the model's residual variance or dispersion parameter.
+Ordinal summaries use category scores;
 zero counts describe the combined response distribution for zero-inflated models.
 Uses the families and fitted rows supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}:
 missing responses are not imputed, time gaps follow the fitted model, and
