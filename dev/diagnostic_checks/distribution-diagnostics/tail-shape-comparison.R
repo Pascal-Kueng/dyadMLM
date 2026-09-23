@@ -67,8 +67,8 @@ for (scenario in names(responses)) {
   predicted <- simulations$predicted_response
   message(scenario, ": plotting diagnostics")
 
-  png(file.path(output, paste0(scenario, "-panel-%02d.png")),
-      width = 1800, height = 2700, res = 150)
+  grDevices::svg(file.path(output, paste0(scenario, "-panel-%02d.svg")),
+                 width = 12, height = 18, onefile = FALSE)
   check_residuals(simulations, dyad = dyad, role = member,
     member = person, data = data, predictors = list(x = data$x), ask = FALSE)
   dev.off()

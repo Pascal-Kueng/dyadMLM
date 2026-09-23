@@ -26,10 +26,11 @@
 #' @param data The unchanged data used to fit the model. Supply it when grouping
 #'   columns are absent from the model frame, or to identify compositions using
 #'   partners whose responses were excluded during fitting.
-#' @param details Add individual statistic histograms and PIT-distance plots
-#'   against fitted values? Default: `FALSE`.
+#' @param details Add a uniformity histogram and PIT-distance plots against
+#'   fitted values? Default: `FALSE`.
 #'
-#' @return Plots, with one overview per composition and optional follow-up pages.
+#' @return Plots, with an overview and a summary page per composition, plus
+#'   optional predictor pages.
 #'   Invisibly returns PIT residuals for all fitted observations: rows are
 #'   observations; columns are observed data followed by the second half of the
 #'   simulations. Graphics settings are restored afterwards.
@@ -50,11 +51,13 @@
 #' PIT residuals rank each outcome from 0 (low) to 1 (high) relative to its own
 #' simulated values. Blue ranges contain the middle 95% at each plotted position,
 #' not across the whole plot. Some red points can fall outside by chance.
-#' The table compares response variability (variance of outcome minus prediction),
+#' The next page plots response variability (variance of outcome minus prediction),
 #' outcomes outside the simulated range (PIT endpoints), largest absolute deviation
-#' from prediction, and optional zero counts with simulated middle 95% ranges.
-#' Variance needs at least two observations. `details = TRUE` also shows uniformity
-#' (KS distance) and the simulated distribution of each summary.
+#' from prediction, and zero counts where relevant. Each blue histogram shows
+#' simulated values; the red line shows the observed value. A red line far to the
+#' right or left means more or less than the model usually produces. Dashed lines
+#' mark the middle 95%. Variance needs at least two observations.
+#' `details = TRUE` adds uniformity (KS distance) and fitted-value PIT-distance plots.
 #'
 #' Each additional predictor gets a page with quartile and distance plots. Numeric
 #' predictors with many values use up to eight bins, chosen within each role.
@@ -206,10 +209,24 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   }
   draw_statistic <- function(values, title) {
     if (anyNA(values)) return(empty_plot(title, "Needs at least two observations"))
-    histogram <- graphics::hist(values[-1], breaks = 20, plot = FALSE)
+    simulated <- values[-1]
+    counts <- title %in% c("Outside simulated range", "Number of zeros")
+    breaks <- if (counts && diff(range(simulated)) < 20)
+      seq(min(simulated) - .5, max(simulated) + .5, by = 1) else 20
+    histogram <- graphics::hist(simulated, breaks = breaks, plot = FALSE)
+    label <- switch(title,
+      "Response variability" = "Variance of outcome minus prediction",
+      "Largest absolute deviation" = "Absolute difference from prediction",
+      "Uniformity" = "Distance from uniform residuals",
+      "Number of observations")
     graphics::plot(histogram, xlim = range(values[1], histogram$breaks),
-                   col = "#bcd7e8", border = "white", main = title, xlab = "Value")
-    graphics::abline(v = stats::quantile(values[-1], c(.025, .975)), lty = 2, col = "grey40")
+                   col = "#bcd7e8", border = "white", main = title, xlab = label,
+                   ylab = "Simulated datasets", xaxt = if (counts) "n" else "s")
+    if (counts) {
+      ticks <- pretty(range(values))
+      graphics::axis(1, ticks[ticks >= 0 & ticks %% 1 == 0])
+    }
+    graphics::abline(v = stats::quantile(simulated, c(.025, .975)), lty = 2, col = "grey40")
     graphics::abline(v = values[1], col = "#a12b35", lwd = 2)
     caption("Compare the red value with the blue distribution.\nDashed lines mark its middle 95%.")
   }
@@ -228,9 +245,17 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
       shown <- values[, seq_len(min(ncol(values), 31)), drop = FALSE]
       graphics::plot(limits, c(0, 1), type = "n", main = "Outcome overlay",
                      xlab = label, ylab = "Cumulative proportion")
+      # One step path keeps vector exports small while retaining every ECDF jump.
+      draw_ecdf <- function(response, ...) {
+        empirical <- stats::ecdf(response)
+        knots <- stats::knots(empirical)
+        graphics::lines(c(graphics::par("usr")[1], knots, graphics::par("usr")[2]),
+                        c(0, empirical(knots), 1), type = "s", ...)
+      }
       for (dataset in 2:ncol(shown))
-        graphics::lines(stats::ecdf(shown[, dataset]), do.points = FALSE, col = "#bcd7e8")
-      graphics::lines(stats::ecdf(shown[, 1]), do.points = FALSE, col = "#a12b35", lwd = 2)
+        draw_ecdf(shown[, dataset], col = "#bcd7e8")
+      draw_ecdf(shown[, 1], col = "#a12b35", lwd = 2)
+      graphics::abline(h = c(0, 1), col = "grey70", lty = 2)
       caption("The red curve should resemble\nthe blue simulated curves.")
     }
   }
@@ -313,24 +338,6 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     if (include_zeros) statistics <- rbind(statistics, `Number of zeros` = colSums(responses[rows, , drop = FALSE] == 0))
     statistics
   }
-  draw_table <- function(statistics) {
-    graphics::plot.new()
-    if (is.null(statistics)) return(invisible(NULL))
-    statistics <- statistics[rownames(statistics) != "Uniformity", , drop = FALSE]
-    graphics::plot.window(c(0, 1), c(0, 1))
-    format_value <- function(x) trimws(formatC(x, digits = 3, format = "fg"))
-    bounds <- apply(statistics[, -1, drop = FALSE], 1, stats::quantile, c(.025, .975), na.rm = TRUE)
-    y <- seq(.7, .05, length.out = nrow(statistics))
-    graphics::text(0, .95, "Check", adj = 0, font = 2, cex = .85)
-    graphics::text(.57, .95, "Observed", adj = 1, font = 2, cex = .85)
-    graphics::text(1, .95, "Simulated 95% range", adj = 1, font = 2, cex = .85)
-    graphics::text(0, y, rownames(statistics), adj = 0, cex = .9)
-    graphics::text(.57, y, format_value(statistics[, 1]), adj = 1, col = "#a12b35", cex = .9)
-    graphics::text(1, y, paste(format_value(bounds[1, ]), format_value(bounds[2, ]), sep = " to "),
-                   adj = 1, cex = .9)
-    caption("Values outside the ranges invite a closer look.\nThese are descriptive comparisons, not tests.")
-  }
-
   old_par <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "mfg", "las", "plt"))
   on.exit(graphics::par(old_par), add = TRUE)
   old_ask <- grDevices::devAskNewPage((is.null(ask) || ask) && grDevices::dev.interactive())
@@ -373,10 +380,9 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     } else if (!(identical(family, "ordinal") ||
                  (family %in% count_families && length(support) <= 20))) support <- NULL
     outcome_limits <- range(responses[composition_rows, ])
-    start_page(5, length(role_rows))
-    for (panel in c("Uniform QQ", "PIT histogram", "Outcomes", "Fitted", "Summary")) {
-      for (role_index in seq_along(role_rows)) {
-        rows <- role_rows[[role_index]]
+    start_page(4, length(role_rows))
+    for (panel in c("Uniform QQ", "PIT histogram", "Outcomes", "Fitted")) {
+      for (rows in role_rows) {
         if (!length(rows)) {
           empty_plot(panel)
           next
@@ -399,12 +405,19 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
           caption("Red frequencies should be roughly flat.\nCompare each point with its blue range.")
         } else if (panel == "Outcomes") {
           draw_predictive(responses[rows, , drop = FALSE], outcome_limits, support, category_labels)
-        } else if (panel == "Fitted") {
-          draw_pattern(rows, predicted, "Fitted", role_rows)
-        } else draw_table(statistics[[role_index]])
+        } else draw_pattern(rows, predicted, "Fitted", role_rows)
       }
     }
     finish_page(composition, "Residual checks")
+
+    statistic_names <- unique(unlist(lapply(statistics, rownames)))
+    if (!details) statistic_names <- setdiff(statistic_names, "Uniformity")
+    start_page(length(statistic_names), length(role_rows))
+    for (name in statistic_names) for (values in statistics) {
+      if (is.null(values) || !name %in% rownames(values)) empty_plot(name, "Not applicable")
+      else draw_statistic(values[name, ], name)
+    }
+    finish_page(composition, "Spread and extremes")
 
     for (predictor_index in seq_along(predictors)) {
       start_page(2, length(role_rows))
@@ -414,13 +427,6 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
       finish_page(composition, names(predictors)[predictor_index])
     }
     if (details) {
-      statistic_names <- unique(unlist(lapply(statistics, rownames)))
-      start_page(length(statistic_names), length(role_rows))
-      for (name in statistic_names) for (values in statistics) {
-        if (is.null(values) || !name %in% rownames(values)) empty_plot(name, "Not applicable")
-        else draw_statistic(values[name, ], name)
-      }
-      finish_page(composition, "Summary details")
       start_page(1, length(role_rows))
       for (rows in role_rows) draw_pattern(rows, predicted, "Fitted", role_rows, TRUE)
       finish_page(composition, "PIT distance")

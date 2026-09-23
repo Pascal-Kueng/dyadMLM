@@ -226,11 +226,11 @@ test_that("overview and optional panels use predictable pages", {
   skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   simulations <- distribution_check_fixture()
   cases <- list(
-    list(arguments = list(), pages = 1L),
-    list(arguments = list(predictors = rep(list(seq_len(12)), 3)), pages = 4L),
+    list(arguments = list(), pages = 2L),
+    list(arguments = list(predictors = rep(list(seq_len(12)), 3)), pages = 5L),
     list(arguments = list(details = TRUE), pages = 3L),
-    list(arguments = list(centred_overlay = TRUE), pages = 2L),
-    list(arguments = list(dyad = "dyad", role = "role"), pages = 1L)
+    list(arguments = list(centred_overlay = TRUE), pages = 3L),
+    list(arguments = list(dyad = "dyad", role = "role"), pages = 2L)
   )
   for (case in cases) {
     pdf_path <- tempfile(fileext = ".pdf")
@@ -245,7 +245,7 @@ test_that("overview and optional panels use predictable pages", {
 })
 
 
-test_that("different dyad compositions have their own overview pages", {
+test_that("different dyad compositions have their own overview and statistic pages", {
   skip_if_not_installed("DHARMa")
   skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   simulations <- distribution_check_fixture()
@@ -258,7 +258,7 @@ test_that("different dyad compositions have their own overview pages", {
   information <- system2("pdfinfo", shQuote(pdf_path), stdout = TRUE)
   unlink(pdf_path)
   pages <- as.integer(sub("^Pages:\\s+", "", information[grepl("^Pages:", information)]))
-  expect_equal(pages, 3L)
+  expect_equal(pages, 6L)
   expect_equal(dim(pit), c(12L, 21L))
 })
 
@@ -269,13 +269,20 @@ test_that("role columns use their own observations and simulated references", {
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
   panel <- ""
-  observed_qq <- simulated_qq <- tables <- table_ranges <- table_labels <- list()
+  observed_qq <- simulated_qq <- histograms <- list()
+  histogram_values <- histogram_breaks <- NULL
   original_title <- graphics::title
   original_lines <- graphics::lines
   original_segments <- graphics::segments
-  original_text <- graphics::text
+  original_hist <- graphics::hist
+  original_abline <- graphics::abline
   local_mocked_bindings(title = function(main = NULL, ...) {
     panel <<- if (is.null(main)) "" else as.character(main)[1]
+    if (panel %in% c("Response variability", "Outside simulated range", "Largest absolute deviation"))
+      histograms[[length(histograms) + 1L]] <<- list(
+        name = panel, values = histogram_values, limits = graphics::par("usr")[1:2],
+        breaks = histogram_breaks
+      )
     original_title(main = main, ...)
   }, lines = function(x, y, ...) {
     if (grepl("Uniform QQ", panel) && !missing(y))
@@ -285,23 +292,26 @@ test_that("role columns use their own observations and simulated references", {
     if (grepl("Uniform QQ", panel))
       simulated_qq[[length(simulated_qq) + 1L]] <<- unname(rbind(y0, y1))
     original_segments(x0, y0, x1, y1, ...)
-  }, text = function(x, y = NULL, labels = seq_along(x), ...) {
-    if (identical(x, 0) && length(y) > 1)
-      table_labels[[length(table_labels) + 1L]] <<- as.character(labels)
-    if (identical(x, .57) && length(y) > 1)
-      tables[[length(tables) + 1L]] <<- as.character(labels)
-    if (identical(x, 1) && length(y) > 1)
-      table_ranges[[length(table_ranges) + 1L]] <<- as.character(labels)
-    original_text(x, y, labels = labels, ...)
+  }, hist = function(x, ...) {
+    histogram_values <<- x
+    histogram <- original_hist(x, ...)
+    histogram_breaks <<- histogram$breaks
+    histogram
+  }, abline = function(...) {
+    arguments <- list(...)
+    if (length(histograms) && !is.null(arguments$v)) {
+      marker <- if (identical(arguments$col, "#a12b35")) "observed" else "range"
+      histograms[[length(histograms)]][[marker]] <<- arguments$v
+    }
+    original_abline(...)
   }, .package = "graphics")
 
   pit <- check_residuals(simulations, dyad = "dyad", role = "role", ask = FALSE)
   rows_by_role <- split(seq_len(12), simulations$model_frame$role)
+  checks <- c("Response variability", "Outside simulated range", "Largest absolute deviation")
   expect_length(observed_qq, 2)
   expect_length(simulated_qq, 2)
-  expect_length(tables, 2)
-  expect_length(table_ranges, 2)
-  expect_false(any(grepl("Uniformity", unlist(table_labels), ignore.case = TRUE)))
+  expect_identical(vapply(histograms, `[[`, "", "name"), rep(checks, each = 2))
   for (i in seq_along(rows_by_role)) {
     rows <- rows_by_role[[i]]
     expected_qq <- apply(pit[rows, , drop = FALSE], 2, quantile,
@@ -309,15 +319,90 @@ test_that("role columns use their own observations and simulated references", {
     expect_equal(observed_qq[[i]], unname(expected_qq[, 1]))
     expect_equal(simulated_qq[[i]], unname(apply(expected_qq[, -1], 1,
       quantile, probs = c(.025, .975))))
-    # The first statistic is response variability after the common centering.
-    observed_variability <- var(simulations$observed_response[rows] -
-                                  simulations$predicted_response[rows])
-    expect_equal(as.numeric(tables[[i]][1]), signif(observed_variability, 3))
-    simulated_variability <- apply(sweep(simulations$simulated_responses[21:40, rows],
-                                        2, simulations$predicted_response[rows]), 1, var)
-    expect_equal(as.numeric(strsplit(table_ranges[[i]][1], " to ", fixed = TRUE)[[1]]),
-                 unname(signif(quantile(simulated_variability, c(.025, .975)), 3)))
+    # The check's reference contains only held-out whole datasets for this role.
+    responses <- rbind(simulations$observed_response[rows],
+                       simulations$simulated_responses[21:40, rows])
+    deviations <- sweep(responses, 2, simulations$predicted_response[rows])
+    expected <- list(apply(deviations, 1, var),
+                     colSums(pit[rows, ] == 0 | pit[rows, ] == 1),
+                     apply(abs(deviations), 1, max))
+    for (j in seq_along(checks)) {
+      histogram <- histograms[[2 * (j - 1) + i]]
+      expect_equal(unname(histogram$values), unname(expected[[j]][-1]))
+      expect_equal(unname(histogram$observed), unname(expected[[j]][1]))
+      expect_equal(unname(histogram$range),
+                   unname(quantile(expected[[j]][-1], c(.025, .975))))
+      expect_true(histogram$observed >= min(histogram$limits) &&
+                    histogram$observed <= max(histogram$limits))
+      if (checks[j] == "Outside simulated range")
+        expect_true(all(diff(histogram$breaks) == 1))
+    }
   }
+})
+
+
+test_that("zero-count panels are automatic and handle constant references", {
+  skip_if_not_installed("DHARMa")
+  simulations <- distribution_check_fixture()
+  grDevices::pdf(NULL, width = 7, height = 7)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  histograms <- list()
+  histogram_values <- histogram_breaks <- NULL
+  original_title <- graphics::title
+  original_hist <- graphics::hist
+  original_abline <- graphics::abline
+  local_mocked_bindings(title = function(main = NULL, ...) {
+    if (!is.null(main) && main %in% c("Response variability", "Outside simulated range",
+                                    "Largest absolute deviation", "Number of zeros", "Uniformity"))
+      histograms[[length(histograms) + 1L]] <<- list(
+        name = main, values = histogram_values, limits = graphics::par("usr")[1:2],
+        breaks = histogram_breaks
+      )
+    original_title(main = main, ...)
+  }, hist = function(x, ...) {
+    histogram_values <<- x
+    histogram <- original_hist(x, ...)
+    histogram_breaks <<- histogram$breaks
+    histogram
+  }, abline = function(...) {
+    arguments <- list(...)
+    if (length(histograms) && identical(arguments$col, "#a12b35"))
+      histograms[[length(histograms)]]$observed <<- arguments$v
+    original_abline(...)
+  }, .package = "graphics")
+  zero_panels <- function(simulations, ...) {
+    histograms <<- list()
+    check_residuals(simulations, ...)
+    Filter(function(panel) panel$name == "Number of zeros", histograms)
+  }
+
+  # The default call needs no plot flags, and continuous data need no zero panel.
+  expect_length(zero_panels(simulations), 0)
+  expect_identical(vapply(histograms, `[[`, "", "name"),
+    c("Response variability", "Outside simulated range", "Largest absolute deviation"))
+  observed_zero <- simulations
+  observed_zero$observed_response[1] <- 0
+  panel <- zero_panels(observed_zero)[[1]]
+  expect_equal(unname(panel$values), rep(0, 20))
+  expect_equal(unname(panel$observed), 1)
+  expect_equal(panel$breaks, c(-.5, .5))
+  expect_true(max(panel$limits) >= 1)
+  expect_length(zero_panels(observed_zero, check_zeros = FALSE), 0)
+
+  # Zeros in either simulation bank are enough to include the comparison.
+  reference_zero <- simulations
+  reference_zero$simulated_responses[1, 1] <- 0
+  panel <- zero_panels(reference_zero)[[1]]
+  expect_equal(unname(panel$values), rep(0, 20))
+  expect_equal(unname(panel$observed), 0)
+  evaluated_zeros <- simulations
+  evaluated_zeros$simulated_responses[21:23, 1] <- 0
+  panel <- zero_panels(evaluated_zeros)[[1]]
+  expect_equal(unname(panel$values), c(rep(1, 3), rep(0, 17)))
+  expect_equal(unname(panel$observed), 0)
+  expect_length(zero_panels(simulations, check_zeros = TRUE), 1)
+  zero_panels(simulations, details = TRUE)
+  expect_true("Uniformity" %in% vapply(histograms, `[[`, "", "name"))
 })
 
 
@@ -521,6 +606,41 @@ test_that("fallback quartile offsets stay visible on small and clustered scales"
     expect_equal(observed_x, interval_x)
     expect_true(inside_limits)
   }
+})
+
+
+test_that("outcome ECDF paths retain ties, constant samples, and both tails", {
+  skip_if_not_installed("DHARMa")
+  simulations <- distribution_check_fixture()
+  simulations$observed_response <- rep(c(-2, 1, 4), c(3, 6, 3))
+  simulations$simulated_responses[,] <- 2
+  grDevices::pdf(NULL, width = 12, height = 10)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  paths <- list()
+  recording <- FALSE
+  original_title <- graphics::title
+  original_lines <- graphics::lines
+  local_mocked_bindings(title = function(main = NULL, ...) {
+    recording <<- identical(main, "Outcome overlay")
+    original_title(main = main, ...)
+  }, lines = function(x, y, ...) {
+    if (recording) paths[[length(paths) + 1L]] <<- list(
+      x = x, y = y, type = list(...)$type, limits = graphics::par("usr")[1:2]
+    )
+    if (missing(y)) original_lines(x, ...) else original_lines(x, y, ...)
+  }, .package = "graphics")
+
+  check_residuals(simulations, ask = FALSE)
+  expect_length(paths, 21)
+  expect_true(all(vapply(paths, `[[`, "", "type") == "s"))
+  limits <- paths[[1]]$limits
+  # Each constant simulated sample jumps from zero to one exactly at two.
+  expect_equal(lapply(paths[1:20], `[[`, "x"), rep(list(c(limits[1], 2, limits[2])), 20))
+  expect_equal(lapply(paths[1:20], `[[`, "y"), rep(list(c(0, 1, 1)), 20))
+  # Tied observations jump by their empirical proportions; no jumps are dropped.
+  expect_equal(paths[[21]]$x, c(limits[1], -2, 1, 4, limits[2]))
+  expect_equal(paths[[21]]$y, c(0, .25, .75, 1, 1))
+  expect_true(limits[1] < -2 && limits[2] > 4)
 })
 
 

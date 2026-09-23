@@ -6,7 +6,8 @@
   simulations for distribution, outlier, variability, zero-count, and predictor
   checks. Plots retain simulated partner and time dependence in their references,
   separate dyad compositions and roles, and report no p-values. Each overview
-  combines four plot rows with a summary table; detailed plots are optional.
+  has four plot rows, followed by histograms comparing observed summaries with
+  simulated values. Further detailed plots are optional.
 
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),

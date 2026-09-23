@@ -49,11 +49,12 @@ model predictions from observed and simulated outcomes? Default: \code{FALSE}.}
 columns are absent from the model frame, or to identify compositions using
 partners whose responses were excluded during fitting.}
 
-\item{details}{Add individual statistic histograms and PIT-distance plots
-against fitted values? Default: \code{FALSE}.}
+\item{details}{Add a uniformity histogram and PIT-distance plots against
+fitted values? Default: \code{FALSE}.}
 }
 \value{
-Plots, with one overview per composition and optional follow-up pages.
+Plots, with an overview and a summary page per composition, plus
+optional predictor pages.
 Invisibly returns PIT residuals for all fitted observations: rows are
 observations; columns are observed data followed by the second half of the
 simulations. Graphics settings are restored afterwards.
@@ -80,11 +81,13 @@ Use a tall plotting window or save a large figure to keep all rows readable.
 PIT residuals rank each outcome from 0 (low) to 1 (high) relative to its own
 simulated values. Blue ranges contain the middle 95\% at each plotted position,
 not across the whole plot. Some red points can fall outside by chance.
-The table compares response variability (variance of outcome minus prediction),
+The next page plots response variability (variance of outcome minus prediction),
 outcomes outside the simulated range (PIT endpoints), largest absolute deviation
-from prediction, and optional zero counts with simulated middle 95\% ranges.
-Variance needs at least two observations. \code{details = TRUE} also shows uniformity
-(KS distance) and the simulated distribution of each summary.
+from prediction, and zero counts where relevant. Each blue histogram shows
+simulated values; the red line shows the observed value. A red line far to the
+right or left means more or less than the model usually produces. Dashed lines
+mark the middle 95\%. Variance needs at least two observations.
+\code{details = TRUE} adds uniformity (KS distance) and fitted-value PIT-distance plots.
 
 Each additional predictor gets a page with quartile and distance plots. Numeric
 predictors with many values use up to eight bins, chosen within each role.
