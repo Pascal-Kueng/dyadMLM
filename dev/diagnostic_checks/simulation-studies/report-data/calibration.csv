@@ -1,0 +1,89 @@
+"family","target_correlation","latent_correlation","measured_residual_correlation","verification_mcse","method","seconds","verified"
+"bell",0,0,3.36205108945411e-05,0.00192877854307955,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.412,TRUE
+"bell",0.1,0.107386468677056,0.100103337723005,0.00193259132803854,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.412,TRUE
+"bell",0.3,0.317475094343624,0.299935582497975,0.00180909940442702,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.412,TRUE
+"bell",0.5,0.523251084641258,0.49984582902006,0.00150636326940659,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.412,TRUE
+"beta",0,0,0.000278830683967493,0.00142444349521708,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",13.228,TRUE
+"beta",0.1,0.101225031316012,0.0999599816475473,0.00141367601128417,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",13.228,TRUE
+"beta",0.3,0.303651655277822,0.299963146293617,0.00130544455230266,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",13.228,TRUE
+"beta",0.5,0.504957732545111,0.499972145397929,0.00108060603975653,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",13.228,TRUE
+"compois",0,0,-0.00213446426462787,0.00168084950150724,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.097,TRUE
+"compois",0.1,0.105090572249909,0.0972823699166697,0.0016689651259923,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.097,TRUE
+"compois",0.3,0.316700910962182,0.298428769157753,0.00153646216388329,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.097,TRUE
+"compois",0.5,0.526752058616415,0.498526892197356,0.00126825338683825,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.097,TRUE
+"Gamma",0,0,0.00167462071932753,0.00325107345441405,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",5.668,TRUE
+"Gamma",0.1,0.105250402755116,0.0983791507338968,0.00333768074904377,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",5.668,TRUE
+"Gamma",0.3,0.318781714540367,0.298792828380034,0.00329641845112069,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",5.668,TRUE
+"Gamma",0.5,0.527193737279158,0.49950550910449,0.00288764017848495,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",5.668,TRUE
+"gaussian",0,0,0,0,"Exact Gaussian correlation",0.002,TRUE
+"gaussian",0.1,0.1,0.1,0,"Exact Gaussian correlation",0.002,TRUE
+"gaussian",0.3,0.3,0.3,0,"Exact Gaussian correlation",0.002,TRUE
+"gaussian",0.5,0.5,0.5,0,"Exact Gaussian correlation",0.002,TRUE
+"genpois",0,0,2.99494422372136e-05,0.00173166273555979,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.91,TRUE
+"genpois",0.1,0.111522526598176,0.102378032332924,0.00174679635726973,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.91,TRUE
+"genpois",0.3,0.324185180758223,0.30250551342204,0.00165184879533195,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.91,TRUE
+"genpois",0.5,0.529365148714816,0.502035856327747,0.00139158277421996,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",10.91,TRUE
+"hurdle_nbinom2",0,0,0.00120234666807771,0.00138912791948476,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",14.137,TRUE
+"hurdle_nbinom2",0.1,0.107623994156565,0.0957959000298864,0.00141301097377245,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",14.137,TRUE
+"hurdle_nbinom2",0.3,0.327704085785844,0.296073010127569,0.00136366351031345,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",14.137,TRUE
+"hurdle_nbinom2",0.5,0.53890700413127,0.497273644581189,0.00115960678055087,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",14.137,TRUE
+"lognormal",0,0,0,0,"Analytic lognormal covariance; 40/80-node Gaussian quadrature",1.2,TRUE
+"lognormal",0.1,0.125454926291956,0.0999999999895452,0,"Analytic lognormal covariance; 40/80-node Gaussian quadrature",1.2,TRUE
+"lognormal",0.3,0.357294791459083,0.300000000000006,0,"Analytic lognormal covariance; 40/80-node Gaussian quadrature",1.2,TRUE
+"lognormal",0.5,0.566084599539726,0.49999999999995,0,"Analytic lognormal covariance; 40/80-node Gaussian quadrature",1.2,TRUE
+"nbinom1",0,0,-0.000337416969139852,0.00171872159359692,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.991,TRUE
+"nbinom1",0.1,0.110024596497715,0.100610855982207,0.00173154695722641,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.991,TRUE
+"nbinom1",0.3,0.322033796536655,0.30021111605041,0.00163920462815236,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.991,TRUE
+"nbinom1",0.5,0.527559114035985,0.499663021703403,0.00138006634161405,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.991,TRUE
+"nbinom12",0,0,-0.000401193287404811,0.00224661757672357,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.116,TRUE
+"nbinom12",0.1,0.110411270610262,0.0961921818634646,0.00232123898994296,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.116,TRUE
+"nbinom12",0.3,0.328800356648885,0.296044601205499,0.002296072311716,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.116,TRUE
+"nbinom12",0.5,0.537048977913298,0.497278205445239,0.00200038546984187,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.116,TRUE
+"nbinom2",0,0,0.00279578603011972,0.00258741794772596,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.889,TRUE
+"nbinom2",0.1,0.104366578975041,0.096895987276422,0.0026290369012204,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.889,TRUE
+"nbinom2",0.3,0.320437238376642,0.29689896186475,0.0025288684349843,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.889,TRUE
+"nbinom2",0.5,0.529184594614299,0.496713359386374,0.00215420078692458,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.889,TRUE
+"ordinal",0,0,-0.000824325242791511,0.00143046057632974,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.32,TRUE
+"ordinal",0.1,0.119558271497719,0.100716171644201,0.00142755909174677,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.32,TRUE
+"ordinal",0.3,0.352654420969522,0.302267910901248,0.00132359149728589,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.32,TRUE
+"ordinal",0.5,0.576437748914919,0.50152053148195,0.00109767575342492,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.32,TRUE
+"poisson",0,0,0.00138254663603164,0.00172223057542936,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",2.796,TRUE
+"poisson",0.1,0.100768351551557,0.0975874617112749,0.00171303423423184,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",2.796,TRUE
+"poisson",0.3,0.30976778752932,0.297666507070284,0.00158529632817312,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",2.796,TRUE
+"poisson",0.5,0.516876795721931,0.497038520530046,0.00131278050697553,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",2.796,TRUE
+"skewnormal",0,0,0.00176945130824073,0.00141254494433597,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",2.345,TRUE
+"skewnormal",0.1,0.0987084716836793,0.100366653938231,0.0013981343831609,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",2.345,TRUE
+"skewnormal",0.3,0.299167664087178,0.300500889305673,0.00128457834538204,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",2.345,TRUE
+"skewnormal",0.5,0.49960462589901,0.500506895023256,0.00105841525250952,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",2.345,TRUE
+"t",0,0,0.00160698278104835,0.00140816473629018,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.155,TRUE
+"t",0.1,0.10408708931857,0.102152286300534,0.00139667563325163,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.155,TRUE
+"t",0.3,0.309928080269484,0.301723097529162,0.00134335336545451,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.155,TRUE
+"t",0.5,0.513015882364518,0.501333321498222,0.00116505999076324,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.155,TRUE
+"truncated_compois",0,0,-0.0003371220770311,0.00087166783104641,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",28.802,TRUE
+"truncated_compois",0.1,0.107766974108286,0.100266714776002,0.000864888367921525,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",28.802,TRUE
+"truncated_compois",0.3,0.320673641631247,0.299946175310164,0.00079760475615835,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",28.802,TRUE
+"truncated_compois",0.5,0.53228573087211,0.500515238182651,0.000655691687560002,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",28.802,TRUE
+"truncated_genpois",0,0,0.000517976706386209,0.000890570463865688,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",29.648,TRUE
+"truncated_genpois",0.1,0.110917465232144,0.100280812536274,0.000901217354113825,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",29.648,TRUE
+"truncated_genpois",0.3,0.325646555874615,0.300166621948667,0.000857343271309993,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",29.648,TRUE
+"truncated_genpois",0.5,0.532094153961301,0.499685535546972,0.000723844941076328,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",29.648,TRUE
+"truncated_nbinom1",0,0,-0.00255962794536519,0.00176681560637281,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.19,TRUE
+"truncated_nbinom1",0.1,0.108167490714049,0.0958302407040249,0.00178422579215315,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.19,TRUE
+"truncated_nbinom1",0.3,0.323701582024173,0.297751124991675,0.0016930251010651,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.19,TRUE
+"truncated_nbinom1",0.5,0.530644748703235,0.498679480496347,0.0014319824052577,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",6.19,TRUE
+"truncated_nbinom2",0,0,7.30362593888019e-05,0.00293876367275465,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.653,TRUE
+"truncated_nbinom2",0.1,0.108050236711101,0.0955628514099966,0.00305976355182607,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.653,TRUE
+"truncated_nbinom2",0.3,0.32659581077098,0.295794335902341,0.00305422631273291,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.653,TRUE
+"truncated_nbinom2",0.5,0.535842613478576,0.49616571331099,0.00268976931132612,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.653,TRUE
+"truncated_poisson",0,0,-0.000883976931220141,0.00181181308942811,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.708,TRUE
+"truncated_poisson",0.1,0.109364431379349,0.101927591704016,0.00180044596774994,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.708,TRUE
+"truncated_poisson",0.3,0.319471242565103,0.301645072422308,0.00166031926497393,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.708,TRUE
+"truncated_poisson",0.5,0.526046751066539,0.500290220806745,0.00136961048231992,"Gaussian copula calibrated with 200000 pairs; independently verified with 500000 pairs",4.708,TRUE
+"zi_poisson",0,0,0.000124285688953745,0.00123853509248915,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",9.846,TRUE
+"zi_poisson",0.1,0.109685070599214,0.0974474829176324,0.00123830294772226,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",9.846,TRUE
+"zi_poisson",0.3,0.332869868922187,0.297927335005831,0.00115522276080304,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",9.846,TRUE
+"zi_poisson",0.5,0.549974356440535,0.498389070881942,0.000993909963555028,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",9.846,TRUE
+"tweedie",0,0,-0.00121344916983122,0.00110316221973908,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",1047.032,TRUE
+"tweedie",0.1,0.106108206072969,0.0975454386384241,0.00111042223416213,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",1616.493,TRUE
+"tweedie",0.3,0.316223950135165,0.297124319135681,0.00104976800205588,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",1617.013,TRUE
+"tweedie",0.5,0.521361618531777,0.497193121053302,0.000884577729733209,"Gaussian copula calibrated with 1000000 pairs; independently verified with 2000000 pairs",1735.709,TRUE

@@ -1,0 +1,11 @@
+"family","status","Datasets"
+"nbinom1","fit_problem",27
+"nbinom2","fit_problem",10
+"compois","check_error",1
+"truncated_nbinom1","fit_problem",50
+"truncated_nbinom2","fit_problem",30
+"tweedie","fit_problem",32
+"skewnormal","fit_problem",5564
+"t","check_error",114
+"t","fit_problem",631
+"hurdle_nbinom2","fit_problem",66

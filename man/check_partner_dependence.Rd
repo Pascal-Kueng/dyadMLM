@@ -82,6 +82,10 @@ and partner differences.
 
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.
+Agreement does not establish that omitted dependence is negligible, especially
+with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{simulation study}
+illustrates how sample size affects detection when residual partner
+correlation is omitted.
 
 The first set of plots compares:
 \itemize{

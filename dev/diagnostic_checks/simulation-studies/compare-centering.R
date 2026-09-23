@@ -193,6 +193,11 @@ for (family_name in selected_families) {
     ggplot2::ggsave(file.path(output_directory, paste0(family_name, ".", extension)),
       figure, width = 13, height = 6, dpi = 180)
   }
+  if (repetitions == 500L && reference_draws == 1000L &&
+      all(summary$attempted == 500L) && family_name %in% vignette_families) {
+    ggplot2::ggsave(file.path(study_directory, "../figures", paste0("family-comparison-", family_name, ".png")),
+      figure, width = 13, height = 6, dpi = 180)
+  }
   if (!plot_only) {
     family_settings <- data.frame(family = family_name, label = family_labels[[family_name]],
       formula = "outcome ~ actor_predictor + partner_predictor",
@@ -219,8 +224,7 @@ for (family_name in selected_families) {
 saved_settings <- read.csv(file.path(output_directory, "settings.csv"))
 if (!plot_only && repetitions == 500L && reference_draws == 1000L &&
     all(family_names %in% saved_settings$family)) {
-  report_results_directory <- normalizePath(output_directory)
-  rmarkdown::render(file.path(study_directory, "family-comparison.Rmd"),
-    params = list(results_directory = report_results_directory), quiet = TRUE)
+  source(file.path(study_directory, "export-report-data.R"))
+  rmarkdown::render("vignettes/articles/partner-dependence-simulation.Rmd", quiet = TRUE)
   rmarkdown::render(file.path(study_directory, "../partner-dependence-vignette-draft.Rmd"), quiet = TRUE)
 }

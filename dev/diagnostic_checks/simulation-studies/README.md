@@ -11,14 +11,15 @@ These are descriptive predictive checks, not calibrated significance tests.
 | [compare-centering.R](compare-centering.R) | Compare raw and model-centred checks across all supported families |
 | [check-family-comparison.R](check-family-comparison.R) | Verify family generators and the study's correlation calculation |
 | [family-margins.R](family-margins.R) | Generate each response distribution and calibrate residual correlation |
-| [family-comparison.Rmd](family-comparison.Rmd) | Render all family plots and settings from saved results |
+| [Report source](../../../vignettes/articles/partner-dependence-simulation.Rmd) | Render all family plots and settings from saved summary tables |
+| [export-report-data.R](export-report-data.R) | Export the completed study's summary tables for the website |
 | [plot-family-comparison.R](plot-family-comparison.R) | Draw detection and false-alarm plots from saved summary tables |
 | [summarise-family-comparison.R](summarise-family-comparison.R) | Count expected-direction detections and opposite-direction flags |
 | [validation.R](validation.R) | Known-parameter references and correct versus restricted covariance models |
 | [fitting-examples/ordinal.R](fitting-examples/ordinal.R) | Compare Laplace fitting with more accurate quadrature |
 | [fitting-examples/lognormal.R](fitting-examples/lognormal.R) | Compare Laplace fitting with direct likelihood integration |
 
-The [full family report](family-comparison.Rmd) describes the current study;
+The [full family report](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html) describes the current study;
 [recorded earlier results](results-summary.md) cover the historical investigations.
 The separate
 [family checks](../README.md#validation) and package tests protect implementation
@@ -115,19 +116,25 @@ every 25 datasets and at the end of each condition; rerunning resumes from the l
 saved dataset. Outputs are in `results/family-comparison/<settings>/`. The `plot`
 option redraws saved results without fitting models.
 
-The complete default run renders the [full report](family-comparison.Rmd) and
+The complete default run exports the report tables, renders the [full report](../../../vignettes/articles/partner-dependence-simulation.Rmd), and
 updates the selected figures in the [vignette draft](../partner-dependence-vignette-draft.Rmd).
-The report rebuilds its plots from saved summary tables. To change text, layout, colours,
-or axes, edit the report or [plotting helper](plot-family-comparison.R) and render again:
+The report uses four small tables in `report-data/`, which are kept in Git.
+It can be built without the full simulation results. To change text, layout,
+colours, or axes, edit the report or [plotting helper](plot-family-comparison.R)
+and rebuild from the repository root:
 
 ```sh
-Rscript -e 'rmarkdown::render("dev/diagnostic_checks/simulation-studies/family-comparison.Rmd")'
+Rscript -e 'pkgdown::build_article("articles/partner-dependence-simulation")'
 ```
 
-This does not generate data, fit models, or simulate responses. Changing the study
-design or recomputing a different check requires a new run.
-During a run, the report and vignette can show completed families and mark the rest
-as pending.
+This does not generate data, fit models, or simulate responses. After updating the
+completed study results, refresh the report tables before rebuilding:
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/export-report-data.R
+```
+
+Changing the study design or recomputing a different check requires a new run.
 
 Increasing reference simulations improves each fitted model's reference range;
 increasing generated datasets improves the precision of the plotted detection rates.
@@ -202,8 +209,9 @@ Historical population-correlation estimates are also preserved alongside these r
 
 The family comparison explicitly saves per-condition RDS checkpoints, per-dataset
 statistics and fit diagnostics, summary tables, calibration, seeds, and session
-information. The report reads these saved tables rather than relying on a knitr
-cache. Interrupted runs can resume, and report edits do not invalidate the results.
+information. The website report reads the exported `report-data/` tables rather
+than a knitr cache. Interrupted runs can resume, and report edits do not invalidate
+the results.
 
 The complete previous collection, including source, reports, seeds, and results,
 is preserved locally in `results/before-consolidation-20260921.tar.gz`. Every archived

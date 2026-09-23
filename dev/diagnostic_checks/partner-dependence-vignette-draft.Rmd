@@ -117,7 +117,7 @@ can therefore remain unnoticed, especially in smaller samples.
 For ordinal outcomes, the check compares category scores 1, 2, and so on;
 these are not distances on an underlying continuous scale. Zero-inflated and
 hurdle examples check the combined outcome, including zeros.
-The [full comparison](simulation-studies/family-comparison.html) reports available
+The [full comparison](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html) reports
 results by family, model settings, false alarms, and fitting failures. Read detection
 rates alongside the false-alarm plots: how often a mismatch is flagged when there
 is no residual partner correlation.

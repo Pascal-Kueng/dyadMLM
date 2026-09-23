@@ -40,6 +40,8 @@ navbar:
         href: articles/dim.html
       - text: Dyadic Score Model
         href: articles/dsm.html
+      - text: Partner-dependence simulation study
+        href: articles/partner-dependence-simulation.html
     workshop:
       text: Workshop
       href: workshop/
@@ -59,6 +61,9 @@ articles:
   - apim
   - dim
   - dsm
+- title: Predictive checks
+  contents:
+  - articles/partner-dependence-simulation
 
 reference:
 - title: Main functions

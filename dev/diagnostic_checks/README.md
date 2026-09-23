@@ -11,6 +11,7 @@ parameters fixed; close agreement alone does not establish good fit.
 | --- | --- |
 | [Vignette candidate](partner-dependence-vignette-draft.Rmd) | One complete workflow and interpretation |
 | [Reference validation](partner-dependence-reference-validation.Rmd) | Independent Woody–Sadler calculations and Dingy cross-check |
+| [Full simulation report](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html) | Detection and false alarms across families and sample sizes |
 | [Simulation studies](simulation-studies/README.md) | Sensitivity across families, raw versus centred checks, and validation |
 
 The function help is the reference for arguments, output fields, supported
@@ -47,7 +48,10 @@ source("dev/diagnostic_checks/check-additional-families.R")
 source("dev/diagnostic_checks/check-ordinal-family.R")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-reference-validation.Rmd")
+pkgdown::build_article("articles/partner-dependence-simulation")
 ```
+
+The website report uses saved summary tables and does not rerun the simulations.
 
 Tests cover Gaussian and generalized calculations, fitted-row alignment,
 simulation-state restoration, pairing, omissions, undefined statistics, and
