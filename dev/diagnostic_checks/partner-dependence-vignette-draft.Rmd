@@ -7,6 +7,12 @@ Does a fitted model reproduce how much partners' responses vary and how
 strongly they are related? `dyadMLM` compares these features in the observed
 data with the same features in datasets simulated from the model.
 
+The plots help locate mismatches and can be used to examine a simpler model when
+a fuller model does not converge. To formally test a specific covariance
+restriction, use a suitable model comparison, such as
+[`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html),
+when both models can be fitted reliably.
+
 ```{r setup, include=FALSE}
 devtools::load_all(file.path("..", ".."), quiet = TRUE)
 knitr::opts_chunk$set(
@@ -53,10 +59,13 @@ exceeds its upper limit. These ranges and observed positions are descriptive, no
 confidence intervals or p-values. Use
 `plot(check, panels = TRUE)` to show the panel again without repeating simulations.
 
-The check is most useful for examining restrictions such as the omitted
-partner correlation above. A flexible covariance model will usually reproduce
-features it estimated from the same data; close agreement alone does not
-establish good fit.
+The check is most informative about features the model constrains, such as the
+omitted partner correlation above. A flexible covariance model will usually
+reproduce features it estimated from the same data. Agreement alone therefore
+provides limited evidence of overall fit, as explained in the
+[Stan guide](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html#which-statistics-to-test).
+A mismatch does not identify its cause, and agreement does not guarantee reliable
+coefficient estimates or uncertainty intervals.
 
 ## Allow partner correlation
 
@@ -76,6 +85,77 @@ flexible_check <- check_partner_dependence(
 
 The observed partner correlation now falls within the simulated range: allowing
 partner correlation resolves the mismatch seen above.
+
+## Mixed dyad compositions
+
+A pooled model can reproduce overall variability and partner correlation while
+missing differences within particular dyad compositions. Checking each composition
+helps locate these mismatches without first fitting a separate model for every
+group.
+
+The package's simulated `dyads_cross` data contain 120 female-female, 120
+female-male, and 120 male-male dyads. Keep all of them here. Start with a model
+that allows different mean closeness for women and men but uses the same
+exchangeable covariance structure across all dyads.
+
+```{r mixed-pooled, fig.alt="Pooled check across all 360 dyads, with observed summaries inside their simulated ranges."}
+mixed_data <- prepare_dyad_data(
+  dyads_cross, dyad = coupleID, member = personID,
+  predictors = provided_support, model_types = "apim", seed = 123
+)
+
+pooled_covariance_model <- glmmTMB::glmmTMB(
+  closeness ~ gender +
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~0, family = gaussian(), data = mixed_data
+)
+
+mixed_simulations <- simulate_dyad_responses(
+  pooled_covariance_model, seed = 123
+)
+
+check_partner_dependence(
+  mixed_simulations, dyad = coupleID, role = NULL
+)
+```
+
+The pooled summaries fall within their simulated ranges. Now supply `role` to
+check each composition using the **same model and simulations**.
+Same-role pairs use exchangeable summaries, while female-male pairs have separate
+role SDs.
+
+```{r mixed-compositions, fig.alt=c("Female-female dyads: observed summaries fall within their simulated ranges.", "Female-male dyads: the model underestimates female variability and misses the difference between role variances.", "Male-male dyads: the model overestimates variability.")}
+check_partner_dependence(
+  mixed_simulations, dyad = coupleID, role = gender
+)
+```
+
+The model underestimates female variability in female-male dyads and overestimates
+variability in male-male dyads. These differences were hidden in the pooled check.
+
+This does not tell us to change the covariance structure. Omitted predictors can
+also cause these mismatches. In this example, adding actor and partner support
+effects separately for women and men brings all composition summaries within
+their simulated ranges, while keeping the same covariance structure:
+
+```{r mixed-predictors}
+support_adjusted_model <- update(
+  pooled_covariance_model,
+  formula = . ~ . +
+    gender:(.provided_support_actor + .provided_support_partner)
+)
+support_adjusted_simulations <- simulate_dyad_responses(
+  support_adjusted_model, seed = 123
+)
+support_adjusted_check <- check_partner_dependence(
+  support_adjusted_simulations, dyad = coupleID, role = gender,
+  plot = FALSE
+)
+```
+
+Supplying roles checks variability and association within each composition. It
+does not test whether role means or predictor effects can be pooled.
 
 ## How much dependence can the check reveal?
 
@@ -143,11 +223,7 @@ Supply `role` whenever the member distinction is meaningful. For substantively
 interchangeable members, omit it: the check then reports a common member SD
 and a partner correlation unchanged by arbitrary within-dyad member swaps.
 
-With mixed dyad compositions, supplied roles produce one check per observed
-role pair. Same-role pairs use exchangeable summaries. Each composition has
-its own figure and pair count; `panels = FALSE` shows individual plots instead.
-All checks use the same full-model simulations. A composition with fewer than
-three usable pairs is listed but not checked.
+Use `panels = FALSE` to show individual plots instead of one figure per composition.
 
 ## Requirements and technical details
 
@@ -171,6 +247,7 @@ three complete dyads and at most two fitted rows per dyad. Missing identifiers
 and incomplete pairs are omitted and counted. If an identifier is absent from
 the model frame, supply the data frame used to fit the model with `data`.
 Rows excluded during fitting are handled automatically.
+A composition with fewer than three usable pairs is listed but not checked.
 
 Sparse outcomes can produce undefined correlations. The check warns and uses
 only defined simulations for each reference; plot labels show their counts.

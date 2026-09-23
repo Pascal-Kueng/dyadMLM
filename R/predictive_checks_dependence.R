@@ -84,6 +84,11 @@
 #' used for model comparison. It shows how well the simpler model
 #' reproduces the observed variances and partner correlations.
 #'
+#' A flexible covariance model will usually reproduce features it estimated from
+#' the same data. Agreement alone therefore does not establish good fit.
+#' Use a suitable model comparison to formally test a specific covariance
+#' restriction when both models can be fitted (see [compare_nested_models()]).
+#'
 #' Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
 #'
 #' @section Technical details:
