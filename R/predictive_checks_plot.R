@@ -46,6 +46,17 @@ plot_check_statistic <- function(values, title, xlab = "Summary value",
     horiz = TRUE, bty = "n")
 }
 
+# Add the shared counts and role headings to a composition page.
+plot_check_role_page <- function(composition, rows, title, draw) {
+  role_rows <- composition$rows
+  counts <- paste(sum(lengths(role_rows)), "observations")
+  if (!is.null(composition$n_dyads)) counts <- paste(composition$n_dyads, "dyads;", counts)
+  plot_check_page(composition$label, paste(title, counts, sep = " - "),
+    c(rows, length(role_rows)), draw,
+    column_titles = paste0(names(role_rows), " (n = ", lengths(role_rows), ")"),
+    footer = "Red: observed. Blue: simulations; ranges are pointwise middle 95%. Some departures occur by chance.\nParameters fixed; no significance tests.")
+}
+
 # Draw one composition page. `draw` is evaluated inside the temporary layout;
 # column headings are optional because not every check arranges panels by role.
 plot_check_page <- function(composition, title, panels, draw,

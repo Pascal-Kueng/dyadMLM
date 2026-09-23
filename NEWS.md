@@ -2,11 +2,13 @@
 
 * Changed the package license from MIT to GPL-3.
 
-* Added experimental `check_residuals()` for DHARMa PIT residuals and
+* Added experimental `check_residuals()` for simulated PIT residuals and
   `check_outcomes()` for response distributions, variability, extremes, and
   zero counts. Both reuse complete simulated datasets, retain partner and time
   dependence in their references, separate dyad compositions and roles, and
   report no p-values. Additional predictor and detailed residual plots are optional.
+  PIT calculations are internal, following Florian Hartig's DHARMa approach and
+  Dunn and Smyth's (1996) randomized quantile residuals; DHARMa is not required.
 
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),

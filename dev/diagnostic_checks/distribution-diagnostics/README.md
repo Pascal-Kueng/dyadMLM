@@ -1,8 +1,13 @@
 # Distribution-check examples
 
-`check_residuals()` checks DHARMa PIT residuals. `check_outcomes()` checks
+`check_residuals()` checks simulated PIT residuals. `check_outcomes()` checks
 response distributions, spread, extremes, and zero counts. Both reuse complete
 simulated datasets and retain their partner and time dependence in the references.
+
+The residual method follows [Florian Hartig's DHARMa](https://cran.r-project.org/package=DHARMa)
+and the randomized-quantile principle of [Dunn and Smyth (1996)](https://gksmyth.github.io/pubs/residual.html).
+dyadMLM computes the PIT ranks internally. Its envelopes and plots compare whole
+simulated datasets; they are descriptive checks, with no significance tests.
 
 ```r
 simulations <- simulate_dyad_responses(model, seed = 123)
@@ -39,8 +44,7 @@ and simulated datasets. Bands are calculated after smoothing. The median is bold
 matching line styles identify the other quartiles and their bands. Sparse numeric
 values and categories retain separate reference intervals.
 Red shows observed data; blue shows simulated references. Ranges contain the middle 95% at each
-position, not across the whole figure. These are descriptive checks, with fitted
-parameters fixed and no significance tests.
+position, not across the whole figure. Fitted parameters stay fixed.
 
 In `check_residuals()`, use `predictors = simulations$model_frame[c("x", "z")]`
 for extra predictor panels, or `details = TRUE` for a uniformity summary and

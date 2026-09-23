@@ -47,8 +47,8 @@ Graphics settings are restored afterwards.
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Compare observed outcomes with complete datasets from
-\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Uses every simulated dataset directly;
-DHARMa is not required. For PIT residual patterns, use \code{\link[=check_residuals]{check_residuals()}}.
+\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Uses every simulated dataset directly.
+For PIT residual patterns, use \code{\link[=check_residuals]{check_residuals()}}.
 }
 \section{Reading the plots}{
 

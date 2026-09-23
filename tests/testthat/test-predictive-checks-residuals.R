@@ -1,5 +1,4 @@
 test_that("PIT ranks use only the independent reference bank", {
-  skip_if_not_installed("DHARMa")
   simulations <- distribution_check_fixture()
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -27,7 +26,6 @@ test_that("PIT ranks use only the independent reference bank", {
 
 
 test_that("discrete PIT randomizes ties and preserves the caller's RNG", {
-  skip_if_not_installed("DHARMa")
   reference <- cbind(c(0, 0, 1, 1), c(0, 1, 1, 2), c(0, 1, 2, 3),
                      c(0, 0, 0, 1), c(0, 0, 1, 2))
   simulations <- structure(list(
@@ -56,7 +54,6 @@ test_that("discrete PIT randomizes ties and preserves the caller's RNG", {
 
 
 test_that("rare binary groups and observed factor levels remain visible", {
-  skip_if_not_installed("DHARMa")
   simulations <- distribution_check_fixture()
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -109,7 +106,6 @@ test_that("rare binary groups and observed factor levels remain visible", {
 
 
 test_that("missing plotting predictors affect only their own panels", {
-  skip_if_not_installed("DHARMa")
   simulations <- distribution_check_fixture()
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -171,7 +167,6 @@ test_that("missing plotting predictors affect only their own panels", {
 
 
 test_that("plotting restores graphics settings after success and failure", {
-  skip_if_not_installed("DHARMa")
   simulations <- distribution_check_fixture()
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -192,7 +187,6 @@ test_that("plotting restores graphics settings after success and failure", {
 
 
 test_that("role panels and details fit the default graphics device", {
-  skip_if_not_installed("DHARMa")
   simulations <- distribution_check_fixture()
   grDevices::pdf(NULL, width = 7, height = 7)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -205,7 +199,6 @@ test_that("role panels and details fit the default graphics device", {
 
 
 test_that("overview and optional panels use predictable pages", {
-  skip_if_not_installed("DHARMa")
   skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   simulations <- distribution_check_fixture()
   cases <- list(
@@ -228,7 +221,6 @@ test_that("overview and optional panels use predictable pages", {
 
 
 test_that("every residual page identifies its composition and page contents", {
-  skip_if_not_installed("DHARMa")
   skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   simulations <- distribution_check_fixture()
   simulations$model_frame$role <- rep(c("A", "A", "A", "B", "B", "B"), 2)
@@ -272,7 +264,6 @@ test_that("every residual page identifies its composition and page contents", {
 
 
 test_that("role columns use their own observations and simulated references", {
-  skip_if_not_installed("DHARMa")
   simulations <- distribution_check_fixture()
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -340,7 +331,6 @@ test_that("role columns use their own observations and simulated references", {
 
 
 test_that("empty and single-observation roles remain plottable", {
-  skip_if_not_installed("DHARMa")
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
   for (rows in list(1:2, seq(1, 12, by = 2))) {
@@ -359,7 +349,6 @@ test_that("empty and single-observation roles remain plottable", {
 
 
 test_that("predictor groups absent in one role leave gaps on shared axes", {
-  skip_if_not_installed("DHARMa")
   simulations <- distribution_check_fixture()
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -395,7 +384,6 @@ test_that("predictor groups absent in one role leave gaps on shared axes", {
 
 
 test_that("numeric patterns use each role's bins and identical smoothing for references", {
-  skip_if_not_installed("DHARMa")
   simulations <- distribution_check_fixture()
   simulations$model_frame <- simulations$model_frame[
     rep(seq_len(12), times = rep(c(10, 30), 6)), , drop = FALSE
@@ -489,7 +477,6 @@ test_that("numeric patterns use each role's bins and identical smoothing for ref
 
 
 test_that("fallback quartile offsets stay visible on small and clustered scales", {
-  skip_if_not_installed("DHARMa")
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
   observed_x <- interval_x <- list()
@@ -545,7 +532,6 @@ test_that("fallback quartile offsets stay visible on small and clustered scales"
 
 
 test_that("invalid simulation inputs and predictor lengths fail clearly", {
-  skip_if_not_installed("DHARMa")
   simulations <- distribution_check_fixture()
   expect_error(check_residuals(unclass(simulations)), "simulate_dyad_responses")
   expect_error(check_residuals(simulations, predictors = list(Wrong = 1:3)),

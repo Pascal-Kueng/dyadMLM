@@ -2,8 +2,8 @@
 #'
 #' `r lifecycle::badge("experimental")`
 #' Compare observed outcomes with complete datasets from
-#' [simulate_dyad_responses()]. Uses every simulated dataset directly;
-#' DHARMa is not required. For PIT residual patterns, use [check_residuals()].
+#' [simulate_dyad_responses()]. Uses every simulated dataset directly.
+#' For PIT residual patterns, use [check_residuals()].
 #'
 #' @param simulations An object from [simulate_dyad_responses()]. Use 1,000 or
 #'   more simulated datasets for stable comparisons.
@@ -124,16 +124,8 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
         draw_ecdf(shown[, dataset], col = check_colours$simulated)
       draw_ecdf(shown[, 1], col = check_colours$observed, lwd = 2)
       graphics::abline(h = c(0, 1), col = check_colours$reference, lty = 2)
-      plot_check_caption("The red curve should resemble\nthe blue simulated curves.")
+      plot_check_caption("The red curve should resemble the blue curves.\nUp to 30 simulated datasets are shown.")
     }
-  }
-  page <- function(rows, title, draw) {
-    counts <- paste(length(unlist(composition$rows)), "observations")
-    if (!is.null(composition$n_dyads)) counts <- paste(composition$n_dyads, "dyads;", counts)
-    plot_check_page(composition$label, paste(title, counts, sep = " - "),
-      c(rows, length(composition$rows)), draw,
-      column_titles = paste0(names(composition$rows), " (n = ", lengths(composition$rows), ")"),
-      footer = "Red: observed. Blue: simulations; ranges are pointwise middle 95%. Some departures occur by chance.\nOverlays: up to 30 datasets. Parameters fixed; no significance tests.")
   }
   family <- attr(simulations, "dyadMLM")$family
   count_families <- c("poisson", "compois", "genpois", "bell", "nbinom1", "nbinom2", "nbinom12",
@@ -147,16 +139,16 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
     composition_rows <- unlist(role_rows, use.names = FALSE)
     statistics <- summaries[[i]]
     statistic_names <- unique(unlist(lapply(statistics, rownames)))
-    support <- NULL
-    if (family %in% c("ordinal", count_families))
-      support <- sort(unique(as.vector(responses[composition_rows, ])))
-    category_labels <- support
+    support <- category_labels <- NULL
     if (identical(family, "ordinal") && is.factor(frame[[1]])) {
-      support <- seq_along(levels(frame[[1]]))
       category_labels <- levels(frame[[1]])
-    } else if (!(identical(family, "ordinal") ||
-                 (family %in% count_families && length(support) <= 20))) support <- NULL
-    page(1 + length(statistic_names), "Outcome checks", {
+      support <- seq_along(category_labels)
+    } else if (family %in% c("ordinal", count_families)) {
+      support <- sort(unique(as.vector(responses[composition_rows, ])))
+      if (family != "ordinal" && length(support) > 20) support <- NULL
+      category_labels <- support
+    }
+    plot_check_role_page(composition, 1 + length(statistic_names), "Outcome checks", {
       for (rows in role_rows) {
         if (!length(rows)) plot_check_empty("Outcomes")
         else draw_distribution(responses[rows, , drop = FALSE],
@@ -171,7 +163,7 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
       }
     })
     if (centred_overlay) {
-      page(1, "Outcomes minus predictions", {
+      plot_check_role_page(composition, 1, "Outcomes minus predictions", {
         for (rows in role_rows) {
           if (!length(rows)) plot_check_empty("Centred outcome overlay")
           else draw_distribution(centred[rows, , drop = FALSE], range(centred[composition_rows, ]),

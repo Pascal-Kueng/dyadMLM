@@ -2,8 +2,7 @@
 #'
 #' `r lifecycle::badge("experimental")`
 #' Compare PIT residuals with complete datasets from [simulate_dyad_responses()].
-#' Requires the optional package \code{DHARMa}. For checks on the outcome scale,
-#' use [check_outcomes()].
+#' For checks on the outcome scale, use [check_outcomes()].
 #'
 #' @param simulations An object from [simulate_dyad_responses()]. At least four
 #'   datasets are required; 1,000 or more are recommended.
@@ -55,7 +54,7 @@
 #' predictors with many values use up to eight bins, chosen within each role.
 #' With at least four bins, nearby quartiles are averaged into smooth curves using
 #' the same weights for observed and simulated data; blue bands are calculated
-#' afterwards. These are smoothed local summaries, not DHARMa's quantile regressions.
+#' afterwards. These are smoothed local summaries, not quantile regressions.
 #' Curves span each role's predictor range on a shared axis and can hide patterns
 #' within bins.
 #' Dashed, solid, and dotted lines identify the 25th, 50th, and 75th percentiles;
@@ -67,10 +66,10 @@
 #' and bins can hide interactions or finer patterns.
 #'
 #' @section Scope:
-#' The first half of simulations defines PIT through [DHARMa::getQuantile()]; the
-#' other half provides complete reference datasets, transformed and grouped just
-#' like the observations. This retains fitted partner and time dependence without
-#' whitening. These are descriptive checks, not significance tests. Parameters
+#' The first half of simulations defines PIT; the other half provides complete
+#' reference datasets, transformed and grouped just like the observations. These
+#' envelopes account for fitted partner and time dependence without whitening.
+#' They are dyadMLM's descriptive checks, not DHARMa's plots or tests. Parameters
 #' stay fixed, and the observed data were used to fit them; parameter uncertainty
 #' is not included. Check partner and time dependence separately.
 #'
@@ -79,8 +78,27 @@
 #' and fitted rows supported by [simulate_dyad_responses()]: missing responses are
 #' not imputed, and time gaps follow the fitted model. Observations have equal weight.
 #'
+#' @section Method and credit:
+#' The internal calculation follows the simulation-based PIT approach used in
+#' Florian Hartig's DHARMa package and the randomized quantile residual method of
+#' Dunn and Smyth (1996). We implement the definition directly and keep the
+#' uniform 0--1 scale, rather than transforming to normal quantiles.
+#'
+#' For each outcome, calculate the proportions of reference simulations below
+#' it and at or below it. If these match, use that proportion; otherwise draw
+#' uniformly between them. This handles continuous outcomes, discrete ties, and
+#' mixtures of both. A finite simulation bank approximates the model's PIT.
+#'
+#' @references
+#' Hartig, F. DHARMa: Residual Diagnostics for Hierarchical (Multi-Level / Mixed)
+#' Regression Models. \doi{10.32614/CRAN.package.DHARMa}.
+#'
+#' Dunn, P. K., and Smyth, G. K. (1996). Randomized quantile residuals.
+#' *Journal of Computational and Graphical Statistics*, 5(3), 236--244.
+#' \doi{10.2307/1390802}.
+#'
 #' @seealso [check_outcomes()], [check_partner_dependence()]
-#' @examplesIf requireNamespace("glmmTMB", quietly = TRUE) && requireNamespace("DHARMa", quietly = TRUE)
+#' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
 #' model <- glmmTMB::glmmTMB(
 #'   closeness ~ gender + (1 | coupleID), data = dyads_cross
 #' )
@@ -94,8 +112,6 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
                             data = NULL, details = FALSE) {
   if (!inherits(simulations, "dyadMLM_response_simulations"))
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
-  if (!requireNamespace("DHARMa", quietly = TRUE))
-    stop("Install package `DHARMa` to use `check_residuals()`.", call. = FALSE)
   if (!is.list(predictors))
     stop("`predictors` must be a list or data frame of fitted-row values.", call. = FALSE)
   names(predictors) <- rlang::names2(predictors)
@@ -141,11 +157,9 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   reference <- t(draws[reference_rows, , drop = FALSE])
   responses <- cbind(observed, t(draws[-reference_rows, , drop = FALSE]))
   # Every matrix below has observations in rows, datasets in columns; observed first.
-  # DHARMa's PIT method also randomizes ties for discrete outcomes.
   pit <- apply(responses, 2, function(response) {
-    DHARMa::getQuantile(reference, response, method = "PIT", integerResponse = FALSE)
+    randomized_pit(reference, response)
   })
-
 
   # Matrices retain complete datasets in columns; subset only their rows.
   draw_envelopes <- function(x, curves, connect = TRUE, boxes = FALSE, smooth = FALSE) {
@@ -249,19 +263,11 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   }
   old_ask <- grDevices::devAskNewPage((is.null(ask) || ask) && grDevices::dev.interactive())
   on.exit(grDevices::devAskNewPage(old_ask), add = TRUE)
-  page <- function(rows, title, draw) {
-    counts <- paste(length(unlist(composition$rows)), "observations")
-    if (!is.null(composition$n_dyads)) counts <- paste(composition$n_dyads, "dyads;", counts)
-    plot_check_page(composition$label, paste(title, counts, sep = " - "),
-      c(rows, length(composition$rows)), draw,
-      column_titles = paste0(names(composition$rows), " (n = ", lengths(composition$rows), ")"),
-      footer = "Red: observed. Blue: simulations; ranges are pointwise middle 95%. Some departures occur by chance.\nParameters fixed; no significance tests.")
-  }
   probabilities <- seq(0, 1, length.out = 201)
   breaks <- seq(0, 1, length.out = 21)
   for (composition in compositions) {
     role_rows <- composition$rows
-    page(4, "Residual checks", {
+    plot_check_role_page(composition, 4, "Residual checks", {
       for (panel in c("Uniform QQ", "PIT histogram", "Fitted", "Outside simulated range")) {
         for (rows in role_rows) {
           if (!length(rows)) {
@@ -296,14 +302,14 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     })
 
     for (predictor_index in seq_along(predictors)) {
-      page(2, names(predictors)[predictor_index], {
+      plot_check_role_page(composition, 2, names(predictors)[predictor_index], {
         for (distance in c(FALSE, TRUE)) for (rows in role_rows)
           draw_pattern(rows, predictors[[predictor_index]], names(predictors)[predictor_index],
                        role_rows, distance)
       })
     }
     if (details) {
-      page(2, "Residual details", {
+      plot_check_role_page(composition, 2, "Residual details", {
         for (rows in role_rows) {
           if (!length(rows)) plot_check_empty("Uniformity")
           else plot_check_statistic(apply(pit[rows, , drop = FALSE], 2, ks_distance),
@@ -314,4 +320,13 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
     }
   }
   invisible(pit)
+}
+
+# Reference rows are observations, columns are simulations; see the method above.
+randomized_pit <- function(reference, observed) {
+  below <- unname(rowMeans(reference < observed))
+  at_or_below <- unname(rowMeans(reference <= observed))
+  tied <- below < at_or_below
+  if (any(tied)) below[tied] <- stats::runif(sum(tied), below[tied], at_or_below[tied])
+  below
 }

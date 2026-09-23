@@ -53,8 +53,7 @@ simulations. Graphics settings are restored afterwards.
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Compare PIT residuals with complete datasets from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
-Requires the optional package \code{DHARMa}. For checks on the outcome scale,
-use \code{\link[=check_outcomes]{check_outcomes()}}.
+For checks on the outcome scale, use \code{\link[=check_outcomes]{check_outcomes()}}.
 }
 \section{Reading the plots}{
 
@@ -81,7 +80,7 @@ Each additional predictor gets a page with quartile and distance plots. Numeric
 predictors with many values use up to eight bins, chosen within each role.
 With at least four bins, nearby quartiles are averaged into smooth curves using
 the same weights for observed and simulated data; blue bands are calculated
-afterwards. These are smoothed local summaries, not DHARMa's quantile regressions.
+afterwards. These are smoothed local summaries, not quantile regressions.
 Curves span each role's predictor range on a shared axis and can hide patterns
 within bins.
 Dashed, solid, and dotted lines identify the 25th, 50th, and 75th percentiles;
@@ -95,10 +94,10 @@ and bins can hide interactions or finer patterns.
 
 \section{Scope}{
 
-The first half of simulations defines PIT through \code{\link[DHARMa:getQuantile]{DHARMa::getQuantile()}}; the
-other half provides complete reference datasets, transformed and grouped just
-like the observations. This retains fitted partner and time dependence without
-whitening. These are descriptive checks, not significance tests. Parameters
+The first half of simulations defines PIT; the other half provides complete
+reference datasets, transformed and grouped just like the observations. These
+envelopes account for fitted partner and time dependence without whitening.
+They are dyadMLM's descriptive checks, not DHARMa's plots or tests. Parameters
 stay fixed, and the observed data were used to fit them; parameter uncertainty
 is not included. Check partner and time dependence separately.
 
@@ -108,8 +107,21 @@ and fitted rows supported by \code{\link[=simulate_dyad_responses]{simulate_dyad
 not imputed, and time gaps follow the fitted model. Observations have equal weight.
 }
 
+\section{Method and credit}{
+
+The internal calculation follows the simulation-based PIT approach used in
+Florian Hartig's DHARMa package and the randomized quantile residual method of
+Dunn and Smyth (1996). We implement the definition directly and keep the
+uniform 0--1 scale, rather than transforming to normal quantiles.
+
+For each outcome, calculate the proportions of reference simulations below
+it and at or below it. If these match, use that proportion; otherwise draw
+uniformly between them. This handles continuous outcomes, discrete ties, and
+mixtures of both. A finite simulation bank approximates the model's PIT.
+}
+
 \examples{
-\dontshow{if (requireNamespace("glmmTMB", quietly = TRUE) && requireNamespace("DHARMa", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("glmmTMB", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 model <- glmmTMB::glmmTMB(
   closeness ~ gender + (1 | coupleID), data = dyads_cross
 )
@@ -117,6 +129,14 @@ model <- glmmTMB::glmmTMB(
 simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
 check_residuals(simulations, dyad = coupleID, role = gender, ask = FALSE)
 \dontshow{\}) # examplesIf}
+}
+\references{
+Hartig, F. DHARMa: Residual Diagnostics for Hierarchical (Multi-Level / Mixed)
+Regression Models. \doi{10.32614/CRAN.package.DHARMa}.
+
+Dunn, P. K., and Smyth, G. K. (1996). Randomized quantile residuals.
+\emph{Journal of Computational and Graphical Statistics}, 5(3), 236--244.
+\doi{10.2307/1390802}.
 }
 \seealso{
 \code{\link[=check_outcomes]{check_outcomes()}}, \code{\link[=check_partner_dependence]{check_partner_dependence()}}
