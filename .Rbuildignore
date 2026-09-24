@@ -14,6 +14,7 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^\.claude$
 ^codecov\.yml$
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
