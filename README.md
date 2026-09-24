@@ -12,7 +12,7 @@ coverage](https://codecov.io/gh/Pascal-Kueng/dyadMLM/graph/badge.svg)](https://a
 status](https://www.r-pkg.org/badges/version/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
 [![CRAN
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22047083-blue.svg)](https://doi.org/10.5281/zenodo.22047083)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21481720-blue.svg)](https://doi.org/10.5281/zenodo.21481720)
 <!-- badges: end -->
 
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
@@ -54,7 +54,7 @@ citation("dyadMLM")
 Or cite the package without specifying a version:
 
 Küng, P. (2026). *dyadMLM: Tools for dyadic multilevel models*
-\[Computer software\]. <https://doi.org/10.5281/zenodo.22047083>
+\[Computer software\]. <https://doi.org/10.5281/zenodo.21481720>
 
 <details>
 
@@ -68,7 +68,7 @@ BibTeX (without version)
   title = {dyadMLM: Tools for dyadic multilevel models},
   author = {Pascal Küng},
   year = {2026},
-  doi = {10.5281/zenodo.22047083},
+  doi = {10.5281/zenodo.21481720},
 }
 ```
 

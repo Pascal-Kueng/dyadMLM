@@ -32,16 +32,16 @@ helpers, and eventually model syntax explicit and reproducible.
 ## Current State
 
 Version 0.2.0 was accepted by CRAN on 2026-08-21, tagged as `v0.2.0` at the
-exact accepted commit, published as a GitHub Release, and archived through
-Zenodo's native GitHub integration as
-[10.5281/zenodo.22047084](https://doi.org/10.5281/zenodo.22047084). The release
-series uses the concept DOI
-[10.5281/zenodo.22047083](https://doi.org/10.5281/zenodo.22047083). The official
-CRAN tarball remains attached to the GitHub Release. The package has returned
-to development as version 0.2.0.9000, with cross-sectional
-partner-dependence checks in development. The former manually curated
-Zenodo series remains available as a historical archive and now points readers
-to the continuing native series.
+exact accepted commit, published as a GitHub Release, and archived on Zenodo as
+[10.5281/zenodo.22043563](https://doi.org/10.5281/zenodo.22043563). All
+releases share the concept DOI
+[10.5281/zenodo.21481720](https://doi.org/10.5281/zenodo.21481720), which the
+CRAN release also cites. Zenodo support linked the GitHub integration to this
+concept DOI, so future GitHub Releases are added to it as new versions
+automatically, and removed the duplicate native 0.2.0 archive under
+10.5281/zenodo.22047083. The official CRAN tarball remains attached to the
+GitHub Release. The package has returned to development as version 0.2.0.9000,
+with cross-sectional partner-dependence checks in development.
 
 The core data-preparation API is implemented and covered by tests, the README
 links to the pkgdown site, and GitHub Actions are configured for R CMD check,
@@ -791,11 +791,12 @@ another routine breaking CRAN update shortly afterward.
   CRAN submission.
 - [x] Submit one frozen 0.2.0 candidate to CRAN. The accepted commit is tagged
   as `v0.2.0`, the GitHub Release contains the official CRAN tarball, and the
-  native Zenodo archive has version DOI
-  [10.5281/zenodo.22047084](https://doi.org/10.5281/zenodo.22047084). Continue
+  Zenodo archive has version DOI
+  [10.5281/zenodo.22043563](https://doi.org/10.5281/zenodo.22043563). Continue
   using concept DOI
-  [10.5281/zenodo.22047083](https://doi.org/10.5281/zenodo.22047083) in
-  package-facing materials; future GitHub Releases are archived automatically.
+  [10.5281/zenodo.21481720](https://doi.org/10.5281/zenodo.21481720) in
+  package-facing materials; future GitHub Releases are archived under it
+  automatically.
 
 The immediate diagnostic sequence after 0.2.0 is cross-sectional Gaussian and
 compatible non-Gaussian partner checks (0.2.1), then Gaussian ILD partner

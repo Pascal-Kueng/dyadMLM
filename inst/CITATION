@@ -2,7 +2,7 @@
 ## Zenodo concept DOI across package releases.
 local({
   package_citation <- citation(auto = meta)
-  package_citation$doi <- "10.5281/zenodo.22047083"
+  package_citation$doi <- "10.5281/zenodo.21481720"
   package_citation$url <- NULL
   package_citation$title <- "dyadMLM: Tools for dyadic multilevel models"
   package_citation$textVersion <- sprintf(
