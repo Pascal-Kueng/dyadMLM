@@ -30,7 +30,7 @@ test_that("model-centred statistics use aligned pairs and retain simulation sett
   attr(simulations, "dyadMLM")$reference <- "known-parameter oracle"
   attr(simulations, "dyadMLM")$random_effects <- "known covariance"
   attr(simulations, "dyadMLM")$parameter_uncertainty <- "not applicable"
-  result <- check_partner_dependence(simulations, dyad = "dyad", plot = FALSE)
+  result <- check_partner_dependence(simulations, dyad = "dyad", role = NULL, plot = FALSE)
   pairs <- matrix(order(simulations$model_frame$dyad), ncol = 2, byrow = TRUE)
   responses <- sweep(rbind(simulations$observed_response,
                           simulations$simulated_responses),
@@ -191,7 +191,7 @@ test_that("wrappers preserve identifier expressions and an omitted role", {
                              data = data, plot = FALSE)
   }
   simulations$model_frame$dyad[1] <- NA
-  expect_warning(expected <- check_partner_dependence(simulations, dyad, plot = FALSE),
+  expect_warning(expected <- check_partner_dependence(simulations, dyad, NULL, plot = FALSE),
                  "Omitted:")
   expect_warning(wrapped <- check_from_wrapper(simulations, dyad), "Omitted:")
   fields <- c("compositions", "n_pairs",
@@ -496,7 +496,7 @@ test_that("checks plot by default, forward plot settings, and return invisibly",
 
 test_that("printing describes the check and plots show empirical limits", {
   simulations <- partner_check_test_simulations()
-  exchangeable <- check_partner_dependence(simulations, "dyad", plot = FALSE)
+  exchangeable <- check_partner_dependence(simulations, "dyad", NULL, plot = FALSE)
   distinguishable <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
   printed <- paste(capture.output(visible <- withVisible(print(distinguishable))),
                    collapse = "\n")
@@ -580,9 +580,9 @@ test_that("explicit NA factor levels are missing dyad IDs and roles", {
 
 test_that("distinct numeric dyad IDs remain separate despite rounded labels", {
   simulations <- partner_check_test_simulations()
-  expected <- check_partner_dependence(simulations, "dyad", plot = FALSE)
+  expected <- check_partner_dependence(simulations, "dyad", NULL, plot = FALSE)
   simulations$model_frame$dyad <- 1e15 + as.integer(simulations$model_frame$dyad)
-  result <- check_partner_dependence(simulations, "dyad", plot = FALSE)
+  result <- check_partner_dependence(simulations, "dyad", NULL, plot = FALSE)
   expect_identical(result$n_pairs, 5L)
   expect_equal(result$compositions, expected$compositions)
 })
@@ -597,7 +597,7 @@ test_that("predictive histograms show the full outer bars", {
   simulations$observed_response <- values * 0.30055
   simulations$predicted_response <- rep(0, 6)
   simulations$simulated_responses <- scales %o% values
-  result <- check_partner_dependence(simulations, "dyad", plot = FALSE)
+  result <- check_partner_dependence(simulations, "dyad", NULL, plot = FALSE)
 
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)

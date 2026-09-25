@@ -127,9 +127,11 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   if (family$family == "ordinal") {
     # Match predictions, which use category positions 1, 2, ..., K.
     observed <- as.numeric(observed)
-    message("Ordinal categories are scored 1, 2, ..., K in both observed and ",
-            "simulated data. The plots show whether the model reproduces ",
-            "variation and partner correlation in these scores.")
+    rlang::inform(paste0(
+      "Ordinal categories are scored 1, 2, ..., K in both observed and ",
+      "simulated data. The plots show whether the model reproduces ",
+      "variation and partner correlation in these scores."
+    ), .frequency = "once", .frequency_id = "dyadMLM_ordinal_scores")
   }
   if (!is.numeric(observed) || !is.null(dim(observed)) ||
       any(!is.finite(observed))) {
@@ -138,19 +140,18 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   }
 
   zero_inflation_model_matrix <- stats::model.matrix(model, component = "zi")
-  # glmmTMB only uses the zero component when it has fixed-effect coefficients.
-  adjust_zero_inflation_prediction <- ncol(zero_inflation_model_matrix) > 0L &&
-    length(model$obj$env$data$termszi) > 0L
+  # glmmTMB ignores a zero component without fixed-effect coefficients.
+  has_zero_inflation <- ncol(zero_inflation_model_matrix) > 0L
 
   # newdata = NULL prevents na.exclude from padding omitted rows back in.
   predicted <- as.numeric(stats::predict(
     model, newdata = NULL, re.form = NA,
-    type = if (adjust_zero_inflation_prediction) "conditional" else "response"
+    type = if (has_zero_inflation) "conditional" else "response"
   ))
 
-  if (adjust_zero_inflation_prediction) {
-    # glmmTMB's re.form = NA retains zero-inflation random effects, so use its
-    # fitted design and offsets to calculate this component without them.
+  if (has_zero_inflation) {
+    # glmmTMB's re.form = NA can retain zero-inflation random effects, so use
+    # the fitted design and offsets to calculate this component without them.
     zero_inflation_coefficients <- glmmTMB::fixef(model)$zi[
       colnames(zero_inflation_model_matrix)
     ]
@@ -174,7 +175,9 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   # Tell simulate() to draw new random effects for every block.
   for (component in components) {
     for (i in seq_along(original[[component]])) {
-      model$obj$env$data[[component]][[i]]$simCode <- 2 # Redraws whole re-blocks.
+      # 2 = "random", glmmTMB's default. Forcing it also overrides any
+      # set_simcodes() change by the caller that would keep random effects fixed.
+      model$obj$env$data[[component]][[i]]$simCode <- 2
     }
   }
 

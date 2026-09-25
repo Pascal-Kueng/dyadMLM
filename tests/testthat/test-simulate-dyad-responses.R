@@ -40,7 +40,7 @@ test_that("complete response simulations retain fitted-row alignment", {
     parameter_uncertainty = "excluded", seed = 123L
   ))
 
-  result <- check_partner_dependence(simulations, dyad = "dyad", plot = FALSE)
+  result <- check_partner_dependence(simulations, dyad = "dyad", role = NULL, plot = FALSE)
   expect_s3_class(result, "dyadMLM_partner_check")
   expect_identical(result$n_pairs, 20L)
   simulated_statistics <- as.matrix(result$compositions$statistics[[1]][-1, -1])
@@ -291,6 +291,8 @@ test_that("ordinal checks use category scores in the declared order", {
   skip_if_not_installed("glmmTMB")
   skip_if_not("ordinal" %in% getNamespaceExports("glmmTMB"),
               "Ordinal models require a newer glmmTMB version.")
+  # Show the once-per-session scoring message on every call.
+  withr::local_options(rlib_message_verbosity = "verbose")
   withr::local_seed(9241)
   fitting_data <- data.frame(
     dyad = factor(rep(seq_len(180), each = 2)),
@@ -320,9 +322,9 @@ test_that("ordinal checks use category scores in the declared order", {
       model, newdata = NULL, type = "probs", re.form = NA
     )
     for (number_of_simulations in c(1L, 5L)) {
-      simulations <- simulate_dyad_responses(
+      expect_message(simulations <- simulate_dyad_responses(
         model, nsim = number_of_simulations, seed = 9242
-      )
+      ), "Ordinal categories are scored 1, 2, ..., K", fixed = TRUE)
       expect_identical(dim(simulations$simulated_responses),
                        c(number_of_simulations, 356L))
       expect_identical(simulations$observed_response,

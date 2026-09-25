@@ -596,7 +596,8 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
     ask <- number_of_figures > 1L
   }
   # File devices and report rendering should never wait for keyboard input.
-  ask <- ask && grDevices::dev.interactive()
+  # orNone = TRUE also pauses when the first plot will open an interactive device.
+  ask <- ask && grDevices::dev.interactive(orNone = TRUE)
 
   if (panels) {
     previous_graphics_settings <- graphics::par(no.readonly = TRUE)
