@@ -19,7 +19,7 @@ plot(x, ask = NULL, panels = TRUE, ...)
 - ask:
 
   Whether to pause between figures on an interactive device. `NULL`
-  (default) pauses when there is more than one figure; `TRUE` pauses and
+  (default) pauses when there is more than one figure, `TRUE` pauses and
   `FALSE` draws without pausing. In panel mode, each composition is one
   figure. File devices never pause.
 

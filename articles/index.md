@@ -35,3 +35,18 @@ Details for specific dyadic model parameterizations.
   Construction and interpretation of DSM predictor scores and contrasts,
   including their relationship to APIM effects for distinguishable
   dyads.
+
+### Simulation studies
+
+How often predictive checks detect mismatches and raise false alarms.
+
+- [Partner-dependence checks across outcome
+  families](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.md):
+
+  Detection and false alarms across sample sizes and response families.
+
+- [Covariance-pooling checks across outcome
+  families](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.md):
+
+  Composition checks and model comparison when one covariance is pooled
+  across dyad compositions.

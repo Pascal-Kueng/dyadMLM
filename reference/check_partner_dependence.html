@@ -4,12 +4,14 @@ A dyadic model should reproduce how much responses vary and how strongly
 partners' responses are related. This check computes variances and correlations
 of simulated responses based on the model and compares them to the observed
 response variances and correlations from the data.
-This helps identify mismatches in the model's assumptions."><meta property="og:description" content="
+This helps identify mismatches in the model's assumptions. The check
+currently supports cross-sectional dyads only (one response per partner)."><meta property="og:description" content="
 A dyadic model should reproduce how much responses vary and how strongly
 partners' responses are related. This check computes variances and correlations
 of simulated responses based on the model and compares them to the observed
 response variances and correlations from the data.
-This helps identify mismatches in the model's assumptions."><meta property="og:image" content="https://pascal-kueng.github.io/dyadMLM/social-preview.png"><meta property="og:image:alt" content="dyadMLM R package: tools for dyadic multilevel models for distinguishable and exchangeable dyads"></head><body>
+This helps identify mismatches in the model's assumptions. The check
+currently supports cross-sectional dyads only (one response per partner)."><meta property="og:image" content="https://pascal-kueng.github.io/dyadMLM/social-preview.png"><meta property="og:image:alt" content="dyadMLM R package: tools for dyadic multilevel models for distinguishable and exchangeable dyads"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -62,7 +64,8 @@ A dyadic model should reproduce how much responses vary and how strongly
 partners' responses are related. This check computes variances and correlations
 of simulated responses based on the model and compares them to the observed
 response variances and correlations from the data.
-This helps identify mismatches in the model's assumptions.</p>
+This helps identify mismatches in the model's assumptions. The check
+currently supports cross-sectional dyads only (one response per partner).</p>
     </div>
 
     <div class="section level2">
@@ -97,7 +100,8 @@ in the fitted model frame, then in <code>data</code> if supplied.</p></dd>
 in the fitted model frame, then in <code>data</code> if supplied.
 <code>NULL</code> (default) pools all dyads as exchangeable. Supply roles
 even for an exchangeable model to reveal variance or partner-correlation
-mismatches that pooling may hide. Each role pair is checked separately,
+mismatches that pooling may hide. Each dyad composition (role pair, such as
+female-male) is checked separately,
 using exchangeable summaries for same-role pairs and role-specific
 summaries otherwise.</p></dd>
 
@@ -120,7 +124,7 @@ See <code><a href="simulate_dyad_responses.html">simulate_dyad_responses()</a></
 
 <dt id="arg-ask">ask<a class="anchor" aria-label="anchor" href="#arg-ask"></a></dt>
 <dd><p>Whether to pause between figures on an interactive device.
-<code>NULL</code> (default) pauses when there is more than one figure; <code>TRUE</code> pauses
+<code>NULL</code> (default) pauses when there is more than one figure, <code>TRUE</code> pauses
 and <code>FALSE</code> draws without pausing. In panel mode, each composition is one
 figure. File devices never pause.</p></dd>
 
@@ -132,9 +136,8 @@ Graphics settings are restored afterwards.</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>Optional data frame used to fit the model. Supply it when <code>dyad</code>
-or <code>role</code> is absent from the fitted model frame. Use the exact unchanged
-data that was passed to the model when fitting.</p></dd>
+<dd><p>Optional: the unchanged data frame used to fit the model. Supply
+it when <code>dyad</code> or <code>role</code> is not in the model formulas.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -143,8 +146,10 @@ data that was passed to the model when fitting.</p></dd>
 function invisibly returns a <code>dyadMLM_partner_check</code> object containing the
 <code>compositions</code> table with pair counts and a statistics tibble for each
 composition. Each tibble has one observed row followed by one row per
-simulation, identified by <code>dataset</code>. The object includes omission counts
-and settings, and can be saved and plotted later.</p>
+simulation, identified by <code>dataset</code>. <code>summary</code> compares each <code>observed</code>
+statistic with the middle 95% of its simulations (<code>lower</code>, <code>upper</code>) and marks
+those <code>outside</code> it. The object includes omission counts and settings, and can
+be saved and plotted later.</p>
     </div>
     <div class="section level2">
     <h2 id="reading-the-plots">Reading the plots<a class="anchor" aria-label="anchor" href="#reading-the-plots"></a></h2>
@@ -158,26 +163,41 @@ total across all compositions. The top row shows member SDs and partner
 correlation. The bottom row shows the same information using dyad averages
 and partner differences.</p>
 <p>An observed value far from most simulated values may indicate that the
-model does not reproduce that feature of the data well.</p>
-<p>The first set of plots compares:</p><ul><li><p><strong>Response SDs:</strong> one for each role, or one common SD for exchangeable members.</p></li>
+model does not reproduce that feature of the data well.
+Agreement does not establish that omitted dependence is negligible, especially
+with few dyads. The <a href="https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html">partner-dependence study</a>
+illustrates how sample size affects detection when residual partner
+correlation is omitted.</p>
+<p>Checking each composition can reveal differences hidden by pooling.
+Flags (observed values outside the middle 95%, marked <code>*</code> when printed) can
+occur by chance, especially when checking several summaries.
+They invite investigation, not formal rejection of the model. The
+<a href="https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html">covariance-pooling study</a>
+illustrates detection and false alarms when checking each composition; 10 to
+29% of correctly pooled models had at least one flag.</p>
+<p>The top row compares:</p><ul><li><p><strong>Response SDs:</strong> one for each role, or one common SD for exchangeable members.</p></li>
 <li><p><strong>Partner correlation:</strong> how strongly partners' responses are related.</p></li>
-</ul><p>The second set shows <em>the same information</em> using dyad averages and partner
-differences:</p><ul><li><p><strong>Dyad-average SD:</strong> how much dyads differ in their average response.</p></li>
+</ul><p>The bottom row shows:</p><ul><li><p><strong>Dyad-average SD:</strong> how much dyads differ in their average response.</p></li>
 <li><p><strong>Half-difference SD or RMS:</strong> each partner difference is divided by two.
 With distinct roles, the SD shows how much signed differences vary
-across dyads. For exchangeable members, the RMS shows their typical size, regardless of
+across dyads. For exchangeable members, the RMS (root mean square) shows
+their typical size, regardless of
 partner order.</p></li>
-<li><p><strong>Mean/difference correlation:</strong> plotted only for distinct roles,
+<li><p><strong>Dyad-average/role-difference correlation:</strong> shown only for distinct roles,
 because it depends on how partners are ordered. Positive values indicate
 greater variance for the first named role. Negative values indicate greater
 variance for the second.</p></li>
-</ul><p>These checks are particularly useful when a simpler model is needed and a
-less restricted model does not converge and can't be
-used for model comparison. It shows how well the simpler model
+</ul><p>These checks are particularly useful when a less restricted model does not
+converge and so cannot be used for model comparison. They show how well the
+simpler model
 reproduces the observed variances and partner correlations.</p>
-<p>Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
-The warning lists affected dyad IDs and row positions in the fitted data.
-Long lists are shortened; counts are also shown when printing the result.</p>
+<p>A flexible covariance model will usually reproduce features it estimated from
+the same data. Agreement alone therefore does not establish good fit.
+For example, pooled summaries (<code>role = NULL</code>) of a Gaussian model with an
+unconstrained exchangeable covariance, as below, agree almost by construction.
+Use a suitable model comparison to formally test a specific covariance
+restriction when both models can be fitted (see <code><a href="compare_nested_models.html">compare_nested_models()</a></code>).</p>
+<p>Rows with missing IDs or roles and incomplete dyads are omitted with a warning.</p>
     </div>
     <div class="section level2">
     <h2 id="technical-details">Technical details<a class="anchor" aria-label="anchor" href="#technical-details"></a></h2>
@@ -256,17 +276,38 @@ assessment of model fitness via realized discrepancies. <em>Statistica Sinica,
 <span class="r-plt img"><img src="check_partner_dependence-4.png" alt="" width="960" height="624"></span>
 <span class="r-plt img"><img src="check_partner_dependence-5.png" alt="" width="960" height="624"></span>
 <span class="r-plt img"><img src="check_partner_dependence-6.png" alt="" width="960" height="624"></span>
+<span class="r-in"><span><span class="co"># Composition checks flag differences that the pooled check misses.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">check</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;dyadMLM partner-dependence check&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14 statistics; 360 usable complete pairs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Response: model-centred</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Reference: 100 plug-in predictive datasets with new random effects</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> female - female: 120 of 360 usable dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Observed      2.5%     97.5%    Statistic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.516     1.527     1.851 *  Common member SD (exchangeable)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.593     0.507     0.691    Partner correlation (exchangeable)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.353     1.326     1.678    Dyad-average SD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.684     0.661     0.824    Half-difference RMS (about zero)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> female - male: 120 of 360 usable dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Observed      2.5%     97.5%    Statistic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.634     1.461     1.866    SD (female)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.280     1.477     1.873 *  SD (male)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.556     0.516     0.697    Partner correlation (female and male)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.288     1.307     1.661 *  Dyad-average SD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.704     0.656     0.820    Half-difference SD (female minus male)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.284    -0.165     0.182 *  Dyad-average/role-difference correlation (female minus male)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> male - male: 120 of 360 usable dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Observed      2.5%     97.5%    Statistic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.204     1.484     1.863 *  Common member SD (exchangeable)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.543     0.455     0.724    Partner correlation (exchangeable)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.058     1.301     1.714 *  Dyad-average SD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.576     0.653     0.859 *  Half-difference RMS (about zero)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Outside the middle 95% of simulations (*): 7 of 14 observed statistics.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Some departures occur by chance; these are descriptive checks, not significance tests.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Use plot(x) to view the comparisons.</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

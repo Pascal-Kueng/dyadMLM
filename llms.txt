@@ -90,7 +90,12 @@ for data requirements and examples.
 Predictive checks assess whether a model reproduces response variances
 and partner correlations. See the [function
 help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
-for supported models and interpretation.
+for supported models and interpretation, and the simulation studies on
+[omitted partner
+dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
+and [incorrect covariance
+pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
+for how often the check detects mismatches.
 
 ## Quick example
 
@@ -373,3 +378,18 @@ Details for specific dyadic model parameterizations.
   Construction and interpretation of DSM predictor scores and contrasts,
   including their relationship to APIM effects for distinguishable
   dyads.
+
+### Simulation studies
+
+How often predictive checks detect mismatches and raise false alarms.
+
+- [Partner-dependence checks across outcome
+  families](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.md):
+
+  Detection and false alarms across sample sizes and response families.
+
+- [Covariance-pooling checks across outcome
+  families](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.md):
+
+  Composition checks and model comparison when one covariance is pooled
+  across dyad compositions.

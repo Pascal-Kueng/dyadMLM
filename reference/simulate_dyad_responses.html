@@ -94,7 +94,8 @@ exclusions):</p><ul><li><p><code>simulated_responses</code>: a matrix with <code
 observation. Each row is a complete simulated dataset.</p></li>
 <li><p><code>observed_response</code> and <code>predicted_response</code>: numeric vectors with one value
 per fitted observation.</p></li>
-<li><p><code>model_frame</code>: the data frame used for fitting, in the same row order.</p></li>
+<li><p><code>model_frame</code>: the fitted model frame (variables in the model formulas
+only), in the same row order.</p></li>
 </ul><p>The <code>dyadMLM</code> attribute records the model and simulation settings, including
 the seed.</p>
     </div>
@@ -102,15 +103,29 @@ the seed.</p>
     <h2 id="supported-models">Supported models<a class="anchor" aria-label="anchor" href="#supported-models"></a></h2>
 
 
-<p>Currently supports unweighted <code>glmmTMB</code> models without zero inflation for
-the following families:</p><ul><li><p><code><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian()</a></code></p></li>
-<li><p><code><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson()</a></code></p></li>
-<li><p><code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::nbinom1()</a></code></p></li>
-<li><p><code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::nbinom2()</a></code></p></li>
+<p>Supports unweighted <code>glmmTMB</code> models with the following families:</p><ul><li><p><code><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian()</a></code></p></li>
+<li><p><code><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson()</a></code>, <code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::compois()</a></code>, <code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::genpois()</a></code>, <code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::bell()</a></code></p></li>
+<li><p><code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::nbinom1()</a></code>, <code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::nbinom2()</a></code>, <code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::nbinom12()</a></code></p></li>
+<li><p><code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::truncated_poisson()</a></code>, <code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::truncated_nbinom1()</a></code>,
+<code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::truncated_nbinom2()</a></code>, <code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::truncated_compois()</a></code>,
+<code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::truncated_genpois()</a></code></p></li>
 <li><p><code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::tweedie()</a></code></p></li>
-<li><p><code><a href="https://rdrr.io/r/stats/family.html" class="external-link">Gamma()</a></code></p></li>
+<li><p><code><a href="https://rdrr.io/r/stats/family.html" class="external-link">Gamma()</a></code>, <code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::ziGamma()</a></code></p></li>
 <li><p><code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::beta_family()</a></code></p></li>
-</ul><p>The model's fitted link is used for prediction and simulation. Predictions
+<li><p><code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::lognormal()</a></code></p></li>
+<li><p><code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::skewnormal()</a></code></p></li>
+<li><p><code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::t_family()</a></code> with more than two degrees of freedom</p></li>
+<li><p><code>glmmTMB::ordinal()</code> (currently only available in the development version
+of <code>glmmTMB</code>)</p></li>
+</ul><p>Zero-inflated and hurdle versions are supported where available. Checks
+describe the combined response, including zeros, rather than each model
+component separately. Good agreement does not establish that the zero and
+response components each fit well.</p>
+<p>Ordinal checks use category scores <code>1, 2, ..., K</code> in their fitted order,
+matching <a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB's predictions</a>. The plots compare
+variation and partner correlation in these scores. The scores do not measure
+distances on an underlying continuous scale.</p>
+<p>The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.</p>
 <p><code><a href="check_partner_dependence.html">check_partner_dependence()</a></code> currently requires cross-sectional dyads.</p>
     </div>
@@ -121,19 +136,21 @@ and simulated responses must be finite.</p>
 <p>Each simulation draws new random effects and then new responses from the
 fitted model. Random effects within each block are drawn together using
 their fitted variances and correlations. This also applies to random effects
-in the dispersion model, if present.</p>
-<p>Fitted parameters and predictors stay fixed. The model is not refitted, and
-uncertainty in parameter estimates is not included. This is a <em>plug-in
-predictive reference</em>. If dyads are the only grouping factor, the simulations
+in the zero-inflation and dispersion models, if present.</p>
+<p>Fitted parameters and predictors, including any lagged responses, stay fixed.
+The model is not refitted, and uncertainty in parameter estimates is not
+included. This is a <em>plug-in predictive reference</em>. If dyads are the only grouping factor, the simulations
 represent hypothetical new dyads under the same study design.</p>
 <p><code>predicted_response</code> contains predicted mean responses with random effects
-in the conditional model set to zero.
-By default, later checks subtract these same predictions from observed and
+in the conditional and zero-inflation models set to zero. For zero-inflated
+and hurdle models, this is the conditional response mean multiplied by
+one minus the zero-component probability (Brooks et al., 2017, Appendix A;
+<a href="https://doi.org/10.32614/RJ-2017-066" class="external-link">doi:10.32614/RJ-2017-066</a>
+).</p>
+<p>By default, later checks subtract these same predictions from observed and
 simulated responses. Both random effects and observation-level noise still
 contribute to response variance. With nonlinear links, setting random effects
 to zero generally differs from averaging predictions over them.</p>
-<p>Predictor values remain unchanged, including any lagged responses used as
-predictors.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
