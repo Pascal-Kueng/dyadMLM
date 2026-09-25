@@ -149,9 +149,8 @@ run_generalized_covariance_study <- function(repetitions = 500L, reference_draws
     report_directory <- file.path(study_directory, "report-data/generalized-covariance-pooling")
     dir.create(report_directory, recursive = TRUE, showWarnings = FALSE)
     file.copy(file.path(output_directory, paste0(names(report_tables), ".csv")), report_directory, overwrite = TRUE)
-    rmarkdown::render("vignettes/articles/generalized-covariance-pooling.Rmd",
-      output_file = "generalized-covariance-pooling.html", output_dir = study_directory,
-      envir = new.env(), quiet = TRUE)
+    rmarkdown::render("vignettes/articles/covariance-pooling.Rmd",
+      output_dir = study_directory, envir = new.env(), quiet = TRUE)
   }
   message("Saved results: ", output_directory)
   invisible(output_directory)

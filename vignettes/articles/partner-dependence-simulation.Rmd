@@ -33,6 +33,8 @@ fit_exclusions <- read.csv(file.path(results_directory, "fit-exclusions.csv"))
 The models include actor and partner effects but leave out residual partner
 dependence. We compare checks of raw outcomes with checks that first subtract
 fixed-effect predictions. Both use the **same datasets, fitted models, and reference simulations**.
+Each check uses one summary: the correlation between the first and second
+partner in each dyad.
 
 - **Coloured lines:** how often the check detects omitted positive correlation.
   A mismatch is detected when the observed correlation exceeds the upper limit of
@@ -40,7 +42,9 @@ fixed-effect predictions. Both use the **same datasets, fitted models, and refer
   separately in each family's details.
 - **Black lines:** false alarms when residual correlation is zero. Values below or
   above the middle 95% simulated range count as false alarms. The grey dashed line
-  marks 5% as a benchmark, not a guaranteed rate.
+  marks 5% as a benchmark, not a guaranteed rate. A full check shows four to six
+  summaries per composition, so at least one flag is more likely than these rates
+  suggest.
 
 The results apply to the settings studied and can differ with other model
 settings. Rates include only usable fits. Many fits were excluded for skew-normal
@@ -76,11 +80,8 @@ missing a category. Correlations must be defined to count as a valid check.
 Undefined simulated correlations are omitted from reference ranges. Each family's
 details give exclusion counts and reasons.
 
-For 1,450 resumed Tweedie datasets, an isolated glmmTMB build used TMB's equivalent
-single-Gamma sampler to avoid extremely slow simulation when fitted power was close
-to 2. This preserved the fitted models and response distributions but changed the
-random draws.
-The [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md#tweedie-simulation-repair) give the version, patch, and checks.
+Some Tweedie datasets used an equivalent, faster glmmTMB sampler; see the
+[study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md#tweedie-simulation-repair).
 
 The report uses saved results. See the
 [study code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/family-comparison/run.R), [plot code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/family-comparison/plot.R), and

@@ -11,7 +11,8 @@ parameters fixed; close agreement alone does not establish good fit.
 | --- | --- |
 | [Vignette candidate](partner-dependence-vignette-draft.Rmd) | One complete workflow and interpretation |
 | [Reference validation](partner-dependence-reference-validation.Rmd) | Independent Woody–Sadler calculations and Dingy cross-check |
-| [Full simulation report](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html) | Detection and false alarms across families and sample sizes |
+| [Partner-dependence report](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html) | Detection and false alarms across families and sample sizes |
+| [Covariance-pooling report](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html) | Composition checks and model comparison across families |
 | [Simulation studies](simulation-studies/README.md) | Sensitivity across families, raw versus centred checks, and validation |
 
 The function help is the reference for arguments, output fields, supported
@@ -49,6 +50,7 @@ source("dev/diagnostic_checks/check-ordinal-family.R")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-reference-validation.Rmd")
 pkgdown::build_article("articles/partner-dependence-simulation")
+pkgdown::build_article("articles/covariance-pooling")
 ```
 
 The website report uses saved summary tables and does not rerun the simulations.

@@ -8,7 +8,7 @@ Public report sources stay in `vignettes/articles/`.
 | --- | --- | --- |
 | [family-comparison](family-comparison/run.R) | Raw versus model-centred correlation checks across response families | [Full report](../../../vignettes/articles/partner-dependence-simulation.Rmd) |
 | [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
-| [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/generalized-covariance-pooling.Rmd) |
+| [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
 [Shared family generators](shared/family-margins.R) are used by both family studies.
@@ -57,7 +57,7 @@ refitting. A complete default run exports four tables to
 `report-data/covariance-pooling/` and renders the standalone report.
 
 For a short development run, use `5 1000 4 run`. Render the report source with
-`rmarkdown::render()` and its absolute output directory as `results_directory`.
+`rmarkdown::render()` and its absolute output directory as `gaussian_directory`.
 Treat those results as preliminary.
 
 ## Generalized covariance pooling
@@ -98,8 +98,8 @@ Screening tables go to
 `report-data/generalized-covariance-screening/`; main-study tables go to
 `report-data/generalized-covariance-pooling/` only after the complete default run,
 which also renders the local report. The [helpers](generalized-covariance-pooling/helpers.R) reuse Gaussian preparation
-and the shared family generators. Bell requires `gsl`. If Tweedie is selected,
-use the isolated sampler repair described below.
+and the shared family generators. Bell requires `gsl`. Tweedie results
+used the isolated sampler repair described below.
 
 ## Raw versus model-centred checks
 
@@ -145,7 +145,6 @@ After changing text or plots, rebuild from the compact tables without simulation
 ```r
 pkgdown::build_article("articles/partner-dependence-simulation")
 pkgdown::build_article("articles/covariance-pooling")
-pkgdown::build_article("articles/generalized-covariance-pooling")
 ```
 
 After updating saved family-comparison results, first refresh its exported tables:

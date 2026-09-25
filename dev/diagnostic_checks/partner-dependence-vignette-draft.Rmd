@@ -157,15 +157,14 @@ support_adjusted_check <- check_partner_dependence(
 Supplying roles checks variability and association within each composition. It
 does not test whether role means or predictor effects can be pooled.
 
-The [Gaussian covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
+The [covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
 found that checking each composition revealed differences hidden by pooling.
-These checks often detected more mismatches than model comparison, but also raised
-more false alarms. Flags invite investigation, not formal rejection of the model.
-
-In the [generalized-outcome study](https://pascal-kueng.github.io/dyadMLM/articles/generalized-covariance-pooling.html),
-the simpler model could usually be checked even when the full covariance model
-could not be fitted reliably. Small samples often missed covariance differences,
-so agreement offers limited reassurance.
+For Gaussian outcomes, these checks often detected more mismatches than model
+comparison, but also raised more false alarms. For other families, the pooled
+model could usually be checked even when the full model could not be fitted.
+With 40 dyads, neither a flag nor agreement said much. With 400 dyads, model
+comparison was the better test when both models could be fitted. Flags invite
+investigation, not formal rejection of the model.
 
 ## How much dependence can the check reveal?
 
