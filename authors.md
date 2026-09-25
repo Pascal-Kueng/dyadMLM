@@ -12,12 +12,12 @@ Source:
 
 Küng, P. (2026). dyadMLM: Tools for dyadic multilevel models (Version
 0.2.0.9000) \[Computer software\].
-https://doi.org/10.5281/zenodo.22047083
+https://doi.org/10.5281/zenodo.21481720
 
     @Manual{,
       title = {dyadMLM: Tools for dyadic multilevel models},
       author = {Pascal Küng},
       year = {2026},
       note = {R package version 0.2.0.9000},
-      doi = {10.5281/zenodo.22047083},
+      doi = {10.5281/zenodo.21481720},
     }
