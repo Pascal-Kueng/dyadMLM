@@ -8,7 +8,7 @@ output:
     toc_float: true
     self_contained: true
 params:
-  results_directory: "../report-data/generalized-covariance-pooling"
+  results_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/generalized-covariance-pooling"
 ---
 
 ```{r setup, include=FALSE}
@@ -86,12 +86,16 @@ under our fitting and recovery criteria. The other `r sum(!screening$selected)`
 candidates did not qualify in these settings (see the
 [screening code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/generalized-covariance-pooling/screen-families.R)).
 
-The full model provides a check on fitting: it uses the structure that generated
-the data. Few flags do not by themselves establish accurate parameter estimates.
-Each condition uses `r paste(unique(conditions$repetitions), collapse = ", ")`
+The full model uses the structure that generated the data. Few flags do not by
+themselves establish accurate parameter estimates. Each condition uses `r paste(unique(conditions$repetitions), collapse = ", ")`
 generated datasets and `r paste(unique(conditions$reference_draws), collapse = ", ")`
 reference simulations per checked fit. Dyads are divided roughly equally among
 the three compositions, so 100 total dyads means about 33 per composition.
+
+The simpler model could usually be checked even when the full model could not be
+fitted reliably. However, checks often missed covariance differences with 40–100
+total dyads and raised more false alarms than model comparison. Use them to
+investigate a fit. Agreement offers limited reassurance in small samples.
 
 ## False alarms when pooling is correct
 
@@ -102,8 +106,8 @@ investigation, not formal rejection of the model. The model comparison uses a
 likelihood-ratio test at 5%.
 
 ```{r false-alarms, fig.height=max(4, 3 * ceiling(n_distinct(summary$family) / 2)), fig.alt="False-alarm rates for composition checks of the pooled and full models and for model comparisons, by family and total number of dyads."}
-false_alarm_methods <- c(composition_any = "Pooled-model checks", full_any = "Full-model checks",
-  likelihood_ratio = "Model comparison")
+false_alarm_methods <- c(composition_paired = "Pooled-model checks", full_paired = "Full-model checks",
+  likelihood_ratio_paired = "Model comparison")
 false_alarm_axis_maximum <- false_alarm_results |>
   filter(method %in% names(false_alarm_methods)) |>
   summarise(upper = max(upper, na.rm = TRUE)) |>
@@ -116,9 +120,15 @@ plot_rates(false_alarm_results, false_alarm_methods, "False-alarm rate", false_a
   scale_linetype_manual(values = c("solid", "dotted", "longdash"))
 ```
 
-The grey line marks 5% as a reference, not a guaranteed rate. Points use only
-datasets with a usable fit and check. Bars show 95% intervals for uncertainty from
-the finite number of study datasets. Missing results do not count as agreement.
+The grey line marks 5% as a reference. At each point, all three methods use the
+**same datasets**, with both checks and the model comparison available. Bars show
+95% intervals for uncertainty from the finite number of study datasets. Missing
+results do not count as agreement. The availability table below shows how often
+all three methods could be used.
+
+At 400 dyads, composition checks flagged 14–28% of correctly pooled models across
+families. Model comparison rejected 4–7%. A flag among 14 summaries is therefore
+not equivalent to a formal 5% test.
 
 ## When latent covariance is pooled incorrectly
 
@@ -137,15 +147,28 @@ parameters complicate that attribution. The full model's flags remain a referenc
 for what happens with the correct structure.
 
 Higher flag rates alone do not establish a better formal test. Read them alongside
-the false-alarm rates, which need not be equal across methods.
+the false-alarm rates. These comparisons describe the datasets where all three
+methods were available. At 40 dyads, that was sometimes a small minority.
 
-```{r alternatives, fig.height=max(4, 2.6 * n_distinct(summary$family)), fig.alt="Any composition flag for the pooled and full models and rejection by the model comparison, across families, sample sizes, and four latent covariance conditions."}
-summary |> filter(scenario != "Correct pooling") |>
-  plot_rates(c(composition_any = "Pooled-model checks", full_any = "Full-model checks",
-    likelihood_ratio = "Model comparison"), "Flag or rejection rate") +
-  facet_grid(family ~ scenario) +
-  scale_colour_manual(values = c("#D55E00", "grey50", "#009E73")) +
-  scale_linetype_manual(values = c("solid", "dotted", "longdash"))
+At 400 dyads, composition checks flagged 44–93% of models with the larger
+correlation differences, while model comparison rejected 42–98%. Neither method
+consistently produced more signals. Smaller SD differences were harder to detect.
+The full model can also raise flags despite using the correct structure: its
+parameters are estimated, and several summaries are checked.
+
+```{r alternatives, results='asis', fig.height=6.5, fig.alt="Composition checks and model comparison on the same available datasets, across sample sizes and four latent covariance conditions."}
+for (current_family in unique(summary$family)) {
+  cat("\n\n### ", current_family, "\n\n", sep = "")
+  family_results <- summary |>
+    filter(family == current_family, scenario != "Correct pooling")
+  print(plot_rates(family_results,
+      c(composition_paired = "Pooled-model checks", full_paired = "Full-model checks",
+        likelihood_ratio_paired = "Model comparison"), "Flag or rejection rate") +
+    facet_wrap(~scenario, ncol = 2) +
+    scale_colour_manual(values = c("#D55E00", "grey50", "#009E73")) +
+    scale_linetype_manual(values = c("solid", "dotted", "longdash")))
+  cat("\n\n")
+}
 ```
 
 ## Study details
@@ -216,16 +239,20 @@ or that the model fits well in every respect.
 <details>
 <summary>Checks across all compositions</summary>
 
-For comparison, the table checks four summaries across all dyads, using the pooled
-model at the largest sample size. These overall summaries can hide differences
-between compositions.
+These checks use the same pooled model and simulations. The table shows the
+largest correlation differences (−0.10 / 0.30 / 0.70) with 400 dyads. Overall
+summaries usually missed differences revealed by checking each composition.
 
 ```{r pooled-rates}
-summary |> filter(n_dyads == max(n_dyads), method == "pooled_any") |>
-  mutate(scenario = gsub("\n", " ", scenario),
-    percentage = ifelse(checked > 0, sprintf("%.1f%%", 100 * rate), "—")) |>
-  select(family, scenario, checked, percentage) |>
-  knitr::kable(col.names = c("Family", "Condition", "Available datasets", "Flagged"))
+summary |> filter(n_dyads == max(n_dyads),
+    scenario == scenario_labels[["correlation_large"]],
+    method %in% c("pooled_any", "composition_any")) |>
+  mutate(method = recode(method, pooled_any = "Overall check",
+    composition_any = "Composition checks"),
+    percentage = scales::percent(rate, accuracy = 0.1)) |>
+  select(family, checked, method, percentage) |>
+  tidyr::pivot_wider(names_from = method, values_from = percentage) |>
+  knitr::kable(col.names = c("Family", "Available datasets", "Composition checks", "Overall check"))
 ```
 
 </details>
@@ -233,21 +260,34 @@ summary |> filter(n_dyads == max(n_dyads), method == "pooled_any") |>
 <details>
 <summary>Fitting and saved results</summary>
 
+The table gives the number of datasets where both checks and the model comparison
+were available, out of 500. Ranges cover the five covariance settings.
+
 ```{r fitting}
-fit_counts |> mutate(family = family_label(family),
-  model = recode(model, pooled = "Pooled", composition = "Full")) |> group_by(family, model) |>
-  summarise(across(c(attempted, usable, with_warnings, check_failures,
-    comparison_failures), sum), .groups = "drop") |>
-  knitr::kable(col.names = c("Family", "Model", "Attempted", "Usable", "Warnings",
-    "Check failures", "Comparison failures"))
+summary |> filter(method == "composition_paired") |>
+  group_by(family, n_dyads) |>
+  summarise(available = if (min(checked) == max(checked)) as.character(min(checked)) else
+    paste(min(checked), max(checked), sep = "–"), .groups = "drop") |>
+  tidyr::pivot_wider(names_from = n_dyads, values_from = available) |>
+  knitr::kable(col.names = c("Family", "40 dyads", "100 dyads", "400 dyads"))
 ```
 
+The pooled-model check was available in 469–500 of 500 datasets per setting.
+Using the same datasets makes the methods comparable, but the retained datasets
+may differ from those with fitting failures. At 400 dyads, restricting the
+pooled-model checks to this common subset changed flag rates by at most 2.6
+percentage points.
+
 Rates exclude failed fits, convergence or Hessian problems, and unavailable
-checks. Warnings are counted separately and do not necessarily invalidate a fit.
-Model comparisons require both fits, so methods can use different subsets of
-datasets. The screening does not establish that
-excluded families are generally unsuitable, or that fitting problems were caused
-by non-identifiability.
+checks. Warnings alone do not invalidate a fit. Native COM-Poisson simulations
+failed for `r sum(fit_counts$check_failures[fit_counts$family == "compois"])` fitted
+models because of sampler overflow or non-finite draws. Ten model comparisons
+were unavailable because the full model had a lower fitted log-likelihood
+(one Tweedie and nine zero-inflated Poisson fits). These outcomes remain recorded
+as unavailable. No selected fits were retried.
+
+The screening does not establish that excluded families are generally unsuitable,
+or that fitting problems were caused by non-identifiability.
 
 The [study script](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/generalized-covariance-pooling/run.R)
 records per-dataset results and exports the tables used here. Re-rendering this

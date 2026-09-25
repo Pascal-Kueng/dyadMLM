@@ -1,0 +1,22 @@
+"family","selected","reason","complete","minimum_usable_rate","maximum_absolute_relative_variance_bias","maximum_median_absolute_relative_variance_error","maximum_absolute_correlation_bias"
+"poisson",TRUE,"Passed the prespecified screening criteria.",TRUE,1,0.153505553099101,0.259122924475688,0.0586896862370762
+"nbinom1",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.78,0.307127486805478,0.314056035951886,0.147745532901304
+"nbinom2",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.7,1.32636309106022,1.32636309106022,0.33787693497324
+"nbinom12",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.76,0.304602140666024,0.427740522304065,0.250793317754977
+"compois",TRUE,"Passed the prespecified screening criteria.",TRUE,1,0.190688833599326,0.245346735771681,0.0552346851826551
+"genpois",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.46,0.405535702582123,0.409155143715975,0.216222839110466
+"truncated_poisson",TRUE,"Passed the prespecified screening criteria.",TRUE,1,0.1025197009315,0.19422428348181,0.0475717946548673
+"truncated_nbinom1",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.72,0.292041421450874,0.356375085496307,0.183566595702193
+"truncated_nbinom2",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.48,0.494853343704806,0.507295146972019,0.605606621877123
+"truncated_compois",FALSE,"Median latent variance bias exceeds 25%.",TRUE,0.94,0.324832144998783,0.324832144998783,0.15980100143505
+"truncated_genpois",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0,NA,NA,NA
+"tweedie",TRUE,"Passed the prespecified screening criteria.",TRUE,0.98,0.112208446103338,0.298154083612253,0.0878756335770773
+"Gamma",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.86,0.141531625907646,0.21883023454666,0.0588390496747078
+"beta",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.04,0.8114402122258,0.8114402122258,0.699999981891058
+"lognormal",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.16,0.641052975595974,0.641052975595974,0.196228716336729
+"skewnormal",FALSE,"Residual and latent Gaussian variation cannot be separated with free skewness.",NA,NA,NA,NA,NA
+"bell",TRUE,"Passed the prespecified screening criteria.",TRUE,0.94,0.0458528855767179,0.310442164477783,0.0785238470826345
+"t",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.16,0.752736981767759,0.752736981767759,0.699999351430276
+"ordinal",FALSE,"Probit thresholds and full latent variances do not identify a unique scale.",NA,NA,NA,NA,NA
+"zi_poisson",TRUE,"Passed the prespecified screening criteria.",TRUE,0.94,0.224157793038247,0.280312889755701,0.0453018760761554
+"hurdle_nbinom2",FALSE,"Fewer than 90% usable fits in at least one setting at 400 dyads.",TRUE,0.44,0.47738884459366,0.548966196327748,0.290579673567934

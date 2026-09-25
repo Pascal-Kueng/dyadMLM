@@ -8,7 +8,7 @@ Public report sources stay in `vignettes/articles/`.
 | --- | --- | --- |
 | [family-comparison](family-comparison/run.R) | Raw versus model-centred correlation checks across response families | [Full report](../../../vignettes/articles/partner-dependence-simulation.Rmd) |
 | [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
-| [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | Running; [draft source](generalized-covariance-pooling/report-draft.Rmd) |
+| [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/generalized-covariance-pooling.Rmd) |
 | [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
 [Shared family generators](shared/family-margins.R) are used by both family studies.
@@ -62,8 +62,7 @@ Treat those results as preliminary.
 
 ## Generalized covariance pooling
 
-This study is running. Its report remains a development draft until the results
-are reviewed. The [screen](generalized-covariance-pooling/screen-families.R) uses
+This study is complete. The [screen](generalized-covariance-pooling/screen-families.R) used
 50 datasets per setting at 40, 100, and 400 dyads. It covers correct pooling,
 a latent role SD ratio of 1.5, and latent correlations of -0.1, 0.3, and 0.7 across
 compositions. Both fitted models retain dependence and distinguishable fixed effects.
@@ -93,7 +92,9 @@ all five covariance settings. Family dispersion, where present, is estimated in
 both. Flags concern response summaries, so their direction is not inferred from
 latent covariance changes.
 
-Both runners save progress every five datasets. Screening tables go to
+Screening saves progress every five datasets. The main study runs one batch of
+datasets at a time, up to the worker count, and saves each completed batch.
+Screening tables go to
 `report-data/generalized-covariance-screening/`; main-study tables go to
 `report-data/generalized-covariance-pooling/` only after the complete default run,
 which also renders the local report. The [helpers](generalized-covariance-pooling/helpers.R) reuse Gaussian preparation
@@ -144,6 +145,7 @@ After changing text or plots, rebuild from the compact tables without simulation
 ```r
 pkgdown::build_article("articles/partner-dependence-simulation")
 pkgdown::build_article("articles/covariance-pooling")
+pkgdown::build_article("articles/generalized-covariance-pooling")
 ```
 
 After updating saved family-comparison results, first refresh its exported tables:

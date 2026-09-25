@@ -54,8 +54,9 @@ generalized_covariance_formula <- function(model_name) {
 fit_generalized_covariance_model <- function(prepared_data, family_name, model_name) {
   warning_messages <- character()
   error_message <- ""
+  # Keep the data name in the fitted call so model comparison can recover it.
   elapsed <- system.time(fitted_model <- tryCatch(withCallingHandlers(
-    do.call(glmmTMB::glmmTMB, c(list(formula = generalized_covariance_formula(model_name), data = prepared_data,
+    do.call(glmmTMB::glmmTMB, c(list(formula = generalized_covariance_formula(model_name), data = quote(prepared_data),
       REML = FALSE, control = glmmTMB::glmmTMBControl(parallel = 1L)),
       make_family_margin(family_name)$fit_arguments)),
     warning = function(warning) {

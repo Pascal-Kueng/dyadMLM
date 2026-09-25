@@ -83,24 +83,30 @@ run_generalized_covariance_study <- function(repetitions = 500L, reference_draws
     writeLines(c(capture.output(sessionInfo()),
       paste("glmmTMB commit:", packageDescription("glmmTMB")$RemoteSha)),
       file.path(output_directory, "session-info.txt"))
-    completed_conditions <- parallel::mclapply(seq_len(nrow(conditions)), function(condition_index) {
+    for (condition_index in seq_len(nrow(conditions))) {
       condition <- conditions[condition_index, ]
       checkpoint_file <- file.path(output_directory,
         paste0(condition$family, "-condition-", condition$condition, ".rds"))
       completed <- if (file.exists(checkpoint_file)) readRDS(checkpoint_file) else list()
-      if (length(completed) < repetitions) {
-        for (repetition in seq.int(length(completed) + 1L, repetitions)) {
-          completed[[repetition]] <- run_generalized_covariance_dataset(condition, repetition, reference_draws)
-          if (repetition %% 5L == 0L || repetition == repetitions) {
-            saveRDS(completed, paste0(checkpoint_file, ".tmp"))
-            stopifnot(file.rename(paste0(checkpoint_file, ".tmp"), checkpoint_file))
-          }
+      while (length(completed) < repetitions) {
+        batch_repetitions <- seq.int(length(completed) + 1L,
+          min(length(completed) + workers, repetitions))
+        # Each dataset has its own seeds, so worker count does not change its results.
+        batch_results <- parallel::mclapply(batch_repetitions, function(repetition) {
+          run_generalized_covariance_dataset(condition, repetition, reference_draws)
+        }, mc.cores = workers, mc.set.seed = FALSE, mc.preschedule = FALSE)
+        if (any(vapply(batch_results, function(result) {
+          is.null(result) || inherits(result, "try-error")
+        }, logical(1)))) {
+          stop("A dataset worker failed. The previous checkpoint is unchanged.")
         }
+        # Only the parent writes checkpoints, with datasets kept in repetition order.
+        completed <- c(completed, batch_results)
+        saveRDS(completed, paste0(checkpoint_file, ".tmp"))
+        stopifnot(file.rename(paste0(checkpoint_file, ".tmp"), checkpoint_file))
       }
       message(condition$family, ": ", condition$n_dyads, " dyads, ", condition$scenario, " complete")
-      invisible(NULL)
-    }, mc.cores = workers, mc.set.seed = FALSE, mc.preschedule = FALSE)
-    stopifnot(!any(vapply(completed_conditions, inherits, logical(1), "try-error")))
+    }
   }
   checkpoint_files <- file.path(output_directory,
     paste0(conditions$family, "-condition-", conditions$condition, ".rds"))
@@ -143,7 +149,7 @@ run_generalized_covariance_study <- function(repetitions = 500L, reference_draws
     report_directory <- file.path(study_directory, "report-data/generalized-covariance-pooling")
     dir.create(report_directory, recursive = TRUE, showWarnings = FALSE)
     file.copy(file.path(output_directory, paste0(names(report_tables), ".csv")), report_directory, overwrite = TRUE)
-    rmarkdown::render(file.path(study_directory, "generalized-covariance-pooling/report-draft.Rmd"),
+    rmarkdown::render("vignettes/articles/generalized-covariance-pooling.Rmd",
       output_file = "generalized-covariance-pooling.html", output_dir = study_directory,
       envir = new.env(), quiet = TRUE)
   }

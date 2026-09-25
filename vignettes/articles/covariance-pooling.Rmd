@@ -87,6 +87,9 @@ Composition checks can reveal differences hidden by pooling. They can also raise
 more false alarms, so higher detection rates alone do not establish a better
 formal test. Read the false-alarm and detection results together.
 
+The [generalized-outcome study](generalized-covariance-pooling.html) extends this
+comparison to six non-Gaussian families with latent partner effects.
+
 ## False alarms when pooling is correct
 
 A flag means at least one observed summary lies outside its middle 95% simulated

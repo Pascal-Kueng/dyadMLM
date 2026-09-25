@@ -162,6 +162,11 @@ found that checking each composition revealed differences hidden by pooling.
 These checks often detected more mismatches than model comparison, but also raised
 more false alarms. Flags invite investigation, not formal rejection of the model.
 
+In the [generalized-outcome study](https://pascal-kueng.github.io/dyadMLM/articles/generalized-covariance-pooling.html),
+the simpler model could usually be checked even when the full covariance model
+could not be fitted reliably. Small samples often missed covariance differences,
+so agreement offers limited reassurance.
+
 ## How much dependence can the check reveal?
 
 These examples compare checks that subtract the fitted fixed-effect predictions
