@@ -25,7 +25,8 @@ in the fitted model frame, then in \code{data} if supplied.}
 in the fitted model frame, then in \code{data} if supplied.
 \code{NULL} (default) pools all dyads as exchangeable. Supply roles
 even for an exchangeable model to reveal variance or partner-correlation
-mismatches that pooling may hide. Each role pair is checked separately,
+mismatches that pooling may hide. Each dyad composition (role pair, such as
+female-male) is checked separately,
 using exchangeable summaries for same-role pairs and role-specific
 summaries otherwise.}
 
@@ -50,9 +51,8 @@ figure. File devices never pause.}
 two rows and up to three columns. If \code{FALSE}, draw each statistic separately.
 Graphics settings are restored afterwards.}
 
-\item{data}{Optional data frame used to fit the model. Supply it when \code{dyad}
-or \code{role} is absent from the fitted model frame. Use the exact unchanged
-data that was passed to the model when fitting.}
+\item{data}{Optional: the unchanged data frame used to fit the model. Supply
+it when \code{dyad} or \code{role} is not in the model formulas.}
 }
 \value{
 The comparison plots (shown by default) are the main output. The
@@ -72,7 +72,8 @@ A dyadic model should reproduce how much responses vary and how strongly
 partners' responses are related. This check computes variances and correlations
 of simulated responses based on the model and compares them to the observed
 response variances and correlations from the data.
-This helps identify mismatches in the model's assumptions.
+This helps identify mismatches in the model's assumptions. The check
+currently supports cross-sectional dyads only (one response per partner).
 }
 \section{Reading the plots}{
 
@@ -87,43 +88,50 @@ and partner differences.
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.
 Agreement does not establish that omitted dependence is negligible, especially
-with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{simulation study}
+with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{partner-dependence study}
 illustrates how sample size affects detection when residual partner
-correlation is omitted.
+correlation is omitted: with 40 dyads, a correlation of 0.30 was missed in
+more than half of the datasets.
 
 Checking each composition can reveal differences hidden by pooling.
-Flags can occur by chance, especially when checking several summaries.
-They invite investigation, not formal rejection of the model. The
+Flags (observed values outside the middle 95\%, marked \code{*} when printed) can
+occur by chance, especially when checking several summaries.
+They invite investigation, not formal rejection of the model. Use the default
+of 1000 simulations for final checks; with fewer, the limits are less precise. The
 \href{https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html}{covariance-pooling study}
-illustrates detection and false alarms when checking each composition.
+illustrates detection and false alarms when checking each composition: with
+14 summaries, 10 to 29\% of correctly pooled models had at least one flag.
 
-The first set of plots compares:
+The top row compares:
 \itemize{
 \item \strong{Response SDs:} one for each role, or one common SD for exchangeable members.
 \item \strong{Partner correlation:} how strongly partners' responses are related.
 }
 
-The second set shows \emph{the same information} using dyad averages and partner
-differences:
+The bottom row shows:
 \itemize{
 \item \strong{Dyad-average SD:} how much dyads differ in their average response.
 \item \strong{Half-difference SD or RMS:} each partner difference is divided by two.
 With distinct roles, the SD shows how much signed differences vary
-across dyads. For exchangeable members, the RMS shows their typical size, regardless of
+across dyads. For exchangeable members, the RMS (root mean square) shows
+their typical size, regardless of
 partner order.
-\item \strong{Mean/difference correlation:} plotted only for distinct roles,
+\item \strong{Dyad-average/role-difference correlation:} shown only for distinct roles,
 because it depends on how partners are ordered. Positive values indicate
 greater variance for the first named role. Negative values indicate greater
 variance for the second.
 }
 
-These checks are particularly useful when a simpler model is needed and a
-less restricted model does not converge and can't be
-used for model comparison. It shows how well the simpler model
+These checks are particularly useful when a less restricted model does not
+converge and so cannot be used for model comparison. They show how well the
+simpler model
 reproduces the observed variances and partner correlations.
 
 A flexible covariance model will usually reproduce features it estimated from
 the same data. Agreement alone therefore does not establish good fit.
+For example, with a Gaussian model and an unconstrained exchangeable
+covariance, as in the example below, the pooled summaries (\code{role = NULL})
+agree almost by construction. Supply \code{role} to check each composition.
 Use a suitable model comparison to formally test a specific covariance
 restriction when both models can be fitted (see \code{\link[=compare_nested_models]{compare_nested_models()}}).
 
@@ -191,9 +199,8 @@ check <- check_partner_dependence(
 # Check how well the model reproduces variances and partner correlations
 # within each dyad composition.
 plot(check, ask = FALSE, panels = TRUE)
+# Composition checks flag differences that the pooled check misses.
 print(check)
-
-
 \dontshow{\}) # examplesIf}
 }
 \references{

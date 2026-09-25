@@ -26,7 +26,8 @@ exclusions):
 observation. Each row is a complete simulated dataset.
 \item \code{observed_response} and \code{predicted_response}: numeric vectors with one value
 per fitted observation.
-\item \code{model_frame}: the data frame used for fitting, in the same row order.
+\item \code{model_frame}: the fitted model frame (variables in the model formulas
+only), in the same row order.
 }
 
 The \code{dyadMLM} attribute records the model and simulation settings, including
@@ -82,9 +83,9 @@ fitted model. Random effects within each block are drawn together using
 their fitted variances and correlations. This also applies to random effects
 in the zero-inflation and dispersion models, if present.
 
-Fitted parameters and predictors stay fixed. The model is not refitted, and
-uncertainty in parameter estimates is not included. This is a \emph{plug-in
-predictive reference}. If dyads are the only grouping factor, the simulations
+Fitted parameters and predictors, including any lagged responses, stay fixed.
+The model is not refitted, and uncertainty in parameter estimates is not
+included. This is a \emph{plug-in predictive reference}. If dyads are the only grouping factor, the simulations
 represent hypothetical new dyads under the same study design.
 
 \code{predicted_response} contains predicted mean responses with random effects
@@ -97,8 +98,5 @@ By default, later checks subtract these same predictions from observed and
 simulated responses. Both random effects and observation-level noise still
 contribute to response variance. With nonlinear links, setting random effects
 to zero generally differs from averaging predictions over them.
-
-Predictor values remain unchanged, including any lagged responses used as
-predictors.
 }
 

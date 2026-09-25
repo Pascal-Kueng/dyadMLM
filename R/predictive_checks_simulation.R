@@ -22,7 +22,8 @@
 #'   observation. Each row is a complete simulated dataset.
 #' - `observed_response` and `predicted_response`: numeric vectors with one value
 #'   per fitted observation.
-#' - `model_frame`: the data frame used for fitting, in the same row order.
+#' - `model_frame`: the fitted model frame (variables in the model formulas
+#'   only), in the same row order.
 #'
 #' The `dyadMLM` attribute records the model and simulation settings, including
 #' the seed.
@@ -65,9 +66,9 @@
 #' their fitted variances and correlations. This also applies to random effects
 #' in the zero-inflation and dispersion models, if present.
 #'
-#' Fitted parameters and predictors stay fixed. The model is not refitted, and
-#' uncertainty in parameter estimates is not included. This is a *plug-in
-#' predictive reference*. If dyads are the only grouping factor, the simulations
+#' Fitted parameters and predictors, including any lagged responses, stay fixed.
+#' The model is not refitted, and uncertainty in parameter estimates is not
+#' included. This is a *plug-in predictive reference*. If dyads are the only grouping factor, the simulations
 #' represent hypothetical new dyads under the same study design.
 #'
 #' `predicted_response` contains predicted mean responses with random effects
@@ -80,9 +81,6 @@
 #' simulated responses. Both random effects and observation-level noise still
 #' contribute to response variance. With nonlinear links, setting random effects
 #' to zero generally differs from averaging predictions over them.
-#'
-#' Predictor values remain unchanged, including any lagged responses used as
-#' predictors.
 #'
 #' @export
 simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
