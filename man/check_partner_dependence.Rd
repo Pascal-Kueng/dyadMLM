@@ -59,12 +59,10 @@ The comparison plots (shown by default) are the main output. The
 function invisibly returns a \code{dyadMLM_partner_check} object containing the
 \code{compositions} table with pair counts and a statistics tibble for each
 composition. Each tibble has one observed row followed by one row per
-simulation, identified by \code{dataset}. The \code{summary} tibble has one row per
-checked \code{composition} and \code{statistic}, with the \code{observed} value, the middle
-95\% of defined simulated values (\code{lower} and \code{upper}, shown as dashed lines
-in the plots), and whether the observed value lies \code{outside} them. The object
-includes omission counts and settings, and can be saved, printed, and
-plotted later.
+simulation, identified by \code{dataset}. \code{summary} compares each \code{observed}
+statistic with the middle 95\% of its simulations (\code{lower}, \code{upper}) and marks
+those \code{outside} it. The object includes omission counts and settings, and can
+be saved and plotted later.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -90,17 +88,15 @@ model does not reproduce that feature of the data well.
 Agreement does not establish that omitted dependence is negligible, especially
 with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{partner-dependence study}
 illustrates how sample size affects detection when residual partner
-correlation is omitted: with 40 dyads, a correlation of 0.30 was missed in
-more than half of the datasets.
+correlation is omitted.
 
 Checking each composition can reveal differences hidden by pooling.
 Flags (observed values outside the middle 95\%, marked \code{*} when printed) can
 occur by chance, especially when checking several summaries.
-They invite investigation, not formal rejection of the model. Use the default
-of 1000 simulations for final checks; with fewer, the limits are less precise. The
+They invite investigation, not formal rejection of the model. The
 \href{https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html}{covariance-pooling study}
-illustrates detection and false alarms when checking each composition: with
-14 summaries, 10 to 29\% of correctly pooled models had at least one flag.
+illustrates detection and false alarms when checking each composition; 10 to
+29\% of correctly pooled models had at least one flag.
 
 The top row compares:
 \itemize{
@@ -129,9 +125,8 @@ reproduces the observed variances and partner correlations.
 
 A flexible covariance model will usually reproduce features it estimated from
 the same data. Agreement alone therefore does not establish good fit.
-For example, with a Gaussian model and an unconstrained exchangeable
-covariance, as in the example below, the pooled summaries (\code{role = NULL})
-agree almost by construction. Supply \code{role} to check each composition.
+For example, pooled summaries (\code{role = NULL}) of a Gaussian model with an
+unconstrained exchangeable covariance, as below, agree almost by construction.
 Use a suitable model comparison to formally test a specific covariance
 restriction when both models can be fitted (see \code{\link[=compare_nested_models]{compare_nested_models()}}).
 

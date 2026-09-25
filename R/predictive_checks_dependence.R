@@ -45,12 +45,10 @@
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
 #'   `compositions` table with pair counts and a statistics tibble for each
 #'   composition. Each tibble has one observed row followed by one row per
-#'   simulation, identified by `dataset`. The `summary` tibble has one row per
-#'   checked `composition` and `statistic`, with the `observed` value, the middle
-#'   95% of defined simulated values (`lower` and `upper`, shown as dashed lines
-#'   in the plots), and whether the observed value lies `outside` them. The object
-#'   includes omission counts and settings, and can be saved, printed, and
-#'   plotted later.
+#'   simulation, identified by `dataset`. `summary` compares each `observed`
+#'   statistic with the middle 95% of its simulations (`lower`, `upper`) and marks
+#'   those `outside` it. The object includes omission counts and settings, and can
+#'   be saved and plotted later.
 #'
 #' @section Reading the plots:
 #' Histograms show simulated summaries. Red lines mark observed values.
@@ -66,17 +64,15 @@
 #' Agreement does not establish that omitted dependence is negligible, especially
 #' with few dyads. The [partner-dependence study](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 #' illustrates how sample size affects detection when residual partner
-#' correlation is omitted: with 40 dyads, a correlation of 0.30 was missed in
-#' more than half of the datasets.
+#' correlation is omitted.
 #'
 #' Checking each composition can reveal differences hidden by pooling.
 #' Flags (observed values outside the middle 95%, marked `*` when printed) can
 #' occur by chance, especially when checking several summaries.
-#' They invite investigation, not formal rejection of the model. Use the default
-#' of 1000 simulations for final checks; with fewer, the limits are less precise. The
+#' They invite investigation, not formal rejection of the model. The
 #' [covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
-#' illustrates detection and false alarms when checking each composition: with
-#' 14 summaries, 10 to 29% of correctly pooled models had at least one flag.
+#' illustrates detection and false alarms when checking each composition; 10 to
+#' 29% of correctly pooled models had at least one flag.
 #'
 #' The top row compares:
 #' - **Response SDs:** one for each role, or one common SD for exchangeable members.
@@ -101,9 +97,8 @@
 #'
 #' A flexible covariance model will usually reproduce features it estimated from
 #' the same data. Agreement alone therefore does not establish good fit.
-#' For example, with a Gaussian model and an unconstrained exchangeable
-#' covariance, as in the example below, the pooled summaries (`role = NULL`)
-#' agree almost by construction. Supply `role` to check each composition.
+#' For example, pooled summaries (`role = NULL`) of a Gaussian model with an
+#' unconstrained exchangeable covariance, as below, agree almost by construction.
 #' Use a suitable model comparison to formally test a specific covariance
 #' restriction when both models can be fitted (see [compare_nested_models()]).
 #'
@@ -560,7 +555,6 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
                            collapse = "; "), "\n", sep = "")
   }
 
-  n_checked <- n_outside <- 0L
   for (composition_index in seq_len(nrow(x$compositions))) {
     composition <- x$compositions[composition_index, ]
     cat("\n", composition$label, ": ", composition$n_pairs, " of ", x$n_pairs,
@@ -570,25 +564,19 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
       next
     }
     cat("\n")
-    # Recompute by position: composition labels can repeat, so rows of
-    # x$summary cannot always be matched to a composition by label.
-    comparison <- summarise_partner_statistics(composition$statistics[[1]])
-    n_checked <- n_checked + nrow(comparison)
-    n_outside <- n_outside + sum(comparison$outside)
+    rows <- x$summary[x$summary$composition == composition$label, ]
     # One column each for observed, lower, and upper values.
-    values <- matrix(formatC(c(comparison$observed, comparison$lower, comparison$upper),
-                             format = "f", digits = digits), ncol = 3L)
-    width <- max(9L, nchar(values))
+    values <- matrix(formatC(c(rows$observed, rows$lower, rows$upper),
+                             format = "f", digits = digits, width = 9), ncol = 3L)
     # Statistic names come last so long names cannot split the table.
-    cat(sprintf("%*s %*s %*s    %s\n",
-                width, "Observed", width, "2.5%", width, "97.5%", "Statistic"))
-    cat(sprintf("%*s %*s %*s %s  %s\n",
-                width, values[, 1], width, values[, 2], width, values[, 3],
-                ifelse(comparison$outside, "*", " "), comparison$statistic), sep = "")
+    cat(sprintf("%9s %9s %9s    %s\n", "Observed", "2.5%", "97.5%", "Statistic"))
+    cat(sprintf("%s %s %s %s  %s\n", values[, 1], values[, 2], values[, 3],
+                ifelse(rows$outside, "*", " "), rows$statistic), sep = "")
   }
 
+  n_outside <- sum(x$summary$outside)
   cat("\nOutside the middle 95% of simulations", if (n_outside > 0L) " (*)", ": ",
-      n_outside, " of ", n_checked, " observed statistics.\n",
+      n_outside, " of ", nrow(x$summary), " observed statistics.\n",
       if (n_outside > 0L) "Some departures occur by chance; these are descriptive checks, not significance tests.\n" else
         "This does not establish good fit.\n", sep = "")
 
