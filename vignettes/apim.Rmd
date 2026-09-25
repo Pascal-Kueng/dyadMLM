@@ -428,7 +428,10 @@ By default, the check subtracts the model's fixed-effect predictions from
 observed and simulated responses. Good agreement is often expected for variances
 and correlations estimated from the same data. See the
 [function help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
-for details and interpretation. These checks currently support cross-sectional
+for details and interpretation. Simulation studies show how often the check
+detects [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
+and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
+and how often it raises false alarms. These checks currently support cross-sectional
 dyads only.
 
 

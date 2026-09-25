@@ -172,7 +172,11 @@ test_that("small compositions and incomplete dyads have separate counts", {
   expect_null(result$compositions$statistics[[1]])
   expect_identical(dim(result$compositions$statistics[[2]]), c(4L, 7L))
   expect_identical(dim(result$compositions$statistics[[3]]), c(4L, 5L))
-  expect_output(print(result), "female - female", fixed = TRUE)
+  expect_output(print(result), "female - female: 2 of 10 usable dyads; not checked",
+                fixed = TRUE)
+  # Skipped compositions have no summary rows.
+  expect_identical(unique(result$summary$composition), result$compositions$label[2:3])
+  expect_identical(nrow(result$summary), 10L)
 
   simulations <- composition_check_test_simulations()
   # Six complete dyads still cannot support three separate two-dyad checks.

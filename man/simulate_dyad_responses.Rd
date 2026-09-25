@@ -26,7 +26,8 @@ exclusions):
 observation. Each row is a complete simulated dataset.
 \item \code{observed_response} and \code{predicted_response}: numeric vectors with one value
 per fitted observation.
-\item \code{model_frame}: the data frame used for fitting, in the same row order.
+\item \code{model_frame}: the fitted model frame (variables in the model formulas
+only), in the same row order.
 }
 
 The \code{dyadMLM} attribute records the model and simulation settings, including
@@ -41,17 +42,33 @@ see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 \section{Supported models}{
 
-Currently supports unweighted \code{glmmTMB} models without zero inflation for
-the following families:
+Supports unweighted \code{glmmTMB} models with the following families:
 \itemize{
 \item \code{gaussian()}
-\item \code{poisson()}
-\item \code{glmmTMB::nbinom1()}
-\item \code{glmmTMB::nbinom2()}
+\item \code{poisson()}, \code{glmmTMB::compois()}, \code{glmmTMB::genpois()}, \code{glmmTMB::bell()}
+\item \code{glmmTMB::nbinom1()}, \code{glmmTMB::nbinom2()}, \code{glmmTMB::nbinom12()}
+\item \code{glmmTMB::truncated_poisson()}, \code{glmmTMB::truncated_nbinom1()},
+\code{glmmTMB::truncated_nbinom2()}, \code{glmmTMB::truncated_compois()},
+\code{glmmTMB::truncated_genpois()}
 \item \code{glmmTMB::tweedie()}
-\item \code{Gamma()}
+\item \code{Gamma()}, \code{glmmTMB::ziGamma()}
 \item \code{glmmTMB::beta_family()}
+\item \code{glmmTMB::lognormal()}
+\item \code{glmmTMB::skewnormal()}
+\item \code{glmmTMB::t_family()} with more than two degrees of freedom
+\item \code{glmmTMB::ordinal()} (currently only available in the development version
+of \code{glmmTMB})
 }
+
+Zero-inflated and hurdle versions are supported where available. Checks
+describe the combined response, including zeros, rather than each model
+component separately. Good agreement does not establish that the zero and
+response components each fit well.
+
+Ordinal checks use category scores \verb{1, 2, ..., K} in their fitted order,
+matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The plots compare
+variation and partner correlation in these scores. The scores do not measure
+distances on an underlying continuous scale.
 
 The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.
@@ -64,21 +81,22 @@ and simulated responses must be finite.
 Each simulation draws new random effects and then new responses from the
 fitted model. Random effects within each block are drawn together using
 their fitted variances and correlations. This also applies to random effects
-in the dispersion model, if present.
+in the zero-inflation and dispersion models, if present.
 
-Fitted parameters and predictors stay fixed. The model is not refitted, and
-uncertainty in parameter estimates is not included. This is a \emph{plug-in
-predictive reference}. If dyads are the only grouping factor, the simulations
+Fitted parameters and predictors, including any lagged responses, stay fixed.
+The model is not refitted, and uncertainty in parameter estimates is not
+included. This is a \emph{plug-in predictive reference}. If dyads are the only grouping factor, the simulations
 represent hypothetical new dyads under the same study design.
 
 \code{predicted_response} contains predicted mean responses with random effects
-in the conditional model set to zero.
+in the conditional and zero-inflation models set to zero. For zero-inflated
+and hurdle models, this is the conditional response mean multiplied by
+one minus the zero-component probability (Brooks et al., 2017, Appendix A;
+\doi{10.32614/RJ-2017-066}).
+
 By default, later checks subtract these same predictions from observed and
 simulated responses. Both random effects and observation-level noise still
 contribute to response variance. With nonlinear links, setting random effects
 to zero generally differs from averaging predictions over them.
-
-Predictor values remain unchanged, including any lagged responses used as
-predictors.
 }
 

@@ -8,6 +8,7 @@
 ^Meta$
 ^vignettes/.*\.html$
 ^vignettes/.*\.R$
+^vignettes/articles$
 ^HANDOFF\.md$
 ^CITATION\.cff$
 ^_pkgdown\.yml$

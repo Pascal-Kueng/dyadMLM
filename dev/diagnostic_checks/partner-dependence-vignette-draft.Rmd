@@ -7,6 +7,12 @@ Does a fitted model reproduce how much partners' responses vary and how
 strongly they are related? `dyadMLM` compares these features in the observed
 data with the same features in datasets simulated from the model.
 
+The plots help locate mismatches and can be used to examine a simpler model when
+a fuller model does not converge. To formally test a specific covariance
+restriction, use a suitable model comparison, such as
+[`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html),
+when both models can be fitted reliably.
+
 ```{r setup, include=FALSE}
 devtools::load_all(file.path("..", ".."), quiet = TRUE)
 knitr::opts_chunk$set(
@@ -14,13 +20,14 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Fit a model
+## Check a model
 
-Prepare actor and partner predictors for the female-male dyads. Fit an APIM
-that allows different effects and response variances for women and men,
-but assumes no remaining correlation between partners.
+Fit an APIM for the female-male dyads that allows different effects and response
+variances for women and men, but assumes no remaining correlation between
+partners. Then simulate new responses from the model and compare their standard
+deviations (SDs) and partner correlation with the observed ones.
 
-```{r fit}
+```{r check, fig.alt="Female-male dyads: both role SDs lie within their simulated ranges, but the observed partner correlation lies above its range."}
 data <- prepare_dyad_data(
   dyads_cross, dyad = coupleID, member = personID, role = gender,
   predictors = provided_support, model_types = "apim",
@@ -31,97 +38,114 @@ model <- glmmTMB::glmmTMB(
     diag(0 + gender | coupleID),
   dispformula = ~0, family = gaussian(), data = data
 )
+simulations <- simulate_dyad_responses(model, seed = 123)
+check <- check_partner_dependence(simulations, dyad = coupleID, role = gender)
 ```
 
-## Simulate, check, and plot
-
-Simulate new responses and compare their standard deviations (SDs) and
-correlations with the observed values. By default, the same model prediction
-is subtracted from every dataset before comparison; details follow below.
-
-```{r check}
-simulations <- simulate_dyad_responses(model, nsim = 1000, seed = 123)
-check <- check_partner_dependence(
-  simulations, dyad = coupleID, role = gender, panels = TRUE
-)
-```
-
-The red line is the observed value; dashed lines mark the middle 95% of
-simulated values. Here, the role SDs are within their ranges, but the partner correlation
-exceeds its upper limit. These ranges and observed positions are descriptive, not
-confidence intervals or p-values. Use
-`plot(check, panels = TRUE)` to show the panel again without repeating simulations.
-
-The check is most useful for examining restrictions such as the omitted
-partner correlation above. A flexible covariance model will usually reproduce
-features it estimated from the same data; close agreement alone does not
-establish good fit.
+The red line is the observed value; dashed lines mark the middle 95% of the
+simulated values. Both role SDs lie within their ranges, but the observed partner
+correlation lies above its range: the model misses how strongly partners are
+related. The bottom row shows the same information through dyad averages and
+partner differences. By default, the check first subtracts the model's fixed-effect
+predictions, so it looks at the variation left after the fixed effects.
 
 ## Allow partner correlation
 
-Replace the diagonal block with an unstructured block, keeping the fixed
-effects unchanged. The same checking steps apply.
+Replace the diagonal block with an unstructured block and check again.
 
-```{r flexible-model}
+```{r flexible-model, fig.alt="Female-male dyads: all summaries lie within their simulated ranges."}
 flexible <- update(model, formula =
   closeness ~ gender * (.provided_support_actor + .provided_support_partner) +
     us(0 + gender | coupleID)
 )
-flexible_simulations <- simulate_dyad_responses(flexible, seed = 123)
 flexible_check <- check_partner_dependence(
-  flexible_simulations, dyad = coupleID, role = gender, panels = TRUE
+  simulate_dyad_responses(flexible, seed = 123), dyad = coupleID, role = gender
 )
 ```
 
-## Reuse the simulations
+The partner correlation now lies within its range. This agreement is expected: a
+model usually reproduces what it estimates from the same data. The check is most
+informative for features a model restricts, like the omitted correlation above.
 
-Use `response = "raw"` to compare responses without subtracting predictions.
-Each call shows both member summaries and dyad means and half-differences,
-which express the same covariance information.
+## Check each dyad composition
 
-```{r other-views, eval=FALSE}
-raw_check <- check_partner_dependence(
-  simulations, dyad = coupleID, role = gender, response = "raw", panels = TRUE
+`dyads_cross` also contains female-female and male-male dyads, 120 of each
+composition. This model allows different mean closeness for women and men but
+uses one exchangeable covariance for all 360 dyads.
+
+```{r mixed-pooled, fig.alt="All 360 dyads checked together: all summaries lie within their simulated ranges."}
+mixed_data <- prepare_dyad_data(
+  dyads_cross, dyad = coupleID, member = personID,
+  predictors = provided_support, model_types = "apim", seed = 123
+)
+pooled_model <- glmmTMB::glmmTMB(
+  closeness ~ gender +
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~0, family = gaussian(), data = mixed_data
+)
+pooled_simulations <- simulate_dyad_responses(pooled_model, seed = 123)
+check_partner_dependence(pooled_simulations, dyad = coupleID, role = NULL)
+```
+
+Checked together, all summaries agree, as expected: the model estimates exactly
+these pooled summaries. Supplying `role` checks each composition with the same
+simulations.
+
+```{r mixed-compositions, fig.alt=c("Female-female dyads: all summaries lie within their simulated ranges.", "Female-male dyads: the observed female SD lies above its range.", "Male-male dyads: the observed SDs lie below their ranges.")}
+check_partner_dependence(pooled_simulations, dyad = coupleID, role = gender)
+```
+
+The model underestimates female variability in female-male dyads and
+overestimates variability in male-male dyads. A mismatch does not show its cause:
+omitted predictors can produce it too. Here, adding support effects separately
+for women and men brings every composition summary within its range, with the
+same covariance structure:
+
+```{r mixed-predictors}
+support_model <- update(
+  pooled_model,
+  formula = . ~ . + gender:(.provided_support_actor + .provided_support_partner)
+)
+support_check <- check_partner_dependence(
+  simulate_dyad_responses(support_model, seed = 123),
+  dyad = coupleID, role = gender, plot = FALSE
 )
 ```
 
-Supply `role` whenever the member distinction is meaningful. For substantively
-interchangeable members, omit it: the check then reports a common member SD
-and a partner correlation unchanged by arbitrary within-dyad member swaps.
+## What the simulation studies show
 
-With mixed dyad compositions, supplied roles produce one check per observed
-role pair. Same-role pairs use exchangeable summaries. Each composition has
-its own figure and pair count; `panels = FALSE` shows individual plots instead.
-All checks use the same full-model simulations. A composition with fewer than
-three usable pairs is listed but not checked.
+- **Small samples miss mismatches.** In a Gaussian APIM, an omitted residual
+  partner correlation of 0.30 was detected in 48% of datasets with 40 dyads and
+  86% with 100. A correlation of 0.10 was detected in only 18% with 100 dyads.
+- **Subtracting predictions helps.** Checks of raw outcomes detected less: 33%
+  instead of 48% for a correlation of 0.30 with 40 dyads.
+- **Flags also occur when the model is right.** Across 14 composition summaries,
+  the checks flagged 23% of correctly pooled Gaussian datasets with 100 dyads;
+  model comparison rejected 7%.
+- **Checks and model comparison complement each other.** For Gaussian outcomes,
+  the checks detected wrong pooling more often (43% vs 21% for an SD ratio of
+  1.25 with 100 dyads). For other families with 400 dyads, model comparison did
+  better once false alarms are counted. With 40 dyads, neither a flag nor
+  agreement said much.
 
-## Requirements and technical details
+So treat a flag as a reason to investigate, and test a restriction with model
+comparison when both models can be fitted. The
+[partner-dependence study](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
+and the
+[covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
+report every family, sample size, and false-alarm rate.
 
-The simulation and check calls also support Poisson, NB1, NB2, Tweedie, Gamma,
-and beta models. They use the model's fitted link for prediction and simulation.
-Use an appropriate fitted model that produces finite predictions and responses.
+## Other options
 
-In the Gaussian examples, `diag()` models separate role variances; `us()` also
-allows partner covariance. `dispformula = ~0` fixes observation-level residual
-variance near zero so the dyad block represents the residual covariance.
-This model specification is Gaussian-specific.
+- `response = "raw"` compares responses without subtracting predictions.
+- `role = NULL` treats partners as interchangeable: the check then reports a
+  common SD and a partner correlation that do not depend on member order.
+- `panels = FALSE` draws each summary separately, and `plot(check)` redraws a
+  saved check without new simulations.
+- For ordinal outcomes, the check compares category scores 1, 2, and so on.
+  Zero-inflated and hurdle checks use the combined outcome, including zeros.
 
-Every simulation redraws all random effects and responses while keeping fitted
-parameters and predictors fixed. The default check subtracts the same
-prediction with random effects set to zero from each dataset. Under nonlinear
-links, this is a common transformation, not a residual covariance decomposition.
-
-Use unweighted cross-sectional data without zero inflation, with at least
-three complete dyads and at most two fitted rows per dyad. Missing identifiers
-and incomplete pairs are omitted and counted. If an identifier is absent from
-the model frame, supply the data frame used to fit the model with `data`.
-Rows excluded during fitting are handled automatically.
-
-Sparse outcomes can produce undefined correlations. The check warns and uses
-only defined simulations for each reference; plot labels show their counts.
-Interpret these conditional references alongside the counts. An undefined observed
-statistic or entirely undefined reference causes an error.
-
-See `?simulate_dyad_responses` and `?check_partner_dependence` for the full
-interface. The [development guide](README.md) links the separate mathematical
-validation and simulation study.
+The checks support unweighted, cross-sectional models. See
+`?check_partner_dependence` and `?simulate_dyad_responses` for supported
+families, output, and details.

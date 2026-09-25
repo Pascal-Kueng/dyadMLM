@@ -59,6 +59,11 @@ articles:
   - apim
   - dim
   - dsm
+- title: Simulation studies
+  desc: How often predictive checks detect mismatches and raise false alarms.
+  contents:
+  - articles/partner-dependence-simulation
+  - articles/covariance-pooling
 
 reference:
 - title: Main functions

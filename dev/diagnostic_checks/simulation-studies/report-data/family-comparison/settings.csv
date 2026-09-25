@@ -1,0 +1,23 @@
+"family","label","formula","mean_settings","dispersion_settings","zero_settings","datasets_per_condition","reference_draws"
+"gaussian","Gaussian","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; identity link; intercept 0.","SD = 1",NA,500,1000
+"poisson","Poisson","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","Poisson mean",NA,500,1000
+"nbinom1","Negative binomial (NB1)","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","phi = 1",NA,500,1000
+"nbinom2","Negative binomial (NB2)","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","size = 3",NA,500,1000
+"nbinom12","Negative binomial (NB12)","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","phi = 1; psi = 3",NA,500,1000
+"compois","COM-Poisson","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","phi = 0.5 (nu = 2)",NA,500,1000
+"genpois","Generalized Poisson","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","phi = 2",NA,500,1000
+"truncated_poisson","Zero-truncated Poisson","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","Poisson mean; truncated at zero",NA,500,1000
+"truncated_nbinom1","Zero-truncated NB1","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","phi = 1; truncated at zero",NA,500,1000
+"truncated_nbinom2","Zero-truncated NB2","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","size = 3; truncated at zero",NA,500,1000
+"truncated_compois","Zero-truncated COM-Poisson","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","phi = 0.5 (nu = 2); truncated at zero",NA,500,1000
+"truncated_genpois","Zero-truncated generalized Poisson","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","phi = 2; truncated at zero",NA,500,1000
+"tweedie","Tweedie","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","phi = 1; power = 1.5",NA,500,1000
+"Gamma","Gamma","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","shape = 3",NA,500,1000
+"beta","Beta","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; logit link; intercept 0.","precision = 8",NA,500,1000
+"lognormal","Lognormal","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","response SD = 2",NA,500,1000
+"skewnormal","Skew-normal","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; identity link; intercept 0.","response SD = 1; shape = 1",NA,500,1000
+"bell","Bell","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","Bell mean",NA,500,1000
+"t","Student t","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; identity link; intercept 0.","scale = 1; df = 5",NA,500,1000
+"ordinal","Ordinal","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; probit link; intercept 0.","probit; thresholds -1, 0, 1; four categories",NA,500,1000
+"zi_poisson","Zero-inflated Poisson","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","Poisson mean; extra-zero probability = 0.25","Constant zero component, probability 0.25; fitted with ziformula = ~1.",500,1000
+"hurdle_nbinom2","Hurdle negative binomial (NB2)","outcome ~ actor_predictor + partner_predictor","Actor effect 0.5; partner effect 0.3; log link; intercept 1.1.","size = 3; truncated at zero; extra-zero probability = 0.25","Constant zero component, probability 0.25; fitted with ziformula = ~1.",500,1000

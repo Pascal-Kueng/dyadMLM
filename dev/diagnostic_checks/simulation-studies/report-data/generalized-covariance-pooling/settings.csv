@@ -1,0 +1,7 @@
+"family","link","added_intercept","response_settings"
+"poisson","log",1.09861228866811,"Poisson mean"
+"compois","log",1.09861228866811,"phi = 0.5 (nu = 2)"
+"truncated_poisson","log",1.09861228866811,"Poisson mean; truncated at zero"
+"tweedie","log",1.09861228866811,"phi = 1; power = 1.5"
+"bell","log",1.09861228866811,"Bell mean"
+"zi_poisson","log",1.09861228866811,"Poisson mean; extra-zero probability = 0.25"

@@ -11,7 +11,9 @@ parameters fixed; close agreement alone does not establish good fit.
 | --- | --- |
 | [Vignette candidate](partner-dependence-vignette-draft.Rmd) | One complete workflow and interpretation |
 | [Reference validation](partner-dependence-reference-validation.Rmd) | Independent Woody–Sadler calculations and Dingy cross-check |
-| [Outer simulation study](partner-dependence-outer-simulation-study.Rmd) | Known Gaussian populations, fitted models, and repeated-sample behavior |
+| [Partner-dependence report](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html) | Detection and false alarms across families and sample sizes |
+| [Covariance-pooling report](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html) | Composition checks and model comparison across families |
+| [Simulation studies](simulation-studies/README.md) | Sensitivity across families, raw versus centred checks, and validation |
 
 The function help is the reference for arguments, output fields, supported
 models, and omission rules. Keep these details there rather than duplicating
@@ -19,11 +21,10 @@ them in each development document.
 
 ## Scope and extension
 
-Current checks cover unweighted cross-sectional `glmmTMB` models without zero
-inflation: Gaussian, Poisson, NB1, NB2, Tweedie, Gamma, and beta. The model's
-fitted link is used for prediction and simulation. Binomial and beta-binomial response
-formats need adapters. Nonlinear-link centring is not a residual covariance
-decomposition.
+Current checks cover unweighted cross-sectional `glmmTMB` models, including
+zero-inflated and hurdle models. See `?simulate_dyad_responses` for supported
+families. The model's fitted link is used for prediction and simulation.
+Nonlinear-link centring is not a residual covariance decomposition.
 
 The simulator preserves fitted-row order and restores model simulation settings.
 With a supplied seed, it also restores the caller’s random-number state.
@@ -44,13 +45,23 @@ From the repository root:
 
 ```r
 devtools::test()
+source("dev/diagnostic_checks/check-additional-families.R")
+source("dev/diagnostic_checks/check-ordinal-family.R")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-reference-validation.Rmd")
+pkgdown::build_article("articles/partner-dependence-simulation")
+pkgdown::build_article("articles/covariance-pooling")
 ```
+
+The website report uses saved summary tables and does not rerun the simulations.
 
 Tests cover Gaussian and generalized calculations, fitted-row alignment,
 simulation-state restoration, pairing, omissions, undefined statistics, and
-printing/plotting. These are correctness checks, not calibration or power
-studies. Run the outer simulation report separately when that evidence needs
-updating; its full configuration is intentionally more expensive. For a merge,
+printing/plotting. The additional-family script checks native response formats
+and prediction/simulation agreement; Bell models also require `gsl`.
+The ordinal script checks category scores and predictions with logit and probit
+links. It requires a `glmmTMB` version with `ordinal()`.
+These are correctness checks, not calibration or power
+studies. Run the simulation scripts separately when that evidence needs
+updating; their full configurations are intentionally more expensive. For a merge,
 also check the built package and CI on the proposed commit.

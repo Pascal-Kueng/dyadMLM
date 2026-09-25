@@ -1,0 +1,189 @@
+---
+title: "Covariance-pooling checks across outcome families"
+description: "Composition checks and model comparison when one covariance is pooled across dyad compositions."
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    self_contained: true
+params:
+  gaussian_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/covariance-pooling"
+  generalized_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/generalized-covariance-pooling"
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+  fig.width = 13, fig.height = 5.5, dpi = 180, fig.retina = 1, out.width = "100%")
+source("../../dev/diagnostic_checks/simulation-studies/covariance-pooling/plot.R")
+read_results <- function(directory, filename) read.csv(file.path(directory, filename))
+
+conditions <- bind_rows(
+  read_results(params$gaussian_directory, "conditions.csv") |> mutate(family = "gaussian"),
+  read_results(params$generalized_directory, "conditions.csv"))
+# Other families compare methods on the datasets where all of them were available.
+summary <- bind_rows(
+  read_results(params$gaussian_directory, "summary.csv") |> mutate(family = "gaussian",
+    method = recode(method, composition_any = "checks", likelihood_ratio = "comparison",
+      pooled_any = "overall")),
+  read_results(params$generalized_directory, "summary.csv") |> mutate(method = recode(method,
+    composition_paired = "checks", likelihood_ratio_paired = "comparison",
+    full_paired = "full", pooled_any = "overall")))
+scenario_labels <- c(null = "Correct pooling", variance_small = "SD ratio 1.25",
+  variance_large = "SD ratio 1.50", correlation_small = "Correlations 0.10 / 0.30 / 0.50",
+  correlation_large = "Correlations -0.10 / 0.30 / 0.70")
+summary <- summary |> inner_join(conditions, by = c("family", "condition")) |>
+  mutate(scenario = factor(scenario, names(scenario_labels), scenario_labels))
+rates <- summary |> filter(allocation == "balanced", method %in% c("checks", "comparison", "full"))
+fits <- bind_rows(read_results(params$gaussian_directory, "fits.csv") |> mutate(family = "gaussian"),
+  read_results(params$generalized_directory, "fits.csv"))
+response_settings <- read_results(params$generalized_directory, "settings.csv")
+screening <- read_results(params$generalized_directory, "screening.csv")
+
+families <- tibble::tribble(
+  ~family, ~label,
+  "gaussian", "Gaussian",
+  "poisson", "Poisson",
+  "compois", "COM-Poisson",
+  "truncated_poisson", "Zero-truncated Poisson",
+  "tweedie", "Tweedie",
+  "bell", "Bell",
+  "zi_poisson", "Zero-inflated Poisson"
+)
+percent_range <- function(values) paste0(paste(unique(round(100 * range(values))), collapse = "–"), "%")
+correct_pooling <- filter(rates, scenario == "Correct pooling")
+small_sample <- rates |> filter(family != "gaussian", method == "checks", n_dyads == min(n_dyads))
+figure_descriptions <- as.vector(rbind(
+  paste0(families$label, ": detection of incorrect covariance pooling by number of dyads."),
+  paste0(families$label, ": false alarms when pooling is correct, by number of dyads.")
+))
+```
+
+## What these plots compare
+
+Two models allow different means and actor and partner effects for female-female,
+female-male, and male-male dyads. The **pooled model** uses one exchangeable
+covariance for all dyads. The **full model** estimates a separate covariance for
+each composition. We make pooling wrong by changing the female/male SD ratio in
+female-male dyads or the partner correlations across compositions. These changes
+leave the pooled covariance unchanged. The
+[partner-dependence study](partner-dependence-simulation.html) shows how often the
+check detects an omitted partner correlation.
+
+- **Orange:** composition checks of the pooled model,
+  `check_partner_dependence(role = gender)`. A flag means at least one of 14
+  summaries lies outside its middle 95% simulated range.
+- **Green:** model comparison of the pooled and full models, a likelihood-ratio
+  test at 5% with `compare_nested_models()`.
+- **Grey (false-alarm plots of other families):** the same checks of the full
+  model, which has the correct structure.
+
+When pooling was correct, composition checks raised false alarms in
+`r percent_range(correct_pooling$rate[correct_pooling$method == "checks"])` of
+datasets, and model comparison in
+`r percent_range(correct_pooling$rate[correct_pooling$method == "comparison"])`.
+The checks flagged wrong pooling more often than model comparison in most
+settings, partly because of these extra false alarms. Allowing for them, the
+checks mostly did better for Gaussian outcomes with up to 200 dyads, and model
+comparison usually did better for the other families with 400 dyads. For the
+other families with `r min(small_sample$n_dyads)` dyads, the checks flagged `r percent_range(small_sample$rate[small_sample$scenario == "Correct pooling"])`
+of correctly pooled datasets, and no more than
+`r percent_range(summarise(filter(small_sample, scenario != "Correct pooling"), rate = max(rate), .by = family)$rate)`
+of wrongly pooled ones, depending on the family. So a flag or its absence says little.
+
+Use model comparison when both models can be fitted. The checks show where a
+simpler model misfits and still work when the full model cannot be fitted.
+Checking all dyads together (`role = NULL`) rarely flagged anything: at most
+`r scales::percent(max(summary$rate[summary$method == "overall"], na.rm = TRUE), accuracy = 1)`
+in any condition.
+
+<details>
+<summary>Study details</summary>
+
+Gaussian outcomes have the covariance on the outcome scale, with residual SDs of 1
+and partner correlations of 0.3 under correct pooling. For the other families,
+each partner has a Gaussian latent effect on the log scale, with SDs of 0.6 and
+correlations of 0.3 under correct pooling. Outcomes are then drawn from the family.
+These families passed a
+[fitting and recovery screen](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/generalized-covariance-pooling/screen-families.R)
+of `r nrow(screening)` candidates.
+
+Dyads are split roughly equally among the three compositions, so 100 total dyads
+means about 33 per composition. Predictors are standard normal, with partner
+correlation 0.3. Mean coefficients differ by role and composition, and the mean
+model is correct throughout. In practice, omitted predictors can also cause
+mismatches.
+
+Checks subtract fitted fixed-effect predictions and use simulations from the
+fitted model, without refitting. Failed fits, convergence or Hessian problems,
+and unavailable checks are excluded. For the other families, all methods use the
+same datasets: those where both checks and the model comparison were available.
+The pooled model could be checked in nearly all datasets, but the full model often
+had no usable fit with 40 or 100 dyads.
+
+The report uses saved results. See the study code for
+[Gaussian outcomes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/covariance-pooling/run.R)
+and [other families](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/generalized-covariance-pooling/run.R),
+the [plot code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/covariance-pooling/plot.R),
+and the [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md).
+
+</details>
+
+```{r family-results, results='asis', fig.alt=figure_descriptions}
+for (family_index in seq_len(nrow(families))) {
+  family_name <- families$family[family_index]
+  family_label <- families$label[family_index]
+  gaussian <- family_name == "gaussian"
+  family_conditions <- filter(conditions, family == family_name)
+  family_rates <- filter(rates, family == family_name)
+  plot_arguments <- list(family_label = family_label,
+    subtitle = if (gaussian) "outcomes, residual covariance" else
+      "outcomes, latent covariance on the log scale",
+    repetitions = unique(family_conditions$repetitions),
+    reference_draws = unique(family_conditions$reference_draws), same_datasets = !gaussian)
+  cat("\n\n## ", family_label, "\n\n", sep = "")
+  print(do.call(plot_pooling_detection, c(list(
+    filter(family_rates, scenario != "Correct pooling", method != "full")), plot_arguments)))
+  print(do.call(plot_pooling_false_alarms, c(list(
+    filter(family_rates, scenario == "Correct pooling")), plot_arguments)))
+
+  cat("<details>\n<summary>Model settings and checks</summary>\n\n")
+  family_fits <- filter(fits, family == family_name)
+  if (gaussian) {
+    cat("All ", format(sum(family_fits$attempted), big.mark = ","), " fits were usable. The table also counts flags on a summary that truly differed, ",
+      "in the expected direction, and results with unequal group sizes (20 female-female, ",
+      "60 female-male, and 20 male-male dyads).\n\n", sep = "")
+    summary |> filter(family == "gaussian", scenario != "Correct pooling",
+        (allocation == "balanced" & n_dyads %in% c(100, 400)) | allocation == "unbalanced",
+        method %in% c("checks", "expected_direction", "comparison")) |>
+      mutate(dyads = ifelse(allocation == "unbalanced", "100 (20 / 60 / 20)", as.character(n_dyads)),
+        percentage = sprintf("%.0f%%", 100 * rate)) |>
+      select(scenario, dyads, method, percentage) |>
+      tidyr::pivot_wider(names_from = method, values_from = percentage) |>
+      arrange(scenario, dyads) |>
+      select(scenario, dyads, checks, expected_direction, comparison) |>
+      knitr::kable(col.names = c("Setting", "Dyads", "Any flag", "Flag in expected direction",
+        "Model comparison")) |> print()
+  } else {
+    settings <- filter(response_settings, family == family_name)
+    cat("**Response:** ", settings$response_settings, "; log link.\n\n", sep = "")
+    available <- family_rates |> filter(method == "checks") |>
+      summarise(range = paste(unique(range(checked)), collapse = "–"), .by = n_dyads)
+    cat("**Datasets with all methods available:** ",
+      paste0(available$range, " of ", unique(family_conditions$repetitions), " at ",
+        available$n_dyads, " dyads", collapse = "; "), ".\n\n", sep = "")
+    if (family_name == "compois") cat("Simulations failed for ", sum(family_fits$check_failures),
+      " fitted models (sampler overflow or non-finite draws).\n\n", sep = "")
+    if (family_name == "tweedie") cat("Simulations used an equivalent, faster sampler ",
+      "([details](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md#tweedie-simulation-repair)).\n\n", sep = "")
+    if (family_name == "zi_poisson") cat("Both models estimate a zero-inflation ",
+      "intercept without random effects.\n\n", sep = "")
+    unavailable <- sum(family_fits$comparison_failures)
+    if (unavailable > 0) cat("Model comparison was unavailable for ", unavailable,
+      if (unavailable == 1) " dataset" else " datasets",
+      " because the full model had a lower log-likelihood than the pooled model.\n\n", sep = "")
+  }
+  cat("\n\n</details>\n\n")
+}
+```

@@ -31,7 +31,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
 Suggests: 
     brms,
-    glmmTMB (>= 1.1.10),
+    glmmTMB (>= 1.1.11),
     htmltools,
     knitr,
     lavaan,

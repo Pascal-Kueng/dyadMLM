@@ -15,9 +15,14 @@ generalized_check_test_data <- function(family) {
   data$outcome <- switch(
     family$family,
     gaussian = stats::rnorm(n, mean = mu, sd = 0.3),
-    poisson = stats::rpois(n, mu),
+    poisson = , compois = , genpois = stats::rpois(n, mu),
+    # Zero-truncated Poisson draws suit every truncated count family.
+    truncated_nbinom1 = , truncated_nbinom2 = , truncated_compois = ,
+    truncated_genpois = stats::qpois(stats::runif(n, stats::dpois(0, mu), 1), mu),
     nbinom1 = stats::rnbinom(n, mu = mu, size = mu / 0.8),
-    nbinom2 = stats::rnbinom(n, mu = mu, size = 2.5),
+    nbinom2 = , nbinom12 = stats::rnbinom(n, mu = mu, size = 2.5),
+    lognormal = stats::rlnorm(n, meanlog = log(mu), sdlog = 0.3),
+    skewnormal = stats::rnorm(n, mean = mu, sd = 0.3),
     tweedie = {
       # Compound Poisson-Gamma draws with power 1.5 and dispersion 0.8.
       events <- stats::rpois(n, sqrt(mu) / 0.4)
@@ -47,8 +52,15 @@ test_that("supported scalar families and alternative links share the response-ch
     glmmTMB::tweedie(link = "log"),
     stats::Gamma(link = "log"),
     glmmTMB::beta_family(link = "logit"),
-    glmmTMB::beta_family(link = "probit")
+    glmmTMB::beta_family(link = "probit"),
+    glmmTMB::nbinom12(), glmmTMB::genpois(), glmmTMB::truncated_nbinom1(),
+    glmmTMB::truncated_nbinom2(), glmmTMB::truncated_genpois(),
+    glmmTMB::lognormal(), glmmTMB::skewnormal()
   )
+  # Conway-Maxwell-Poisson fits take several seconds each.
+  if (identical(Sys.getenv("NOT_CRAN"), "true")) {
+    families <- c(families, list(glmmTMB::compois(), glmmTMB::truncated_compois()))
+  }
 
   for (family in families) {
     data <- generalized_check_test_data(family)
@@ -57,7 +69,10 @@ test_that("supported scalar families and alternative links share the response-ch
     )
     expect_identical(model$fit$convergence, 0L,
                      info = paste(family$family, family$link))
-    expect_true(model$sdr$pdHess, info = paste(family$family, family$link))
+    # These data leave skewness and the NB2 part of nbinom12 nearly unidentified.
+    if (!family$family %in% c("skewnormal", "nbinom12")) {
+      expect_true(model$sdr$pdHess, info = paste(family$family, family$link))
+    }
     simulations <- simulate_dyad_responses(model, nsim = 20, seed = 459)
     center <- as.numeric(stats::predict(
       model, newdata = NULL, type = "response", re.form = NA

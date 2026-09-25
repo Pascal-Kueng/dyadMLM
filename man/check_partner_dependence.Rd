@@ -25,7 +25,8 @@ in the fitted model frame, then in \code{data} if supplied.}
 in the fitted model frame, then in \code{data} if supplied.
 \code{NULL} (default) pools all dyads as exchangeable. Supply roles
 even for an exchangeable model to reveal variance or partner-correlation
-mismatches that pooling may hide. Each role pair is checked separately,
+mismatches that pooling may hide. Each dyad composition (role pair, such as
+female-male) is checked separately,
 using exchangeable summaries for same-role pairs and role-specific
 summaries otherwise.}
 
@@ -42,7 +43,7 @@ overall response variances and partner correlations.
 See \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} for how predictions are defined.}
 
 \item{ask}{Whether to pause between figures on an interactive device.
-\code{NULL} (default) pauses when there is more than one figure; \code{TRUE} pauses
+\code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
 and \code{FALSE} draws without pausing. In panel mode, each composition is one
 figure. File devices never pause.}
 
@@ -50,17 +51,18 @@ figure. File devices never pause.}
 two rows and up to three columns. If \code{FALSE}, draw each statistic separately.
 Graphics settings are restored afterwards.}
 
-\item{data}{Optional data frame used to fit the model. Supply it when \code{dyad}
-or \code{role} is absent from the fitted model frame. Use the exact unchanged
-data that was passed to the model when fitting.}
+\item{data}{Optional: the unchanged data frame used to fit the model. Supply
+it when \code{dyad} or \code{role} is not in the model formulas.}
 }
 \value{
 The comparison plots (shown by default) are the main output. The
 function invisibly returns a \code{dyadMLM_partner_check} object containing the
 \code{compositions} table with pair counts and a statistics tibble for each
 composition. Each tibble has one observed row followed by one row per
-simulation, identified by \code{dataset}. The object includes omission counts
-and settings, and can be saved and plotted later.
+simulation, identified by \code{dataset}. \code{summary} compares each \code{observed}
+statistic with the middle 95\% of its simulations (\code{lower}, \code{upper}) and marks
+those \code{outside} it. The object includes omission counts and settings, and can
+be saved and plotted later.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -68,7 +70,8 @@ A dyadic model should reproduce how much responses vary and how strongly
 partners' responses are related. This check computes variances and correlations
 of simulated responses based on the model and compares them to the observed
 response variances and correlations from the data.
-This helps identify mismatches in the model's assumptions.
+This helps identify mismatches in the model's assumptions. The check
+currently supports cross-sectional dyads only (one response per partner).
 }
 \section{Reading the plots}{
 
@@ -82,35 +85,52 @@ and partner differences.
 
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.
+Agreement does not establish that omitted dependence is negligible, especially
+with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{partner-dependence study}
+illustrates how sample size affects detection when residual partner
+correlation is omitted.
 
-The first set of plots compares:
+Checking each composition can reveal differences hidden by pooling.
+Flags (observed values outside the middle 95\%, marked \code{*} when printed) can
+occur by chance, especially when checking several summaries.
+They invite investigation, not formal rejection of the model. The
+\href{https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html}{covariance-pooling study}
+illustrates detection and false alarms when checking each composition; 10 to
+29\% of correctly pooled models had at least one flag.
+
+The top row compares:
 \itemize{
 \item \strong{Response SDs:} one for each role, or one common SD for exchangeable members.
 \item \strong{Partner correlation:} how strongly partners' responses are related.
 }
 
-The second set shows \emph{the same information} using dyad averages and partner
-differences:
+The bottom row shows:
 \itemize{
 \item \strong{Dyad-average SD:} how much dyads differ in their average response.
 \item \strong{Half-difference SD or RMS:} each partner difference is divided by two.
 With distinct roles, the SD shows how much signed differences vary
-across dyads. For exchangeable members, the RMS shows their typical size, regardless of
+across dyads. For exchangeable members, the RMS (root mean square) shows
+their typical size, regardless of
 partner order.
-\item \strong{Mean/difference correlation:} plotted only for distinct roles,
+\item \strong{Dyad-average/role-difference correlation:} shown only for distinct roles,
 because it depends on how partners are ordered. Positive values indicate
 greater variance for the first named role. Negative values indicate greater
 variance for the second.
 }
 
-These checks are particularly useful when a simpler model is needed and a
-less restricted model does not converge and can't be
-used for model comparison. It shows how well the simpler model
+These checks are particularly useful when a less restricted model does not
+converge and so cannot be used for model comparison. They show how well the
+simpler model
 reproduces the observed variances and partner correlations.
 
+A flexible covariance model will usually reproduce features it estimated from
+the same data. Agreement alone therefore does not establish good fit.
+For example, pooled summaries (\code{role = NULL}) of a Gaussian model with an
+unconstrained exchangeable covariance, as below, agree almost by construction.
+Use a suitable model comparison to formally test a specific covariance
+restriction when both models can be fitted (see \code{\link[=compare_nested_models]{compare_nested_models()}}).
+
 Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
-The warning lists affected dyad IDs and row positions in the fitted data.
-Long lists are shortened; counts are also shown when printing the result.
 }
 
 \section{Technical details}{
@@ -174,9 +194,8 @@ check <- check_partner_dependence(
 # Check how well the model reproduces variances and partner correlations
 # within each dyad composition.
 plot(check, ask = FALSE, panels = TRUE)
+# Composition checks flag differences that the pooled check misses.
 print(check)
-
-
 \dontshow{\}) # examplesIf}
 }
 \references{

@@ -1,0 +1,154 @@
+---
+title: "Partner-dependence checks across outcome families"
+description: "Detection and false alarms across sample sizes and response families."
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    self_contained: true
+params:
+  results_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/family-comparison"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+  fig.width = 13, fig.height = 6, dpi = 180, fig.retina = 1, out.width = "100%")
+source("../../dev/diagnostic_checks/simulation-studies/family-comparison/plot.R")
+results_directory <- params$results_directory
+settings <- read.csv(file.path(results_directory, "settings.csv")) |>
+  dplyr::mutate(dplyr::across(c(mean_settings, dispersion_settings, zero_settings),
+    ~ gsub("; ", ", ", .x, fixed = TRUE)))
+figure_descriptions <- as.vector(rbind(
+  paste0(settings$label, ": detection of omitted partner correlation by number of dyads."),
+  paste0(settings$label, ": false alarms with no residual partner correlation by number of dyads.")
+))
+summary <- read.csv(file.path(results_directory, "summary.csv"))
+calibration <- read.csv(file.path(results_directory, "calibration.csv"))
+fit_exclusions <- read.csv(file.path(results_directory, "fit-exclusions.csv"))
+```
+
+## What these plots compare
+
+The models include actor and partner effects but leave out residual partner
+dependence. We compare checks of raw outcomes with checks that first subtract
+fixed-effect predictions. Both use the **same datasets, fitted models, and reference simulations**.
+Each check uses one summary: the correlation between the first and second
+partner in each dyad. The [covariance-pooling study](covariance-pooling.html)
+checks all summaries within each dyad composition.
+
+- **Coloured lines:** how often the check detects omitted positive correlation.
+  A mismatch is detected when the observed correlation exceeds the upper limit of
+  the model's middle 95% simulated range. Flags below the lower limit are listed
+  separately in each family's details.
+- **Black lines:** false alarms when residual correlation is zero. Values below or
+  above the middle 95% simulated range count as false alarms. The grey dashed line
+  marks 5% as a benchmark, not a guaranteed rate. A full check shows four to six
+  summaries per composition, so at least one flag is more likely than these rates
+  suggest.
+
+The results apply to the settings studied and can differ with other model
+settings. Rates include only usable fits. Many fits were excluded for skew-normal
+models and small Student t samples, mainly because of numerical problems during
+fitting.
+
+Checks that subtract model predictions generally detected more omitted dependence
+than raw checks. Their false-alarm rates ranged from 4.7% to 5.9% across settings
+when pooled over sample sizes. Small residual correlations (0.10) were difficult
+to detect even with several hundred dyads. At 1,000 dyads, detection ranged from
+27% to 91% across the studied settings.
+
+Ordinal checks use category scores 1, 2, and so on. Zero-inflated and hurdle checks
+use the combined outcome, including zeros.
+
+<details>
+<summary>Study details</summary>
+
+Predictors are standard normal with a partner correlation of 0.3. Actor and partner
+effects are 0.5 and 0.3 on the model's link scale. We transform correlated normal
+draws to each outcome distribution using a Gaussian copula. We adjust their
+dependence to give residual correlations of 0, 0.10, 0.30, and 0.50 after subtracting
+the true means given the predictors.
+
+Reference simulations keep fitted parameters and predictors fixed, without
+refitting the models. More simulations give more precise estimates of the 2.5th
+and 97.5th percentile limits. More study datasets give more precise estimates of
+the plotted rates. The bars and bands are 95% Wilson intervals for this Monte Carlo
+uncertainty.
+
+We exclude failed fits and checks without retry, as well as ordinal datasets
+missing a category. Correlations must be defined to count as a valid check.
+Undefined simulated correlations are omitted from reference ranges. Each family's
+details give exclusion counts and reasons.
+
+Some Tweedie datasets used an equivalent, faster glmmTMB sampler; see the
+[study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md#tweedie-simulation-repair).
+
+The report uses saved results. See the
+[study code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/family-comparison/run.R), [plot code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/family-comparison/plot.R), and
+[study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md).
+
+</details>
+
+```{r family-results, results='asis', fig.alt=figure_descriptions}
+for (family_index in seq_len(nrow(settings))) {
+  family_settings <- settings[family_index, ]
+  family_summary <- summary[summary$family == family_settings$family, ]
+  family_calibration <- calibration[calibration$family == family_settings$family, ]
+  cat("\n\n## ", family_settings$label, "\n\n", sep = "")
+  figure <- plot_family_comparison(family_summary, family_settings$label,
+    family_settings$datasets_per_condition, family_settings$reference_draws)
+  print(figure)
+  print(plot_family_false_alarms(family_summary, family_settings$label,
+    family_settings$datasets_per_condition, family_settings$reference_draws))
+
+  cat("<details>\n<summary>Model settings and checks</summary>\n\n")
+  cat("**Fitted model:** `", family_settings$formula, "`.\n\n", sep = "")
+  cat("**Mean:** ", family_settings$mean_settings, "\n\n", sep = "")
+  cat("**Dispersion:** ", family_settings$dispersion_settings, "\n\n", sep = "")
+  if (!is.na(family_settings$zero_settings) && nzchar(family_settings$zero_settings)) {
+    cat("**Zero component:** ", family_settings$zero_settings, "\n\n", sep = "")
+  }
+
+  cat("**Population correlations**\n\n")
+  cat(paste(unique(gsub("; ", " and ", family_calibration$method, fixed = TRUE)),
+    collapse = ". "), ".\n\n", sep = "")
+  print(knitr::kable(family_calibration[c("target_correlation", "measured_residual_correlation", "verification_mcse")],
+    col.names = c("Target residual correlation", "Verified correlation", "Monte Carlo SE"),
+    digits = 3, row.names = FALSE))
+
+  cat("\n\n**Opposite-direction flags with positive residual correlation**\n\n")
+  opposite_direction <- family_summary |>
+    dplyr::filter(target_correlation > 0) |>
+    dplyr::group_by(response) |>
+    dplyr::summarise(checked = sum(checked),
+      opposite_direction = sum(opposite_direction), .groups = "drop")
+  print(knitr::kable(opposite_direction,
+    col.names = c("Method", "Datasets checked", "Opposite-direction flags")))
+
+  # Fit counts repeat for the two methods. Count them only once.
+  fit_counts <- family_summary[family_summary$response == "model-centred", ]
+  cat("\n\n", sum(fit_counts$successful), " of ", sum(fit_counts$attempted),
+      " datasets produced reference simulations.\n\n", sep = "")
+  excluded_fits <- fit_exclusions |>
+    dplyr::filter(family == family_settings$family) |>
+    dplyr::select(status, Datasets)
+  if (nrow(excluded_fits)) {
+    excluded_fits$status <- c(fit_error = "Model fitting failed",
+      fit_problem = "Convergence or Hessian problem", check_error = "Check failed",
+      study_exclusion = "Ordinal category absent")[excluded_fits$status]
+    print(knitr::kable(excluded_fits, col.names = c("Exclusion reason", "Datasets")))
+  }
+  reduced_counts <- family_summary |>
+    dplyr::filter(checked < attempted) |>
+    dplyr::group_by(n_dyads, target_correlation, attempted, checked) |>
+    dplyr::summarise(methods = paste(response, collapse = ", "), .groups = "drop") |>
+    dplyr::select(n_dyads, target_correlation, methods, attempted, checked)
+  if (nrow(reduced_counts)) {
+    cat("\n\n**Conditions with fewer usable checks**\n\n")
+    print(knitr::kable(reduced_counts,
+      col.names = c("Dyads", "Residual correlation", "Methods", "Generated", "Checked")))
+  }
+  cat("\n\nCounts for every plotted point are saved in the [summary table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/family-comparison/summary.csv).\n\n</details>\n\n")
+}
+```

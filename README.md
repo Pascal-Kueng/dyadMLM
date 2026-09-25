@@ -109,7 +109,12 @@ for data requirements and examples.
 Predictive checks assess whether a model reproduces response variances
 and partner correlations. See the [function
 help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
-for supported models and interpretation.
+for supported models and interpretation, and the simulation studies on
+[omitted partner
+dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
+and [incorrect covariance
+pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
+for how often the check detects mismatches.
 
 ## Quick example
 

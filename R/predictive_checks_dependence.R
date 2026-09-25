@@ -7,7 +7,8 @@
 #' partners' responses are related. This check computes variances and correlations
 #' of simulated responses based on the model and compares them to the observed
 #' response variances and correlations from the data.
-#' This helps identify mismatches in the model's assumptions.
+#' This helps identify mismatches in the model's assumptions. The check
+#' currently supports cross-sectional dyads only (one response per partner).
 #'
 #' @param simulations An object returned by [simulate_dyad_responses()].
 #' @param dyad The dyad column name. Looked up first
@@ -16,7 +17,8 @@
 #'   in the fitted model frame, then in `data` if supplied.
 #'   `NULL` (default) pools all dyads as exchangeable. Supply roles
 #'   even for an exchangeable model to reveal variance or partner-correlation
-#'   mismatches that pooling may hide. Each role pair is checked separately,
+#'   mismatches that pooling may hide. Each dyad composition (role pair, such as
+#'   female-male) is checked separately,
 #'   using exchangeable summaries for same-role pairs and role-specific
 #'   summaries otherwise.
 #' @param plot If `TRUE` (default), draw the comparison plots for visual checks.
@@ -30,22 +32,23 @@
 #'   overall response variances and partner correlations.
 #'   See [simulate_dyad_responses()] for how predictions are defined.
 #' @param ask Whether to pause between figures on an interactive device.
-#'   `NULL` (default) pauses when there is more than one figure; `TRUE` pauses
+#'   `NULL` (default) pauses when there is more than one figure, `TRUE` pauses
 #'   and `FALSE` draws without pausing. In panel mode, each composition is one
 #'   figure. File devices never pause.
 #' @param panels If `TRUE` (default), show each composition in one figure, with
 #'   two rows and up to three columns. If `FALSE`, draw each statistic separately.
 #'   Graphics settings are restored afterwards.
-#' @param data Optional data frame used to fit the model. Supply it when `dyad`
-#'   or `role` is absent from the fitted model frame. Use the exact unchanged
-#'   data that was passed to the model when fitting.
+#' @param data Optional: the unchanged data frame used to fit the model. Supply
+#'   it when `dyad` or `role` is not in the model formulas.
 #'
 #' @return The comparison plots (shown by default) are the main output. The
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
 #'   `compositions` table with pair counts and a statistics tibble for each
 #'   composition. Each tibble has one observed row followed by one row per
-#'   simulation, identified by `dataset`. The object includes omission counts
-#'   and settings, and can be saved and plotted later.
+#'   simulation, identified by `dataset`. `summary` compares each `observed`
+#'   statistic with the middle 95% of its simulations (`lower`, `upper`) and marks
+#'   those `outside` it. The object includes omission counts and settings, and can
+#'   be saved and plotted later.
 #'
 #' @section Reading the plots:
 #' Histograms show simulated summaries. Red lines mark observed values.
@@ -58,31 +61,48 @@
 #'
 #' An observed value far from most simulated values may indicate that the
 #' model does not reproduce that feature of the data well.
+#' Agreement does not establish that omitted dependence is negligible, especially
+#' with few dyads. The [partner-dependence study](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
+#' illustrates how sample size affects detection when residual partner
+#' correlation is omitted.
 #'
-#' The first set of plots compares:
+#' Checking each composition can reveal differences hidden by pooling.
+#' Flags (observed values outside the middle 95%, marked `*` when printed) can
+#' occur by chance, especially when checking several summaries.
+#' They invite investigation, not formal rejection of the model. The
+#' [covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
+#' illustrates detection and false alarms when checking each composition; 10 to
+#' 29% of correctly pooled models had at least one flag.
+#'
+#' The top row compares:
 #' - **Response SDs:** one for each role, or one common SD for exchangeable members.
 #' - **Partner correlation:** how strongly partners' responses are related.
 #'
-#' The second set shows *the same information* using dyad averages and partner
-#' differences:
+#' The bottom row shows:
 #' - **Dyad-average SD:** how much dyads differ in their average response.
 #' - **Half-difference SD or RMS:** each partner difference is divided by two.
 #'   With distinct roles, the SD shows how much signed differences vary
-#'   across dyads. For exchangeable members, the RMS shows their typical size, regardless of
+#'   across dyads. For exchangeable members, the RMS (root mean square) shows
+#'   their typical size, regardless of
 #'   partner order.
-#' - **Mean/difference correlation:** plotted only for distinct roles,
+#' - **Dyad-average/role-difference correlation:** shown only for distinct roles,
 #'   because it depends on how partners are ordered. Positive values indicate
 #'   greater variance for the first named role. Negative values indicate greater
 #'   variance for the second.
 #'
-#' These checks are particularly useful when a simpler model is needed and a
-#' less restricted model does not converge and can't be
-#' used for model comparison. It shows how well the simpler model
+#' These checks are particularly useful when a less restricted model does not
+#' converge and so cannot be used for model comparison. They show how well the
+#' simpler model
 #' reproduces the observed variances and partner correlations.
 #'
+#' A flexible covariance model will usually reproduce features it estimated from
+#' the same data. Agreement alone therefore does not establish good fit.
+#' For example, pooled summaries (`role = NULL`) of a Gaussian model with an
+#' unconstrained exchangeable covariance, as below, agree almost by construction.
+#' Use a suitable model comparison to formally test a specific covariance
+#' restriction when both models can be fitted (see [compare_nested_models()]).
+#'
 #' Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
-#' The warning lists affected dyad IDs and row positions in the fitted data.
-#' Long lists are shortened; counts are also shown when printing the result.
 #'
 #' @section Technical details:
 #' After any centring, paired responses `a` and `b` are used to compute
@@ -142,9 +162,8 @@
 #' # Check how well the model reproduces variances and partner correlations
 #' # within each dyad composition.
 #' plot(check, ask = FALSE, panels = TRUE)
+#' # Composition checks flag differences that the pooled check misses.
 #' print(check)
-#'
-#'
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
@@ -246,19 +265,27 @@ check_partner_dependence <- function(
          paste(statistic_descriptions[n_defined_by_statistic == 0L], collapse = ", "),
          ". A predictive reference cannot be calculated.", call. = FALSE)
   }
-  ## 3. Warn if any statistics have some simulated values that
-  ##    are undefined. Plots are possible and use only the defined values.
+  ## 3. Warn if any statistics have some simulated values that are undefined.
+  ##    Plots and summaries are possible and use only the defined values.
   n_undefined_by_statistic <- n_simulations - n_defined_by_statistic
   if (any(n_undefined_by_statistic > 0L)) {
     warning("Undefined simulated summaries (counts out of ", n_simulations,
             "): ", paste(statistic_descriptions[n_undefined_by_statistic > 0L],
                          n_undefined_by_statistic[n_undefined_by_statistic > 0L],
                          sep = " = ", collapse = "; "),
-            ". Plots use defined values only.", call. = FALSE)
+            ". Plots and summaries use defined values only.", call. = FALSE)
   }
+
+  summary_by_composition <- lapply(checked_composition_indices, function(composition_index) {
+    tibble::tibble(
+      composition = compositions$label[[composition_index]],
+      summarise_partner_statistics(compositions$statistics[[composition_index]])
+    )
+  })
 
   check_result <- list(
     compositions = compositions,
+    summary = dplyr::bind_rows(summary_by_composition),
     n_pairs = nrow(partner_row_map$pairs),
     n_simulations = n_simulations,
     n_incomplete_dyads = length(partner_row_map$incomplete_dyad_ids),
@@ -464,13 +491,41 @@ calculate_partner_pair_statistics <- function(
 }
 
 
+### Summarising statistics ----------------------------------------------------
+
+# Middle 95% of the defined simulated values, as printed and plotted.
+simulated_middle_95 <- function(simulated_values) {
+  stats::quantile(simulated_values[is.finite(simulated_values)], c(0.025, 0.975),
+                  names = FALSE)
+}
+
+# Compare each observed statistic of one composition with its simulations.
+# Takes one statistics tibble: a dataset column, then one column per statistic,
+# with the observed row first.
+summarise_partner_statistics <- function(statistics) {
+  statistics <- statistics[, -1]
+  observed <- unlist(statistics[1, ], use.names = FALSE)
+  limits <- unname(vapply(statistics[-1, ], simulated_middle_95, numeric(2)))
+  tibble::tibble(
+    statistic = names(statistics),
+    observed = observed,
+    lower = limits[1, ],
+    upper = limits[2, ],
+    outside = observed < limits[1, ] | observed > limits[2, ]
+  )
+}
+
+
 ### Printing results ----------------------------------------------------------
 
-#' Print a summary of the partner-dependence predictive check object.
+#' Print a summary of the partner-dependence predictive check object
 #'
-#' Use [plot.dyadMLM_partner_check()] to view the comparisons.
+#' Shows each observed statistic with the middle 95% of its simulated values
+#' and marks observed values outside that range. Use
+#' [plot.dyadMLM_partner_check()] to view the comparisons.
 #'
 #' @param x An object returned by [check_partner_dependence()].
+#' @param digits Number of decimal places to print.
 #' @param ... Not used.
 #'
 #' @return `x`, invisibly.
@@ -478,27 +533,13 @@ calculate_partner_pair_statistics <- function(
 #' @keywords internal
 #'
 #' @export
-print.dyadMLM_partner_check <- function(x, ...) {
+print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
   # Read saved settings; printing does not rerun the check.
   simulation_settings <- attr(x, "dyadMLM")
-  # Each table has one dataset column followed by the statistics.
-  n_statistics <- sum(vapply(x$compositions$statistics,
-    function(statistics) if (is.null(statistics)) 0L else ncol(statistics) - 1L, integer(1)))
   cat("<dyadMLM partner-dependence check>\n")
-  cat(n_statistics, "statistics;", x$n_pairs, "usable complete pairs\n")
   cat("Response: ", x$response, "\n", sep = "")
   cat("Reference: ", x$n_simulations, " ", simulation_settings$reference, " datasets with ",
       simulation_settings$random_effects, " random effects\n", sep = "")
-
-  for (composition_index in seq_len(nrow(x$compositions))) {
-    composition <- x$compositions[composition_index, ]
-    cat(composition$label, ": ", composition$n_pairs, " of ", x$n_pairs,
-        " usable dyads", sep = "")
-    if (is.null(composition$statistics[[1]])) {
-      cat("; not checked (fewer than three complete pairs)")
-    }
-    cat("\n")
-  }
 
   # A named vector of counts: dyads for the first entry, rows for the others.
   omitted_counts <- c(
@@ -513,6 +554,31 @@ print.dyadMLM_partner_check <- function(x, ...) {
     cat("Omitted: ", paste0(names(omitted_counts), ": ", omitted_counts,
                            collapse = "; "), "\n", sep = "")
   }
+
+  for (composition_index in seq_len(nrow(x$compositions))) {
+    composition <- x$compositions[composition_index, ]
+    cat("\n", composition$label, ": ", composition$n_pairs, " of ", x$n_pairs,
+        " usable dyads", sep = "")
+    if (is.null(composition$statistics[[1]])) {
+      cat("; not checked (fewer than three complete pairs)\n")
+      next
+    }
+    cat("\n")
+    rows <- x$summary[x$summary$composition == composition$label, ]
+    # One column each for observed, lower, and upper values.
+    values <- matrix(formatC(c(rows$observed, rows$lower, rows$upper),
+                             format = "f", digits = digits, width = 9), ncol = 3L)
+    # Statistic names come last so long names cannot split the table.
+    cat(sprintf("%9s %9s %9s    %s\n", "Observed", "2.5%", "97.5%", "Statistic"))
+    cat(sprintf("%s %s %s %s  %s\n", values[, 1], values[, 2], values[, 3],
+                ifelse(rows$outside, "*", " "), rows$statistic), sep = "")
+  }
+
+  n_outside <- sum(x$summary$outside)
+  cat("\nOutside the middle 95% of simulations", if (n_outside > 0L) " (*)", ": ",
+      n_outside, " of ", nrow(x$summary), " observed statistics.\n",
+      if (n_outside > 0L) "Some departures occur by chance; these are descriptive checks, not significance tests.\n" else
+        "This does not establish good fit.\n", sep = "")
 
   cat("Use plot(x) to view the comparisons.\n")
   # Return the same check object without displaying the full list.
@@ -583,7 +649,8 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
     ask <- number_of_figures > 1L
   }
   # File devices and report rendering should never wait for keyboard input.
-  ask <- ask && grDevices::dev.interactive()
+  # orNone = TRUE also pauses when the first plot will open an interactive device.
+  ask <- ask && grDevices::dev.interactive(orNone = TRUE)
 
   if (panels) {
     previous_graphics_settings <- graphics::par(no.readonly = TRUE)
@@ -621,9 +688,7 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
       simulated_statistic_values <-
         simulated_statistic_values[is.finite(simulated_statistic_values)]
 
-      middle_95_simulation_limits <- stats::quantile(
-        simulated_statistic_values, c(0.025, 0.975), names = FALSE
-      )
+      middle_95_simulation_limits <- simulated_middle_95(simulated_statistic_values)
 
       simulated_statistic_histogram <- graphics::hist(
         simulated_statistic_values,

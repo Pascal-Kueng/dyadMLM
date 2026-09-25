@@ -2,12 +2,14 @@
 % Please edit documentation in R/predictive_checks_dependence.R
 \name{print.dyadMLM_partner_check}
 \alias{print.dyadMLM_partner_check}
-\title{Print a summary of the partner-dependence predictive check object.}
+\title{Print a summary of the partner-dependence predictive check object}
 \usage{
-\method{print}{dyadMLM_partner_check}(x, ...)
+\method{print}{dyadMLM_partner_check}(x, digits = 3L, ...)
 }
 \arguments{
 \item{x}{An object returned by \code{\link[=check_partner_dependence]{check_partner_dependence()}}.}
+
+\item{digits}{Number of decimal places to print.}
 
 \item{...}{Not used.}
 }
@@ -15,6 +17,8 @@
 \code{x}, invisibly.
 }
 \description{
-Use \code{\link[=plot.dyadMLM_partner_check]{plot.dyadMLM_partner_check()}} to view the comparisons.
+Shows each observed statistic with the middle 95\% of its simulated values
+and marks observed values outside that range. Use
+\code{\link[=plot.dyadMLM_partner_check]{plot.dyadMLM_partner_check()}} to view the comparisons.
 }
 \keyword{internal}
