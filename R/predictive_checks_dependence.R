@@ -44,8 +44,12 @@
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
 #'   `compositions` table with pair counts and a statistics tibble for each
 #'   composition. Each tibble has one observed row followed by one row per
-#'   simulation, identified by `dataset`. The object includes omission counts
-#'   and settings, and can be saved and plotted later.
+#'   simulation, identified by `dataset`. The `summary` tibble has one row per
+#'   checked `composition` and `statistic`, with the `observed` value, the middle
+#'   95% of defined simulated values (`lower` and `upper`, shown as dashed lines
+#'   in the plots), and whether the observed value lies `outside` them. The object
+#'   includes omission counts and settings, and can be saved, printed, and
+#'   plotted later.
 #'
 #' @section Reading the plots:
 #' Histograms show simulated summaries. Red lines mark observed values.
@@ -259,19 +263,27 @@ check_partner_dependence <- function(
          paste(statistic_descriptions[n_defined_by_statistic == 0L], collapse = ", "),
          ". A predictive reference cannot be calculated.", call. = FALSE)
   }
-  ## 3. Warn if any statistics have some simulated values that
-  ##    are undefined. Plots are possible and use only the defined values.
+  ## 3. Warn if any statistics have some simulated values that are undefined.
+  ##    Plots and summaries are possible and use only the defined values.
   n_undefined_by_statistic <- n_simulations - n_defined_by_statistic
   if (any(n_undefined_by_statistic > 0L)) {
     warning("Undefined simulated summaries (counts out of ", n_simulations,
             "): ", paste(statistic_descriptions[n_undefined_by_statistic > 0L],
                          n_undefined_by_statistic[n_undefined_by_statistic > 0L],
                          sep = " = ", collapse = "; "),
-            ". Plots use defined values only.", call. = FALSE)
+            ". Plots and summaries use defined values only.", call. = FALSE)
   }
+
+  summary_by_composition <- lapply(checked_composition_indices, function(composition_index) {
+    tibble::tibble(
+      composition = compositions$label[[composition_index]],
+      summarise_partner_statistics(compositions$statistics[[composition_index]])
+    )
+  })
 
   check_result <- list(
     compositions = compositions,
+    summary = dplyr::bind_rows(summary_by_composition),
     n_pairs = nrow(partner_row_map$pairs),
     n_simulations = n_simulations,
     n_incomplete_dyads = length(partner_row_map$incomplete_dyad_ids),
@@ -477,13 +489,41 @@ calculate_partner_pair_statistics <- function(
 }
 
 
+### Summarising statistics ----------------------------------------------------
+
+# Middle 95% of the defined simulated values, as printed and plotted.
+simulated_middle_95 <- function(simulated_values) {
+  stats::quantile(simulated_values[is.finite(simulated_values)], c(0.025, 0.975),
+                  names = FALSE)
+}
+
+# Compare each observed statistic of one composition with its simulations.
+# Takes one statistics tibble: a dataset column, then one column per statistic,
+# with the observed row first.
+summarise_partner_statistics <- function(statistics) {
+  statistics <- statistics[, -1]
+  observed <- unlist(statistics[1, ], use.names = FALSE)
+  limits <- unname(vapply(statistics[-1, ], simulated_middle_95, numeric(2)))
+  tibble::tibble(
+    statistic = names(statistics),
+    observed = observed,
+    lower = limits[1, ],
+    upper = limits[2, ],
+    outside = observed < limits[1, ] | observed > limits[2, ]
+  )
+}
+
+
 ### Printing results ----------------------------------------------------------
 
-#' Print a summary of the partner-dependence predictive check object.
+#' Print a summary of the partner-dependence predictive check object
 #'
-#' Use [plot.dyadMLM_partner_check()] to view the comparisons.
+#' Shows each observed statistic with the middle 95% of its simulated values
+#' and marks observed values outside that range. Use
+#' [plot.dyadMLM_partner_check()] to view the comparisons.
 #'
 #' @param x An object returned by [check_partner_dependence()].
+#' @param digits Number of decimal places to print.
 #' @param ... Not used.
 #'
 #' @return `x`, invisibly.
@@ -491,27 +531,13 @@ calculate_partner_pair_statistics <- function(
 #' @keywords internal
 #'
 #' @export
-print.dyadMLM_partner_check <- function(x, ...) {
+print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
   # Read saved settings; printing does not rerun the check.
   simulation_settings <- attr(x, "dyadMLM")
-  # Each table has one dataset column followed by the statistics.
-  n_statistics <- sum(vapply(x$compositions$statistics,
-    function(statistics) if (is.null(statistics)) 0L else ncol(statistics) - 1L, integer(1)))
   cat("<dyadMLM partner-dependence check>\n")
-  cat(n_statistics, "statistics;", x$n_pairs, "usable complete pairs\n")
   cat("Response: ", x$response, "\n", sep = "")
   cat("Reference: ", x$n_simulations, " ", simulation_settings$reference, " datasets with ",
       simulation_settings$random_effects, " random effects\n", sep = "")
-
-  for (composition_index in seq_len(nrow(x$compositions))) {
-    composition <- x$compositions[composition_index, ]
-    cat(composition$label, ": ", composition$n_pairs, " of ", x$n_pairs,
-        " usable dyads", sep = "")
-    if (is.null(composition$statistics[[1]])) {
-      cat("; not checked (fewer than three complete pairs)")
-    }
-    cat("\n")
-  }
 
   # A named vector of counts: dyads for the first entry, rows for the others.
   omitted_counts <- c(
@@ -526,6 +552,38 @@ print.dyadMLM_partner_check <- function(x, ...) {
     cat("Omitted: ", paste0(names(omitted_counts), ": ", omitted_counts,
                            collapse = "; "), "\n", sep = "")
   }
+
+  n_checked <- n_outside <- 0L
+  for (composition_index in seq_len(nrow(x$compositions))) {
+    composition <- x$compositions[composition_index, ]
+    cat("\n", composition$label, ": ", composition$n_pairs, " of ", x$n_pairs,
+        " usable dyads", sep = "")
+    if (is.null(composition$statistics[[1]])) {
+      cat("; not checked (fewer than three complete pairs)\n")
+      next
+    }
+    cat("\n")
+    # Recompute by position: composition labels can repeat, so rows of
+    # x$summary cannot always be matched to a composition by label.
+    comparison <- summarise_partner_statistics(composition$statistics[[1]])
+    n_checked <- n_checked + nrow(comparison)
+    n_outside <- n_outside + sum(comparison$outside)
+    # One column each for observed, lower, and upper values.
+    values <- matrix(formatC(c(comparison$observed, comparison$lower, comparison$upper),
+                             format = "f", digits = digits), ncol = 3L)
+    width <- max(9L, nchar(values))
+    # Statistic names come last so long names cannot split the table.
+    cat(sprintf("%*s %*s %*s    %s\n",
+                width, "Observed", width, "2.5%", width, "97.5%", "Statistic"))
+    cat(sprintf("%*s %*s %*s %s  %s\n",
+                width, values[, 1], width, values[, 2], width, values[, 3],
+                ifelse(comparison$outside, "*", " "), comparison$statistic), sep = "")
+  }
+
+  cat("\nOutside the middle 95% of simulations", if (n_outside > 0L) " (*)", ": ",
+      n_outside, " of ", n_checked, " observed statistics.\n",
+      if (n_outside > 0L) "Some departures occur by chance; these are descriptive checks, not significance tests.\n" else
+        "This does not establish good fit.\n", sep = "")
 
   cat("Use plot(x) to view the comparisons.\n")
   # Return the same check object without displaying the full list.
@@ -635,9 +693,7 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
       simulated_statistic_values <-
         simulated_statistic_values[is.finite(simulated_statistic_values)]
 
-      middle_95_simulation_limits <- stats::quantile(
-        simulated_statistic_values, c(0.025, 0.975), names = FALSE
-      )
+      middle_95_simulation_limits <- simulated_middle_95(simulated_statistic_values)
 
       simulated_statistic_histogram <- graphics::hist(
         simulated_statistic_values,

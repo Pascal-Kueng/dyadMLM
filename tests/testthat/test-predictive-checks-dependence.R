@@ -41,7 +41,7 @@ test_that("model-centred statistics use aligned pairs and retain simulation sett
   statistics <- result$compositions$statistics[[1]]
 
   expect_s3_class(result, "dyadMLM_partner_check")
-  expect_named(result, c("compositions", "n_pairs", "n_simulations",
+  expect_named(result, c("compositions", "summary", "n_pairs", "n_simulations",
                         "n_incomplete_dyads", "n_missing_dyad_rows",
                         "n_missing_role_rows", "response"))
   expect_s3_class(result$compositions, "tbl_df")
@@ -500,7 +500,7 @@ test_that("printing describes the check and plots show empirical limits", {
   distinguishable <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
   printed <- paste(capture.output(visible <- withVisible(print(distinguishable))),
                    collapse = "\n")
-  expect_match(printed, "6 statistics; 5 usable complete pairs", fixed = TRUE)
+  expect_match(printed, "female - male: 5 of 5 usable dyads", fixed = TRUE)
   expect_match(printed, "model-centred", fixed = TRUE)
   expect_false(visible$visible)
   expect_identical(visible$value, distinguishable)
@@ -551,6 +551,43 @@ test_that("printing describes the check and plots show empirical limits", {
   }, .package = "grDevices")
   plot(exchangeable, ask = FALSE)
   expect_identical(ask_values, c(FALSE, TRUE))
+})
+
+
+test_that("the summary and printout flag statistics outside the middle 95% of defined simulations", {
+  simulations <- partner_check_test_simulations()
+  # Triple the observed residuals so most summaries fall outside the simulations.
+  simulations$observed_response <- simulations$predicted_response +
+    3 * (simulations$observed_response - simulations$predicted_response)
+  # Simulation 1 equals the predictions: zero SDs and undefined correlations.
+  # The undefined correlations must not enter the limits.
+  simulations$simulated_responses[1, ] <- simulations$predicted_response
+  result <- suppressWarnings(
+    check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
+  )
+  statistics <- result$compositions$statistics[[1]][, -1]
+  observed <- unlist(statistics[1, ], use.names = FALSE)
+  limits <- vapply(statistics[-1, ], function(values) stats::quantile(
+    values[is.finite(values)], c(0.025, 0.975), names = FALSE
+  ), numeric(2))
+
+  expect_s3_class(result$summary, "tbl_df")
+  expect_named(result$summary, c("composition", "statistic", "observed",
+                                 "lower", "upper", "outside"))
+  expect_identical(result$summary$composition, rep("female - male", 6L))
+  expect_identical(result$summary$statistic, names(statistics))
+  expect_equal(result$summary$observed, observed)
+  expect_equal(result$summary$lower, unname(limits[1, ]))
+  expect_equal(result$summary$upper, unname(limits[2, ]))
+  expect_identical(result$summary$outside, c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE))
+
+  # Printed rows mark the same statistics and report their count.
+  printed <- capture.output(print(result))
+  flagged_lines <- grep(" *  ", printed, fixed = TRUE, value = TRUE)
+  expect_identical(sub(".* \\*  ", "", flagged_lines), names(statistics)[1:4])
+  expect_match(paste(printed, collapse = "\n"),
+               "Outside the middle 95% of simulations (*): 4 of 6 observed statistics.",
+               fixed = TRUE)
 })
 
 
