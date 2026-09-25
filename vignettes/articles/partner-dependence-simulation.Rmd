@@ -34,7 +34,8 @@ The models include actor and partner effects but leave out residual partner
 dependence. We compare checks of raw outcomes with checks that first subtract
 fixed-effect predictions. Both use the **same datasets, fitted models, and reference simulations**.
 Each check uses one summary: the correlation between the first and second
-partner in each dyad.
+partner in each dyad. The [covariance-pooling study](covariance-pooling.html)
+checks all summaries within each dyad composition.
 
 - **Coloured lines:** how often the check detects omitted positive correlation.
   A mismatch is detected when the observed correlation exceeds the upper limit of

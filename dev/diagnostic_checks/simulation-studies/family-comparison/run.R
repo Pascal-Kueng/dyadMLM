@@ -192,11 +192,6 @@ for (family_name in selected_families) {
     ggplot2::ggsave(file.path(output_directory, paste0(family_name, ".", extension)),
       figure, width = 13, height = 6, dpi = 180)
   }
-  if (repetitions == 500L && reference_draws == 1000L &&
-      all(summary$attempted == 500L) && family_name %in% vignette_families) {
-    ggplot2::ggsave(file.path(study_directory, "../figures", paste0("family-comparison-", family_name, ".png")),
-      figure, width = 13, height = 6, dpi = 180)
-  }
   if (!plot_only) {
     family_settings <- data.frame(family = family_name, label = family_labels[[family_name]],
       formula = "outcome ~ actor_predictor + partner_predictor",

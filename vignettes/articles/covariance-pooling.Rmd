@@ -67,7 +67,9 @@ female-male, and male-male dyads. The **pooled model** uses one exchangeable
 covariance for all dyads. The **full model** estimates a separate covariance for
 each composition. We make pooling wrong by changing the female/male SD ratio in
 female-male dyads or the partner correlations across compositions. These changes
-leave the pooled covariance unchanged.
+leave the pooled covariance unchanged. The
+[partner-dependence study](partner-dependence-simulation.html) shows how often the
+check detects an omitted partner correlation.
 
 - **Orange:** composition checks of the pooled model,
   `check_partner_dependence(role = gender)`. A flag means at least one of 14

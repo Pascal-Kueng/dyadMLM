@@ -132,9 +132,8 @@ Progress is saved every 25 datasets under `results/family-comparison/<settings>/
 `plot` redraws saved results. Full runs require `gsl` and glmmTMB with `ordinal()`.
 COM-Poisson settings can be slow.
 
-A complete default run exports four tables to `report-data/family-comparison/`,
-renders the report, and updates selected figures in the
-[vignette draft](../partner-dependence-vignette-draft.Rmd). The folder also contains
+A complete default run exports four tables to `report-data/family-comparison/`
+and renders the report and the [vignette draft](../partner-dependence-vignette-draft.Rmd). The folder also contains
 [plotting](family-comparison/plot.R), [summarising](family-comparison/summarise.R),
 and [export](family-comparison/export-report-data.R) helpers.
 
