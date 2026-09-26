@@ -3,7 +3,7 @@ check_colours <- list(observed = "#a12b35", observed_fill = "#f2d3d6",
                       reference = "grey40")
 
 check_footer <- paste("Red: observed. Blue: simulated.",
-  "Some departures occur by chance; these are descriptive checks.", sep = "\n")
+  "These are descriptive checks. Some departures occur by chance.", sep = "\n")
 
 # Restore paging in the calling plot method, including after a plotting error.
 local_check_paging <- function(ask, panels, number_of_figures) {
