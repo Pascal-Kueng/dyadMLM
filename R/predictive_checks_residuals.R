@@ -58,6 +58,7 @@
 #' All pages for one composition appear together.
 #' The histogram and QQ plot show the same residual distribution in different
 #' ways; agreement between them is not independent evidence.
+#' The histogram uses 10 equal-width bins to make broad shapes easier to see.
 #' Use a tall plotting window or save a large figure to keep all rows readable.
 #'
 #' PIT (probability integral transform) residuals rank each outcome from 0 (low)
@@ -217,7 +218,7 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
 
   # Matrices retain complete datasets in columns; subset only their rows.
   probabilities <- seq(0, 1, length.out = 201)
-  breaks <- seq(0, 1, length.out = 21)
+  breaks <- seq(0, 1, length.out = 11)
   ks_distance <- function(x) {
     ordered <- sort(x)
     ranks <- seq_along(x)
@@ -420,8 +421,8 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
         plot_check_caption("The red curve should roughly follow the diagonal.\nDepartures outside the blue global envelope suggest a distribution mismatch.")
       } else if (check == "histogram") {
         density <- statistics$histogram
-        midpoints <- seq(.025, .975, length.out = length(density$observed))
-        graphics::plot(midpoints, density$observed, type = "n", ylim = c(0, max(unlist(density))),
+        midpoints <- (seq_along(density$observed) - .5) / length(density$observed)
+        graphics::plot(midpoints, density$observed, type = "n", xlim = c(0, 1), ylim = c(0, max(unlist(density))),
                        main = title, xlab = "PIT", ylab = "Density")
         draw_envelopes(midpoints, list(density), connect = FALSE)
         graphics::abline(h = 1, lty = 2, col = check_colours$reference)

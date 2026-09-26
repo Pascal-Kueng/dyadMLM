@@ -90,6 +90,7 @@ predicted outcomes. Each supplied predictor gets another two-row pattern page.
 All pages for one composition appear together.
 The histogram and QQ plot show the same residual distribution in different
 ways; agreement between them is not independent evidence.
+The histogram uses 10 equal-width bins to make broad shapes easier to see.
 Use a tall plotting window or save a large figure to keep all rows readable.
 
 PIT (probability integral transform) residuals rank each outcome from 0 (low)

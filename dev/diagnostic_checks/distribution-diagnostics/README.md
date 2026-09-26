@@ -34,7 +34,7 @@ can be established from the fitting data.
 Roles determine the display; simulations retain the fitted model's assumptions,
 including its partner dependence and any role-specific variability.
 
-The first residual page shows a PIT QQ plot, PIT histogram, the number of outcomes
+The first residual page shows a PIT QQ plot, a 10-bin PIT histogram, the number of outcomes
 outside their simulation reference range, and mean PIT distance. The next page
 shows PIT quartiles and distance across predicted outcomes. Each supplied
 predictor gets another two-row pattern page. All pages for one composition
@@ -92,6 +92,9 @@ It changes the layout, not which checks are shown. By default, plots pause only
 when there are multiple figures on an interactive device; file output never pauses.
 
 ## Validation
+
+The [10-bin comparison](histogram-bins.md) records paired 20-versus-10-bin
+envelopes, figures and implementation checks for four example datasets.
 
 [validate-envelopes.R](validate-envelopes.R) compares the global envelopes with
 GET, used only as a development reference. [calibration-check.R](calibration-check.R)

@@ -67,7 +67,7 @@ check_residuals(
 )
 ```
 
-The QQ curves and PIT histogram show the same distribution mismatch in two
+The QQ curves and 10-bin PIT histogram show the same distribution mismatch in two
 ways. The outlier row compares counts beyond the finite simulated response
 range. *Predicted outcome* means the model prediction
 with random effects set to zero. The separate predictor page uses the supplied

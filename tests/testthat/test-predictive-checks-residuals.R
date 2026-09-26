@@ -438,7 +438,7 @@ test_that("role columns use their own observations and simulated references", {
     expected_qq <- apply(values, 2, quantile, probs = seq(0, 1, length.out = 201))
     expect_equal(statistics$qq, residual_curve_summary(expected_qq))
     expected_histogram <- apply(values, 2, function(x)
-      hist(x, breaks = seq(0, 1, length.out = 21), plot = FALSE)$density)
+      hist(x, breaks = seq(0, 1, length.out = 11), plot = FALSE)$density)
     expect_equal(statistics$histogram, residual_curve_summary(expected_histogram))
     # Strict raw-response extrema remain visible even though PIT has no endpoints.
     expect_equal(unname(statistics$outliers), colSums(strict_response_outliers(responses)[rows, ]))
@@ -477,6 +477,38 @@ test_that("residual plots draw each role's saved curves and scalar summaries", {
   expected <- c(lapply(statistics, `[[`, "outliers"), lapply(statistics, `[[`, "mean_distance"))
   expect_equal(lapply(scalars, `[[`, "values"), unname(expected))
   expect_identical(vapply(scalars, `[[`, logical(1), "counts"), c(TRUE, TRUE, FALSE, FALSE))
+})
+
+
+test_that("histogram positions match the bin count in new and saved results", {
+  result <- check_residuals(distribution_check_fixture(), role = NULL, plot = FALSE)
+  grDevices::pdf(NULL, width = 12, height = 10)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  positions <- limits <- NULL
+  recording <- FALSE
+  original_title <- graphics::title
+  original_lines <- graphics::lines
+  local_mocked_bindings(title = function(main = NULL, ...) {
+    recording <<- identical(main, "PIT histogram\n(how residuals are distributed)")
+    original_title(main = main, ...)
+  }, lines = function(x, y, ...) {
+    if (recording) {
+      positions <<- x
+      limits <<- graphics::par("usr")[1:2]
+    }
+    if (missing(y)) original_lines(x, ...) else original_lines(x, y, ...)
+  }, .package = "graphics")
+  expect_length(result$compositions[[1]]$statistics[[1]]$histogram$observed, 10)
+  for (bins in c(10L, 20L)) {
+    # Existing 20-bin saved checks retain their original bin positions.
+    densities <- apply(result$pit, 2, function(x)
+      hist(x, breaks = seq(0, 1, length.out = bins + 1L), plot = FALSE)$density)
+    result$compositions[[1]]$statistics[[1]]$histogram <- residual_curve_summary(densities)
+    plot(result, ask = FALSE)
+    expect_equal(positions, seq(1 / (2 * bins), 1 - 1 / (2 * bins), length.out = bins))
+    expect_lte(limits[1], 0)
+    expect_gte(limits[2], 1)
+  }
 })
 
 
