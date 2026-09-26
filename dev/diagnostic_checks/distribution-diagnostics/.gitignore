@@ -1,0 +1,5 @@
+# Regenerate the tail-shape gallery with tail-shape-comparison.R.
+/results/t3-*.svg
+/results/t22-*.svg
+/results/gaussian-*.svg
+/results/gaussian_strong-*.svg

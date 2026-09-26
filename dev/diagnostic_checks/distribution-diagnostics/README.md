@@ -120,7 +120,7 @@ the earlier study's first Tweedie dataset (120 dyads, seed 100104) and 2,000
 simulations from an exchangeable Gaussian model without the difference random
 effect. Run [tweedie-gaussian.R](tweedie-gaussian.R) to reproduce it.
 
-From the package folder, run:
+Generate the full tail-shape gallery on demand from the package folder:
 
 ```sh
 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 Rscript dev/diagnostic_checks/distribution-diagnostics/tail-shape-comparison.R
@@ -137,19 +137,18 @@ compositions:
 
 The tail-shape script fits Gaussian models to four datasets:
 
-| Data | Residual distribution | Outcomes | Patterns |
-|---|---|---|---|
-| Heavy-tailed t(3) | [Plots](results/t3-residual-01.svg) | [Plots](results/t3-outcome-01.svg) | [Predicted outcome](results/t3-residual-02.svg), [predictor](results/t3-residual-03.svg) |
-| Heavier-tailed t(2.2) | [Plots](results/t22-residual-01.svg) | [Plots](results/t22-outcome-01.svg) | [Predicted outcome](results/t22-residual-02.svg), [predictor](results/t22-residual-03.svg) |
-| Gaussian | [Plots](results/gaussian-residual-01.svg) | [Plots](results/gaussian-outcome-01.svg) | [Predicted outcome](results/gaussian-residual-02.svg), [predictor](results/gaussian-residual-03.svg) |
-| Gaussian with strong partner and AR(1) dependence | [Plots](results/gaussian_strong-residual-01.svg) | [Plots](results/gaussian_strong-outcome-01.svg) | [Predicted outcome](results/gaussian_strong-residual-02.svg), [predictor](results/gaussian_strong-residual-03.svg) |
+- Heavy-tailed t(3).
+- Heavier-tailed t(2.2).
+- Gaussian.
+- Gaussian with strong partner and AR(1) dependence.
 
 The first two illustrate a distribution mismatch; the others are comparison
 cases with the same sample size. The composition examples demonstrate the layout
 using a simplified model; they are not correctly specified controls. These examples
 do not establish how reliably the checks detect model problems.
-The SVGs are kept for review and are reproduced by these scripts; they are
-excluded from the built R package. `results/` also records package versions and
+The composition plots and complete worked examples are kept for review. Tail-shape
+plots are generated in `results/` and ignored by Git. All development examples are
+excluded from the built R package. `results/` retains package versions and
 fit summaries. Its tail ratio is the 1st-to-99th percentile range divided by the
 interquartile range, after subtracting fixed-effect predictions. Its references
 use all simulated datasets, as `check_outcomes()` does.

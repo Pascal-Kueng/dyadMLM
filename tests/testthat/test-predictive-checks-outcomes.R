@@ -1,59 +1,23 @@
 test_that("outcome summaries use all simulations and each role's fitted rows", {
   simulations <- distribution_check_fixture()
-  grDevices::pdf(NULL, width = 7, height = 7)
-  on.exit(grDevices::dev.off(), add = TRUE)
   withr::local_seed(392)
   random_state <- .Random.seed
-  histograms <- list()
-  histogram_values <- NULL
-  original_title <- graphics::title
-  original_hist <- graphics::hist
-  original_abline <- graphics::abline
-  local_mocked_bindings(title = function(main = NULL, ...) {
-    title <- sub("\n.*", "", main)
-    if (!is.null(main) && title %in% c("Response SD", "Largest absolute deviation"))
-      histograms[[length(histograms) + 1L]] <<- list(
-        name = title, values = histogram_values, limits = graphics::par("usr")[1:2]
-      )
-    original_title(main = main, ...)
-  }, hist = function(x, ...) {
-    histogram_values <<- x
-    original_hist(x, ...)
-  }, abline = function(...) {
-    arguments <- list(...)
-    if (length(histograms) && !is.null(arguments$v)) {
-      marker <- if (identical(arguments$col, "#a12b35")) "observed" else "range"
-      histograms[[length(histograms)]][[marker]] <<- arguments$v
-    }
-    original_abline(...)
-  }, .package = "graphics")
-
-  result <- withVisible(check_outcomes(simulations, dyad = "dyad", role = "role", ask = FALSE))
+  result <- withVisible(check_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE))
   expect_false(result$visible)
   expect_s3_class(result$value, "dyadMLM_outcome_check")
   expect_identical(attr(result$value, "dyadMLM"), attr(simulations, "dyadMLM"))
   expect_identical(result$value$compositions[[1]]$label, "A - B")
   expect_named(result$value$compositions[[1]]$statistics, c("A", "B"))
   expect_identical(.Random.seed, random_state)
-  checks <- c("Response variability", "Largest absolute deviation")
-  expect_identical(vapply(histograms, `[[`, "", "name"),
-    rep(c("Response SD", "Largest absolute deviation"), each = 2))
   rows_by_role <- split(seq_len(12), simulations$model_frame$role)
   for (i in seq_along(rows_by_role)) {
     rows <- rows_by_role[[i]]
     responses <- rbind(simulations$observed_response[rows], simulations$simulated_responses[, rows])
     deviations <- sweep(responses, 2, simulations$predicted_response[rows])
-    expected <- rbind(apply(deviations, 1, sd), apply(abs(deviations), 1, max))
-    expect_identical(rownames(result$value$compositions[[1]]$statistics[[i]]), checks)
+    expected <- rbind(`Response variability` = apply(deviations, 1, sd),
+                      `Largest absolute deviation` = apply(abs(deviations), 1, max))
     expect_equal(unname(result$value$compositions[[1]]$statistics[[i]]), unname(expected))
-    for (j in seq_along(checks)) {
-      histogram <- histograms[[2 * (j - 1) + i]]
-      expect_equal(unname(histogram$values), unname(expected[j, -1]))
-      expect_equal(unname(histogram$observed), unname(expected[j, 1]))
-      expect_equal(unname(histogram$range), simulated_rank_limits(expected[j, -1]))
-      expect_true(histogram$observed >= min(histogram$limits) &&
-                    histogram$observed <= max(histogram$limits))
-    }
+    expect_identical(rownames(result$value$compositions[[1]]$statistics[[i]]), rownames(expected))
   }
 })
 
@@ -143,66 +107,30 @@ test_that("outcome checks retain lone responses and accept one simulated dataset
 })
 
 
-test_that("zero-count panels are automatic and handle constant references", {
+test_that("zero counts include every dataset and can be selected explicitly", {
   simulations <- distribution_check_fixture()
   nsim <- nrow(simulations$simulated_responses)
-  grDevices::pdf(NULL, width = 7, height = 7)
-  on.exit(grDevices::dev.off(), add = TRUE)
-  histograms <- list()
-  histogram_values <- histogram_breaks <- NULL
-  original_title <- graphics::title
-  original_hist <- graphics::hist
-  original_abline <- graphics::abline
-  local_mocked_bindings(title = function(main = NULL, ...) {
-    title <- sub("\n.*", "", main)
-    if (!is.null(main) && title %in% c("Response SD", "Largest absolute deviation", "Number of zeros"))
-      histograms[[length(histograms) + 1L]] <<- list(
-        name = title, values = histogram_values, limits = graphics::par("usr")[1:2],
-        breaks = histogram_breaks
-      )
-    original_title(main = main, ...)
-  }, hist = function(x, ...) {
-    histogram_values <<- x
-    histogram <- original_hist(x, ...)
-    histogram_breaks <<- histogram$breaks
-    histogram
-  }, abline = function(...) {
-    arguments <- list(...)
-    if (length(histograms) && identical(arguments$col, "#a12b35"))
-      histograms[[length(histograms)]]$observed <<- arguments$v
-    original_abline(...)
-  }, .package = "graphics")
-  zero_panels <- function(simulations, ...) {
-    histograms <<- list()
-    check_outcomes(simulations, role = NULL, ...)
-    Filter(function(panel) panel$name == "Number of zeros", histograms)
-  }
+  result <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  expect_identical(rownames(result$compositions[[1]]$statistics[[1]]),
+                   c("Response variability", "Largest absolute deviation"))
 
-  # The default call needs no plot flags, and continuous data need no zero panel.
-  expect_length(zero_panels(simulations), 0)
-  expect_identical(vapply(histograms, `[[`, "", "name"),
-    c("Response SD", "Largest absolute deviation"))
   observed_zero <- simulations
   observed_zero$observed_response[1] <- 0
-  panel <- zero_panels(observed_zero)[[1]]
-  expect_equal(unname(panel$values), rep(0, nsim))
-  expect_equal(unname(panel$observed), 1)
-  expect_equal(panel$breaks, c(-.5, .5))
-  expect_true(max(panel$limits) >= 1)
-  expect_length(zero_panels(observed_zero, check_zeros = FALSE), 0)
+  result <- check_outcomes(observed_zero, role = NULL, plot = FALSE)
+  expect_equal(unname(result$compositions[[1]]$statistics[[1]]["Number of zeros", ]),
+               c(1, rep(0, nsim)))
+  result <- check_outcomes(observed_zero, role = NULL, check_zeros = FALSE, plot = FALSE)
+  expect_false("Number of zeros" %in% rownames(result$compositions[[1]]$statistics[[1]]))
 
-  # Every simulated dataset contributes; there is no PIT reference-bank split.
-  reference_zero <- simulations
-  reference_zero$simulated_responses[1, 1] <- 0
-  panel <- zero_panels(reference_zero)[[1]]
-  expect_equal(unname(panel$values), c(1, rep(0, nsim - 1)))
-  expect_equal(unname(panel$observed), 0)
-  evaluated_zeros <- simulations
-  evaluated_zeros$simulated_responses[21:23, 1] <- 0
-  panel <- zero_panels(evaluated_zeros)[[1]]
-  expect_equal(unname(panel$values), c(rep(0, 20), rep(1, 3), rep(0, nsim - 23)))
-  expect_equal(unname(panel$observed), 0)
-  expect_length(zero_panels(simulations, check_zeros = TRUE), 1)
+  # Include early and later simulations, without a separate reference-bank split.
+  simulations$simulated_responses[c(1, 21:23), 1] <- 0
+  result <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  expect_equal(unname(result$compositions[[1]]$statistics[[1]]["Number of zeros", ]),
+               c(0, as.numeric(seq_len(nsim) %in% c(1, 21:23))))
+  result <- check_outcomes(distribution_check_fixture(), role = NULL,
+                            check_zeros = TRUE, plot = FALSE)
+  expect_equal(unname(result$compositions[[1]]$statistics[[1]]["Number of zeros", ]),
+               rep(0, nsim + 1))
 })
 
 
@@ -241,41 +169,42 @@ test_that("outcome ECDF paths retain ties, constant samples, and both tails", {
 })
 
 
-test_that("discrete outcome panels show role-specific proportions and category labels", {
+test_that("discrete outcome panels use saved role proportions, bounds, and category labels", {
   simulations <- distribution_check_fixture()
   simulations$observed_response <- c(0, 0, 1, 0, 1, 2, 2, 3, 0, 1, 2, 3)
   simulations$simulated_responses <- matrix(as.integer(abs(sin(seq_len(40 * 12))) * 4), 40)
   attr(simulations, "dyadMLM") <- list(family = "poisson")
+  result <- check_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE)
+  distribution <- result$compositions[[1]]$distribution
+  expect_equal(as.numeric(distribution$labels), 0:3)
+  rows_by_role <- split(seq_len(12), simulations$model_frame$role)
+  for (i in seq_along(rows_by_role)) {
+    rows <- rows_by_role[[i]]
+    expect_equal(unname(distribution$roles[[i]]$observed), tabulate(
+      simulations$observed_response[rows] + 1, nbins = 4) / length(rows))
+    proportions <- t(apply(simulations$simulated_responses[, rows], 1,
+                           function(x) tabulate(x + 1, nbins = 4) / length(x)))
+    expect_equal(unname(distribution$roles[[i]]$bounds),
+                 unname(apply(proportions, 2, simulated_rank_limits)))
+  }
+
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
   bars <- bounds <- list()
-  recording <- FALSE
   original_barplot <- graphics::barplot
-  original_title <- graphics::title
   original_segments <- graphics::segments
   local_mocked_bindings(barplot = function(height, names.arg = NULL, ...) {
     bars[[length(bars) + 1L]] <<- list(values = height, labels = names.arg)
     original_barplot(height, names.arg = names.arg, ...)
-  }, title = function(main = NULL, ...) {
-    recording <<- identical(main, "Outcome frequencies\n(category proportions)")
-    original_title(main = main, ...)
   }, segments = function(x0, y0, x1, y1, ...) {
-    if (recording) bounds[[length(bounds) + 1L]] <<- unname(rbind(y0, y1))
+    bounds[[length(bounds) + 1L]] <<- rbind(y0, y1)
     original_segments(x0, y0, x1, y1, ...)
   }, .package = "graphics")
-
-  check_outcomes(simulations, dyad = "dyad", role = "role", ask = FALSE)
-  expect_length(bars, 2)
-  expect_length(bounds, 2)
-  rows_by_role <- split(seq_len(12), simulations$model_frame$role)
-  for (i in seq_along(rows_by_role)) {
-    rows <- rows_by_role[[i]]
-    expect_equal(as.numeric(bars[[i]]$labels), 0:3)
-    expect_equal(unname(bars[[i]]$values), tabulate(
-      simulations$observed_response[rows] + 1, nbins = 4) / length(rows))
-    proportions <- t(apply(simulations$simulated_responses[, rows], 1,
-                           function(x) tabulate(x + 1, nbins = 4) / length(x)))
-    expect_equal(bounds[[i]], unname(apply(proportions, 2, simulated_rank_limits)))
+  for (i in seq_along(distribution$roles)) {
+    plot_outcome_distribution(distribution, i)
+    expect_equal(bars[[i]], list(values = distribution$roles[[i]]$observed,
+                                 labels = distribution$labels))
+    expect_equal(unname(bounds[[i]]), unname(distribution$roles[[i]]$bounds))
   }
 
   simulations$observed_response <- simulations$observed_response + 1
@@ -287,7 +216,8 @@ test_that("discrete outcome panels show role-specific proportions and category l
     simulations$model_frame
   )
   attr(simulations, "dyadMLM") <- list(family = "ordinal")
-  check_outcomes(simulations, role = NULL, ask = FALSE)
+  result <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  plot_outcome_distribution(result$compositions[[1]]$distribution, 1)
   expect_identical(bars[[3]]$labels, categories)
   expect_equal(unname(bars[[3]]$values[5]), 0)
 })
@@ -385,6 +315,7 @@ test_that("unobserved count values show simulations without an artificial red ze
 
 test_that("outcome results can be calculated without graphics and plotted later", {
   simulations <- distribution_check_fixture()
+  simulations$observed_response[1] <- 0
   device <- grDevices::dev.cur()
   result <- with_mocked_bindings(
     check_outcomes(simulations, role = NULL, plot = FALSE, ask = "ignored", panels = "ignored"),
@@ -392,6 +323,8 @@ test_that("outcome results can be calculated without graphics and plotted later"
   )
   expect_identical(grDevices::dev.cur(), device)
   expect_s3_class(result, "dyadMLM_outcome_check")
+  withr::local_seed(392)
+  random_state <- .Random.seed
   # Saved checks contain plain data, including every overlay path and comparison.
   saved <- unserialize(serialize(result, NULL))
   grDevices::pdf(NULL, width = 12, height = 10)
@@ -400,4 +333,18 @@ test_that("outcome results can be calculated without graphics and plotted later"
   expect_identical(check_outcomes(simulations, role = NULL, panels = FALSE, ask = FALSE), result)
   expect_identical(plot(saved, ask = FALSE), result)
   expect_identical(plot(saved, panels = FALSE, ask = FALSE), result)
+
+  drawn <- list()
+  local_mocked_bindings(plot_check_statistic = function(values, title, ..., counts) {
+    drawn[[length(drawn) + 1L]] <<- list(values = values, title = title, counts = counts)
+    graphics::plot.new()
+  })
+  plot(saved, ask = FALSE)
+  statistics <- saved$compositions[[1]]$statistics[[1]]
+  expect_equal(lapply(drawn, `[[`, "values"),
+               lapply(seq_len(nrow(statistics)), function(i) statistics[i, ]))
+  expect_identical(vapply(drawn, function(panel) sub("\n.*", "", panel$title), ""),
+                   c("Response SD", "Largest absolute deviation", "Number of zeros"))
+  expect_identical(vapply(drawn, `[[`, logical(1), "counts"), c(FALSE, FALSE, TRUE))
+  expect_identical(.Random.seed, random_state)
 })

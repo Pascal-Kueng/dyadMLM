@@ -1,9 +1,7 @@
 test_that("PIT ranks use every dataset symmetrically", {
   simulations <- distribution_check_fixture()
-  grDevices::pdf(NULL, width = 12, height = 10)
-  on.exit(grDevices::dev.off(), add = TRUE)
 
-  result <- withVisible(check_residuals(simulations, role = NULL, ask = FALSE))
+  result <- withVisible(check_residuals(simulations, role = NULL, plot = FALSE))
   responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
   expect_false(result$visible)
   expect_equal(dim(result$value$pit), c(12L, 201L))
@@ -15,11 +13,11 @@ test_that("PIT ranks use every dataset symmetrically", {
   # Grouping and predictor choices must not change the residuals being checked.
   simulations$model_frame$X <- seq_len(12)
   expect_equal(check_residuals(simulations, role = NULL, predictors = c("role", "X"),
-                              ask = FALSE)$pit, result$value$pit)
+                              plot = FALSE)$pit, result$value$pit)
   expect_identical(check_residuals(simulations, dyad = "dyad", role = "role",
-                                 member = "member", ask = FALSE)$pit, result$value$pit)
+                                 member = "member", plot = FALSE)$pit, result$value$pit)
   expect_identical(check_residuals(simulations, dyad = "dyad", role = NULL,
-                                 ask = FALSE)$pit, result$value$pit)
+                                 plot = FALSE)$pit, result$value$pit)
 })
 
 
@@ -31,12 +29,10 @@ test_that("discrete PIT randomizes ties and preserves the caller's RNG", {
     simulated_responses = reference[rep(1:4, 50), ],
     model_frame = data.frame(row = seq_len(ncol(reference)))
   ), class = "dyadMLM_response_simulations", dyadMLM = list(family = "poisson"))
-  grDevices::pdf(NULL, width = 12, height = 10)
-  on.exit(grDevices::dev.off(), add = TRUE)
   withr::local_seed(392)
   random_state <- .Random.seed
 
-  result <- check_residuals(simulations, role = NULL, seed = 143, ask = FALSE)
+  result <- check_residuals(simulations, role = NULL, seed = 143, plot = FALSE)
   pit <- result$pit
   responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
   for (row in seq_len(nrow(responses))) {
@@ -48,10 +44,10 @@ test_that("discrete PIT randomizes ties and preserves the caller's RNG", {
                  seq_len(ncol(responses)))
   }
   expect_identical(.Random.seed, random_state)
-  expect_identical(check_residuals(simulations, role = NULL, seed = 143, ask = FALSE), result)
+  expect_identical(check_residuals(simulations, role = NULL, seed = 143, plot = FALSE), result)
 
   rm(".Random.seed", envir = .GlobalEnv)
-  expect_identical(check_residuals(simulations, role = NULL, seed = 143, ask = FALSE), result)
+  expect_identical(check_residuals(simulations, role = NULL, seed = 143, plot = FALSE), result)
   expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
 })
 
@@ -123,8 +119,8 @@ test_that("rare binary groups and observed factor levels remain visible", {
   role <- factor(rep(c("A", "B"), 6), levels = c("A", "B", "Unused"))
   simulations$model_frame$Binary <- c(rep(0, 11), 1)
   simulations$model_frame$Role <- role
-  pit <- check_residuals(simulations, role = NULL, predictors = c("Binary", "Role"),
-                         ask = FALSE)$pit
+  result <- check_residuals(simulations, role = NULL, predictors = c("Binary", "Role"),
+                            ask = FALSE)
   expect_true(any(vapply(axes, function(axis) {
     isTRUE(all.equal(unname(axis$at), c(0, 1)))
   }, logical(1))))
@@ -134,9 +130,9 @@ test_that("rare binary groups and observed factor levels remain visible", {
   expect_false(any(vapply(axes, function(axis) "Unused" %in% axis$labels, logical(1))))
   expect_false(connected_role)
   for (display in 1:2) {
-    values <- if (display == 1) pit[, 1] else 2 * abs(pit[, 1] - .5)
-    expected <- vapply(split(values, role, drop = TRUE), quantile, numeric(3),
-                       probs = c(.25, .5, .75))
+    pattern <- result$compositions[[1]]$patterns[[3]][[1]]
+    curves <- pattern[[c("quantiles", "distance")[display]]]
+    expected <- do.call(rbind, lapply(curves, `[[`, "observed"))
     expect_equal(boxes[[display]], unname(expected[c(1, 3), ]))
     expect_equal(medians[[display]], unname(expected[2, ]))
   }
@@ -145,61 +141,36 @@ test_that("rare binary groups and observed factor levels remain visible", {
 
 test_that("missing plotting predictors affect only their own panels", {
   simulations <- distribution_check_fixture()
-  grDevices::pdf(NULL, width = 12, height = 10)
-  on.exit(grDevices::dev.off(), add = TRUE)
-  expected <- check_residuals(simulations, role = NULL, ask = FALSE)$pit
-  observed <- bounds <- observed_x <- reference_x <- list()
-  recording <- FALSE
-  filled_pattern <- FALSE
-  original_title <- graphics::title
-  original_lines <- graphics::lines
-  original_segments <- graphics::segments
-  original_polygon <- graphics::polygon
-  local_mocked_bindings(title = function(main = NULL, sub = NULL, xlab = NULL, ...) {
-    recording <<- identical(xlab, "Incomplete")
-    original_title(main = main, sub = sub, xlab = xlab, ...)
-  }, lines = function(x, y, ...) {
-    if (recording && !missing(y)) {
-      observed[[length(observed) + 1L]] <<- unname(y)
-      observed_x[[length(observed_x) + 1L]] <<- unname(x)
-    }
-    if (missing(y)) original_lines(x, ...) else original_lines(x, y, ...)
-  }, segments = function(x0, y0, x1, y1, ...) {
-    if (recording) {
-      bounds[[length(bounds) + 1L]] <<- unname(rbind(y0, y1))
-      reference_x[[length(reference_x) + 1L]] <<- unname(x0)
-    }
-    original_segments(x0, y0, x1, y1, ...)
-  }, polygon = function(x, y = NULL, ...) {
-    if (recording) filled_pattern <<- TRUE
-    original_polygon(x, y, ...)
-  }, .package = "graphics")
-
+  expected <- check_residuals(simulations, role = NULL, plot = FALSE)$pit
   incomplete <- c(0, NA, 0, 1, 1, NA, 0, 1, 0, NA, 1, 0)
   simulations$model_frame$Incomplete <- incomplete
   expect_warning(result <- check_residuals(simulations, role = NULL, predictors = "Incomplete",
-                                           ask = FALSE), "Incomplete.*3")
+                                           plot = FALSE), "Incomplete.*3")
   expect_identical(result$pit, expected)
-  expect_false(filled_pattern)
-  expect_true(all(observed_x[[1]] < observed_x[[2]] &
-                    observed_x[[2]] < observed_x[[3]]))
-  for (i in seq_along(c(.25, .5, .75))) {
-    summaries <- vapply(c(0, 1), function(group) {
+  pattern <- result$compositions[[1]]$patterns[[2]][[1]]
+  expect_equal(unname(pattern$positions), c(0, 1))
+  expect_equal(pattern$points$predictor, incomplete[!is.na(incomplete)])
+  expect_equal(pattern$points$pit, unname(expected[!is.na(incomplete), 1]))
+  summaries <- lapply(c(.25, .5, .75), function(probability) {
+    t(vapply(c(0, 1), function(group) {
       apply(expected[which(incomplete == group), , drop = FALSE], 2,
-            quantile, probs = c(.25, .5, .75)[i])
-    }, numeric(ncol(expected)))
-    expect_equal(observed[[i]], unname(summaries[1, ]))
-    expect_equal(observed_x[[i]], reference_x[[i]])
-    curve <- result$compositions[[1]]$patterns[[2]][[1]]$quantiles[[i]]
-    expect_equal(bounds[[i]], unname(rbind(curve$lower, curve$upper)))
-  }
+            quantile, probs = probability)
+    }, numeric(ncol(expected))))
+  })
+  joint <- residual_curve_summary(do.call(rbind, summaries))
+  for (i in seq_along(summaries))
+    expect_equal(lapply(pattern$quantiles[[i]], unname),
+                 lapply(joint, `[`, (1:2) + (i - 1L) * 2L))
+
   simulations$model_frame$Empty <- rep(NA, 12)
   expect_warning(result <- check_residuals(simulations, role = NULL, predictors = "Empty",
-                                           ask = FALSE), "Empty.*12")
+                                           plot = FALSE), "Empty.*12")
   expect_identical(result$pit, expected)
+  expect_length(result$predictors, 0)
+  expect_length(result$compositions[[1]]$patterns, 1)
   simulations$model_frame$Role <- factor(c(NA, rep(c("A", "B"), 5), "A"), exclude = NULL)
   expect_warning(result <- check_residuals(simulations, role = NULL, predictors = "Role",
-                                           ask = FALSE), "Role.*1")
+                                           plot = FALSE), "Role.*1")
   expect_identical(result$pit, expected)
 })
 
@@ -209,40 +180,16 @@ test_that("predictor names match unchanged fitting data to fitted rows", {
   simulations$model_frame$age <- rep(c(20, 20, 40, 40), 3)
   simulations$model_frame$stress <- factor(rep(c("low", "medium", "high"), 4))
   fitting_data <- simulations$model_frame
-  grDevices::pdf(NULL, width = 12, height = 10)
-  on.exit(grDevices::dev.off(), add = TRUE)
-  panels <- marks <- list()
-  recording <- FALSE
-  original_title <- graphics::title
-  original_lines <- graphics::lines
-  original_rect <- graphics::rect
-  original_segments <- graphics::segments
-  local_mocked_bindings(title = function(main = NULL, xlab = NULL, ...) {
-    recording <<- !is.null(xlab) && xlab %in% c("age", "stress")
-    if (recording) panels[[length(panels) + 1L]] <<- c(main, xlab)
-    original_title(main = main, xlab = xlab, ...)
-  }, lines = function(x, y, ...) {
-    if (recording && !missing(y)) marks[[length(marks) + 1L]] <<- list(x, y)
-    if (missing(y)) original_lines(x, ...) else original_lines(x, y, ...)
-  }, rect = function(xleft, ybottom, xright, ytop, ...) {
-    if (recording) marks[[length(marks) + 1L]] <<- list(xleft, ybottom, xright, ytop)
-    original_rect(xleft, ybottom, xright, ytop, ...)
-  }, segments = function(x0, y0, x1, y1, ...) {
-    if (recording) marks[[length(marks) + 1L]] <<- list(x0, y0, x1, y1)
-    original_segments(x0, y0, x1, y1, ...)
-  }, .package = "graphics")
-  capture_predictors <- function(predictors, data = NULL) {
-    panels <<- marks <<- list()
-    check_residuals(simulations, role = NULL, predictors = predictors, data = data, ask = FALSE)
-    list(panels = panels, marks = marks)
+  calculate <- function(predictors, data = NULL) {
+    check_residuals(simulations, role = NULL, predictors = predictors, data = data, plot = FALSE)
   }
 
   columns <- c("age", "stress")
-  expected <- capture_predictors(columns)
-  expect_length(expected$panels, 4)
-  expect_gt(length(expected$marks), 0)
+  expected <- calculate(columns)
+  expect_identical(expected$predictors, columns)
+  expect_length(expected$compositions[[1]]$patterns, 3)
   simulations$model_frame$stress <- NULL
-  expect_identical(capture_predictors(columns, fitting_data), expected)
+  expect_identical(calculate(columns, fitting_data), expected)
 
   # Omitted and reordered fitted rows retain their original predictor values.
   rows <- c(12, 2, 9, 4, 7, 6, 5, 8)
@@ -251,13 +198,13 @@ test_that("predictor names match unchanged fitting data to fitted rows", {
   simulations$simulated_responses <- simulations$simulated_responses[, rows]
   simulations$model_frame <- simulations$model_frame[rows, , drop = FALSE]
   simulations$model_frame$stress <- fitting_data$stress[rows]
-  expected <- capture_predictors(columns)
+  expected <- calculate(columns)
   simulations$model_frame$stress <- NULL
-  expect_identical(capture_predictors(columns, fitting_data[12:1, ]), expected)
-  expect_error(capture_predictors(columns), "stress.*not found.*data =")
-  expect_error(capture_predictors("missing", fitting_data), "missing.*not found")
+  expect_identical(calculate(columns, fitting_data[12:1, ]), expected)
+  expect_error(calculate(columns), "stress.*not found.*data =")
+  expect_error(calculate("missing", fitting_data), "missing.*not found")
   fitting_data$age[2] <- 99
-  expect_error(capture_predictors(columns, fitting_data), "age.*does not match")
+  expect_error(calculate(columns, fitting_data), "age.*does not match")
 })
 
 
@@ -481,69 +428,55 @@ test_that("individual residual figures retain composition, role and guidance", {
 
 test_that("role columns use their own observations and simulated references", {
   simulations <- distribution_check_fixture()
+  result <- check_residuals(simulations, dyad = "dyad", role = "role", plot = FALSE)
+  responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
+  rows_by_role <- split(seq_len(12), simulations$model_frame$role)
+  for (i in seq_along(rows_by_role)) {
+    rows <- rows_by_role[[i]]
+    values <- result$pit[rows, , drop = FALSE]
+    statistics <- result$compositions[[1]]$statistics[[i]]
+    expected_qq <- apply(values, 2, quantile, probs = seq(0, 1, length.out = 201))
+    expect_equal(statistics$qq, residual_curve_summary(expected_qq))
+    expected_histogram <- apply(values, 2, function(x)
+      hist(x, breaks = seq(0, 1, length.out = 21), plot = FALSE)$density)
+    expect_equal(statistics$histogram, residual_curve_summary(expected_histogram))
+    # Strict raw-response extrema remain visible even though PIT has no endpoints.
+    expect_equal(unname(statistics$outliers), colSums(strict_response_outliers(responses)[rows, ]))
+    expect_equal(statistics$mean_distance, colMeans(2 * abs(values - .5)))
+  }
+})
+
+
+test_that("residual plots draw each role's saved curves and scalar summaries", {
+  result <- check_residuals(distribution_check_fixture(), dyad = "dyad", role = "role", plot = FALSE)
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
-  panel <- ""
-  observed_qq <- simulated_qq <- histograms <- list()
-  histogram_values <- histogram_breaks <- NULL
+  observed <- bounds <- scalars <- list()
+  recording <- FALSE
   original_title <- graphics::title
   original_lines <- graphics::lines
   original_segments <- graphics::segments
-  original_hist <- graphics::hist
-  original_abline <- graphics::abline
   local_mocked_bindings(title = function(main = NULL, ...) {
-    panel <<- if (is.null(main)) "" else as.character(main)[1]
-    if (panel == "Outside simulated range (outliers)")
-      histograms[[length(histograms) + 1L]] <<- list(
-        name = panel, values = histogram_values, limits = graphics::par("usr")[1:2],
-        breaks = histogram_breaks
-      )
+    recording <<- isTRUE(grepl("Uniform QQ", main))
     original_title(main = main, ...)
   }, lines = function(x, y, ...) {
-    if (grepl("Uniform QQ", panel) && !missing(y))
-      observed_qq[[length(observed_qq) + 1L]] <<- unname(y)
+    if (recording && !missing(y)) observed[[length(observed) + 1L]] <<- y
     if (missing(y)) original_lines(x, ...) else original_lines(x, y, ...)
   }, segments = function(x0, y0, x1, y1, ...) {
-    if (grepl("Uniform QQ", panel))
-      simulated_qq[[length(simulated_qq) + 1L]] <<- unname(rbind(y0, y1))
+    if (recording) bounds[[length(bounds) + 1L]] <<- unname(rbind(y0, y1))
     original_segments(x0, y0, x1, y1, ...)
-  }, hist = function(x, ...) {
-    histogram_values <<- x
-    histogram <- original_hist(x, ...)
-    histogram_breaks <<- histogram$breaks
-    histogram
-  }, abline = function(...) {
-    arguments <- list(...)
-    if (identical(panel, "Outside simulated range (outliers)") && !is.null(arguments$v)) {
-      marker <- if (identical(arguments$col, "#a12b35")) "observed" else "range"
-      histograms[[length(histograms)]][[marker]] <<- arguments$v
-    }
-    original_abline(...)
   }, .package = "graphics")
-
-  pit <- check_residuals(simulations, dyad = "dyad", role = "role", ask = FALSE)$pit
-  rows_by_role <- split(seq_len(12), simulations$model_frame$role)
-  expect_length(observed_qq, 2)
-  expect_length(simulated_qq, 2)
-  expect_identical(vapply(histograms, `[[`, "", "name"), rep("Outside simulated range (outliers)", 2))
-  for (i in seq_along(rows_by_role)) {
-    rows <- rows_by_role[[i]]
-    expected_qq <- apply(pit[rows, , drop = FALSE], 2, quantile,
-                         probs = seq(0, 1, length.out = 201))
-    expect_equal(observed_qq[[i]], unname(expected_qq[, 1]))
-    qq <- residual_curve_summary(expected_qq)
-    expect_equal(simulated_qq[[i]], unname(rbind(qq$lower, qq$upper)))
-    # Strict raw-response extrema remain visible even though PIT has no endpoints.
-    responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
-    expected <- colSums(strict_response_outliers(responses)[rows, ])
-    histogram <- histograms[[i]]
-    expect_equal(unname(histogram$values), unname(expected[-1]))
-    expect_equal(unname(histogram$observed), unname(expected[1]))
-    expect_equal(unname(histogram$range), simulated_rank_limits(expected[-1]))
-    expect_true(histogram$observed >= min(histogram$limits) &&
-                  histogram$observed <= max(histogram$limits))
-    expect_true(all(diff(histogram$breaks) == 1))
-  }
+  local_mocked_bindings(plot_check_statistic = function(values, ..., counts = FALSE) {
+    scalars[[length(scalars) + 1L]] <<- list(values = values, counts = counts)
+    graphics::plot.new()
+  })
+  plot(result, ask = FALSE)
+  statistics <- result$compositions[[1]]$statistics
+  expect_equal(observed, unname(lapply(statistics, function(x) x$qq$observed)))
+  expect_equal(bounds, unname(lapply(statistics, function(x) rbind(x$qq$lower, x$qq$upper))))
+  expected <- c(lapply(statistics, `[[`, "outliers"), lapply(statistics, `[[`, "mean_distance"))
+  expect_equal(lapply(scalars, `[[`, "values"), unname(expected))
+  expect_identical(vapply(scalars, `[[`, logical(1), "counts"), c(TRUE, TRUE, FALSE, FALSE))
 })
 
 
@@ -705,11 +638,12 @@ test_that("fallback quartile offsets stay visible on small and clustered scales"
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
   observed_x <- interval_x <- list()
-  recording <- FALSE
+  recording <- filled_pattern <- FALSE
   inside_limits <- TRUE
   original_title <- graphics::title
   original_lines <- graphics::lines
   original_segments <- graphics::segments
+  original_polygon <- graphics::polygon
   visible <- function(x) {
     limits <- graphics::par("usr")[1:2]
     all(x >= limits[1] & x <= limits[2])
@@ -729,6 +663,9 @@ test_that("fallback quartile offsets stay visible on small and clustered scales"
       inside_limits <<- inside_limits && visible(c(x0, x1))
     }
     original_segments(x0, y0, x1, y1, ...)
+  }, polygon = function(x, y = NULL, ...) {
+    if (recording) filled_pattern <<- TRUE
+    original_polygon(x, y, ...)
   }, .package = "graphics")
 
   scales <- list(
@@ -750,6 +687,8 @@ test_that("fallback quartile offsets stay visible on small and clustered scales"
     check_residuals(simulations, role = NULL, predictors = "Edge", ask = FALSE)
     expect_equal(lengths(observed_x), rep(i, 3))
     expect_equal(observed_x, interval_x)
+    expect_true(all(observed_x[[1]] < observed_x[[2]] & observed_x[[2]] < observed_x[[3]]))
+    expect_false(filled_pattern)
     expect_true(inside_limits)
   }
 })
