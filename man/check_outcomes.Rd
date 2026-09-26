@@ -75,12 +75,14 @@ Blue ranges show the middle 95\% for each category separately. Other outcomes sh
 the proportion at or below each outcome value, for the observations and up to
 30 simulated datasets.
 
-The remaining rows compare response variability (variance of outcome minus
-prediction), the largest absolute deviation from prediction, and zero counts
+The remaining rows compare the SD (standard deviation) of outcome minus
+prediction, the largest absolute deviation from prediction, and zero counts
 where relevant. Each blue histogram shows simulated values; the red line shows
 the observed value. A red line far to the right or left means more or less than
 the model usually produces. Dashed lines mark the middle 95\%.
-Some departures occur by chance. Variance needs at least two observations.
+Some departures occur by chance. SD needs at least two observations.
+For complete cross-sectional dyads with distinct roles, these SDs match the
+default role SDs in \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 Use a tall plotting window to keep all rows readable.
 }
 

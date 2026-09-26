@@ -3,7 +3,7 @@
 * Changed the package license from MIT to GPL-3.
 
 * Added experimental `check_residuals()` for simulated PIT residuals and
-  `check_outcomes()` for response distributions, variability, extremes, and
+  `check_outcomes()` for response distributions, SDs, extremes, and
   zero counts. Both reuse complete simulated datasets, retain partner and time
   dependence in their references, separate dyad compositions and roles, and
   report no p-values. Residual panels include all six checks; additional predictor

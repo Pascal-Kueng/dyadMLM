@@ -76,7 +76,7 @@ the horizontal lines at 0.25, 0.50 and 0.75 are guides.
 ### Check outcomes
 
 `check_zeros = TRUE` includes zero counts. The call produces one complete panel:
-the raw outcome distribution, variability and largest deviations after
+the raw outcome distribution, SDs and largest deviations after
 subtracting predictions, and zero counts.
 
 ```{r outcome, fig.alt="Complete panels produced by check_outcomes"}
@@ -87,7 +87,7 @@ check_outcomes(
 ```
 
 The Gaussian model generates negative values, misses the male zeros, and
-understates the largest deviations from predictions. Its common variance is
+understates the largest deviations from predictions. Its common SD is
 too large for female responses and too small for male responses.
 
 ### Check partner dependence
@@ -102,10 +102,11 @@ check_partner_dependence(
 )
 ```
 
-The role SDs and mean–difference correlation reveal unequal variability, while
-the partner correlation agrees reasonably well. Omitting the difference random
-effect does not by itself force a mismatch: the shared intercept and
-observation-level noise can reproduce positive partner correlation.
+Here the role SDs repeat the outcome check. The mean–difference correlation also
+reveals unequal variability, while the partner correlation agrees reasonably
+well. Omitting the difference random effect does not by itself force a mismatch:
+the shared intercept and observation-level noise can reproduce positive
+partner correlation.
 
 For comparison, request the same panel for raw outcomes:
 

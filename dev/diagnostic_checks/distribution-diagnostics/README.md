@@ -38,8 +38,8 @@ Residual pages show a PIT QQ plot, PIT histogram, PIT quartiles and distance
 across predicted outcomes, the number of outcomes outside their simulation
 reference range, and mean PIT distance. The QQ plot and histogram are two views
 of the same distribution; agreement is not independent evidence.
-Outcome pages show the raw response distribution, variability,
-largest deviations, and relevant zero counts. Variability and deviations are
+Outcome pages show the raw response distribution, SDs,
+largest deviations, and relevant zero counts. SDs and deviations are
 calculated after subtracting the same model predictions from each dataset.
 They include random effects, so variability does not isolate the model's residual
 variance or dispersion parameter.

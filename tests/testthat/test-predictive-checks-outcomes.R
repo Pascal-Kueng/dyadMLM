@@ -11,7 +11,7 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
   original_abline <- graphics::abline
   local_mocked_bindings(title = function(main = NULL, ...) {
     title <- sub("\n.*", "", main)
-    if (!is.null(main) && title %in% c("Response variance", "Largest absolute deviation"))
+    if (!is.null(main) && title %in% c("Response SD", "Largest absolute deviation"))
       histograms[[length(histograms) + 1L]] <<- list(
         name = title, values = histogram_values, limits = graphics::par("usr")[1:2]
       )
@@ -37,13 +37,13 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
   expect_identical(.Random.seed, random_state)
   checks <- c("Response variability", "Largest absolute deviation")
   expect_identical(vapply(histograms, `[[`, "", "name"),
-    rep(c("Response variance", "Largest absolute deviation"), each = 2))
+    rep(c("Response SD", "Largest absolute deviation"), each = 2))
   rows_by_role <- split(seq_len(12), simulations$model_frame$role)
   for (i in seq_along(rows_by_role)) {
     rows <- rows_by_role[[i]]
     responses <- rbind(simulations$observed_response[rows], simulations$simulated_responses[, rows])
     deviations <- sweep(responses, 2, simulations$predicted_response[rows])
-    expected <- rbind(apply(deviations, 1, var), apply(abs(deviations), 1, max))
+    expected <- rbind(apply(deviations, 1, sd), apply(abs(deviations), 1, max))
     expect_identical(rownames(result$value$compositions[[1]]$statistics[[i]]), checks)
     expect_equal(unname(result$value$compositions[[1]]$statistics[[i]]), unname(expected))
     for (j in seq_along(checks)) {
@@ -54,6 +54,18 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
       expect_true(histogram$observed >= min(histogram$limits) &&
                     histogram$observed <= max(histogram$limits))
     }
+  }
+})
+
+
+test_that("outcome SDs match partner role SDs for complete distinct-role dyads", {
+  simulations <- distribution_check_fixture()
+  simulations$observed_response[1] <- simulations$observed_response[1] + 1
+  outcomes <- check_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE)
+  partners <- check_partner_dependence(simulations, dyad = "dyad", role = "role", plot = FALSE)
+  for (role in c("A", "B")) {
+    expect_equal(unname(outcomes$compositions[[1]]$statistics[[role]]["Response variability", ]),
+                 partners$compositions$statistics[[1]][[paste0("SD (", role, ")")]])
   }
 })
 
@@ -143,7 +155,7 @@ test_that("zero-count panels are automatic and handle constant references", {
   original_abline <- graphics::abline
   local_mocked_bindings(title = function(main = NULL, ...) {
     title <- sub("\n.*", "", main)
-    if (!is.null(main) && title %in% c("Response variance", "Largest absolute deviation", "Number of zeros"))
+    if (!is.null(main) && title %in% c("Response SD", "Largest absolute deviation", "Number of zeros"))
       histograms[[length(histograms) + 1L]] <<- list(
         name = title, values = histogram_values, limits = graphics::par("usr")[1:2],
         breaks = histogram_breaks
@@ -169,7 +181,7 @@ test_that("zero-count panels are automatic and handle constant references", {
   # The default call needs no plot flags, and continuous data need no zero panel.
   expect_length(zero_panels(simulations), 0)
   expect_identical(vapply(histograms, `[[`, "", "name"),
-    c("Response variance", "Largest absolute deviation"))
+    c("Response SD", "Largest absolute deviation"))
   observed_zero <- simulations
   observed_zero$observed_response[1] <- 0
   panel <- zero_panels(observed_zero)[[1]]

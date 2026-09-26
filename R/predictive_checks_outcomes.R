@@ -32,12 +32,14 @@
 #' the proportion at or below each outcome value, for the observations and up to
 #' 30 simulated datasets.
 #'
-#' The remaining rows compare response variability (variance of outcome minus
-#' prediction), the largest absolute deviation from prediction, and zero counts
+#' The remaining rows compare the SD (standard deviation) of outcome minus
+#' prediction, the largest absolute deviation from prediction, and zero counts
 #' where relevant. Each blue histogram shows simulated values; the red line shows
 #' the observed value. A red line far to the right or left means more or less than
 #' the model usually produces. Dashed lines mark the middle 95%.
-#' Some departures occur by chance. Variance needs at least two observations.
+#' Some departures occur by chance. SD needs at least two observations.
+#' For complete cross-sectional dyads with distinct roles, these SDs match the
+#' default role SDs in [check_partner_dependence()].
 #' Use a tall plotting window to keep all rows readable.
 #'
 #' @section Scope:
@@ -91,7 +93,7 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
     composition$statistics <- lapply(composition$rows, function(rows) {
       if (!length(rows)) return(NULL)
       statistics <- rbind(
-        `Response variability` = apply(centred[rows, , drop = FALSE], 2, stats::var),
+        `Response variability` = apply(centred[rows, , drop = FALSE], 2, stats::sd),
         `Largest absolute deviation` = apply(abs(centred[rows, , drop = FALSE]), 2, max)
       )
       if (include_zeros) statistics <- rbind(statistics,
@@ -172,11 +174,11 @@ plot.dyadMLM_outcome_check <- function(x, ask = NULL, panels = TRUE, ...) {
         plot_outcome_distribution(composition$distribution, role)
       } else {
         plot_check_statistic(composition$statistics[[role]][check, ], switch(check,
-          "Response variability" = "Response variance\n(variation after subtracting predictions)",
+          "Response variability" = "Response SD\n(after subtracting predictions)",
           "Largest absolute deviation" = "Largest absolute deviation\n(biggest gap from prediction)",
           "Number of zeros\n(excess or missing zeros)"),
           xlab = switch(check,
-            "Response variability" = "Variance of outcome minus prediction",
+            "Response variability" = "SD of outcome minus prediction",
             "Largest absolute deviation" = "Absolute difference from prediction",
             "Number of observations"), counts = check == "Number of zeros",
           sub = paste("Red should usually lie between the dashed limits.", switch(check,
