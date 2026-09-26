@@ -66,10 +66,11 @@
 #' three quartiles treated together. They use a nominal 95% extreme-rank-length
 #' envelope; coverage is not simultaneous across roles, predictors, or pages.
 #' Scalar rows show simulated values as a blue histogram and the observed value
-#' as a red line; dashed limits use simulation order statistics. Ties are retained
-#' at the limits. Fitting can make these references conservative or biased.
+#' as a red line; dashed limits use simulation order statistics. Values exactly on
+#' a limit count as inside. Because the model was fitted to these same data,
+#' the references can make departures look smaller or larger.
 #' The lines at 0.25, 0.50 and 0.75 are visual guides. Judge the red quartiles
-#' against their matching blue bands, especially after centring.
+#' against their matching blue bands.
 #'
 #' Each additional predictor gets a page with quartile and distance plots. Numeric
 #' predictors with many values use up to eight bins, chosen within each role.

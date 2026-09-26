@@ -46,7 +46,7 @@ Both models used `closeness ~ gender + provided_support + (1 | coupleID)`;
 the ILD model also included `(1 | personID)`. Simulation and PIT seeds were
 260926 and 260927. These timings describe one local run. Rendered examples are
 linked in the [development guide](README.md#reproduce-the-examples).
-Latest validation: 2,509 test assertions passed; ERL matched GET in 24 cases,
+Latest validation: 2,507 test assertions passed; ERL matched GET in 24 cases,
 and 201/1,001-curve cutoff checks passed. `R CMD check` was OK, with tests run
 separately and manuals/vignettes skipped.
 

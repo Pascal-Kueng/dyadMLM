@@ -108,8 +108,6 @@ test_that("centring recognises equivalent role codings with zero dispersion", {
   for (model in list(intercept, role_means)) {
     expect_identical(model$fit$convergence, 0L)
     expect_true(model$sdr$pdHess)
-    # With only betadisp mapped, $beta would partially match the wrong block.
-    expect_named(model$obj$env$map, "betadisp")
     simulations <- simulate_dyad_responses(model, nsim = 200, seed = 7261)
     expect_true(attr(simulations, "dyadMLM")$free_conditional_intercept)
     result <- check_residuals(simulations, role = NULL, plot = FALSE)

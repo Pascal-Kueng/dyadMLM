@@ -363,7 +363,7 @@ test_that("unobserved count values show simulations without an artificial red ze
     original_mtext(text, ...)
   }, .package = "graphics")
   plot_outcome_distribution(distribution, 1)
-  expect_identical(labels[other], "Other\nvalues")
+  expect_identical(labels[other], "Other")
   expect_true(is.na(heights[other]))
   expect_true(is.na(marks[other]))
   expect_equal(heights[-other], distribution$roles[[1]]$observed[-other])

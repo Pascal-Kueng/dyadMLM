@@ -198,7 +198,7 @@ plot_outcome_distribution <- function(distribution, role) {
     # This group excludes observed values by definition; do not compare its zero.
     if (isTRUE(distribution$has_other_values)) {
       observed[length(observed)] <- NA_real_
-      labels[length(labels)] <- "Other\nvalues"
+      labels[length(labels)] <- "Other"
     }
     positions <- graphics::barplot(observed, names.arg = labels,
       col = check_colours$observed_fill, border = check_colours$observed,
