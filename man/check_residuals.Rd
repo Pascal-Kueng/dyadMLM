@@ -57,8 +57,7 @@ Invisibly returns a \code{dyadMLM_residual_check} list with the \code{pit} matri
 and calculated summaries in \code{compositions}. PIT rows are fitted observations;
 columns are observed data followed by all simulated datasets. This matrix
 uses about 77 MiB for 10,080 observations and 1,000 simulations. The \code{dyadMLM}
-attribute records whether PIT was centred in \code{pit_centered}. \code{uniformity}
-retains the KS distances for each panel; these are not plotted.
+attribute records whether PIT was centred in \code{pit_centered}.
 Save it with \code{plot = FALSE} and draw it later with \code{plot(result)}.
 Graphics settings are restored afterwards.
 }

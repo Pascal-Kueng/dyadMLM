@@ -15,8 +15,9 @@
 * Residual checks now rank observed data and all simulations together, centre
   whole datasets when the conditional model can freely shift its overall location,
   including models with separate role means or `dispformula = ~0`, and use global
-  curve envelopes within each panel. Mean PIT distance replaces the plotted KS
-  statistic; a 10-bin histogram provides a second view of the QQ distribution. Strict
+  curve envelopes within each panel. Mean PIT distance replaces the KS statistic;
+  unused KS distances are no longer calculated or saved as `uniformity`.
+  A 10-bin histogram provides a second view of the QQ distribution. Strict
   outlier counts use the original responses. At least 200 simulations are now
   required for residual checks; 1,000 are recommended. `seed = NULL` advances the
   caller's RNG. Count-distribution bars use the observed categories and include

@@ -2,6 +2,9 @@ check_colours <- list(observed = "#a12b35", observed_fill = "#f2d3d6",
                       simulated = "#bcd7e8", simulation_line = "#7fa7be",
                       reference = "grey40")
 
+check_footer <- paste("Red: observed. Blue: simulated.",
+  "Some departures occur by chance; these are descriptive checks.", sep = "\n")
+
 # Restore paging in the calling plot method, including after a plotting error.
 local_check_paging <- function(ask, panels, number_of_figures) {
   if (!is.null(ask) && !rlang::is_bool(ask))
@@ -94,7 +97,7 @@ plot_check_role_page <- function(composition, rows, title, draw) {
   plot_check_page(composition$label, paste(title, check_counts(composition), sep = " - "),
     c(rows, length(role_rows)), draw,
     column_titles = paste0(names(role_rows), " (n = ", lengths(role_rows), ")"),
-    footer = "Red: observed data. Blue: model simulations. Dashed histogram limits contain the middle 95%.\nSome departures occur by chance; these are descriptive checks, not significance tests.")
+    footer = check_footer)
 }
 
 # Draw one composition page. `draw` is evaluated inside the temporary layout;

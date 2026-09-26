@@ -27,8 +27,9 @@ are estimated when fitting. Exact formulas, seeds and fit results are in
 
 The script verified all of the following:
 
-- The complete saved results are identical after removing only the histogram
-  fields. This includes PITs, QQ envelopes, pattern curves and scalar summaries.
+- The saved results are identical after excluding histogram fields and the
+  unused KS distances removed in a later cleanup. This includes PITs, QQ
+  envelopes, pattern curves and displayed scalar summaries.
 - Every 10-bin density equals the average of its two adjacent 20-bin densities,
   for the observed data and every simulation. Each density integrates to one
   within numerical tolerance (`1e-12`).
@@ -87,8 +88,9 @@ summary. Function help was regenerated.
 The NB2 and Tweedie worked examples and all three composition examples were
 regenerated. The changed distribution pages were visually inspected, including
 pooled and separate-role layouts: all ten points and intervals are correctly
-positioned, both PIT endpoints are visible, and labels do not overlap. Pattern,
-outcome and partner figures remained byte-for-byte unchanged. A separate reviewer
+positioned, both PIT endpoints are visible, and labels do not overlap. The bin
+change left pattern, outcome and partner figures unchanged; a later cleanup
+shortened their shared footer without changing plotted values. A separate reviewer
 checked the report's numbers against the CSVs and inspected the composition pages.
 
 Run these commands from the package folder, sequentially:

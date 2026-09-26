@@ -10,10 +10,13 @@ stopifnot(is.null(attr(old_source, "status")))
 old <- new.env(parent = asNamespace("dyadMLM"))
 eval(parse(text = old_source), envir = old)
 envelope <- getFromNamespace("residual_curve_summary", "dyadMLM")
-without_histogram <- function(result) {
+comparable_results <- function(result) {
   for (i in seq_along(result$compositions))
-    for (j in seq_along(result$compositions[[i]]$statistics))
+    for (j in seq_along(result$compositions[[i]]$statistics)) {
       result$compositions[[i]]$statistics[[j]]$histogram <- NULL
+      # KS distances were later removed; they were never plotted.
+      result$compositions[[i]]$statistics[[j]]$uniformity <- NULL
+    }
   result
 }
 summary_rows <- bin_rows <- fit_rows <- list()
@@ -51,7 +54,7 @@ for (example in examples) {
                                   predictors = predictor, seed = 123, plot = FALSE)
     after <- check_residuals(simulations, dyad = dyad, role = role, data = model_data,
                              predictors = predictor, seed = 123, plot = FALSE)
-    stopifnot(identical(without_histogram(before), without_histogram(after)),
+    stopifnot(identical(comparable_results(before), comparable_results(after)),
               length(after$compositions) == 1L)
     composition <- after$compositions[[1]]
     comparison <- list()

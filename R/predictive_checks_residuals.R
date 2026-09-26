@@ -32,8 +32,7 @@
 #'   and calculated summaries in `compositions`. PIT rows are fitted observations;
 #'   columns are observed data followed by all simulated datasets. This matrix
 #'   uses about 77 MiB for 10,080 observations and 1,000 simulations. The `dyadMLM`
-#'   attribute records whether PIT was centred in `pit_centered`. `uniformity`
-#'   retains the KS distances for each panel; these are not plotted.
+#'   attribute records whether PIT was centred in `pit_centered`.
 #'   Save it with `plot = FALSE` and draw it later with `plot(result)`.
 #'   Graphics settings are restored afterwards.
 #'
@@ -219,11 +218,6 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   # Matrices retain complete datasets in columns; subset only their rows.
   probabilities <- seq(0, 1, length.out = 201)
   breaks <- seq(0, 1, length.out = 11)
-  ks_distance <- function(x) {
-    ordered <- sort(x)
-    ranks <- seq_along(x)
-    max(ranks / length(x) - ordered, ordered - (ranks - 1) / length(x))
-  }
   for (i in seq_along(compositions)) {
     role_rows <- compositions[[i]]$rows
     compositions[[i]]$statistics <- lapply(role_rows, function(rows) {
@@ -234,8 +228,7 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
         histogram = residual_curve_summary(apply(values, 2, function(x)
           graphics::hist(x, breaks, plot = FALSE)$density)),
         outliers = colSums(outliers[rows, , drop = FALSE]),
-        mean_distance = colMeans(2 * abs(values - .5)),
-        uniformity = apply(values, 2, ks_distance)
+        mean_distance = colMeans(2 * abs(values - .5))
       )
     })
     compositions[[i]]$patterns <- lapply(c(list(predicted), predictors), function(predictor) {

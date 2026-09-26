@@ -646,8 +646,7 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
     composition_statistics <- composition$statistics[[1]][, -1]
     page_title <- paste("Partner dependence", paste0(composition$n_pairs, " of ", x$n_pairs,
                         " usable dyads"), x$response, sep = " - ")
-    footer <- paste0(n_simulations, " simulations. Red: observed. Blue: simulations. ",
-                     "Dashed lines: middle 95%. No significance tests.")
+    footer <- paste(n_simulations, "simulations.", check_footer)
     draw_statistics <- function() {
       # Match observed values and simulations by position, since names may repeat.
       for (statistic_index in seq_along(composition_statistics)) {
