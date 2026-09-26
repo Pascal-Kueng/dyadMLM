@@ -354,9 +354,9 @@ test_that("every residual page identifies its composition and page contents", {
     original_mtext(text, ...)
   }, .package = "graphics")
   cases <- list(
-    list(arguments = list(), pages = c("Residual distribution", "Predicted outcome")),
+    list(arguments = list(), pages = c("Residual distribution", "Residual patterns: predicted outcome")),
     list(arguments = list(predictors = "X"),
-         pages = c("Residual distribution", "Predicted outcome", "X"))
+         pages = c("Residual distribution", "Residual patterns: predicted outcome", "Residual patterns: X"))
   )
   for (case in cases) {
     margins <- list()
@@ -422,7 +422,7 @@ test_that("individual residual figures retain composition, role and guidance", {
   }
   expect_equal(as.integer(table(roles)), c(8L, 8L))
   expect_identical(sub(" - .*", "", page_titles),
-    rep(c("Residual distribution", "Predicted outcome", "age"), c(8, 4, 4)))
+    rep(c("Residual distribution", "Residual patterns: predicted outcome", "Residual patterns: age"), c(8, 4, 4)))
 })
 
 

@@ -9,21 +9,9 @@
   report no p-values. Residual distributions and patterns across predicted
   outcomes have separate pages; additional predictor pages are optional.
   Checks can be saved with `plot = FALSE` and plotted later.
+  Residual checks need at least 200 simulations; 1,000 are recommended.
   PIT calculations are internal, following Florian Hartig's DHARMa approach and
   Dunn and Smyth's (1996) randomized quantile residuals; DHARMa is not required.
-
-* Residual checks now rank observed data and all simulations together, centre
-  whole datasets when the conditional model can freely shift its overall location,
-  including models with separate role means or `dispformula = ~0`, and use global
-  curve envelopes within each panel. Mean PIT distance replaces the KS statistic;
-  unused KS distances are no longer calculated or saved as `uniformity`.
-  A 10-bin histogram provides a second view of the QQ distribution. Strict
-  outlier counts use the original responses. At least 200 simulations are now
-  required for residual checks; 1,000 are recommended. `seed = NULL` advances the
-  caller's RNG. Count-distribution bars use the observed categories and include
-  an "Other values" range for simulated values not observed, without an observed
-  comparison. Scalar reference limits use simulation order statistics
-  consistently across checks.
 
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),

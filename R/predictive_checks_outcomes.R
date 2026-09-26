@@ -93,7 +93,7 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
     composition$statistics <- lapply(composition$rows, function(rows) {
       if (!length(rows)) return(NULL)
       statistics <- rbind(
-        `Response variability` = apply(centred[rows, , drop = FALSE], 2, stats::sd),
+        `Response SD` = apply(centred[rows, , drop = FALSE], 2, stats::sd),
         `Largest absolute deviation` = apply(abs(centred[rows, , drop = FALSE]), 2, max)
       )
       if (include_zeros) statistics <- rbind(statistics,
@@ -174,15 +174,15 @@ plot.dyadMLM_outcome_check <- function(x, ask = NULL, panels = TRUE, ...) {
         plot_outcome_distribution(composition$distribution, role)
       } else {
         plot_check_statistic(composition$statistics[[role]][check, ], switch(check,
-          "Response variability" = "Response SD\n(after subtracting predictions)",
+          "Response SD" = "Response SD\n(after subtracting predictions)",
           "Largest absolute deviation" = "Largest absolute deviation\n(biggest gap from prediction)",
           "Number of zeros\n(excess or missing zeros)"),
           xlab = switch(check,
-            "Response variability" = "SD of outcome minus prediction",
+            "Response SD" = "SD of outcome minus prediction",
             "Largest absolute deviation" = "Absolute difference from prediction",
             "Number of observations"), counts = check == "Number of zeros",
           sub = paste("Red should usually lie between the dashed limits.", switch(check,
-            "Response variability" = "Beyond right: more remaining variation; left: less.",
+            "Response SD" = "Beyond right: more remaining variation; left: less.",
             "Largest absolute deviation" = "Beyond right: a bigger gap than the model usually produces.",
             "Beyond right: more zeros than predicted; left: fewer."), sep = "\n"))
       }

@@ -109,19 +109,19 @@ for the settings, results, limits, and large-data benchmark.
 
 ## Reproduce the examples
 
-The [NB2-to-Gaussian example](results/nbinom2-gaussian/index.html) fits an
+The [NB2-to-Gaussian script](nbinom2-gaussian.R) fits an
 independent Gaussian model to negative-binomial dyads with a shared dyad effect.
 It shows the separate residual pages, outcome checks and the missing partner
-dependence. Run [nbinom2-gaussian.R](nbinom2-gaussian.R) to reproduce it.
+dependence.
 
-The [full Tweedie-to-Gaussian example](results/tweedie-gaussian/index.html) starts
+The [Tweedie-to-Gaussian script](tweedie-gaussian.R) starts
 with pooled residual checks, then checks roles and a predictor. It shows the
 calls to all three checks and every page they produce. The
 [executable example](../tweedie-gaussian-example.Rmd) is also included directly
 in the development vignette. It uses
 the earlier study's first Tweedie dataset (120 dyads, seed 100104) and 2,000
 simulations from an exchangeable Gaussian model without the difference random
-effect. Run [tweedie-gaussian.R](tweedie-gaussian.R) to reproduce it.
+effect.
 
 Generate the full tail-shape gallery on demand from the package folder:
 
@@ -129,14 +129,8 @@ Generate the full tail-shape gallery on demand from the package folder:
 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 Rscript dev/diagnostic_checks/distribution-diagnostics/tail-shape-comparison.R
 ```
 
-Run [composition-layout.R](composition-layout.R) the same way for the three
-compositions:
-
-| Composition | Residuals | Outcomes | Partner dependence |
-|---|---|---|---|
-| Female-female | [Distribution](results/residual-composition-01.svg), [patterns](results/residual-composition-02.svg) | [Plots](results/outcome-composition-01.svg) | [Plots](results/partner-composition-01.svg) |
-| Female-male | [Distribution](results/residual-composition-03.svg), [patterns](results/residual-composition-04.svg) | [Plots](results/outcome-composition-02.svg) | [Plots](results/partner-composition-02.svg) |
-| Male-male | [Distribution](results/residual-composition-05.svg), [patterns](results/residual-composition-06.svg) | [Plots](results/outcome-composition-03.svg) | [Plots](results/partner-composition-03.svg) |
+Run [composition-layout.R](composition-layout.R) the same way for residual,
+outcome and partner plots of female-female, female-male and male-male compositions.
 
 The tail-shape script fits Gaussian models to four datasets:
 
@@ -149,8 +143,8 @@ The first two illustrate a distribution mismatch; the others are comparison
 cases with the same sample size. The composition examples demonstrate the layout
 using a simplified model; they are not correctly specified controls. These examples
 do not establish how reliably the checks detect model problems.
-The composition plots and complete worked examples are kept for review. Tail-shape
-plots are generated in `results/` and ignored by Git. All development examples are
+Rendered figures and HTML reports are generated in `results/` and ignored by Git.
+Scripts, reports and numerical results remain tracked. All development examples are
 excluded from the built R package. `results/` retains package versions and
 fit summaries. Its tail ratio is the 1st-to-99th percentile range divided by the
 interquartile range, after subtracting fixed-effect predictions. Its references

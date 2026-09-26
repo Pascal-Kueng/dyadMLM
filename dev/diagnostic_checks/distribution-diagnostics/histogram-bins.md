@@ -6,9 +6,9 @@ count, so existing 20-bin results still plot correctly. The x-axis covers 0–1.
 
 ## Paired comparison
 
-[histogram-bins.R](histogram-bins.R) compares the previous implementation at
-`f222e122` with the updated function. Each pair uses exactly the same fitted model,
-simulated responses and PIT seed (123). All four examples use whole-dataset
+[histogram-bins.R](histogram-bins.R) compares 20 and 10 bins using the same fitted
+model, simulated responses and PIT matrix (seed 123). It needs no earlier Git
+commits. All four examples use whole-dataset
 centring and separate role panels.
 
 | Example | Observations per role | Simulations | Fitted model |
@@ -25,11 +25,10 @@ SD 1. NB1 log means are `0.7 + 0.3 * predictor`, with dispersion 1. These parame
 are estimated when fitting. Exact formulas, seeds and fit results are in
 [fits.csv](results/histogram-bins/fits.csv).
 
-The script verified all of the following:
+The original code comparison confirmed unchanged PITs, QQ envelopes, pattern
+curves and displayed scalar summaries. The current script verifies:
 
-- The saved results are identical after excluding histogram fields and the
-  unused KS distances removed in a later cleanup. This includes PITs, QQ
-  envelopes, pattern curves and displayed scalar summaries.
+- The ten-bin histogram summary matches the saved `check_residuals()` result.
 - Every 10-bin density equals the average of its two adjacent 20-bin densities,
   for the observed data and every simulation. Each density integrates to one
   within numerical tolerance (`1e-12`).
@@ -65,11 +64,9 @@ upper bounds from 1.7 to 2.0. These are the measured limits for this example,
 not universal limits. Every ten-bin panel has a positive lower bound in every bin.
 
 Full values are in [summary.csv](results/histogram-bins/summary.csv) and
-[bins.csv](results/histogram-bins/bins.csv). Comparison figures use matching axes
-within each role: [NB2](results/histogram-bins/nbinom2-gaussian.png),
-[Tweedie](results/histogram-bins/tweedie-gaussian.png),
-[Gaussian](results/histogram-bins/gaussian-correct.png), and
-[NB1](results/histogram-bins/nbinom1-correct.png). Blue rectangles and red horizontal
+[bins.csv](results/histogram-bins/bins.csv). Run [histogram-bins.R](histogram-bins.R)
+to generate the four comparison figures in `results/histogram-bins/`.
+They use matching axes within each role. Blue rectangles and red horizontal
 marks show the limits and observed densities; the public plots use intervals
 and dots for these same quantities.
 

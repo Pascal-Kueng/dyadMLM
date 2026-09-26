@@ -2,7 +2,7 @@ check_colours <- list(observed = "#a12b35", observed_fill = "#f2d3d6",
                       simulated = "#bcd7e8", simulation_line = "#7fa7be",
                       reference = "grey40")
 
-check_footer <- paste("Red: observed. Blue: simulated.",
+check_footer <- paste("Red: observed. Blue: simulated. Limits and envelopes: 95% simulation references.",
   "These are descriptive checks. Some departures occur by chance.", sep = "\n")
 
 # Restore paging in the calling plot method, including after a plotting error.

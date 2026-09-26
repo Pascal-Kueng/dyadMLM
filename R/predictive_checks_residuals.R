@@ -362,7 +362,7 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
     } else for (curve_index in seq_along(curves))
       graphics::lines(x + offsets[curve_index], curves[[curve_index]]$observed,
                       type = if (smooth) "l" else if (connect) "b" else "p",
-                      pch = 16, cex = .65, lty = line_types[curve_index],
+                      pch = 16, cex = if (connect) .65 else 1, lty = line_types[curve_index],
                       lwd = if (quartiles && curve_index == 2) 2 else 1, col = check_colours$observed)
   }
   draw_pattern <- function(pattern, name = NULL, distance = FALSE) {
@@ -435,7 +435,7 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
     for (i in seq_along(composition$patterns)) {
       name <- if (i == 1L) NULL else x$predictors[i - 1L]
       plot_check_role_panels(composition, c(FALSE, TRUE),
-        if (is.null(name)) "Predicted outcome" else name,
+        paste("Residual patterns:", if (is.null(name)) "predicted outcome" else name),
         function(distance, role) draw_pattern(composition$patterns[[i]][[role]],
                                              name, distance), panels)
     }

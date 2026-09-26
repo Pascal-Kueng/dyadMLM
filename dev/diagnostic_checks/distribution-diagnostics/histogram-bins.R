@@ -5,20 +5,7 @@ pkgload::load_all(quiet = TRUE)
 base <- "dev/diagnostic_checks/distribution-diagnostics"
 output <- file.path(base, "results/histogram-bins")
 dir.create(output, recursive = TRUE, showWarnings = FALSE)
-old_source <- system2("git", c("show", "f222e122:R/predictive_checks_residuals.R"), stdout = TRUE)
-stopifnot(is.null(attr(old_source, "status")))
-old <- new.env(parent = asNamespace("dyadMLM"))
-eval(parse(text = old_source), envir = old)
 envelope <- getFromNamespace("residual_curve_summary", "dyadMLM")
-comparable_results <- function(result) {
-  for (i in seq_along(result$compositions))
-    for (j in seq_along(result$compositions[[i]]$statistics)) {
-      result$compositions[[i]]$statistics[[j]]$histogram <- NULL
-      # KS distances were later removed; they were never plotted.
-      result$compositions[[i]]$statistics[[j]]$uniformity <- NULL
-    }
-  result
-}
 summary_rows <- bin_rows <- fit_rows <- list()
 examples <- c("nbinom2-gaussian", "tweedie-gaussian", "gaussian-correct", "nbinom1-correct")
 for (example in examples) {
@@ -50,17 +37,14 @@ for (example in examples) {
     model <- glmmTMB::glmmTMB(formula, family = family, dispformula = ~1, data = model_data)
     simulations <- simulate_dyad_responses(model, nsim = nsim, seed = simulation_seed)
     predictor <- if (example == "nbinom2-gaussian") "support" else "predictor"
-    before <- old$check_residuals(simulations, dyad = dyad, role = role, data = model_data,
-                                  predictors = predictor, seed = 123, plot = FALSE)
-    after <- check_residuals(simulations, dyad = dyad, role = role, data = model_data,
-                             predictors = predictor, seed = 123, plot = FALSE)
-    stopifnot(identical(comparable_results(before), comparable_results(after)),
-              length(after$compositions) == 1L)
-    composition <- after$compositions[[1]]
+    result <- check_residuals(simulations, dyad = dyad, role = role, data = model_data,
+                              predictors = predictor, seed = 123, plot = FALSE)
+    stopifnot(length(result$compositions) == 1L)
+    composition <- result$compositions[[1]]
     comparison <- list()
     for (role in names(composition$rows)) {
       rows <- composition$rows[[role]]
-      pit <- after$pit[rows, , drop = FALSE]
+      pit <- result$pit[rows, , drop = FALSE]
       densities <- lapply(c(20L, 10L), function(bins) apply(pit, 2, function(values)
         hist(values, breaks = seq(0, 1, length.out = bins + 1L), plot = FALSE)$density))
       stopifnot(isTRUE(all.equal(densities[[2]],
@@ -71,16 +55,15 @@ for (example in examples) {
         bins <- c(20L, 10L)[k]
         values <- densities[[k]]
         curve <- envelope(values)
-        saved <- if (bins == 20L) before$compositions[[1]]$statistics[[role]]$histogram else
-          composition$statistics[[role]]$histogram
+        if (bins == 10L) stopifnot(identical(composition$statistics[[role]]$histogram, curve))
         outside <- values < curve$lower | values > curve$upper
         bank_fraction <- mean(colSums(outside) > 0L)
-        stopifnot(identical(saved, curve), max(abs(colSums(values) / bins - 1)) < 1e-12,
+        stopifnot(max(abs(colSums(values) / bins - 1)) < 1e-12,
                   bank_fraction <= .05)
         comparison[[role]][[k]] <- curve
         summary_rows[[length(summary_rows) + 1L]] <- data.frame(
           example, role, bins, n = length(rows), nsim,
-          centered = attr(after, "dyadMLM")$pit_centered,
+          centered = attr(result, "dyadMLM")$pit_centered,
           lower_min = min(curve$lower), lower_max = max(curve$lower),
           upper_min = min(curve$upper), upper_max = max(curve$upper),
           mean_width = mean(curve$upper - curve$lower),
@@ -124,15 +107,11 @@ summary <- do.call(rbind, summary_rows)
 write.csv(summary, file.path(output, "summary.csv"), row.names = FALSE)
 write.csv(do.call(rbind, bin_rows), file.path(output, "bins.csv"), row.names = FALSE)
 write.csv(do.call(rbind, fit_rows), file.path(output, "fits.csv"), row.names = FALSE)
-old_file <- tempfile(fileext = ".R")
-writeLines(old_source, old_file)
-sources <- c(old_file, "R/predictive_checks_residuals.R", "R/predictive_checks_envelopes.R",
+sources <- c("R/predictive_checks_residuals.R", "R/predictive_checks_envelopes.R",
              "R/predictive_checks_simulation.R", file.path(base, "histogram-bins.R"),
              file.path(base, "results", examples[1:2], "data.csv"))
 hashes <- tools::md5sum(sources)
-names(hashes)[1] <- "f222e122:R/predictive_checks_residuals.R"
 writeLines(trimws(c(capture.output(print(hashes)), "", capture.output(sessionInfo())), which = "right"),
            file.path(output, "session-info.txt"))
-unlink(old_file)
 stopifnot(all(vapply(fit_rows, function(x) x$convergence == 0L && x$pdHess, logical(1))))
 print(summary, row.names = FALSE)

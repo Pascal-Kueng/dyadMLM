@@ -14,7 +14,7 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
     rows <- rows_by_role[[i]]
     responses <- rbind(simulations$observed_response[rows], simulations$simulated_responses[, rows])
     deviations <- sweep(responses, 2, simulations$predicted_response[rows])
-    expected <- rbind(`Response variability` = apply(deviations, 1, sd),
+    expected <- rbind(`Response SD` = apply(deviations, 1, sd),
                       `Largest absolute deviation` = apply(abs(deviations), 1, max))
     expect_equal(unname(result$value$compositions[[1]]$statistics[[i]]), unname(expected))
     expect_identical(rownames(result$value$compositions[[1]]$statistics[[i]]), rownames(expected))
@@ -28,7 +28,7 @@ test_that("outcome SDs match partner role SDs for complete distinct-role dyads",
   outcomes <- check_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE)
   partners <- check_partner_dependence(simulations, dyad = "dyad", role = "role", plot = FALSE)
   for (role in c("A", "B")) {
-    expect_equal(unname(outcomes$compositions[[1]]$statistics[[role]]["Response variability", ]),
+    expect_equal(unname(outcomes$compositions[[1]]$statistics[[role]]["Response SD", ]),
                  partners$compositions$statistics[[1]][[paste0("SD (", role, ")")]])
   }
 })
@@ -99,7 +99,7 @@ test_that("outcome checks retain lone responses and accept one simulated dataset
                                               data = fitting_data, ask = FALSE))
     expect_named(result$compositions[[1]]$statistics, c("A", "B"))
     expect_equal(ncol(result$compositions[[1]]$statistics$A), 2)
-    if (length(rows) <= 2) expect_true(all(is.na(result$compositions[[1]]$statistics$A["Response variability", ])))
+    if (length(rows) <= 2) expect_true(all(is.na(result$compositions[[1]]$statistics$A["Response SD", ])))
     if (!2 %in% rows) expect_null(result$compositions[[1]]$statistics$B)
   }
   expect_error(check_outcomes(unclass(simulations)), "simulate_dyad_responses")
@@ -112,7 +112,7 @@ test_that("zero counts include every dataset and can be selected explicitly", {
   nsim <- nrow(simulations$simulated_responses)
   result <- check_outcomes(simulations, role = NULL, plot = FALSE)
   expect_identical(rownames(result$compositions[[1]]$statistics[[1]]),
-                   c("Response variability", "Largest absolute deviation"))
+                   c("Response SD", "Largest absolute deviation"))
 
   observed_zero <- simulations
   observed_zero$observed_response[1] <- 0
