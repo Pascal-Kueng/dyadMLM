@@ -193,6 +193,57 @@ component is correctly assigned, or validate model-based standard errors.
 Response-scale SDs and Pearson correlations are selected summaries; they do not
 characterize every form of non-Gaussian dependence.
 
+## Deferred numerical summaries
+
+Keep the first cross-sectional and ILD steps focused on visual checks and their
+existing descriptive table. The additions below are for later, not the current
+PR: no new discrepancy columns, ratios, p-values, or pass/fail rules yet.
+
+Use
+[`DHARMa::testGeneric()`](https://florianhartig.r-universe.dev/DHARMa/doc/manual.html#testGeneric)
+as the reference for designing and validating these features. It applies the
+same scalar summary to observed and simulated responses. Retain our raw or
+model-centred transformations, pairing rules, and full-model simulations with
+random effects redrawn. This is a comparison reference, not a commitment to
+replace our implementation or add a runtime dependency.
+
+- [ ] Add `observed - median(simulated)` as a signed difference in the
+  statistic's own units. For example, an observed correlation of 0.45 versus a
+  simulated median of 0.30 gives +0.15 correlation points. It describes size and
+  direction, not how unusual the result is; retain the plot and reference
+  interval for context. This difference is our proposed descriptive addition,
+  not DHARMa's ratio statistic.
+- [ ] Consider `observed / mean(simulated)` for SD/RMS when the simulated mean
+  is positive and not close to zero. This matches DHARMa's mean denominator,
+  not our displayed median. A ratio of 1.2 means 20% more SD/RMS, not 20% more
+  variance. Do not use ratios for signed correlations or covariances.
+- [ ] Evaluate optional tail summaries: the proportions of simulated statistics
+  at or below, and at or above, the observed value. DHARMa doubles the smaller
+  proportion and caps it at one for its two-sided p-value. It includes ties and
+  uses no finite-simulation `+1` correction. Consider that correction and
+  document any intentional difference from the reference; it does not fix
+  calibration issues caused by fitting the model to the same data.
+- [ ] Test ties, all-equal statistics, small simulation counts, and undefined
+  statistics. Do not derive a two-sided p-value directly from the current
+  observed-position column: all-equal values give position 1 but indicate no
+  departure. Retain the existing defined-only references, counts, warnings,
+  and errors for undefined observed or wholly undefined simulated statistics.
+  Any tail summary then describes only simulations where that statistic is
+  defined.
+- [ ] Before formal testing claims, validate the complete generate-fit-simulate
+  workflow under correct and misspecified models, across supported families,
+  raw/model-centred responses, and later ILD summaries. Assess false alarms and
+  detection, including the effect of examining many statistics or lags. Matching
+  DHARMa's calculation is not a guarantee of calibrated p-values for every
+  model and statistic.
+
+These summaries can reuse the existing response simulations. For the independent
+DHARMa comparison, also generate responses through
+`DHARMa::simulateResiduals(..., simulateREs = "unconditional", refit = FALSE)`
+with matched settings and the same summary definitions. The reference formulas
+are in DHARMa's
+[`testGeneric()` and `getP()` source](https://github.com/florianhartig/DHARMa/blob/master/DHARMa/R/tests.R).
+
 ## Validation and review
 
 Deterministic package tests cover:

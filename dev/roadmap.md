@@ -820,6 +820,9 @@ inflation.
   member and mean/half-difference summaries for interchangeable dyads.
 - Return descriptive observed values, simulated medians, middle 95% intervals,
   observed positions, omission counts, and predictive-reference histograms.
+- Keep the initial checks visual, backed by these descriptive summaries. Defer
+  new difference/ratio columns, p-values, and pass/fail rules to the later
+  numerical-summary work below.
 - Keep `brms`, ILD, generalized families, cross-validation, refitting, formal
   calibration, and parameter-uncertainty propagation outside this slice.
 
@@ -1009,6 +1012,29 @@ them as one release commitment.
   design rank, boundary covariance estimates, and row alignment.
 - Do not export diagnostic automation until false-positive behavior and the
   interpretation of every reported check are understood for supported models.
+
+#### Numerical summaries (deferred)
+
+Keep the first cross-sectional and ILD steps focused on plots and their existing
+descriptive summaries. Use
+[`DHARMa::testGeneric()`](https://florianhartig.r-universe.dev/DHARMa/doc/manual.html#testGeneric)
+as the reference for designing and validating later numerical features, without
+requiring a DHARMa wrapper or dependency.
+
+- [ ] Add observed minus simulated median to describe the size and direction of
+  a difference, especially for correlations.
+- [ ] Consider observed/simulated-mean ratios for SD/RMS only when the simulated
+  mean is positive and not close to zero; avoid ratios for signed correlations.
+- [ ] Evaluate tail summaries and optional two-sided p-values, including ties,
+  finite simulation counts, and undefined statistics.
+- [ ] Validate false-alarm rates under correct models and detection under
+  misspecified models, including multiple ILD lags, before formal testing claims.
+  Agreement with DHARMa alone does not establish validity for every model and
+  statistic.
+
+Reuse the existing response simulations. Details and the DHARMa comparison
+contract are in
+[`diagnostic_checks/README.md`](diagnostic_checks/README.md#deferred-numerical-summaries).
 
 ### Advanced ILD/EMA data infrastructure
 
