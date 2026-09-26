@@ -58,10 +58,11 @@ cover positions jointly within each panel, including all three quartiles, but no
 across roles or pages. Outcome category ranges remain pointwise. Scalar limits
 use simulation order statistics with ties retained at the limits.
 
-PIT uses observed data and all simulations symmetrically. When the model freely
-estimates a conditional-mean intercept, each complete dataset is median-centred
-on the normal-score scale before any grouping. The one resulting PIT matrix is
-used throughout; outlier counts use strict extrema of the original responses.
+PIT uses observed data and all simulations symmetrically. When the conditional
+mean has a free overall location, whether fitted as an intercept or separate
+role means, each complete dataset is median-centred on the normal-score scale
+before any grouping. Ordinal models remain uncentred. The one resulting PIT matrix
+is used throughout; outlier counts use strict extrema of the original responses.
 At least 200 simulations are required for residual checks; 1,000 are recommended.
 Fitted parameters stay fixed. Centring is an empirical adjustment, not a guarantee
 of exact calibration. Fitting can make references conservative or biased. With
@@ -93,7 +94,12 @@ when there are multiple figures on an interactive device; file output never paus
 [validate-envelopes.R](validate-envelopes.R) compares the global envelopes with
 GET, used only as a development reference. [calibration-check.R](calibration-check.R)
 checks the package implementation on known-parameter and fitted Gaussian and
-negative-binomial models. See [calibration-summary.md](calibration-summary.md)
+negative-binomial models. It also checks Gaussian role panels when the fitted
+model omits a role mean difference (A: -0.4, B: +0.4) or a residual SD difference
+(A: 0.6, B: 1.4), alongside matching correct-model role panels. It records rates,
+Monte Carlo standard errors, and fit warnings and convergence; these are examples,
+not fixed detection targets. Set `DYADMLM_CALIBRATION_OUTPUT` to save a pilot run
+separately. See [calibration-summary.md](calibration-summary.md)
 for the settings, results, limits, and large-data benchmark.
 
 ## Reproduce the examples

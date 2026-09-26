@@ -12,7 +12,8 @@
   Dunn and Smyth's (1996) randomized quantile residuals; DHARMa is not required.
 
 * Residual checks now rank observed data and all simulations together, centre
-  whole datasets when the model freely estimates an intercept, and use global
+  whole datasets when the conditional model can freely shift its overall location,
+  including models with separate role means or `dispformula = ~0`, and use global
   curve envelopes within each panel. Mean PIT distance replaces the plotted KS
   statistic; the histogram remains a second view of the QQ distribution. Strict
   outlier counts use the original responses. At least 200 simulations are now

@@ -145,15 +145,19 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   # glmmTMB ignores a zero component without fixed-effect coefficients.
   has_zero_inflation <- ncol(zero_inflation_model_matrix) > 0L
 
-  intercept <- match(
-    "(Intercept)", colnames(stats::model.matrix(model, component = "cond"))
-  )
-  coefficient_map <- model$obj$env$map$beta
-  # A fixed intercept or one tied to another coefficient cannot shift freely.
-  free_conditional_intercept <- !is.na(intercept) &&
-    (is.null(coefficient_map) ||
-       (!is.na(coefficient_map[intercept]) &&
-          sum(coefficient_map == coefficient_map[intercept], na.rm = TRUE) == 1L))
+  conditional_design <- as.matrix(stats::model.matrix(model, component = "cond"))
+  coefficient_map <- model$obj$env$map[["beta"]]
+  if (!is.null(coefficient_map)) {
+    # Tied coefficients move together; fixed coefficients contribute no change.
+    free_groups <- outer(as.integer(coefficient_map),
+                         seq_len(nlevels(coefficient_map)), "==")
+    conditional_design <- conditional_design %*% (free_groups & !is.na(free_groups))
+  }
+  # Recognise a free overall location in any coding, including separate role means.
+  # Ordinal threshold centring has not yet been validated here.
+  free_conditional_intercept <- family$family != "ordinal" &&
+    ncol(conditional_design) > 0L &&
+    qr(conditional_design)$rank == qr(cbind(conditional_design, 1))$rank
 
   # newdata = NULL prevents na.exclude from padding omitted rows back in.
   predicted <- as.numeric(stats::predict(

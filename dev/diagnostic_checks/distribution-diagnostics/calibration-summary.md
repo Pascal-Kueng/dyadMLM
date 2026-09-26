@@ -46,10 +46,34 @@ Both models used `closeness ~ gender + provided_support + (1 | coupleID)`;
 the ILD model also included `(1 | personID)`. Simulation and PIT seeds were
 260926 and 260927. These timings describe one local run. Rendered examples are
 linked in the [development guide](README.md#reproduce-the-examples).
-Separate validation: 2,483 test assertions passed; ERL matched GET in 24 cases,
+Latest validation: 2,509 test assertions passed; ERL matched GET in 24 cases,
 and 201/1,001-curve cutoff checks passed. `R CMD check` was OK, with tests run
 separately and manuals/vignettes skipped.
 
-The review fixes passed 1,143 diagnostic assertions, including ordinal intercept
-mapping and the display of unobserved count values. The corrected count plot was
-visually checked, and the updated Tweedie example was rendered again.
+Tests include fixed and tied coefficients, equivalent role codings with
+`dispformula = ~0`, ordinal intercept mapping, and unobserved count values.
+Both example documents rendered again; the saved Tweedie figures were unchanged.
+
+## Role-specific mismatches
+
+The expanded script was run after the location-guard fix, using 100 repetitions
+per design and the same Gaussian settings above. The fitted model omits role.
+The mean design adds -0.4 for role A and +0.4 for B; the variance design uses
+residual SDs of 0.6 and 1.4. Each pair of role panels reuses one simulation bank.
+
+Percent crossing the reference limits:
+
+| Design | Role | QQ | Histogram | Predictor quartiles | Predictor distance | Outliers | Mean distance |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Correct model | A | 3 | 3 | 4 | 5 | 0 | 1 |
+| Correct model | B | 6 | 1 | 2 | 4 | 1 | 1 |
+| Omitted role mean | A | 100 | 24 | 88 | 0 | 1 | 1 |
+| Omitted role mean | B | 99 | 25 | 82 | 7 | 1 | 0 |
+| Unequal role SDs | A | 80 | 42 | 11 | 77 | 0 | 98 |
+| Unequal role SDs | B | 42 | 22 | 15 | 49 | 46 | 61 |
+
+These large mismatches provide detection baselines, not fixed test targets or
+power estimates for other designs. With 100 repetitions, Monte Carlo SE can be
+as large as 5 percentage points. All 400 fits across the expanded study converged
+with positive-definite Hessians and no warnings. The pooled Gaussian/NB2 rates
+matched the earlier table. Records are saved in ignored `results/calibration-role-power/`.

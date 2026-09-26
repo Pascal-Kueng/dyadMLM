@@ -150,9 +150,10 @@ breaking ties randomly. For rank \code{r} among \code{m} datasets, use \code{(r 
 where \code{U} is uniform between 0 and 1. This treats all datasets symmetrically
 and keeps finite-bank PIT values strictly inside 0--1.
 
-When the model has a freely estimated conditional-mean intercept, transform
-each dataset's PIT to normal scores, subtract its median across all fitted
-rows, then transform back. This removes overall location before splitting by
+When the conditional model can freely shift its overall location, whether
+fitted with an intercept or separate role means, transform each dataset's PIT
+to normal scores, subtract its median across all fitted rows, then transform
+back. This removes overall location before splitting by
 role or predictor. Patterns describe residuals relative to that overall
 location. This empirically supported adjustment reduces one source of
 conservativeness; it does not account for every effect of fitting.

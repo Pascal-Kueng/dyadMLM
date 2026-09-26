@@ -114,9 +114,10 @@
 #' where `U` is uniform between 0 and 1. This treats all datasets symmetrically
 #' and keeps finite-bank PIT values strictly inside 0--1.
 #'
-#' When the model has a freely estimated conditional-mean intercept, transform
-#' each dataset's PIT to normal scores, subtract its median across all fitted
-#' rows, then transform back. This removes overall location before splitting by
+#' When the conditional model can freely shift its overall location, whether
+#' fitted with an intercept or separate role means, transform each dataset's PIT
+#' to normal scores, subtract its median across all fitted rows, then transform
+#' back. This removes overall location before splitting by
 #' role or predictor. Patterns describe residuals relative to that overall
 #' location. This empirically supported adjustment reduces one source of
 #' conservativeness; it does not account for every effect of fitting.
@@ -281,7 +282,7 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows) {
   curves <- lapply(list(quantiles = pit, distance = 2 * abs(pit - .5)), function(values) {
     quartiles <- lapply(rows_by_group, function(group_rows) {
       apply(values[intersect(rows, group_rows), , drop = FALSE], 2,
-            stats::quantile, probs = c(.25, .5, .75))
+            stats::quantile, probs = c(.25, .5, .75), names = FALSE)
     })
     quartile_curves <- lapply(1:3, function(i) {
       values <- do.call(rbind, lapply(quartiles, function(group) group[i, ]))
