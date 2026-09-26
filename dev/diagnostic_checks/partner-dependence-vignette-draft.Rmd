@@ -88,8 +88,8 @@ pooled_simulations <- simulate_dyad_responses(pooled_model, seed = 123)
 check_partner_dependence(pooled_simulations, dyad = coupleID, role = NULL)
 ```
 
-Checked together, all summaries agree, as expected: the model estimates exactly
-these pooled summaries. Supplying `role` checks each composition with the same
+Checked together, all summaries agree, as expected: the model fits these same
+pooled features. Supplying `role` checks each composition with the same
 simulations.
 
 ```{r mixed-compositions, fig.alt=c("Female-female dyads: all summaries lie within their simulated ranges.", "Female-male dyads: the observed female SD lies above its range.", "Male-male dyads: the observed SDs lie below their ranges.")}
@@ -136,19 +136,49 @@ and the
 [covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
 report every family, sample size, and false-alarm rate.
 
+## Inspect residuals step by step
+
+Red shows your data; blue shows what the fitted model produces. Look for
+differences between them.
+
+1. **Start with everyone together.** Use `role = NULL` to inspect the overall
+   residual distribution and patterns.
+2. **Check the roles used in your model.** Repeat with your role variable, for
+   example `role = gender`. A problem affecting one role can be harder to see
+   when everyone is pooled.
+3. **Look at other characteristics that might matter.** Use `predictors` to
+   examine measured variables, such as age or support. Look for changes in
+   residual location or spread that the blue references do not reproduce.
+4. **Inspect particular groups more closely if needed.** Use a categorical
+   characteristic as `role` for separate QQ plots, histograms and summaries.
+   Examine one characteristic at a time. Choose groups from recorded
+   characteristics, not from outcomes or residuals. With repeated measurements,
+   the characteristic must stay the same for each person; also supply `member`.
+
+Reuse the same simulations for these checks. Supply the original fitting data
+with `data` if a needed column is absent from the model frame. Smaller groups
+give less precise comparisons. Each blue reference applies to its own plot;
+looking at more plots gives more chances to find a difference by chance.
+An unmeasured characteristic may still cause a visible problem, but the plots
+cannot tell you which unmeasured characteristic caused it.
+
+The example below starts pooled, then checks roles and a predictor using the
+same simulated datasets.
+
 ```{r tweedie-example, child="tweedie-gaussian-example.Rmd"}
 ```
 
 ## Other options
 
 - `response = "raw"` compares responses without subtracting predictions.
-- `role = NULL` treats partners as interchangeable: the check then reports a
-  common SD and a partner correlation that do not depend on member order.
+- `role = NULL` pools partners in the display: the partner check reports a
+  common SD and a correlation that do not depend on member order.
 - `panels = FALSE` draws each summary separately, and `plot(check)` redraws a
   saved check without new simulations.
-- For ordinal outcomes, the check compares category scores 1, 2, and so on.
-  Zero-inflated and hurdle checks use the combined outcome, including zeros.
+- For ordinal outcomes, outcome and partner checks compare category scores
+  1, 2, and so on; PIT residuals are not centred. Zero-inflated and hurdle checks
+  use the combined outcome, including zeros.
 
-The checks support unweighted, cross-sectional models. See
-`?check_partner_dependence` and `?simulate_dyad_responses` for supported
-families, output, and details.
+Partner checks support unweighted, cross-sectional models. Residual and outcome
+checks also support repeated observations. See `?check_residuals`,
+`?check_partner_dependence` and `?simulate_dyad_responses` for details.

@@ -11,6 +11,17 @@
   PIT calculations are internal, following Florian Hartig's DHARMa approach and
   Dunn and Smyth's (1996) randomized quantile residuals; DHARMa is not required.
 
+* Residual checks now rank observed data and all simulations together, centre
+  whole datasets when the model freely estimates an intercept, and use global
+  curve envelopes within each panel. Mean PIT distance replaces the plotted KS
+  statistic; the histogram remains a second view of the QQ distribution. Strict
+  outlier counts use the original responses. At least 200 simulations are now
+  required for residual checks; 1,000 are recommended. `seed = NULL` advances the
+  caller's RNG. Count-distribution bars use the observed categories and include
+  an "Other values" range for simulated values not observed, without an observed
+  comparison. Scalar reference limits use simulation order statistics
+  consistently across checks.
+
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),
   [#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).

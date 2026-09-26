@@ -54,6 +54,9 @@
 #' matching [glmmTMB's predictions][glmmTMB::family_glmmTMB]. The plots compare
 #' variation and partner correlation in these scores. The scores do not measure
 #' distances on an underlying continuous scale.
+#' With few observations per random effect, Laplace estimation can bias ordinal
+#' random-effect variances and affect the dependence predicted by the model.
+#' Refitting with the same approximation does not necessarily remove this bias.
 #'
 #' The model's fitted link is used for prediction and simulation. Predictions
 #' and simulated responses must be finite.
@@ -142,6 +145,16 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   # glmmTMB ignores a zero component without fixed-effect coefficients.
   has_zero_inflation <- ncol(zero_inflation_model_matrix) > 0L
 
+  intercept <- match(
+    "(Intercept)", colnames(stats::model.matrix(model, component = "cond"))
+  )
+  coefficient_map <- model$obj$env$map$beta
+  # A fixed intercept or one tied to another coefficient cannot shift freely.
+  free_conditional_intercept <- !is.na(intercept) &&
+    (is.null(coefficient_map) ||
+       (!is.na(coefficient_map[intercept]) &&
+          sum(coefficient_map == coefficient_map[intercept], na.rm = TRUE) == 1L))
+
   # newdata = NULL prevents na.exclude from padding omitted rows back in.
   predicted <- as.numeric(stats::predict(
     model, newdata = NULL, re.form = NA,
@@ -211,6 +224,7 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     reference = "plug-in predictive",
     random_effects = "new",
     parameter_uncertainty = "excluded",
+    free_conditional_intercept = free_conditional_intercept,
     seed = seed
   )
 

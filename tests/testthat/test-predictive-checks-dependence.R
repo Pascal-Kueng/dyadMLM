@@ -451,6 +451,9 @@ test_that("one simulation retains every statistic as a table column", {
     expect_identical(dim(statistics), c(2L, 1L + n_statistics))
     expect_identical(dim(as.matrix(statistics[-1, -1])), c(1L, n_statistics))
     expect_identical(result$n_simulations, 1L)
+    expect_identical(result$summary$lower, rep(-Inf, n_statistics))
+    expect_identical(result$summary$upper, rep(Inf, n_statistics))
+    expect_false(any(result$summary$outside))
     expect_output(print(result), "Reference: 1 plug-in predictive", fixed = TRUE)
   }
 })
@@ -496,6 +499,7 @@ test_that("checks plot by default, forward plot settings, and return invisibly",
 
 test_that("printing describes the check and plots show empirical limits", {
   simulations <- partner_check_test_simulations()
+  simulations$simulated_responses <- simulations$simulated_responses[rep(1:4, 10), ]
   exchangeable <- check_partner_dependence(simulations, "dyad", NULL, plot = FALSE)
   distinguishable <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
   printed <- paste(capture.output(visible <- withVisible(print(distinguishable))),
@@ -546,7 +550,7 @@ test_that("printing describes the check and plots show empirical limits", {
     expect_identical(sub("\n.*", "", titles), expected_titles)
     expect_equal(observed_lines, unname(observed_statistics))
     expect_equal(unname(do.call(cbind, limits)), unname(apply(
-      as.matrix(statistics[-1, -1]), 2, stats::quantile, probs = c(0.025, 0.975)
+      as.matrix(statistics[-1, -1]), 2, range
     )))
     expect_equal(graphics::par(names(settings)), settings)
   }
@@ -562,6 +566,7 @@ test_that("printing describes the check and plots show empirical limits", {
 
 test_that("the summary and printout flag statistics outside the middle 95% of defined simulations", {
   simulations <- partner_check_test_simulations()
+  simulations$simulated_responses <- simulations$simulated_responses[rep(1:4, 10), ]
   # Triple the observed residuals so most summaries fall outside the simulations.
   simulations$observed_response <- simulations$predicted_response +
     3 * (simulations$observed_response - simulations$predicted_response)
@@ -573,9 +578,8 @@ test_that("the summary and printout flag statistics outside the middle 95% of de
   )
   statistics <- result$compositions$statistics[[1]][, -1]
   observed <- unlist(statistics[1, ], use.names = FALSE)
-  limits <- vapply(statistics[-1, ], function(values) stats::quantile(
-    values[is.finite(values)], c(0.025, 0.975), names = FALSE
-  ), numeric(2))
+  limits <- vapply(statistics[-1, ], function(values)
+    range(values[is.finite(values)]), numeric(2))
 
   expect_s3_class(result$summary, "tbl_df")
   expect_named(result$summary, c("composition", "statistic", "observed",
@@ -585,14 +589,14 @@ test_that("the summary and printout flag statistics outside the middle 95% of de
   expect_equal(result$summary$observed, observed)
   expect_equal(result$summary$lower, unname(limits[1, ]))
   expect_equal(result$summary$upper, unname(limits[2, ]))
-  expect_identical(result$summary$outside, c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE))
+  expect_identical(result$summary$outside, c(TRUE, TRUE, FALSE, TRUE, FALSE, FALSE))
 
   # Printed rows mark the same statistics and report their count.
   printed <- capture.output(print(result))
   flagged_lines <- grep(" *  ", printed, fixed = TRUE, value = TRUE)
-  expect_identical(sub(".* \\*  ", "", flagged_lines), names(statistics)[1:4])
+  expect_identical(sub(".* \\*  ", "", flagged_lines), names(statistics)[c(1, 2, 4)])
   expect_match(paste(printed, collapse = "\n"),
-               "Outside the middle 95% of simulations (*): 4 of 6 observed statistics.",
+               "Outside the middle 95% of simulations (*): 3 of 6 observed statistics.",
                fixed = TRUE)
 })
 

@@ -45,11 +45,14 @@ plot_check_statistic <- function(values, title, xlab = "Summary value",
     ticks <- pretty(range(values, finite = TRUE))
     graphics::axis(1, ticks[ticks >= 0 & ticks %% 1 == 0])
   }
-  graphics::abline(v = stats::quantile(simulated, c(.025, .975)),
-                   lty = 2, col = check_colours$reference)
+  limits <- simulated_rank_limits(simulated)
+  if (any(is.finite(limits))) graphics::abline(v = limits[is.finite(limits)],
+    lty = 2, col = check_colours$reference)
   graphics::abline(v = values[1], col = check_colours$observed, lwd = 2)
   guide <- if (is.null(sub))
     "The red line should usually lie between the dashed limits.\nOutside means an unusually low or high value for this model." else sub
+  if (!any(is.finite(limits)))
+    guide <- "Too few simulations for finite 95% limits."
   plot_check_caption(guide)
 }
 
@@ -91,7 +94,7 @@ plot_check_role_page <- function(composition, rows, title, draw) {
   plot_check_page(composition$label, paste(title, check_counts(composition), sep = " - "),
     c(rows, length(role_rows)), draw,
     column_titles = paste0(names(role_rows), " (n = ", lengths(role_rows), ")"),
-    footer = "Red: observed data. Blue: model simulations. Ranges and dashed histogram limits contain the middle 95%.\nSome departures occur by chance; these are descriptive checks, not significance tests.")
+    footer = "Red: observed data. Blue: model simulations. Dashed histogram limits contain the middle 95%.\nSome departures occur by chance; these are descriptive checks, not significance tests.")
 }
 
 # Draw one composition page. `draw` is evaluated inside the temporary layout;

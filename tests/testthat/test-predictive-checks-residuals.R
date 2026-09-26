@@ -1,18 +1,16 @@
-test_that("PIT ranks use only the independent reference bank", {
+test_that("PIT ranks use every dataset symmetrically", {
   simulations <- distribution_check_fixture()
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
 
   result <- withVisible(check_residuals(simulations, role = NULL, ask = FALSE))
-  reference <- simulations$simulated_responses[1:20, ]
-  evaluated <- rbind(simulations$observed_response,
-                    simulations$simulated_responses[21:40, ])
-  expected <- vapply(seq_len(nrow(evaluated)), function(dataset) {
-    colMeans(reference < rep(evaluated[dataset, ], each = 20))
-  }, numeric(ncol(reference)))
+  responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
   expect_false(result$visible)
-  expect_equal(unname(result$value$pit), expected)
-  expect_equal(dim(result$value$pit), c(12L, 21L))
+  expect_equal(dim(result$value$pit), c(12L, 201L))
+  # One PIT in every rank interval, with ordering preserved for untied outcomes.
+  expect_equal(unname(ceiling(result$value$pit * ncol(responses))),
+               unname(t(apply(responses, 1, rank))))
+  expect_true(all(result$value$pit > 0 & result$value$pit < 1))
 
   # Grouping and predictor choices must not change the residuals being checked.
   simulations$model_frame$X <- seq_len(12)
@@ -30,7 +28,7 @@ test_that("discrete PIT randomizes ties and preserves the caller's RNG", {
                      c(0, 0, 0, 1), c(0, 0, 1, 2))
   simulations <- structure(list(
     observed_response = c(0, 1, 2, 0, 3), predicted_response = rep(1, 5),
-    simulated_responses = rbind(reference, reference),
+    simulated_responses = reference[rep(1:4, 50), ],
     model_frame = data.frame(row = seq_len(ncol(reference)))
   ), class = "dyadMLM_response_simulations", dyadMLM = list(family = "poisson"))
   grDevices::pdf(NULL, width = 12, height = 10)
@@ -40,11 +38,15 @@ test_that("discrete PIT randomizes ties and preserves the caller's RNG", {
 
   result <- check_residuals(simulations, role = NULL, seed = 143, ask = FALSE)
   pit <- result$pit
-  lower <- colMeans(reference < rep(simulations$observed_response, each = 4))
-  upper <- colMeans(reference <= rep(simulations$observed_response, each = 4))
-  expect_true(all(pit[, 1] >= lower & pit[, 1] <= upper))
-  expect_true(all(pit[1:4, 1] > lower[1:4] & pit[1:4, 1] < upper[1:4]))
-  expect_equal(unname(pit[5, 1]), 1)
+  responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
+  for (row in seq_len(nrow(responses))) {
+    lower <- sum(responses[row, ] < responses[row, 1]) / ncol(responses)
+    upper <- sum(responses[row, ] <= responses[row, 1]) / ncol(responses)
+    expect_gt(pit[row, 1], lower)
+    expect_lt(pit[row, 1], upper)
+    expect_equal(sort(unname(ceiling(pit[row, ] * ncol(responses)))),
+                 seq_len(ncol(responses)))
+  }
   expect_identical(.Random.seed, random_state)
   expect_identical(check_residuals(simulations, role = NULL, seed = 143, ask = FALSE), result)
 
@@ -188,8 +190,8 @@ test_that("missing plotting predictors affect only their own panels", {
     }, numeric(ncol(expected)))
     expect_equal(observed[[i]], unname(summaries[1, ]))
     expect_equal(observed_x[[i]], reference_x[[i]])
-    expect_equal(bounds[[i]], unname(apply(summaries[-1, , drop = FALSE], 2,
-                                          quantile, probs = c(.025, .975))))
+    curve <- result$compositions[[1]]$patterns[[2]][[1]]$quantiles[[i]]
+    expect_equal(bounds[[i]], unname(rbind(curve$lower, curve$upper)))
   }
   simulations$model_frame$Empty <- rep(NA, 12)
   expect_warning(result <- check_residuals(simulations, role = NULL, predictors = "Empty",
@@ -418,7 +420,7 @@ test_that("every residual page identifies its composition and page contents", {
     unlink(pdf_path)
     pages <- as.integer(sub("^Pages:\\s+", "", information[grepl("^Pages:", information)]))
     expect_equal(pages, 3 * length(case$pages))
-    expect_equal(dim(pit$pit), c(12L, 21L))
+    expect_equal(dim(pit$pit), c(12L, 201L))
     headings <- Filter(function(text) isTRUE(text$outer) && isTRUE(text$side == 3) &&
       length(text$text) == 1L && text$text %in% compositions, margins)
     subtitles <- Filter(function(text) isTRUE(text$outer) && isTRUE(text$side == 3) &&
@@ -523,14 +525,15 @@ test_that("role columns use their own observations and simulated references", {
     expected_qq <- apply(pit[rows, , drop = FALSE], 2, quantile,
                          probs = seq(0, 1, length.out = 201))
     expect_equal(observed_qq[[i]], unname(expected_qq[, 1]))
-    expect_equal(simulated_qq[[i]], unname(apply(expected_qq[, -1], 1,
-      quantile, probs = c(.025, .975))))
-    # Endpoint counts use the same role's observed and held-out PIT residuals.
-    expected <- colSums(pit[rows, ] == 0 | pit[rows, ] == 1)
+    qq <- residual_curve_summary(expected_qq)
+    expect_equal(simulated_qq[[i]], unname(rbind(qq$lower, qq$upper)))
+    # Strict raw-response extrema remain visible even though PIT has no endpoints.
+    responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
+    expected <- colSums(strict_response_outliers(responses)[rows, ])
     histogram <- histograms[[i]]
     expect_equal(unname(histogram$values), unname(expected[-1]))
     expect_equal(unname(histogram$observed), unname(expected[1]))
-    expect_equal(unname(histogram$range), unname(quantile(expected[-1], c(.025, .975))))
+    expect_equal(unname(histogram$range), simulated_rank_limits(expected[-1]))
     expect_true(histogram$observed >= min(histogram$limits) &&
                   histogram$observed <= max(histogram$limits))
     expect_true(all(diff(histogram$breaks) == 1))
@@ -598,7 +601,7 @@ test_that("numeric patterns use each role's bins and identical smoothing for ref
   n <- nrow(simulations$model_frame)
   simulations$predicted_response <- seq(0, 2, length.out = n)
   simulations$observed_response <- simulations$predicted_response + sin(seq_len(n))
-  simulations$simulated_responses <- sweep(matrix(sin(seq_len(40 * n)), 40),
+  simulations$simulated_responses <- sweep(matrix(sin(seq_len(200 * n)), 200),
     2, simulations$predicted_response, "+")
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -649,18 +652,25 @@ test_that("numeric patterns use each role's bins and identical smoothing for ref
     exp(-.5 * ((x - centre) / median(diff(centres)))^2)
   })
   weights <- weights / rowSums(weights)
-  for (i in seq_along(c(.25, .5, .75))) {
-    binned <- t(vapply(rows_b, function(rows) {
-      apply(pit[rows, , drop = FALSE], 2, quantile, probs = c(.25, .5, .75)[i])
+  binned <- lapply(c(.25, .5, .75), function(probability) {
+    t(vapply(rows_b, function(rows) {
+      apply(pit[rows, , drop = FALSE], 2, quantile, probs = probability)
     }, numeric(ncol(pit))))
-    smoothed <- weights %*% binned
-    bounds <- apply(smoothed[, -1], 1, quantile, probs = c(.025, .975))
+  })
+  smoothed <- lapply(binned, function(values) weights %*% values)
+  joint <- residual_curve_summary(do.call(rbind, smoothed))
+  before_smoothing <- residual_curve_summary(do.call(rbind, binned))
+  for (i in seq_along(smoothed)) {
+    indices <- seq_along(grid) + (i - 1L) * length(grid)
+    bounds <- rbind(joint$lower[indices], joint$upper[indices])
     expect_equal(curves[[i + 3]]$x, grid)
     expect_equal(band_x[[i]], c(grid, rev(grid)))
-    expect_equal(curves[[i + 3]]$y, unname(smoothed[, 1]))
+    expect_equal(curves[[i + 3]]$y, unname(smoothed[[i]][, 1]))
     expect_equal(bands[[i]], unname(c(bounds[1, ], rev(bounds[2, ]))))
-    # Smoothing the interval endpoints instead would give a different reference.
-    wrong_order <- weights %*% t(apply(binned[, -1], 1, quantile, c(.025, .975)))
+    # Envelopes are computed jointly AFTER smoothing the dataset curves.
+    bin_indices <- seq_along(rows_b) + (i - 1L) * length(rows_b)
+    wrong_order <- weights %*% cbind(before_smoothing$lower[bin_indices],
+                                    before_smoothing$upper[bin_indices])
     expect_gt(max(abs(t(bounds) - wrong_order)), .001)
   }
   observed_quartiles <- do.call(cbind, lapply(curves[4:6], `[[`, "y"))
@@ -729,7 +739,7 @@ test_that("fallback quartile offsets stay visible on small and clustered scales"
     simulations$model_frame <- data.frame(row = seq_len(n))
     simulations$predicted_response <- rep(0, n)
     simulations$observed_response <- sin(seq_len(n))
-    simulations$simulated_responses <- matrix(sin(seq_len(40 * n)), 40)
+    simulations$simulated_responses <- matrix(sin(seq_len(200 * n)), 200)
     simulations$model_frame$Edge <- scales[[i]]
     check_residuals(simulations, role = NULL, predictors = "Edge", ask = FALSE)
     expect_equal(lengths(observed_x), rep(i, 3))
@@ -748,6 +758,59 @@ test_that("invalid simulation inputs and unsupported predictor forms fail clearl
     expect_error(check_residuals(simulations, predictors = predictors, plot = FALSE),
                  "predictors.*(column names|character)")
   expect_error(check_residuals(simulations, details = TRUE), "unused argument")
-  simulations$simulated_responses <- simulations$simulated_responses[1:3, ]
-  expect_error(check_residuals(simulations), "four simulated datasets")
+  simulations$simulated_responses <- simulations$simulated_responses[1:199, ]
+  expect_error(check_residuals(simulations), "200 simulated datasets")
+})
+
+
+test_that("strict response extrema exclude tied minima and maxima", {
+  responses <- rbind(c(0, 1, 2, 3), c(0, 0, 1, 2), c(0, 1, 2, 2), rep(1, 4))
+  expected <- rbind(c(TRUE, FALSE, FALSE, TRUE), c(FALSE, FALSE, FALSE, TRUE),
+                    c(TRUE, FALSE, FALSE, FALSE), rep(FALSE, 4))
+  expect_identical(strict_response_outliers(responses), expected)
+  order <- c(4, 2, 1, 3)
+  expect_identical(strict_response_outliers(responses[, order]), expected[, order])
+})
+
+
+test_that("centring precedes role splits and all PIT summaries use it", {
+  simulations <- distribution_check_fixture()
+  uncentred <- check_residuals(simulations, role = NULL, plot = FALSE)
+  attr(simulations, "dyadMLM")$free_conditional_intercept <- TRUE
+  centred <- check_residuals(simulations, dyad = "dyad", role = "role", plot = FALSE)
+  z <- qnorm(uncentred$pit)
+  expected <- pnorm(sweep(z, 2, apply(z, 2, median)))
+  expect_equal(centred$pit, expected)
+  expect_equal(apply(qnorm(centred$pit), 2, median), rep(0, ncol(expected)),
+               ignore_attr = TRUE, tolerance = 1e-12)
+  expect_true(attr(centred, "dyadMLM")$pit_centered)
+  expect_false(attr(uncentred, "dyadMLM")$pit_centered)
+  for (role in names(centred$compositions[[1]]$rows)) {
+    rows <- centred$compositions[[1]]$rows[[role]]
+    statistics <- centred$compositions[[1]]$statistics[[role]]
+    expect_equal(statistics$mean_distance, colMeans(2 * abs(expected[rows, ] - .5)))
+    expect_equal(statistics$qq$observed,
+                 quantile(expected[rows, 1], seq(0, 1, length.out = 201)))
+  }
+  # The raw-response outlier count is independent of centring.
+  pooled <- check_residuals(simulations, role = NULL, plot = FALSE)
+  expect_identical(pooled$pit, centred$pit)
+  expect_identical(pooled$compositions[[1]]$statistics[[1]]$outliers,
+                   uncentred$compositions[[1]]$statistics[[1]]$outliers)
+})
+
+
+test_that("NULL seed advances RNG without warnings and saved plotting uses none", {
+  simulations <- distribution_check_fixture()
+  withr::local_seed(97)
+  original <- .Random.seed
+  expect_no_warning(result <- check_residuals(simulations, role = NULL,
+                                             seed = NULL, plot = FALSE))
+  expect_false(identical(original, .Random.seed))
+  after <- .Random.seed
+  expect_identical(check_residuals(simulations, role = NULL, plot = FALSE),
+                   check_residuals(simulations, role = NULL, plot = FALSE))
+  expect_identical(.Random.seed, after)
+  expect_false(identical(result$pit, check_residuals(simulations, role = NULL,
+                                                   seed = NULL, plot = FALSE)$pit))
 })

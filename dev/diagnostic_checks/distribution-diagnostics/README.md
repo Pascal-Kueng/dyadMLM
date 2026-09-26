@@ -36,23 +36,37 @@ including its partner dependence and any role-specific variability.
 
 Residual pages show a PIT QQ plot, PIT histogram, PIT quartiles and distance
 across predicted outcomes, the number of outcomes outside their simulation
-reference range, and overall uniformity (KS distance).
+reference range, and mean PIT distance. The QQ plot and histogram are two views
+of the same distribution; agreement is not independent evidence.
 Outcome pages show the raw response distribution, variability,
 largest deviations, and relevant zero counts. Variability and deviations are
 calculated after subtracting the same model predictions from each dataset.
 They include random effects, so variability does not isolate the model's residual
 variance or dispersion parameter.
 Outcome distributions use category frequencies for ordinal outcomes and small
-count ranges; otherwise, the proportion at or below each outcome value.
+count ranges (at most 20 observed values), with an "Other values" range for
+unobserved simulated values, shown only in blue without an observed comparison;
+otherwise, the proportion at or below each outcome value.
 
 Each plot has a short reading guide. Numeric residual plots use bins chosen
 within each role, then smooth nearby quartiles with the same weights for observed
 and simulated datasets. Bands are calculated after smoothing. The median is bold;
 matching line styles identify the other quartiles and their bands. Sparse numeric
 values and categories retain separate reference intervals.
-Red shows observed data; blue shows simulated references. Ranges contain the middle 95% at each
-position, not across the whole figure; some departures occur by chance.
-Fitted parameters stay fixed.
+Red shows observed data; blue shows simulated references. Residual curve envelopes
+cover positions jointly within each panel, including all three quartiles, but not
+across roles or pages. Outcome category ranges remain pointwise. Scalar limits
+use simulation order statistics with ties retained at the limits.
+
+PIT uses observed data and all simulations symmetrically. When the model freely
+estimates a conditional-mean intercept, each complete dataset is median-centred
+on the normal-score scale before any grouping. The one resulting PIT matrix is
+used throughout; outlier counts use strict extrema of the original responses.
+At least 200 simulations are required for residual checks; 1,000 are recommended.
+Fitted parameters stay fixed. Centring is an empirical adjustment, not a guarantee
+of exact calibration. Fitting can make references conservative or biased. With
+few observations per random effect, ordinal Laplace fits can bias partner
+dependence; refitting with the same approximation need not remove that bias.
 
 In `check_residuals()`, use `predictors = c("x", "z")` for extra predictor panels.
 Columns come from the model frame; if absent, supply the original fitting data
@@ -74,11 +88,19 @@ plot(residual_check, ask = FALSE)
 It changes the layout, not which checks are shown. By default, plots pause only
 when there are multiple figures on an interactive device; file output never pauses.
 
+## Validation
+
+[validate-envelopes.R](validate-envelopes.R) compares the global envelopes with
+GET, used only as a development reference. [calibration-check.R](calibration-check.R)
+checks the package implementation on known-parameter and fitted Gaussian and
+negative-binomial models. See [calibration-summary.md](calibration-summary.md)
+for the settings, results, limits, and large-data benchmark.
+
 ## Reproduce the examples
 
-The [full Tweedie-to-Gaussian example](results/tweedie-gaussian/index.html) shows
-the exact calls to all three checks followed by every complete panel they produce,
-including predictor pages and raw partner summaries. The
+The [full Tweedie-to-Gaussian example](results/tweedie-gaussian/index.html) starts
+with pooled residual checks, then checks roles and a predictor. It shows the
+calls to all three checks and every page they produce. The
 [executable example](../tweedie-gaussian-example.Rmd) is also included directly
 in the development vignette. It uses
 the earlier study's first Tweedie dataset (120 dyads, seed 100104) and 2,000

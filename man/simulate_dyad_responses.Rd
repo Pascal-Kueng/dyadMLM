@@ -69,6 +69,9 @@ Ordinal checks use category scores \verb{1, 2, ..., K} in their fitted order,
 matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The plots compare
 variation and partner correlation in these scores. The scores do not measure
 distances on an underlying continuous scale.
+With few observations per random effect, Laplace estimation can bias ordinal
+random-effect variances and affect the dependence predicted by the model.
+Refitting with the same approximation does not necessarily remove this bias.
 
 The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.

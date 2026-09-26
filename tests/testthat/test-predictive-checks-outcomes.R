@@ -31,6 +31,7 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
   result <- withVisible(check_outcomes(simulations, dyad = "dyad", role = "role", ask = FALSE))
   expect_false(result$visible)
   expect_s3_class(result$value, "dyadMLM_outcome_check")
+  expect_identical(attr(result$value, "dyadMLM"), attr(simulations, "dyadMLM"))
   expect_identical(result$value$compositions[[1]]$label, "A - B")
   expect_named(result$value$compositions[[1]]$statistics, c("A", "B"))
   expect_identical(.Random.seed, random_state)
@@ -49,7 +50,7 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
       histogram <- histograms[[2 * (j - 1) + i]]
       expect_equal(unname(histogram$values), unname(expected[j, -1]))
       expect_equal(unname(histogram$observed), unname(expected[j, 1]))
-      expect_equal(unname(histogram$range), unname(quantile(expected[j, -1], c(.025, .975))))
+      expect_equal(unname(histogram$range), simulated_rank_limits(expected[j, -1]))
       expect_true(histogram$observed >= min(histogram$limits) &&
                     histogram$observed <= max(histogram$limits))
     }
@@ -132,6 +133,7 @@ test_that("outcome checks retain lone responses and accept one simulated dataset
 
 test_that("zero-count panels are automatic and handle constant references", {
   simulations <- distribution_check_fixture()
+  nsim <- nrow(simulations$simulated_responses)
   grDevices::pdf(NULL, width = 7, height = 7)
   on.exit(grDevices::dev.off(), add = TRUE)
   histograms <- list()
@@ -171,7 +173,7 @@ test_that("zero-count panels are automatic and handle constant references", {
   observed_zero <- simulations
   observed_zero$observed_response[1] <- 0
   panel <- zero_panels(observed_zero)[[1]]
-  expect_equal(unname(panel$values), rep(0, 40))
+  expect_equal(unname(panel$values), rep(0, nsim))
   expect_equal(unname(panel$observed), 1)
   expect_equal(panel$breaks, c(-.5, .5))
   expect_true(max(panel$limits) >= 1)
@@ -181,12 +183,12 @@ test_that("zero-count panels are automatic and handle constant references", {
   reference_zero <- simulations
   reference_zero$simulated_responses[1, 1] <- 0
   panel <- zero_panels(reference_zero)[[1]]
-  expect_equal(unname(panel$values), c(1, rep(0, 39)))
+  expect_equal(unname(panel$values), c(1, rep(0, nsim - 1)))
   expect_equal(unname(panel$observed), 0)
   evaluated_zeros <- simulations
   evaluated_zeros$simulated_responses[21:23, 1] <- 0
   panel <- zero_panels(evaluated_zeros)[[1]]
-  expect_equal(unname(panel$values), c(rep(0, 20), rep(1, 3), rep(0, 17)))
+  expect_equal(unname(panel$values), c(rep(0, 20), rep(1, 3), rep(0, nsim - 23)))
   expect_equal(unname(panel$observed), 0)
   expect_length(zero_panels(simulations, check_zeros = TRUE), 1)
 })
@@ -261,12 +263,13 @@ test_that("discrete outcome panels show role-specific proportions and category l
       simulations$observed_response[rows] + 1, nbins = 4) / length(rows))
     proportions <- t(apply(simulations$simulated_responses[, rows], 1,
                            function(x) tabulate(x + 1, nbins = 4) / length(x)))
-    expect_equal(bounds[[i]], unname(apply(proportions, 2, quantile, c(.025, .975))))
+    expect_equal(bounds[[i]], unname(apply(proportions, 2, simulated_rank_limits)))
   }
 
   simulations$observed_response <- simulations$observed_response + 1
   simulations$simulated_responses <- simulations$simulated_responses + 1
-  categories <- c("Low", "Middle", "High", "Very high", "Unused")
+  # An ordinal level with this name is still an ordinary observed category.
+  categories <- c("Low", "Middle", "High", "Very high", "Other values")
   simulations$model_frame <- data.frame(
     response = ordered(categories[simulations$observed_response], levels = categories),
     simulations$model_frame
@@ -291,8 +294,80 @@ test_that("zero-count inclusion is shared across roles within each composition",
     expect_false("Number of zeros" %in% rownames(statistics[[3]][[1]]))
     expect_true(all(vapply(statistics[[2]], function(role)
       "Number of zeros" %in% rownames(role), logical(1))))
-    expect_equal(unname(statistics[[2]]$B["Number of zeros", ]), rep(0, 41))
+    expect_equal(unname(statistics[[2]]$B["Number of zeros", ]),
+                 rep(0, nrow(simulations$simulated_responses) + 1))
   }
+})
+
+
+test_that("count categories follow observed support and retain simulated other values", {
+  simulations <- distribution_check_fixture()
+  nsim <- nrow(simulations$simulated_responses)
+  simulations$observed_response <- rep(0:2, 4)
+  simulations$simulated_responses <- matrix(rep(simulations$observed_response, each = nsim), nsim)
+  # Many unobserved values must not switch the display to an ECDF or vanish.
+  simulations$simulated_responses[, 10:12] <- seq_len(nsim * 3) + 10
+  attr(simulations, "dyadMLM")$family <- "poisson"
+  result <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  distribution <- result$compositions[[1]]$distribution
+  expect_identical(distribution$labels, c("0", "1", "2", "Other values"))
+  expect_true(distribution$has_other_values)
+  expect_equal(distribution$roles[[1]]$observed, c(rep(1 / 3, 3), 0))
+  expect_equal(distribution$roles[[1]]$bounds, matrix(.25, 2, 4))
+
+  # One simulated dataset provides no finite rank limits; category support is [0, 1].
+  simulations$simulated_responses <- simulations$simulated_responses[1, , drop = FALSE]
+  small <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  expect_equal(small$compositions[[1]]$distribution$roles[[1]]$bounds,
+               matrix(c(0, 1), 2, 4))
+
+  simulations$observed_response <- 1:21
+  simulations$predicted_response <- rep(0, 21)
+  simulations$simulated_responses <- matrix(rep(1:21, each = nsim), nsim)
+  simulations$model_frame <- data.frame(response = 1:21)
+  many <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  expect_null(many$compositions[[1]]$distribution$labels)
+})
+
+
+test_that("unobserved count values show simulations without an artificial red zero", {
+  withr::local_seed(27)
+  observed <- rpois(20, 100)
+  simulations <- structure(list(
+    observed_response = observed, predicted_response = rep(100, 20),
+    simulated_responses = matrix(rpois(1000 * 20, 100), 1000),
+    model_frame = data.frame(outcome = observed)
+  ), class = "dyadMLM_response_simulations", dyadMLM = list(family = "poisson"))
+  result <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  distribution <- result$compositions[[1]]$distribution
+  other <- match("Other values", distribution$labels)
+  # Even a correct model can assign substantial mass to values absent by chance.
+  expect_equal(distribution$roles[[1]]$observed[other], 0)
+  expect_gt(distribution$roles[[1]]$bounds[1, other], 0)
+
+  grDevices::pdf(NULL, width = 10, height = 7)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  heights <- marks <- labels <- caption <- NULL
+  original_barplot <- graphics::barplot
+  original_points <- graphics::points
+  original_mtext <- graphics::mtext
+  local_mocked_bindings(barplot = function(height, names.arg, ...) {
+    heights <<- height
+    labels <<- names.arg
+    original_barplot(height, names.arg = names.arg, ...)
+  }, points = function(x, y, ...) {
+    marks <<- y
+    original_points(x, y, ...)
+  }, mtext = function(text, ...) {
+    caption <<- text
+    original_mtext(text, ...)
+  }, .package = "graphics")
+  plot_outcome_distribution(distribution, 1)
+  expect_identical(labels[other], "Other\nvalues")
+  expect_true(is.na(heights[other]))
+  expect_true(is.na(marks[other]))
+  expect_equal(heights[-other], distribution$roles[[1]]$observed[-other])
+  expect_match(caption, "Other values: simulations only")
 })
 
 

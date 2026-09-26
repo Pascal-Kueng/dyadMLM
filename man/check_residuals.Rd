@@ -18,14 +18,15 @@ check_residuals(
 )
 }
 \arguments{
-\item{simulations}{An object from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. At least four
+\item{simulations}{An object from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. At least 200
 datasets are required; 1,000 or more are recommended.}
 
 \item{dyad, role, member}{Column names, with or without quotes, identifying
 dyads, roles, and members within dyads. Looked up in the fitted model frame
 or \code{data}. With \code{role = NULL}, all observations are pooled. Otherwise supply
-\code{dyad}; also supply \code{member} for repeated observations. Supplying \code{dyad}
-without \code{role} adds the dyad count to the pooled overview.}
+\code{dyad}; also supply \code{member} for repeated observations, with \code{role} unchanged
+within each member. Supplying \code{dyad} without \code{role} adds the dyad count to
+the pooled overview.}
 
 \item{predictors}{Optional column names, e.g. \code{c("age", "stress")}, looked up
 in the model frame or \code{data}. \code{NULL} (default) omits additional predictor
@@ -33,7 +34,7 @@ pages. Missing or infinite values are omitted only from that predictor's
 plots. Predicted outcomes are always checked.}
 
 \item{seed}{Seed for randomized PIT residuals. The caller's random-number
-state is restored afterwards.}
+state is restored afterwards. With \code{NULL}, use and advance the caller's RNG.}
 
 \item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
 If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
@@ -54,7 +55,10 @@ partners whose responses were excluded during fitting.}
 \value{
 Invisibly returns a \code{dyadMLM_residual_check} list with the \code{pit} matrix
 and calculated summaries in \code{compositions}. PIT rows are fitted observations;
-columns are observed data followed by the second half of the simulations.
+columns are observed data followed by all simulated datasets. This matrix
+uses about 77 MiB for 10,080 observations and 1,000 simulations. The \code{dyadMLM}
+attribute records whether PIT was centred in \code{pit_centered}. \code{uniformity}
+retains the KS distances for each panel; these are not plotted.
 Save it with \code{plot = FALSE} and draw it later with \code{plot(result)}.
 Graphics settings are restored afterwards.
 }
@@ -66,6 +70,11 @@ For checks on the outcome scale, use \code{\link[=check_outcomes]{check_outcomes
 }
 \section{Reading the plots}{
 
+Start with everyone pooled (\code{role = NULL}), then inspect the roles used in
+your model. Use \code{predictors} to examine other measured characteristics. For
+separate QQ plots, histograms and summaries by a categorical characteristic,
+use that variable as \code{role}.
+
 A composition is the combination of partners' roles. Each composition gets
 one pooled column for same-role partners, or separate columns for distinct
 roles. Every page repeats the composition heading.
@@ -76,20 +85,23 @@ with a warning.
 
 \strong{Red shows observed data; blue shows simulated references.} The six rows
 show uniform QQ, a PIT histogram, PIT quartiles and distance against predicted
-outcomes, counts outside the simulated range (PIT endpoints), and overall
-departure from uniformity (KS distance).
+outcomes, counts outside the simulated response range, and mean PIT distance.
+The histogram and QQ plot show the same residual distribution in different
+ways; agreement between them is not independent evidence.
 Use a tall plotting window or save a large figure to keep all rows readable.
 
 PIT (probability integral transform) residuals rank each outcome from 0 (low)
 to 1 (high) relative to its own simulated values. A suitable model should
 produce ranks roughly evenly spread between 0 and 1, allowing for the
 variation shown in blue.
-Blue ranges contain the middle 95\% at each plotted position,
-not across the whole plot. Some red points can fall outside by chance.
-For out-of-range counts, the blue histogram shows simulated counts and the red
-line shows the observed count; dashed lines mark the middle 95\%.
-In the quartile and distance plots, red curves should roughly follow the lines at
-0.25, 0.50 and 0.75, allowing for the variation in their matching blue bands.
+Blue curve envelopes cover positions jointly within each panel, with the
+three quartiles treated together. They use a nominal 95\% extreme-rank-length
+envelope; coverage is not simultaneous across roles, predictors, or pages.
+Scalar rows show simulated values as a blue histogram and the observed value
+as a red line; dashed limits use simulation order statistics. Ties are retained
+at the limits. Fitting can make these references conservative or biased.
+The lines at 0.25, 0.50 and 0.75 are visual guides. Judge the red quartiles
+against their matching blue bands, especially after centring.
 
 Each additional predictor gets a page with quartile and distance plots. Numeric
 predictors with many values use up to eight bins, chosen within each role.
@@ -109,13 +121,13 @@ and bins can hide interactions or finer patterns.
 
 \section{Scope}{
 
-The first half of simulations defines PIT; the other half provides complete
-reference datasets, transformed and grouped just like the observations. These
+Observed and simulated datasets are ranked and transformed together. These
 envelopes retain the fitted partner and time dependence and any modelled
 differences in variability between roles, without whitening.
 They are dyadMLM's descriptive checks, not DHARMa's plots or tests. Parameters
 stay fixed, and the observed data were used to fit them; parameter uncertainty
-is not included. For cross-sectional data, check partner correlations with
+is not included. Neither ranking nor centring makes fitted-data references
+exact. For cross-sectional data, check partner correlations with
 \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 
 The "Predicted outcome" axis shows model predictions, not observed outcomes
@@ -131,12 +143,30 @@ not imputed, and time gaps follow the fitted model. Observations have equal weig
 The internal calculation follows the simulation-based PIT approach used in
 Florian Hartig's DHARMa package and the randomized quantile residual method of
 Dunn and Smyth (1996). We implement the definition directly and keep the
-uniform 0--1 scale, rather than transforming to normal quantiles.
+uniform 0--1 scale.
 
-For each outcome, calculate the proportions of reference simulations below
-it and at or below it. If these match, use that proportion; otherwise draw
-uniformly between them. This handles continuous outcomes, discrete ties, and
-mixtures of both. A finite simulation bank approximates the model's PIT.
+At each fitted row, rank the observed and all simulated outcomes together,
+breaking ties randomly. For rank \code{r} among \code{m} datasets, use \code{(r - U) / m},
+where \code{U} is uniform between 0 and 1. This treats all datasets symmetrically
+and keeps finite-bank PIT values strictly inside 0--1.
+
+When the model has a freely estimated conditional-mean intercept, transform
+each dataset's PIT to normal scores, subtract its median across all fitted
+rows, then transform back. This removes overall location before splitting by
+role or predictor. Patterns describe residuals relative to that overall
+location. This empirically supported adjustment reduces one source of
+conservativeness; it does not account for every effect of fitting.
+PIT residuals are not centred for ordinal models.
+
+Outlier counts use the original responses: a dataset contributes an outlier
+when it alone has the smallest or largest outcome at that fitted row. Tied
+extremes do not count. These are outcomes beyond the finite simulated range,
+not outcomes impossible under the model. Counts usually fall as simulations
+are added. With continuous exchangeable datasets, their expected count is
+\code{2 * n / (nsim + 1)}; ties and fitted parameters change this benchmark.
+
+Global envelopes use extreme-rank-length ordering (Myllymaki et al., 2017),
+retaining ties at the boundary and rounding coverage conservatively.
 }
 
 \examples{
@@ -145,7 +175,7 @@ model <- glmmTMB::glmmTMB(
   closeness ~ gender + provided_support + (1 | coupleID), data = dyads_cross
 )
 # Use at least 1,000 draws when checking a model.
-simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
+simulations <- simulate_dyad_responses(model, nsim = 200, seed = 123)
 check_residuals(simulations, dyad = coupleID, role = gender,
                 predictors = "provided_support", ask = FALSE)
 # Save the same checks without drawing, then plot individual figures.
@@ -160,6 +190,10 @@ Regression Models. \doi{10.32614/CRAN.package.DHARMa}.
 Dunn, P. K., and Smyth, G. K. (1996). Randomized quantile residuals.
 \emph{Journal of Computational and Graphical Statistics}, 5(3), 236--244.
 \doi{10.2307/1390802}.
+
+Myllymaki, M., Mrkvicka, T., Grabarnik, P., Seijo, H., and Hahn, U. (2017).
+Global envelope tests for spatial point patterns. \emph{Journal of the Royal
+Statistical Society: Series B}, 79, 381--404. \doi{10.1111/rssb.12172}.
 }
 \seealso{
 \code{\link[=check_outcomes]{check_outcomes()}}, \code{\link[=check_partner_dependence]{check_partner_dependence()}}

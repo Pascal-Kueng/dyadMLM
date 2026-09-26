@@ -193,7 +193,7 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
   partner_column <- match("Partner correlation (female and male)",
                           names(statistics)[-1])
   expect_equal(unname(limits[[partner_column]]),
-               unname(stats::quantile(defined, c(0.025, 0.975))))
+               simulated_rank_limits(defined))
 })
 
 

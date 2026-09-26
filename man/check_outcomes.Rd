@@ -23,8 +23,9 @@ more simulated datasets for stable comparisons.}
 \item{dyad, role, member}{Column names, with or without quotes, identifying
 dyads, roles, and members within dyads. Looked up in the fitted model frame
 or \code{data}. With \code{role = NULL}, all observations are pooled. Otherwise supply
-\code{dyad}; also supply \code{member} for repeated observations. Supplying \code{dyad}
-without \code{role} adds the dyad count to the pooled overview.}
+\code{dyad}; also supply \code{member} for repeated observations, with \code{role} unchanged
+within each member. Supplying \code{dyad} without \code{role} adds the dyad count to
+the pooled overview.}
 
 \item{check_zeros}{Include zero counts? \code{NULL} (default) includes them for all
 roles in a composition if any observed or simulated outcome there is zero.}
@@ -67,7 +68,10 @@ when the composition is known; unknown compositions are omitted with a warning.
 
 \strong{Red shows observed data; blue shows simulations.} The first row compares
 outcome distributions. Ordinal responses and counts with up to 20 distinct
-observed or simulated values use category frequencies. Other outcomes show
+observed values use category frequencies. All defined ordinal categories are
+retained; simulated counts at unobserved values are grouped as "Other values"
+and shown only in blue, without an observed comparison.
+Blue ranges show the middle 95\% for each category separately. Other outcomes show
 the proportion at or below each outcome value, for the observations and up to
 30 simulated datasets.
 
@@ -90,7 +94,7 @@ the observed data were used to fit them, and parameter uncertainty is not includ
 Predictions have random effects set to zero; for nonlinear links they differ
 from averages over random effects. Variability includes random effects; it does
 not isolate the model's residual variance or dispersion parameter.
-Ordinal summaries use category scores;
+Ordinal variability and deviation summaries depend on the category scores;
 zero counts describe the combined response distribution for zero-inflated models.
 Uses the families and fitted rows supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}:
 missing responses are not imputed, time gaps follow the fitted model, and

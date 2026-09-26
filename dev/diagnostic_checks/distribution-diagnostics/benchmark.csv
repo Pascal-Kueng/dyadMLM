@@ -1,0 +1,3 @@
+"dataset","observations","simulations","fit_seconds","simulation_seconds","check_seconds","pit_MiB","result_MiB","convergence","pdHess"
+"cross",720,1000,0.765,0.297,6.918,5.56018829345703,6.57146453857422,0,TRUE
+"ild",10080,1000,0.567,2.016,11.732,77.0427322387695,78.2330932617188,0,TRUE

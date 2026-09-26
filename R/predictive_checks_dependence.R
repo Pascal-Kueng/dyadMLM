@@ -101,6 +101,9 @@
 #' Use a suitable model comparison to formally test a specific covariance
 #' restriction when both models can be fitted (see [compare_nested_models()]).
 #'
+#' For ordinal responses, these summaries depend on the category scores, not only
+#' their order; they do not describe dependence on the model's latent scale.
+#'
 #' Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
 #'
 #' @section Technical details:
@@ -488,19 +491,13 @@ calculate_partner_pair_statistics <- function(
 
 ### Summarising statistics ----------------------------------------------------
 
-# Middle 95% of the defined simulated values, as printed and plotted.
-simulated_middle_95 <- function(simulated_values) {
-  stats::quantile(simulated_values[is.finite(simulated_values)], c(0.025, 0.975),
-                  names = FALSE)
-}
-
 # Compare each observed statistic of one composition with its simulations.
 # Takes one statistics tibble: a dataset column, then one column per statistic,
 # with the observed row first.
 summarise_partner_statistics <- function(statistics) {
   statistics <- statistics[, -1]
   observed <- unlist(statistics[1, ], use.names = FALSE)
-  limits <- unname(vapply(statistics[-1, ], simulated_middle_95, numeric(2)))
+  limits <- unname(vapply(statistics[-1, ], simulated_rank_limits, numeric(2)))
   tibble::tibble(
     statistic = names(statistics),
     observed = observed,
@@ -564,7 +561,7 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
     values <- matrix(formatC(c(rows$observed, rows$lower, rows$upper),
                              format = "f", digits = digits, width = 9), ncol = 3L)
     # Statistic names come last so long names cannot split the table.
-    cat(sprintf("%9s %9s %9s    %s\n", "Observed", "2.5%", "97.5%", "Statistic"))
+    cat(sprintf("%9s %9s %9s    %s\n", "Observed", "Lower", "Upper", "Statistic"))
     cat(sprintf("%s %s %s %s  %s\n", values[, 1], values[, 2], values[, 3],
                 ifelse(rows$outside, "*", " "), rows$statistic), sep = "")
   }

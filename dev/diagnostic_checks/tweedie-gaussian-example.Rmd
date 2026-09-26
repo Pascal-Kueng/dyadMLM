@@ -49,8 +49,14 @@ split the plots without changing the fitted model's assumptions.
 
 ### Check residuals
 
-The default panel contains all six residual checks. `predictors` adds a page
-for the named predictor, giving two complete panels here.
+Start with everyone together. The page contains all six residual checks.
+
+```{r residual-pooled, fig.height=20, fig.alt="All observations pooled: six residual checks for the Gaussian model"}
+check_residuals(gaussian_simulations, role = NULL, seed = 123, ask = FALSE)
+```
+
+Now separate women and men using the same simulations. `predictors` adds a page
+showing how residuals change with the predictor. This call produces two pages.
 
 ```{r residual, fig.height=20, fig.alt="Complete panels produced by check_residuals"}
 check_residuals(
@@ -60,12 +66,12 @@ check_residuals(
 )
 ```
 
-The QQ curves and PIT histogram reveal a distribution mismatch. Five male
-outcomes fall outside all their reference simulations, compared with a usual
-simulated count of zero to one. *Predicted outcome* means the model prediction
+The QQ curves and PIT histogram show the same distribution mismatch in two
+ways. The outlier row compares counts beyond the finite simulated response
+range. *Predicted outcome* means the model prediction
 with random effects set to zero. The separate predictor page uses the supplied
-predictor values. Red quartiles should roughly follow the horizontal lines at
-0.25, 0.50 and 0.75, usually within their matching blue bands.
+predictor values. Judge the red quartiles against their matching blue bands;
+the horizontal lines at 0.25, 0.50 and 0.75 are guides.
 
 ### Check outcomes
 
@@ -112,5 +118,7 @@ check_partner_dependence(
 
 This includes variation explained by the predictor; the role-variance mismatch
 remains visible. Several assumptions are wrong here, so a failed check does not
-identify a single cause. Blue ranges describe the middle 95% at each comparison,
-not across all plots. These are descriptive checks, not significance tests.
+identify a single cause. Residual curve envelopes cover each panel jointly;
+scalar ranges describe individual comparisons. Coverage is not simultaneous
+across all plots. Fitted parameters stay fixed, so these are descriptive checks,
+not significance tests.

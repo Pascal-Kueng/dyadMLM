@@ -25,7 +25,10 @@
 #'
 #' **Red shows observed data; blue shows simulations.** The first row compares
 #' outcome distributions. Ordinal responses and counts with up to 20 distinct
-#' observed or simulated values use category frequencies. Other outcomes show
+#' observed values use category frequencies. All defined ordinal categories are
+#' retained; simulated counts at unobserved values are grouped as "Other values"
+#' and shown only in blue, without an observed comparison.
+#' Blue ranges show the middle 95% for each category separately. Other outcomes show
 #' the proportion at or below each outcome value, for the observations and up to
 #' 30 simulated datasets.
 #'
@@ -46,7 +49,7 @@
 #' Predictions have random effects set to zero; for nonlinear links they differ
 #' from averages over random effects. Variability includes random effects; it does
 #' not isolate the model's residual variance or dispersion parameter.
-#' Ordinal summaries use category scores;
+#' Ordinal variability and deviation summaries depend on the category scores;
 #' zero counts describe the combined response distribution for zero-inflated models.
 #' Uses the families and fitted rows supported by [simulate_dyad_responses()]:
 #' missing responses are not imputed, time gaps follow the fitted model, and
@@ -100,24 +103,31 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
       category_labels <- levels(frame[[1]])
       support <- seq_along(category_labels)
     } else if (family %in% c("ordinal", count_families)) {
-      support <- sort(unique(as.vector(responses[composition_rows, ])))
+      support <- sort(unique(if (family == "ordinal")
+        as.vector(responses[composition_rows, ]) else responses[composition_rows, 1]))
       if (family != "ordinal" && length(support) > 20) support <- NULL
       category_labels <- support
+      if (!is.null(support) && family != "ordinal" &&
+          any(!responses[composition_rows, -1, drop = FALSE] %in% support))
+        category_labels <- c(category_labels, "Other values")
     }
     # Store plain plotting data, so the saved check needs no model or simulation object.
     composition$distribution <- list(
       limits = range(responses[composition_rows, ]), labels = category_labels,
+      has_other_values = length(category_labels) > length(support),
       roles = lapply(composition$rows, function(rows) {
         if (!length(rows)) return(NULL)
         values <- responses[rows, , drop = FALSE]
         if (!is.null(support)) {
           frequencies <- vapply(seq_len(ncol(values)), function(dataset)
-            tabulate(match(values[, dataset], support), nbins = length(support)) / nrow(values),
-            numeric(length(support)))
-          frequencies <- matrix(frequencies, nrow = length(support))
+            tabulate(match(values[, dataset], support, nomatch = length(support) + 1L),
+                     nbins = length(category_labels)) / nrow(values),
+            numeric(length(category_labels)))
+          frequencies <- matrix(frequencies, nrow = length(category_labels))
+          bounds <- apply(frequencies[, -1, drop = FALSE], 1, simulated_rank_limits)
+          bounds[] <- pmax(0, pmin(1, bounds))
           list(observed = frequencies[, 1],
-               bounds = apply(frequencies[, -1, drop = FALSE], 1, stats::quantile, c(.025, .975)),
-               maximum = max(frequencies, .01))
+               bounds = bounds, maximum = max(frequencies, bounds, .01))
         } else {
           lapply(seq_len(min(ncol(values), 31)), function(dataset) {
             empirical <- stats::ecdf(values[, dataset])
@@ -129,6 +139,7 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
     composition
   })
   result <- structure(list(compositions = compositions), class = c("dyadMLM_outcome_check", "list"))
+  attr(result, "dyadMLM") <- attr(simulations, "dyadMLM")
   if (missing(role)) message_pooled_roles()
   if (plot) graphics::plot(result, ask = ask, panels = panels)
   invisible(result)
@@ -182,15 +193,25 @@ plot.dyadMLM_outcome_check <- function(x, ask = NULL, panels = TRUE, ...) {
 plot_outcome_distribution <- function(distribution, role) {
   values <- distribution$roles[[role]]
   if (!is.null(distribution$labels)) {
-    positions <- graphics::barplot(values$observed, names.arg = distribution$labels,
+    observed <- values$observed
+    labels <- distribution$labels
+    # This group excludes observed values by definition; do not compare its zero.
+    if (isTRUE(distribution$has_other_values)) {
+      observed[length(observed)] <- NA_real_
+      labels[length(labels)] <- "Other\nvalues"
+    }
+    positions <- graphics::barplot(observed, names.arg = labels,
       col = check_colours$observed_fill, border = check_colours$observed,
       ylim = c(0, values$maximum), main = "Outcome frequencies\n(category proportions)",
       xlab = "Outcome", ylab = "Proportion")
     graphics::segments(positions, values$bounds[1, ], positions, values$bounds[2, ],
                        col = check_colours$simulated, lwd = 3)
-    graphics::points(positions, values$observed, col = check_colours$observed, pch = 16, cex = .65)
-    plot_check_caption(paste("Red proportions should usually lie within the blue ranges.",
-      "Above: more observations in that category; below: fewer.", sep = "\n"))
+    graphics::points(positions, observed, col = check_colours$observed, pch = 16, cex = .65)
+    guide <- paste("Red should usually lie within each category's blue 95% range.",
+      "Above: more observations in that category; below: fewer.", sep = "\n")
+    if (isTRUE(distribution$has_other_values)) guide <- paste(guide,
+      "Other values: simulations only; absent from the observed data.", sep = "\n")
+    plot_check_caption(guide)
   } else {
     graphics::plot(distribution$limits, c(0, 1), type = "n", main = "Outcome ECDF\n(distribution shape)",
       xlab = "Outcome", ylab = "Proportion at or below this value")
