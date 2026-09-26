@@ -10,8 +10,8 @@ check_residuals(
   role = NULL,
   member = NULL,
   predictors = NULL,
-  plot = TRUE,
   seed = 123,
+  plot = TRUE,
   ask = NULL,
   panels = TRUE,
   data = NULL
@@ -32,11 +32,11 @@ in the model frame or \code{data}. \code{NULL} (default) omits additional predic
 pages. Missing or infinite values are omitted only from that predictor's
 plots. Predicted outcomes are always checked.}
 
-\item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
-If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
-
 \item{seed}{Seed for randomized PIT residuals. The caller's random-number
 state is restored afterwards.}
+
+\item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
+If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
 
 \item{ask}{Whether to pause between figures on an interactive device.
 \code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
@@ -115,7 +115,8 @@ envelopes retain the fitted partner and time dependence and any modelled
 differences in variability between roles, without whitening.
 They are dyadMLM's descriptive checks, not DHARMa's plots or tests. Parameters
 stay fixed, and the observed data were used to fit them; parameter uncertainty
-is not included. Check partner and time dependence separately.
+is not included. For cross-sectional data, check partner correlations with
+\code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 
 The "Predicted outcome" axis shows model predictions, not observed outcomes
 or predictions of residuals. Random effects are set to zero, which differs

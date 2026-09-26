@@ -68,12 +68,27 @@ plot_check_role_panels <- function(composition, checks, title, draw, panels = TR
   }
 }
 
+# Dyad and observation counts, shared by page headings and printed results.
+check_counts <- function(composition) {
+  counts <- paste(sum(lengths(composition$rows)), "observations")
+  if (is.null(composition$n_dyads)) counts else paste(composition$n_dyads, "dyads;", counts)
+}
+
+# Describe a saved residual or outcome check without printing its matrices.
+print_check_overview <- function(x, title, predictors = NULL) {
+  cat("<dyadMLM ", title, ">\n", sep = "")
+  for (composition in x$compositions) {
+    cat(composition$label, ": ", check_counts(composition), "\n", sep = "")
+  }
+  if (length(predictors)) cat("Predictors: ", paste(predictors, collapse = ", "), "\n", sep = "")
+  cat("Use plot(x) to view the checks.\n")
+  invisible(x)
+}
+
 # Add the shared counts and role headings to a composition page.
 plot_check_role_page <- function(composition, rows, title, draw) {
   role_rows <- composition$rows
-  counts <- paste(sum(lengths(role_rows)), "observations")
-  if (!is.null(composition$n_dyads)) counts <- paste(composition$n_dyads, "dyads;", counts)
-  plot_check_page(composition$label, paste(title, counts, sep = " - "),
+  plot_check_page(composition$label, paste(title, check_counts(composition), sep = " - "),
     c(rows, length(role_rows)), draw,
     column_titles = paste0(names(role_rows), " (n = ", lengths(role_rows), ")"),
     footer = "Red: observed data. Blue: model simulations. Ranges and dashed histogram limits contain the middle 95%.\nSome departures occur by chance; these are descriptive checks, not significance tests.")

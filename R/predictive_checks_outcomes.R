@@ -50,7 +50,8 @@
 #' zero counts describe the combined response distribution for zero-inflated models.
 #' Uses the families and fitted rows supported by [simulate_dyad_responses()]:
 #' missing responses are not imputed, time gaps follow the fitted model, and
-#' observations have equal weight. Check partner and time dependence separately.
+#' observations have equal weight. For cross-sectional data, check partner
+#' correlations with [check_partner_dependence()].
 #'
 #' @seealso [check_residuals()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
@@ -128,9 +129,14 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
     composition
   })
   result <- structure(list(compositions = compositions), class = c("dyadMLM_outcome_check", "list"))
+  if (missing(role)) message_pooled_roles()
   if (plot) graphics::plot(result, ask = ask, panels = panels)
   invisible(result)
 }
+
+#' @rdname print.dyadMLM_residual_check
+#' @export
+print.dyadMLM_outcome_check <- function(x, ...) print_check_overview(x, "outcome check")
 
 #' Plot saved outcome checks
 #'

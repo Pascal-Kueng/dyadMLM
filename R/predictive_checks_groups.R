@@ -94,3 +94,10 @@ build_check_groups <- function(model_frame, dyad_quo, role_quo,
          n_dyads = dplyr::n_distinct(current$dyad_number))
   })
 }
+
+# Pooling is the default, but compositions can reveal mismatches it hides.
+message_pooled_roles <- function() {
+  message("No role supplied: summaries pool partners. Supply `role` to check ",
+          "each composition separately, even if the model did not include it. ",
+          "Use `role = NULL` to pool without this message.")
+}

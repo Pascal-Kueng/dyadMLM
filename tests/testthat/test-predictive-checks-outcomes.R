@@ -101,7 +101,7 @@ test_that("outcome plotting restores settings after failure", {
   settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "cex.main", "mfg", "las", "plt", "new"))
   grDevices::devAskNewPage(TRUE)
   local_mocked_bindings(hist = function(...) stop("forced plotting failure"), .package = "graphics")
-  expect_error(check_outcomes(simulations, ask = FALSE), "forced plotting failure")
+  expect_error(check_outcomes(simulations, role = NULL, ask = FALSE), "forced plotting failure")
   expect_equal(graphics::par(names(settings)), settings)
   expect_true(grDevices::devAskNewPage())
 })
@@ -160,7 +160,7 @@ test_that("zero-count panels are automatic and handle constant references", {
   }, .package = "graphics")
   zero_panels <- function(simulations, ...) {
     histograms <<- list()
-    check_outcomes(simulations, ...)
+    check_outcomes(simulations, role = NULL, ...)
     Filter(function(panel) panel$name == "Number of zeros", histograms)
   }
 
@@ -212,7 +212,7 @@ test_that("outcome ECDF paths retain ties, constant samples, and both tails", {
     if (missing(y)) original_lines(x, ...) else original_lines(x, y, ...)
   }, .package = "graphics")
 
-  check_outcomes(simulations, ask = FALSE)
+  check_outcomes(simulations, role = NULL, ask = FALSE)
   expect_length(paths, 31)
   expect_true(all(vapply(paths, `[[`, "", "type") == "s"))
   limits <- paths[[1]]$limits
@@ -272,7 +272,7 @@ test_that("discrete outcome panels show role-specific proportions and category l
     simulations$model_frame
   )
   attr(simulations, "dyadMLM") <- list(family = "ordinal")
-  check_outcomes(simulations, ask = FALSE)
+  check_outcomes(simulations, role = NULL, ask = FALSE)
   expect_identical(bars[[3]]$labels, categories)
   expect_equal(unname(bars[[3]]$values[5]), 0)
 })
@@ -300,7 +300,7 @@ test_that("outcome results can be calculated without graphics and plotted later"
   simulations <- distribution_check_fixture()
   device <- grDevices::dev.cur()
   result <- with_mocked_bindings(
-    check_outcomes(simulations, plot = FALSE, ask = "ignored", panels = "ignored"),
+    check_outcomes(simulations, role = NULL, plot = FALSE, ask = "ignored", panels = "ignored"),
     plot.new = function(...) stop("Unexpected drawing"), .package = "graphics"
   )
   expect_identical(grDevices::dev.cur(), device)
@@ -309,8 +309,8 @@ test_that("outcome results can be calculated without graphics and plotted later"
   saved <- unserialize(serialize(result, NULL))
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
-  expect_identical(check_outcomes(simulations, ask = FALSE), result)
-  expect_identical(check_outcomes(simulations, panels = FALSE, ask = FALSE), result)
+  expect_identical(check_outcomes(simulations, role = NULL, ask = FALSE), result)
+  expect_identical(check_outcomes(simulations, role = NULL, panels = FALSE, ask = FALSE), result)
   expect_identical(plot(saved, ask = FALSE), result)
   expect_identical(plot(saved, panels = FALSE, ask = FALSE), result)
 })

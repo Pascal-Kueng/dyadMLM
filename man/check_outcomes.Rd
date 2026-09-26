@@ -94,7 +94,8 @@ Ordinal summaries use category scores;
 zero counts describe the combined response distribution for zero-inflated models.
 Uses the families and fitted rows supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}:
 missing responses are not imputed, time gaps follow the fitted model, and
-observations have equal weight. Check partner and time dependence separately.
+observations have equal weight. For cross-sectional data, check partner
+correlations with \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 
 \examples{

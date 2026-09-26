@@ -323,11 +323,7 @@ check_partner_dependence <- function(
                    compositions$n_pairs[skipped_composition_indices], ")",
                    collapse = "; "), ".", call. = FALSE)
   }
-  if (missing(role)) {
-    message("No role supplied: summaries pool partners. Supply `role` to check ",
-            "each composition separately, even if the model did not include it. ",
-            "Use `role = NULL` to pool without this message.")
-  }
+  if (missing(role)) message_pooled_roles()
   if (plot) graphics::plot(check_result, ask = ask, panels = panels)
   return(invisible(check_result))
 }

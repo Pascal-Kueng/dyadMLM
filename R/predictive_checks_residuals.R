@@ -81,7 +81,8 @@
 #' differences in variability between roles, without whitening.
 #' They are dyadMLM's descriptive checks, not DHARMa's plots or tests. Parameters
 #' stay fixed, and the observed data were used to fit them; parameter uncertainty
-#' is not included. Check partner and time dependence separately.
+#' is not included. For cross-sectional data, check partner correlations with
+#' [check_partner_dependence()].
 #'
 #' The "Predicted outcome" axis shows model predictions, not observed outcomes
 #' or predictions of residuals. Random effects are set to zero, which differs
@@ -123,8 +124,8 @@
 #' plot(result, panels = FALSE, ask = FALSE)
 #' @export
 check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL,
-                            predictors = NULL, plot = TRUE,
-                            seed = 123, ask = NULL, panels = TRUE, data = NULL) {
+                            predictors = NULL, seed = 123, plot = TRUE,
+                            ask = NULL, panels = TRUE, data = NULL) {
   if (!inherits(simulations, "dyadMLM_response_simulations"))
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
   frame <- simulations$model_frame
@@ -196,6 +197,7 @@ check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL
   result <- list(pit = pit, compositions = compositions, predictors = names(predictors))
   attr(result, "dyadMLM") <- attr(simulations, "dyadMLM")
   class(result) <- c("dyadMLM_residual_check", "list")
+  if (missing(role)) message_pooled_roles()
   if (plot) graphics::plot(result, ask = ask, panels = panels)
   invisible(result)
 }
@@ -259,6 +261,18 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows) {
        numeric = is.numeric(predictor),
        points = data.frame(predictor = predictor[rows], pit = pit[rows, 1]),
        quantiles = curves$quantiles, distance = curves$distance)
+}
+
+#' Print saved residual or outcome checks
+#'
+#' Lists the checked compositions without printing the stored results.
+#' @param x A result from [check_residuals()] or [check_outcomes()].
+#' @param ... Unused.
+#' @return `x`, invisibly.
+#' @keywords internal
+#' @export
+print.dyadMLM_residual_check <- function(x, ...) {
+  print_check_overview(x, "residual check", x$predictors)
 }
 
 #' Plot saved residual checks
@@ -370,7 +384,7 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
       } else if (check == "outliers") {
         plot_check_statistic(statistics$outliers, title,
           xlab = "Number of observations", counts = TRUE,
-          sub = "Counts outcomes below or above all their reference simulations.\nRed beyond the right dashed limit means more such outcomes\nthan the model usually produces.")
+          sub = "Counts outcomes below or above all their reference simulations.\nRed should usually lie between the dashed limits.\nBeyond right: more such outcomes than simulated; left: fewer.")
       } else {
         plot_check_statistic(statistics$uniformity, title, xlab = "Distance from uniform residuals",
           sub = "Larger values mean a greater departure from evenly spread PIT residuals.\nRed beyond the right dashed limit means more departure\nthan the model usually produces.")
