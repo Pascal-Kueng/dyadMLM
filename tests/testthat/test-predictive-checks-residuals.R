@@ -299,12 +299,12 @@ test_that("overview and optional panels use predictable pages", {
   simulations$model_frame$age <- rep(c(20, 40), 6)
   simulations$model_frame$stress <- factor(rep(c("low", "high", "medium"), 4))
   cases <- list(
-    list(arguments = list(role = NULL), pages = 1L),
-    list(arguments = list(role = NULL, predictors = NULL), pages = 1L),
-    list(arguments = list(role = NULL, predictors = c("age", "stress")), pages = 3L),
+    list(arguments = list(role = NULL), pages = 2L),
+    list(arguments = list(role = NULL, predictors = NULL), pages = 2L),
+    list(arguments = list(role = NULL, predictors = c("age", "stress")), pages = 4L),
     list(arguments = list(role = NULL, panels = FALSE), pages = 6L),
     list(arguments = list(role = NULL, predictors = c("age", "stress"), panels = FALSE), pages = 10L),
-    list(arguments = list(dyad = "dyad", role = "role"), pages = 1L),
+    list(arguments = list(dyad = "dyad", role = "role"), pages = 2L),
     list(arguments = list(dyad = "dyad", role = "role", panels = FALSE), pages = 12L)
   )
   for (case in cases) {
@@ -324,11 +324,13 @@ test_that("all check functions pause consistently only on interactive devices", 
   simulations <- distribution_check_fixture()
   simulations$model_frame$age <- seq_len(12)
   single <- list(
-    check_residuals(simulations, role = NULL, plot = FALSE),
     check_outcomes(simulations, role = NULL, plot = FALSE),
     check_partner_dependence(simulations, "dyad", role = NULL, plot = FALSE)
   )
-  multiple <- list(check_residuals(simulations, role = NULL, predictors = "age", plot = FALSE))
+  multiple <- list(
+    check_residuals(simulations, role = NULL, plot = FALSE),
+    check_residuals(simulations, role = NULL, predictors = "age", plot = FALSE)
+  )
   simulations$model_frame$role <- c(rep("A", 6), rep(c("A", "B"), 3))
   multiple <- c(multiple, list(
     check_outcomes(simulations, "dyad", "role", plot = FALSE),
@@ -405,9 +407,9 @@ test_that("every residual page identifies its composition and page contents", {
     original_mtext(text, ...)
   }, .package = "graphics")
   cases <- list(
-    list(arguments = list(), pages = "Residual checks"),
+    list(arguments = list(), pages = c("Residual distribution", "Predicted outcome")),
     list(arguments = list(predictors = "X"),
-         pages = c("Residual checks", "X"))
+         pages = c("Residual distribution", "Predicted outcome", "X"))
   )
   for (case in cases) {
     margins <- list()
@@ -459,8 +461,10 @@ test_that("individual residual figures retain composition, role and guidance", {
   plot(result, panels = FALSE, ask = FALSE)
   expect_length(figures, 16)
   roles <- character()
+  page_titles <- character()
   for (figure in figures) {
     labels <- unlist(lapply(figure, `[[`, "text"), use.names = FALSE)
+    page_titles <- c(page_titles, labels[grepl("dyads;.*observations", labels)])
     expect_true(any(grepl("A - B", labels, fixed = TRUE)))
     role <- labels[grepl("^[AB] \\(n = 6\\)$", labels)]
     expect_length(role, 1)
@@ -470,6 +474,8 @@ test_that("individual residual figures retain composition, role and guidance", {
     expect_length(captions, 1)
   }
   expect_equal(as.integer(table(roles)), c(8L, 8L))
+  expect_identical(sub(" - .*", "", page_titles),
+    rep(c("Residual distribution", "Predicted outcome", "age"), c(8, 4, 4)))
 })
 
 

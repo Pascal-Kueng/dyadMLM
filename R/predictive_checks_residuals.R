@@ -51,9 +51,11 @@
 #' are retained when the composition is known; unknown compositions are omitted
 #' with a warning.
 #'
-#' **Red shows observed data; blue shows simulated references.** The six rows
-#' show uniform QQ, a PIT histogram, PIT quartiles and distance against predicted
-#' outcomes, counts outside the simulated response range, and mean PIT distance.
+#' **Red shows observed data; blue shows simulated references.** The first page
+#' shows uniform QQ, a PIT histogram, counts outside the simulated response range,
+#' and mean PIT distance. The second shows PIT quartiles and distance against
+#' predicted outcomes. Each supplied predictor gets another two-row pattern page.
+#' All pages for one composition appear together.
 #' The histogram and QQ plot show the same residual distribution in different
 #' ways; agreement between them is not independent evidence.
 #' Use a tall plotting window or save a large figure to keep all rows readable.
@@ -333,7 +335,7 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #' @export
 plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
   local_check_paging(ask, panels, if (panels)
-    length(x$compositions) * (1L + length(x$predictors)) else
+    length(x$compositions) * (2L + length(x$predictors)) else
     sum(vapply(x$compositions, function(composition) length(composition$rows), integer(1))) *
       (6L + 2L * length(x$predictors)))
   draw_envelopes <- function(x, curves, connect = TRUE, boxes = FALSE, smooth = FALSE) {
@@ -406,8 +408,6 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
       title <- switch(check,
         qq = "Uniform QQ\n(overall residual distribution)",
         histogram = "PIT histogram\n(how residuals are distributed)",
-        quantiles = "PIT quantiles\n(fit across predicted outcomes)",
-        distance = "PIT distance\n(residual extremes across predicted outcomes)",
         outliers = "Outside simulated range (outliers)",
         mean_distance = "Mean PIT distance\n(overall residual spread)")
       if (is.null(statistics)) return(plot_check_empty(title))
@@ -426,8 +426,6 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
         draw_envelopes(midpoints, list(density), connect = FALSE)
         graphics::abline(h = 1, lty = 2, col = check_colours$reference)
         plot_check_caption("A binned view of the same residual distribution as the QQ plot.\nPeaks and gaps help identify departures; the blue global envelope\nshows variation across complete simulated datasets.")
-      } else if (check %in% c("quantiles", "distance")) {
-        draw_pattern(composition$patterns[[1]][[role]], distance = check == "distance")
       } else if (check == "outliers") {
         plot_check_statistic(statistics$outliers, title,
           xlab = "Number of observations", counts = TRUE,
@@ -438,12 +436,14 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
       }
     }
     plot_check_role_panels(composition,
-      c("qq", "histogram", "quantiles", "distance", "outliers", "mean_distance"),
-      "Residual checks", draw_check, panels)
-    for (i in seq_along(x$predictors)) {
-      plot_check_role_panels(composition, c(FALSE, TRUE), x$predictors[i],
-        function(distance, role) draw_pattern(composition$patterns[[i + 1L]][[role]],
-                                             x$predictors[i], distance), panels)
+      c("qq", "histogram", "outliers", "mean_distance"),
+      "Residual distribution", draw_check, panels)
+    for (i in seq_along(composition$patterns)) {
+      name <- if (i == 1L) NULL else x$predictors[i - 1L]
+      plot_check_role_panels(composition, c(FALSE, TRUE),
+        if (is.null(name)) "Predicted outcome" else name,
+        function(distance, role) draw_pattern(composition$patterns[[i]][[role]],
+                                             name, distance), panels)
     }
   }
   invisible(x)

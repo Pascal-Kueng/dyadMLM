@@ -83,9 +83,11 @@ supplying roles does not change the model's assumptions. Available responses
 are retained when the composition is known; unknown compositions are omitted
 with a warning.
 
-\strong{Red shows observed data; blue shows simulated references.} The six rows
-show uniform QQ, a PIT histogram, PIT quartiles and distance against predicted
-outcomes, counts outside the simulated response range, and mean PIT distance.
+\strong{Red shows observed data; blue shows simulated references.} The first page
+shows uniform QQ, a PIT histogram, counts outside the simulated response range,
+and mean PIT distance. The second shows PIT quartiles and distance against
+predicted outcomes. Each supplied predictor gets another two-row pattern page.
+All pages for one composition appear together.
 The histogram and QQ plot show the same residual distribution in different
 ways; agreement between them is not independent evidence.
 Use a tall plotting window or save a large figure to keep all rows readable.

@@ -26,7 +26,7 @@ check_outcomes(
 
 Use your own column names and the unchanged data used to fit the model.
 Without `role`, all observations are pooled. With `role`, each combination of
-partners' roles gets one page per check: one column for same-role dyads, two
+partners' roles gets its own pages: one column for same-role dyads, two
 role-specific columns for distinct-role dyads. For repeated observations, also
 supply `member`.
 Observed responses from incomplete pairs are retained when their composition
@@ -34,9 +34,11 @@ can be established from the fitting data.
 Roles determine the display; simulations retain the fitted model's assumptions,
 including its partner dependence and any role-specific variability.
 
-Residual pages show a PIT QQ plot, PIT histogram, PIT quartiles and distance
-across predicted outcomes, the number of outcomes outside their simulation
-reference range, and mean PIT distance. The QQ plot and histogram are two views
+The first residual page shows a PIT QQ plot, PIT histogram, the number of outcomes
+outside their simulation reference range, and mean PIT distance. The next page
+shows PIT quartiles and distance across predicted outcomes. Each supplied
+predictor gets another two-row pattern page. All pages for one composition
+appear together. The QQ plot and histogram are two views
 of the same distribution; agreement is not independent evidence.
 Outcome pages show the raw response distribution, SDs,
 largest deviations, and relevant zero counts. SDs and deviations are
@@ -104,6 +106,11 @@ for the settings, results, limits, and large-data benchmark.
 
 ## Reproduce the examples
 
+The [NB2-to-Gaussian example](results/nbinom2-gaussian/index.html) fits an
+independent Gaussian model to negative-binomial dyads with a shared dyad effect.
+It shows the separate residual pages, outcome checks and the missing partner
+dependence. Run [nbinom2-gaussian.R](nbinom2-gaussian.R) to reproduce it.
+
 The [full Tweedie-to-Gaussian example](results/tweedie-gaussian/index.html) starts
 with pooled residual checks, then checks roles and a predictor. It shows the
 calls to all three checks and every page they produce. The
@@ -124,18 +131,18 @@ compositions:
 
 | Composition | Residuals | Outcomes | Partner dependence |
 |---|---|---|---|
-| Female-female | [Plots](results/residual-composition-01.svg) | [Plots](results/outcome-composition-01.svg) | [Plots](results/partner-composition-01.svg) |
-| Female-male | [Plots](results/residual-composition-02.svg) | [Plots](results/outcome-composition-02.svg) | [Plots](results/partner-composition-02.svg) |
-| Male-male | [Plots](results/residual-composition-03.svg) | [Plots](results/outcome-composition-03.svg) | [Plots](results/partner-composition-03.svg) |
+| Female-female | [Distribution](results/residual-composition-01.svg), [patterns](results/residual-composition-02.svg) | [Plots](results/outcome-composition-01.svg) | [Plots](results/partner-composition-01.svg) |
+| Female-male | [Distribution](results/residual-composition-03.svg), [patterns](results/residual-composition-04.svg) | [Plots](results/outcome-composition-02.svg) | [Plots](results/partner-composition-02.svg) |
+| Male-male | [Distribution](results/residual-composition-05.svg), [patterns](results/residual-composition-06.svg) | [Plots](results/outcome-composition-03.svg) | [Plots](results/partner-composition-03.svg) |
 
 The tail-shape script fits Gaussian models to four datasets:
 
-| Data | Residuals | Outcomes | Predictor patterns |
+| Data | Residual distribution | Outcomes | Patterns |
 |---|---|---|---|
-| Heavy-tailed t(3) | [Plots](results/t3-residual-01.svg) | [Plots](results/t3-outcome-01.svg) | [Plots](results/t3-residual-02.svg) |
-| Heavier-tailed t(2.2) | [Plots](results/t22-residual-01.svg) | [Plots](results/t22-outcome-01.svg) | [Plots](results/t22-residual-02.svg) |
-| Gaussian | [Plots](results/gaussian-residual-01.svg) | [Plots](results/gaussian-outcome-01.svg) | [Plots](results/gaussian-residual-02.svg) |
-| Gaussian with strong partner and AR(1) dependence | [Plots](results/gaussian_strong-residual-01.svg) | [Plots](results/gaussian_strong-outcome-01.svg) | [Plots](results/gaussian_strong-residual-02.svg) |
+| Heavy-tailed t(3) | [Plots](results/t3-residual-01.svg) | [Plots](results/t3-outcome-01.svg) | [Predicted outcome](results/t3-residual-02.svg), [predictor](results/t3-residual-03.svg) |
+| Heavier-tailed t(2.2) | [Plots](results/t22-residual-01.svg) | [Plots](results/t22-outcome-01.svg) | [Predicted outcome](results/t22-residual-02.svg), [predictor](results/t22-residual-03.svg) |
+| Gaussian | [Plots](results/gaussian-residual-01.svg) | [Plots](results/gaussian-outcome-01.svg) | [Predicted outcome](results/gaussian-residual-02.svg), [predictor](results/gaussian-residual-03.svg) |
+| Gaussian with strong partner and AR(1) dependence | [Plots](results/gaussian_strong-residual-01.svg) | [Plots](results/gaussian_strong-outcome-01.svg) | [Predicted outcome](results/gaussian_strong-residual-02.svg), [predictor](results/gaussian_strong-residual-03.svg) |
 
 The first two illustrate a distribution mismatch; the others are comparison
 cases with the same sample size. The composition examples demonstrate the layout
