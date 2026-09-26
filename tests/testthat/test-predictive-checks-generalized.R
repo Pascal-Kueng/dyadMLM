@@ -73,15 +73,15 @@ test_that("supported scalar families and alternative links share the response-ch
     if (!family$family %in% c("skewnormal", "nbinom12")) {
       expect_true(model$sdr$pdHess, info = paste(family$family, family$link))
     }
-    simulations <- simulate_dyad_responses(model, nsim = 20, seed = 459)
+    simulations <- simulate_dyad_responses(model, nsim = 200, seed = 459)
     center <- as.numeric(stats::predict(
       model, newdata = NULL, type = "response", re.form = NA
     ))
-    expect_identical(dim(simulations$simulated_responses), c(20L, 120L))
+    expect_identical(dim(simulations$simulated_responses), c(200L, 120L))
     expect_identical(simulations$predicted_response, center)
     expect_identical(
       simulations$simulated_responses,
-      t(as.matrix(stats::simulate(model, nsim = 20, seed = 459)))
+      t(as.matrix(stats::simulate(model, nsim = 200, seed = 459)))
     )
 
     # Formula and raw/centred behavior are covered by the deterministic pair tests.
@@ -90,8 +90,28 @@ test_that("supported scalar families and alternative links share the response-ch
     )
     expect_identical(result$n_pairs, 60L)
     simulated_statistics <- as.matrix(result$compositions$statistics[[1]][-1, -1])
-    expect_identical(dim(simulated_statistics), c(20L, 6L))
+    expect_identical(dim(simulated_statistics), c(200L, 6L))
     expect_true(all(is.finite(simulated_statistics)))
+
+    rows_by_role <- split(seq_len(nrow(data)), data$role)
+    residuals <- check_residuals(
+      simulations, dyad = "dyad", role = "role", plot = FALSE
+    )
+    expect_s3_class(residuals, "dyadMLM_residual_check")
+    expect_identical(dim(residuals$pit), c(120L, 201L))
+    expect_identical(residuals$compositions[[1]]$rows, rows_by_role)
+    expect_true(all(is.finite(residuals$pit) & residuals$pit > 0 & residuals$pit < 1))
+
+    outcomes <- check_outcomes(
+      simulations, dyad = "dyad", role = "role", plot = FALSE
+    )
+    expect_s3_class(outcomes, "dyadMLM_outcome_check")
+    expect_identical(outcomes$compositions[[1]]$rows, rows_by_role)
+    for (statistics in outcomes$compositions[[1]]$statistics) {
+      expect_true(nrow(statistics) %in% c(2L, 3L))
+      expect_identical(ncol(statistics), 201L)
+      expect_true(all(is.finite(statistics)))
+    }
   }
 })
 

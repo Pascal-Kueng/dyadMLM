@@ -105,7 +105,11 @@ The lines at 0.25, 0.50 and 0.75 are visual guides. Judge the red quartiles
 against their matching blue bands.
 
 Each additional predictor gets a page with quartile and distance plots. Numeric
-predictors with many values use up to eight bins, chosen within each role.
+predictors with more than eight distinct values in a composition use up to
+eight bins per role, aiming for about 20 observations per bin. For these
+predictors, fewer than 40 available observations in a role give one bin.
+Repeated values can reduce the number of bins and hide local patterns, such as
+differences between zero and positive predictor values.
 With at least four bins, nearby quartiles are averaged into smooth curves using
 the same weights for observed and simulated data; blue bands are calculated
 afterwards. These are smoothed local summaries, not quantile regressions.
@@ -125,6 +129,8 @@ and bins can hide interactions or finer patterns.
 Observed and simulated datasets are ranked and transformed together. These
 envelopes retain the fitted partner and time dependence and any modelled
 differences in variability between roles, without whitening.
+Simulations redraw all random effects; DHARMa's default since version 0.5.0
+holds their fitted values fixed.
 They are dyadMLM's descriptive checks, not DHARMa's plots or tests. Parameters
 stay fixed, and the observed data were used to fit them; parameter uncertainty
 is not included. Neither ranking nor centring makes fitted-data references
