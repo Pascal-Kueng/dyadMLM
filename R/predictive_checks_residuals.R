@@ -51,14 +51,13 @@
 #' with a warning.
 #'
 #' **Red shows observed data; blue shows simulated references.** The first page
-#' shows uniform QQ, a PIT histogram, counts outside the simulated response range,
-#' and mean PIT distance. The second shows PIT quartiles and distance against
-#' predicted outcomes. Each supplied predictor gets another two-row pattern page.
-#' All pages for one composition appear together.
+#' shows uniform QQ and a PIT histogram; the second shows counts outside the
+#' simulated response range and mean PIT distance. The third shows PIT quartiles
+#' and distance against predicted outcomes. Each supplied predictor gets another
+#' two-row pattern page. All pages for one composition appear together.
 #' The histogram and QQ plot show the same residual distribution in different
 #' ways; agreement between them is not independent evidence.
 #' The histogram uses 10 equal-width bins to make broad shapes easier to see.
-#' Use a tall plotting window or save a large figure to keep all rows readable.
 #'
 #' PIT (probability integral transform) residuals rank each outcome from 0 (low)
 #' to 1 (high) relative to its own simulated values. A suitable model should
@@ -71,8 +70,8 @@
 #' envelope; coverage is not simultaneous across roles, predictors, or pages.
 #' The outlier and mean-distance rows show simulated values as a blue histogram
 #' and the observed value as a red line; dashed lines mark the middle 95%.
-#' Values exactly on a limit count as inside. Because the model was fitted to these same data,
-#' the references can make departures look smaller or larger.
+#' Values exactly on a limit count as inside. Because the model was fitted to
+#' these same data, the references can make departures look smaller or larger.
 #' The lines at 0.25, 0.50 and 0.75 are visual guides. Judge the red quartiles
 #' against their matching blue bands.
 #'
@@ -336,7 +335,7 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #' @export
 plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
   local_check_paging(ask, panels, if (panels)
-    length(x$compositions) * (2L + length(x$predictors)) else
+    length(x$compositions) * (3L + length(x$predictors)) else
     sum(vapply(x$compositions, function(composition) length(composition$rows), integer(1))) *
       (6L + 2L * length(x$predictors)))
   draw_envelopes <- function(x, curves, connect = TRUE, boxes = FALSE, smooth = FALSE) {
@@ -436,9 +435,10 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
           sub = "Mean of 2 * |PIT - 0.5|, relative to simulated datasets.\nBeyond right: more extreme residuals; left: more central residuals.\nLocation and spread errors can both affect this distance.")
       }
     }
-    plot_check_role_panels(composition,
-      c("qq", "histogram", "outliers", "mean_distance"),
+    plot_check_role_panels(composition, c("qq", "histogram"),
       "Residual distribution", draw_check, panels)
+    plot_check_role_panels(composition, c("outliers", "mean_distance"),
+      "Residual summaries", draw_check, panels)
     for (i in seq_along(composition$patterns)) {
       name <- if (i == 1L) NULL else x$predictors[i - 1L]
       plot_check_role_panels(composition, c(FALSE, TRUE),
