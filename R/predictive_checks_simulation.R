@@ -45,6 +45,9 @@
 #' - `glmmTMB::ordinal()` (currently only available in the development version
 #'   of `glmmTMB`)
 #'
+#' Smooth terms (`s()`) are not supported, because glmmTMB fits them as random
+#' effects. Fixed-effect splines, such as `splines::ns()`, are supported.
+#'
 #' Zero-inflated and hurdle versions are supported where available. Checks
 #' describe the combined response, including zeros, rather than each model
 #' component separately. Good agreement does not establish that the zero and
@@ -114,6 +117,12 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   }
   if (any(stats::weights(model) != 1)) {
     stop("Predictive checks currently only support unweighted models.", call. = FALSE)
+  }
+  # glmmTMB fits the wiggly part of s() as a random effect, so simulate() would redraw it.
+  if (any(lengths(lapply(model$modelInfo$reTrms, `[[`, "smooth_info")) > 0L)) {
+    stop("Smooth terms (s()) are not supported: glmmTMB fits them as random effects, ",
+         "so every simulation would draw a new curve. Use fixed-effect splines, such ",
+         "as splines::ns(), instead.", call. = FALSE)
   }
   if (family$family == "t" && glmmTMB::family_params(model) <= 2) {
     stop("Student-t predictive checks require more than two degrees of freedom ",

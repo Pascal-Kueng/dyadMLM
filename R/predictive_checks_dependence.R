@@ -44,11 +44,12 @@
 #' @return The comparison plots (shown by default) are the main output. The
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
 #'   `compositions` table with pair counts and a statistics tibble for each
-#'   composition. Each tibble has one observed row followed by one row per
-#'   simulation, identified by `dataset`. `summary` compares each `observed`
-#'   statistic with the middle 95% of its simulations (`lower`, `upper`) and marks
-#'   those `outside` it. The object includes omission counts and settings, and can
-#'   be saved and plotted later.
+#'   composition with at least three complete dyads (`NULL` for smaller
+#'   compositions, which are not checked). Each tibble has one observed row
+#'   followed by one row per simulation, identified by `dataset`. `summary`
+#'   compares each `observed` statistic with the middle 95% of its simulations
+#'   (`lower`, `upper`) and marks those `outside` it. The object includes
+#'   omission counts and settings, and can be saved and plotted later.
 #'
 #' @section Reading the plots:
 #' Histograms show simulated summaries. Red lines mark observed values.
@@ -187,7 +188,8 @@ check_partner_dependence <- function(
   if (!inherits(simulations, "dyadMLM_response_simulations")) {
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
   }
-  if (missing(dyad)) {
+  # The quosure check also catches `{{ dyad }}` omitted in a wrapper's call.
+  if (missing(dyad) || rlang::quo_is_missing(rlang::enquo(dyad))) {
     stop("`dyad` must identify the dyad for each fitted row.", call. = FALSE)
   }
 
@@ -564,7 +566,8 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
       next
     }
     cat("\n")
-    rows <- x$summary[x$summary$composition == composition$label, ]
+    # Recompute from this composition, since distinct compositions can share a label.
+    rows <- summarise_partner_statistics(composition$statistics[[1]])
     # One column each for observed, lower, and upper values.
     values <- matrix(formatC(c(rows$observed, rows$lower, rows$upper),
                              format = "f", digits = digits, width = 9), ncol = 3L)

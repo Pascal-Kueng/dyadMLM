@@ -140,6 +140,9 @@ test_that("rounded role labels cannot merge distinct compositions", {
   expect_identical(mixed_statistic_names[2], mixed_statistic_names[3])
   expect_equal(result$compositions$n_pairs, expected$compositions$n_pairs)
   expect_identical(result$n_pairs, 15L)
+  # Each printed composition lists only its own 4, 6, or 4 statistics.
+  printed <- capture.output(print(result))
+  expect_identical(length(grep("^ +-?[0-9.]+ ", printed)), 14L)
 })
 
 
