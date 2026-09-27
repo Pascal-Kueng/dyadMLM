@@ -464,6 +464,7 @@ test_that("one simulation retains every statistic as a table column", {
     expect_identical(result$summary$upper, rep(Inf, n_statistics))
     expect_false(any(result$summary$outside))
     expect_output(print(result), "Reference: 1 plug-in predictive", fixed = TRUE)
+    expect_output(print(result), "Too few simulations for finite 95% limits")
   }
 })
 

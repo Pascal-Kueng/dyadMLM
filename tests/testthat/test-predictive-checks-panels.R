@@ -45,26 +45,14 @@ partner_check_plot_fixture <- function() {
 
 
 test_that("panel mode produces one page per composition", {
-  skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   check_result <- partner_check_plot_fixture()
   # A small composition stays in the overview but has no plot page.
   check_result$compositions[4L, ] <- list("mother - child", 2L, list(NULL))
   check_result$n_pairs <- 362L
 
   for (panels in c(TRUE, FALSE)) {
-    pdf_path <- tempfile(fileext = ".pdf")
-    grDevices::pdf(pdf_path, width = 12, height = 8)
-    tryCatch({
-      if (panels) {
-        plot(check_result, ask = FALSE)
-      } else {
-        plot(check_result, panels = FALSE, ask = FALSE)
-      }
-    }, finally = grDevices::dev.off())
-    pdf_information <- system2("pdfinfo", shQuote(pdf_path), stdout = TRUE)
-    unlink(pdf_path)
-    page_count <- as.integer(sub("^Pages:\\s+", "",
-                                 pdf_information[grepl("^Pages:", pdf_information)]))
+    page_count <- count_pdf_pages(plot(check_result, panels = panels, ask = FALSE),
+                                  width = 12, height = 8)
     expect_identical(page_count, if (panels) 3L else 14L)
   }
 })

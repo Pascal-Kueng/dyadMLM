@@ -35,7 +35,6 @@ test_that("outcome SDs match partner role SDs for complete distinct-role dyads",
 
 
 test_that("outcome pages retain composition headings and restore graphics settings", {
-  skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   simulations <- distribution_check_fixture()
   simulations$model_frame$role <- rep(c("A", "A", "A", "B", "B", "B"), 2)
   headings <- character()
@@ -47,24 +46,18 @@ test_that("outcome pages retain composition headings and restore graphics settin
   }, .package = "graphics")
   for (panels in c(TRUE, FALSE)) {
     headings <- character()
-    pdf_path <- tempfile(fileext = ".pdf")
-    grDevices::pdf(pdf_path, width = 7, height = 7)
-    graphics::par(mfrow = c(2, 1), mar = c(4, 3, 2, 1), cex = .9, mex = 1.2, las = 2)
-    settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "cex.main", "mfg", "las", "plt", "new"))
-    grDevices::devAskNewPage(TRUE)
-    result <- tryCatch({
+    pages <- count_pdf_pages({
+      graphics::par(mfrow = c(2, 1), mar = c(4, 3, 2, 1), cex = .9, mex = 1.2, las = 2)
+      settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "cex.main", "mfg", "las", "plt", "new"))
+      grDevices::devAskNewPage(TRUE)
       result <- check_outcomes(simulations, dyad = "dyad", role = "role",
                                panels = panels, ask = FALSE)
       expect_equal(graphics::par(names(settings)), settings)
       expect_true(grDevices::devAskNewPage())
-      result
-    }, finally = grDevices::dev.off())
+    }, width = 7, height = 7)
     labels <- vapply(result$compositions, `[[`, "", "label")
     expect_identical(labels, c("A - A", "A - B", "B - B"))
     expect_identical(headings, rep(labels, if (panels) 1 else c(3, 6, 3)))
-    information <- system2("pdfinfo", shQuote(pdf_path), stdout = TRUE)
-    unlink(pdf_path)
-    pages <- as.integer(sub("^Pages:\\s+", "", information[grepl("^Pages:", information)]))
     expect_equal(pages, if (panels) 3 else 12)
   }
 })
@@ -116,6 +109,11 @@ test_that("zero counts include every dataset and can be selected explicitly", {
 
   observed_zero <- simulations
   observed_zero$observed_response[1] <- 0
+  # A Gaussian model never simulates an exact zero, so an observed zero alone
+  # (e.g. on a rating scale) does not add the row; count families compare it.
+  result <- check_outcomes(observed_zero, role = NULL, plot = FALSE)
+  expect_false("Number of zeros" %in% rownames(result$compositions[[1]]$statistics[[1]]))
+  attr(observed_zero, "dyadMLM")$family <- "poisson"
   result <- check_outcomes(observed_zero, role = NULL, plot = FALSE)
   expect_equal(unname(result$compositions[[1]]$statistics[[1]]["Number of zeros", ]),
                c(1, rep(0, nsim)))
@@ -228,8 +226,10 @@ test_that("zero-count inclusion is shared across roles within each composition",
   simulations$model_frame$role <- rep(c("A", "A", "A", "B", "B", "B"), 2)
   for (source in c("observed", "simulated")) {
     changed <- simulations
-    if (source == "observed") changed$observed_response[3] <- 0
-    else changed$simulated_responses[1, 3] <- 0
+    if (source == "observed") {
+      changed$observed_response[3] <- 0
+      attr(changed, "dyadMLM")$family <- "poisson"
+    } else changed$simulated_responses[1, 3] <- 0
     result <- check_outcomes(changed, dyad = "dyad", role = "role", plot = FALSE)
     statistics <- lapply(result$compositions, `[[`, "statistics")
     expect_false("Number of zeros" %in% rownames(statistics[[1]][[1]]))
@@ -315,7 +315,9 @@ test_that("unobserved count values show simulations without an artificial red ze
 
 test_that("outcome results can be calculated without graphics and plotted later", {
   simulations <- distribution_check_fixture()
+  # Gaussian simulations include the zero row only when they contain a zero.
   simulations$observed_response[1] <- 0
+  simulations$simulated_responses[1, 1] <- 0
   device <- grDevices::dev.cur()
   result <- with_mocked_bindings(
     check_outcomes(simulations, role = NULL, plot = FALSE, ask = "ignored", panels = "ignored"),

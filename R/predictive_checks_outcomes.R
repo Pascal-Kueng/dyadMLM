@@ -9,7 +9,8 @@
 #'   more simulated datasets for stable comparisons.
 #' @inheritParams check_residuals
 #' @param check_zeros Include zero counts? `NULL` (default) includes them for all
-#'   roles in a composition if any observed or simulated outcome there is zero.
+#'   roles in a composition if any simulated outcome there is zero, or, for
+#'   count families, any observed outcome.
 #'
 #' @return Invisibly returns a `dyadMLM_outcome_check` list containing compositions,
 #'   role-specific summary matrices, and outcome distributions. Matrix columns
@@ -28,7 +29,8 @@
 #' observed values use category frequencies. All defined ordinal categories are
 #' retained; simulated counts at unobserved values are grouped as "Other values"
 #' and shown only in blue, without an observed comparison.
-#' Blue ranges show the middle 95% for each category separately. Other outcomes show
+#' Blue ranges show the middle 95% for each category separately, so with many
+#' categories one or two red points outside can occur by chance. Other outcomes show
 #' the proportion at or below each outcome value, for the observations and up to
 #' 30 simulated datasets.
 #'
@@ -44,7 +46,7 @@
 #'
 #' @section Scope:
 #' These are descriptive predictive checks, not significance tests. Complete
-#' simulations retain fitted partner and time dependence and any modelled
+#' simulations retain fitted partner and time dependence and any modeled
 #' differences in variability between roles. Parameters stay fixed;
 #' the observed data were used to fit them, and parameter uncertainty is not included.
 #'
@@ -88,8 +90,11 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
                      "truncated_compois", "truncated_genpois")
   compositions <- lapply(compositions, function(composition) {
     composition_rows <- unlist(composition$rows, use.names = FALSE)
+    # Other families only count zeros their simulations produce; otherwise an
+    # observed 0 on a rating scale would always look like excess zeros.
+    zero_columns <- if (family %in% count_families) TRUE else -1
     include_zeros <- if (is.null(check_zeros))
-      any(responses[composition_rows, ] == 0) else check_zeros
+      any(responses[composition_rows, zero_columns] == 0) else check_zeros
     composition$statistics <- lapply(composition$rows, function(rows) {
       if (!length(rows)) return(NULL)
       statistics <- rbind(
@@ -209,7 +214,8 @@ plot_outcome_distribution <- function(distribution, role) {
     graphics::segments(positions, values$bounds[1, ], positions, values$bounds[2, ],
                        col = check_colours$simulated, lwd = 3)
     graphics::points(positions, observed, col = check_colours$observed, pch = 16, cex = .65)
-    guide <- paste("Red should usually lie within each category's blue 95% range.",
+    # "Most": with many categories, one or two outside can occur by chance.
+    guide <- paste("Most red points should lie within their blue 95% ranges.",
       "Above: more observations in that category; below: fewer.", sep = "\n")
     if (isTRUE(distribution$has_other_values)) guide <- paste(guide,
       "Other values: simulations only; absent from the observed data.", sep = "\n")

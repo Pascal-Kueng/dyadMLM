@@ -17,6 +17,8 @@
 #' - [simulate_dyad_responses()] and [check_partner_dependence()] provide
 #'   experimental predictive comparisons of response variances and partner
 #'   correlations.
+#' - [check_residuals()] and [check_outcomes()] compare residual and outcome
+#'   distributions using the same simulations.
 #'
 #' @section Example data:
 #' See [dyads_cross] and [dyads_ild] for Gaussian examples, and

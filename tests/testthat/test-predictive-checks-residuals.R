@@ -222,7 +222,8 @@ test_that("plotting restores graphics settings after success and failure", {
   expect_true(grDevices::devAskNewPage())
   local_mocked_bindings(plot.new = function(...) stop("forced plotting failure"),
                         .package = "graphics")
-  expect_error(check_residuals(simulations, ask = FALSE), "forced plotting failure")
+  expect_error(check_residuals(simulations, role = NULL, ask = FALSE),
+               "forced plotting failure")
   expect_equal(graphics::par(names(settings)), settings)
   expect_true(grDevices::devAskNewPage())
 })
@@ -241,7 +242,6 @@ test_that("complete role panels fit the default graphics device", {
 
 
 test_that("overview and optional panels use predictable pages", {
-  skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   simulations <- distribution_check_fixture()
   simulations$model_frame$age <- rep(c(20, 40), 6)
   simulations$model_frame$stress <- factor(rep(c("low", "high", "medium"), 4))
@@ -255,13 +255,10 @@ test_that("overview and optional panels use predictable pages", {
     list(arguments = list(dyad = "dyad", role = "role", panels = FALSE), pages = 12L)
   )
   for (case in cases) {
-    pdf_path <- tempfile(fileext = ".pdf")
-    grDevices::pdf(pdf_path, width = 12, height = 10)
-    tryCatch(do.call(check_residuals, c(list(simulations, ask = FALSE), case$arguments)),
-             finally = grDevices::dev.off())
-    information <- system2("pdfinfo", shQuote(pdf_path), stdout = TRUE)
-    unlink(pdf_path)
-    pages <- as.integer(sub("^Pages:\\s+", "", information[grepl("^Pages:", information)]))
+    pages <- count_pdf_pages(
+      do.call(check_residuals, c(list(simulations, ask = FALSE), case$arguments)),
+      width = 12, height = 10
+    )
     expect_equal(pages, case$pages)
   }
 })
@@ -342,7 +339,6 @@ test_that("saved residual and outcome checks print a short overview", {
 
 
 test_that("every residual page identifies its composition and page contents", {
-  skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   simulations <- distribution_check_fixture()
   simulations$model_frame$role <- rep(c("A", "A", "A", "B", "B", "B"), 2)
   simulations$model_frame$X <- seq_len(12)
@@ -360,14 +356,9 @@ test_that("every residual page identifies its composition and page contents", {
   )
   for (case in cases) {
     margins <- list()
-    pdf_path <- tempfile(fileext = ".pdf")
-    grDevices::pdf(pdf_path, width = 12, height = 10)
-    pit <- tryCatch(do.call(check_residuals, c(list(simulations, dyad = "dyad",
-      role = "role", member = "member", ask = FALSE), case$arguments)),
-      finally = grDevices::dev.off())
-    information <- system2("pdfinfo", shQuote(pdf_path), stdout = TRUE)
-    unlink(pdf_path)
-    pages <- as.integer(sub("^Pages:\\s+", "", information[grepl("^Pages:", information)]))
+    pages <- count_pdf_pages(pit <- do.call(check_residuals, c(list(simulations,
+      dyad = "dyad", role = "role", member = "member", ask = FALSE), case$arguments)),
+      width = 12, height = 10)
     expect_equal(pages, 3 * length(case$pages))
     expect_equal(dim(pit$pit), c(12L, 201L))
     headings <- Filter(function(text) isTRUE(text$outer) && isTRUE(text$side == 3) &&

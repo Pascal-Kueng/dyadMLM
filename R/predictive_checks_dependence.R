@@ -570,6 +570,10 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
   }
 
   n_outside <- sum(x$summary$outside)
+  if (any(is.infinite(c(x$summary$lower, x$summary$upper)))) {
+    cat("\nToo few simulations for finite 95% limits: statistics with fewer than",
+        "39 defined simulations cannot be flagged.\n")
+  }
   cat("\nOutside the middle 95% of simulations", if (n_outside > 0L) " (*)", ": ",
       n_outside, " of ", nrow(x$summary), " observed statistics.\n",
       if (n_outside > 0L) "Some departures occur by chance; these are descriptive checks, not significance tests.\n" else

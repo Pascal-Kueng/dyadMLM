@@ -1,3 +1,11 @@
+# Count pages without external tools: the device writes one file per page.
+count_pdf_pages <- function(code, ...) {
+  directory <- withr::local_tempdir()
+  grDevices::pdf(file.path(directory, "page%03d.pdf"), onefile = FALSE, ...)
+  tryCatch(force(code), finally = grDevices::dev.off())
+  length(list.files(directory))
+}
+
 distribution_check_fixture <- function() {
   predicted <- seq(0, 2, length.out = 12)
   structure(list(

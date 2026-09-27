@@ -28,7 +28,8 @@ within each member. Supplying \code{dyad} without \code{role} adds the dyad coun
 the pooled overview.}
 
 \item{check_zeros}{Include zero counts? \code{NULL} (default) includes them for all
-roles in a composition if any observed or simulated outcome there is zero.}
+roles in a composition if any simulated outcome there is zero, or, for
+count families, any observed outcome.}
 
 \item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
 If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
@@ -71,7 +72,8 @@ outcome distributions. Ordinal responses and counts with up to 20 distinct
 observed values use category frequencies. All defined ordinal categories are
 retained; simulated counts at unobserved values are grouped as "Other values"
 and shown only in blue, without an observed comparison.
-Blue ranges show the middle 95\% for each category separately. Other outcomes show
+Blue ranges show the middle 95\% for each category separately, so with many
+categories one or two red points outside can occur by chance. Other outcomes show
 the proportion at or below each outcome value, for the observations and up to
 30 simulated datasets.
 
@@ -89,7 +91,7 @@ Use a tall plotting window to keep all rows readable.
 \section{Scope}{
 
 These are descriptive predictive checks, not significance tests. Complete
-simulations retain fitted partner and time dependence and any modelled
+simulations retain fitted partner and time dependence and any modeled
 differences in variability between roles. Parameters stay fixed;
 the observed data were used to fit them, and parameter uncertainty is not included.
 

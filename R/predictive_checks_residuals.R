@@ -95,7 +95,7 @@
 #'
 #' @section Scope:
 #' Observed and simulated datasets are ranked and transformed together. These
-#' envelopes retain the fitted partner and time dependence and any modelled
+#' envelopes retain the fitted partner and time dependence and any modeled
 #' differences in variability between roles, without whitening.
 #' Simulations redraw all random effects; DHARMa's default since version 0.5.0
 #' holds their fitted values fixed.
