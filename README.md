@@ -254,8 +254,6 @@ check_partner_dependence(
 The function groups the six plots in one figure. Use `panels = FALSE` to
 show them separately.
 
-The same `simulations` can be reused with `check_residuals()` and `check_outcomes()`.
-
 Here, simulations produce weaker partner correlations and larger SDs of
 partner half-differences than observed (red lines), suggesting
 **misfit**.
@@ -273,6 +271,8 @@ in variances or partner correlations. These checks alone do not
 establish whether fixed effects should be pooled ([nested model
 comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
 can help assess those restrictions).
+
+The same `simulations` can be reused with `check_residuals()` and `check_outcomes()`.
 
 ## Vignettes and examples
 
