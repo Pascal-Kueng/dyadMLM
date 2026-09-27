@@ -454,9 +454,9 @@ dependence. See the [APIM example](apim.html#checking-partner-dependence)
 for guidance on reading these plots.
 
 Reuse `dim_simulations` with
-[`check_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_residuals.html)
+[`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)
 for residual distributions and patterns, or
-[`check_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_outcomes.html)
+[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)
 for outcome distributions. Use the same `dyad`, `role` and `data` arguments as above.
 
 `check_partner_dependence()` currently supports cross-sectional dyads only.

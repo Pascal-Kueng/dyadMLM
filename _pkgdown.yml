@@ -77,8 +77,8 @@ reference:
   contents:
   - simulate_dyad_responses
   - check_partner_dependence
-  - check_residuals
-  - check_outcomes
+  - check_dyad_residuals
+  - check_dyad_outcomes
 
 - title: Example data
   contents:

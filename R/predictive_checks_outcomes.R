@@ -3,11 +3,11 @@
 #' `r lifecycle::badge("experimental")`
 #' Compare observed outcomes with complete datasets from
 #' [simulate_dyad_responses()]. Uses every simulated dataset directly.
-#' For PIT residual patterns, use [check_residuals()].
+#' For PIT residual patterns, use [check_dyad_residuals()].
 #'
 #' @param simulations An object from [simulate_dyad_responses()]. Use 1,000 or
 #'   more simulated datasets for stable comparisons.
-#' @inheritParams check_residuals
+#' @inheritParams check_dyad_residuals
 #' @param check_zeros Include zero counts? `NULL` (default) includes them for all
 #'   roles in a composition if any simulated outcome there is zero, or, for
 #'   count and Tweedie families, any observed outcome.
@@ -19,7 +19,7 @@
 #'
 #' @section Reading the plots:
 #' Each combination of partners' roles gets one pooled column for same-role
-#' partners, or separate columns for distinct roles, as in [check_residuals()].
+#' partners, or separate columns for distinct roles, as in [check_dyad_residuals()].
 #' Roles define the display without changing the model's assumptions.
 #' Every page repeats its composition heading. Available responses are retained
 #' when the composition is known; unknown compositions are omitted with a warning.
@@ -60,18 +60,18 @@
 #' observations have equal weight. For cross-sectional data, check partner
 #' correlations with [check_partner_dependence()].
 #'
-#' @seealso [check_residuals()], [check_partner_dependence()]
+#' @seealso [check_dyad_residuals()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
 #' model <- glmmTMB::glmmTMB(
 #'   closeness ~ gender + (1 | coupleID), data = dyads_cross
 #' )
 #' # Use at least 1,000 draws when checking a model.
 #' simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
-#' check_outcomes(simulations, dyad = coupleID, role = gender, ask = FALSE)
+#' check_dyad_outcomes(simulations, dyad = coupleID, role = gender, ask = FALSE)
 #' @export
-check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
-                            check_zeros = NULL, plot = TRUE, ask = NULL,
-                            panels = TRUE, data = NULL) {
+check_dyad_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
+                                check_zeros = NULL, plot = TRUE, ask = NULL,
+                                panels = TRUE, data = NULL) {
   if (!inherits(simulations, "dyadMLM_response_simulations"))
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
   if (!is.null(check_zeros) && !rlang::is_bool(check_zeros))
@@ -158,8 +158,8 @@ print.dyadMLM_outcome_check <- function(x, ...) print_check_overview(x, "outcome
 
 #' Plot saved outcome checks
 #'
-#' @param x An object returned by [check_outcomes()].
-#' @inheritParams check_residuals
+#' @param x An object returned by [check_dyad_outcomes()].
+#' @inheritParams check_dyad_residuals
 #' @param ... Unused.
 #' @return Invisibly returns `x`.
 #' @keywords internal

@@ -110,7 +110,7 @@ test_that("centring recognises equivalent role codings with zero dispersion", {
     expect_true(model$sdr$pdHess)
     simulations <- simulate_dyad_responses(model, nsim = 200, seed = 7261)
     expect_true(attr(simulations, "dyadMLM")$free_conditional_intercept)
-    result <- check_residuals(simulations, role = NULL, plot = FALSE)
+    result <- check_dyad_residuals(simulations, role = NULL, plot = FALSE)
     expect_true(attr(result, "dyadMLM")$pit_centered)
     expect_equal(apply(stats::qnorm(result$pit), 2, stats::median),
                  rep(0, 201), ignore_attr = TRUE, tolerance = 1e-12)

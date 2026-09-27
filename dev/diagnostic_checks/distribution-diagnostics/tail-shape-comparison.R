@@ -72,17 +72,17 @@ for (scenario in names(responses)) {
 
   grDevices::svg(file.path(output, paste0(scenario, "-residual-%02d.svg")),
                  width = 12, height = 12, onefile = FALSE)
-  check_residuals(simulations, dyad = dyad, role = member,
+  check_dyad_residuals(simulations, dyad = dyad, role = member,
     member = person, data = data, predictors = "x", ask = FALSE)
   dev.off()
 
   grDevices::svg(file.path(output, paste0(scenario, "-outcome-%02d.svg")),
                  width = 12, height = 18, onefile = FALSE)
-  check_outcomes(simulations, dyad = dyad, role = member,
+  check_dyad_outcomes(simulations, dyad = dyad, role = member,
     member = person, data = data, ask = FALSE)
   dev.off()
 
-  # Use all simulations for the numerical tail summary, as check_outcomes() does.
+  # Use all simulations for the numerical tail summary, as check_dyad_outcomes() does.
   centred_observed <- observed - predicted
   centred_replicated <- sweep(simulations$simulated_responses, 2, predicted)
   simulated_tails <- apply(centred_replicated, 1, tail_ratio)

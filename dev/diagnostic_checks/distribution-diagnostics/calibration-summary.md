@@ -32,7 +32,7 @@ These limited designs do not establish general calibration or power. The fitted
 mean-distance comparison remained conservative. Coverage is per panel, not across panels.
 
 For actual `dyads_ild` data (10,080 rows, 1,000 simulations), simulation took
-2.016 s and `check_residuals()` took 11.732 s. Stored PIT used 77.04 MiB; the full
+2.016 s and `check_dyad_residuals()` took 11.732 s. Stored PIT used 77.04 MiB; the full
 result used 78.23 MiB. The complete cross-sectional/ILD benchmark process peaked
 at 1.09 GiB RAM, including packages, fits, simulations, checks and plotting.
 Its ILD model used couple/person random intercepts: this was a runtime/layout

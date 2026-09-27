@@ -23,7 +23,7 @@ quantities.
 \item \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} and \code{\link[=check_partner_dependence]{check_partner_dependence()}} provide
 experimental predictive comparisons of response variances and partner
 correlations.
-\item \code{\link[=check_residuals]{check_residuals()}} and \code{\link[=check_outcomes]{check_outcomes()}} compare residual and outcome
+\item \code{\link[=check_dyad_residuals]{check_dyad_residuals()}} and \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}} compare residual and outcome
 distributions using the same simulations.
 }
 }

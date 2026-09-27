@@ -180,5 +180,5 @@ same simulated datasets.
   use the combined outcome, including zeros.
 
 Partner checks support unweighted, cross-sectional models. Residual and outcome
-checks also support repeated observations. See `?check_residuals`,
+checks also support repeated observations. See `?check_dyad_residuals`,
 `?check_partner_dependence` and `?simulate_dyad_responses` for details.

@@ -7,7 +7,7 @@
 \method{plot}{dyadMLM_outcome_check}(x, ask = NULL, panels = TRUE, ...)
 }
 \arguments{
-\item{x}{An object returned by \code{\link[=check_outcomes]{check_outcomes()}}.}
+\item{x}{An object returned by \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}.}
 
 \item{ask}{Whether to pause between figures on an interactive device.
 \code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses

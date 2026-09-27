@@ -54,7 +54,7 @@
 #' Blue histograms show simulated summaries. Red lines mark observed values.
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
-#' The composition heading follows the same layout as [check_residuals()].
+#' The composition heading follows the same layout as [check_dyad_residuals()].
 #' Below it are the number of usable dyads and the total across all compositions.
 #' The top row shows member SDs and partner correlation. The bottom row shows the same information using dyad averages
 #' and partner differences.

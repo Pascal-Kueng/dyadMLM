@@ -88,7 +88,7 @@ for (family_name in c("gaussian", "nbinom2")) {
         simulations <- if (reference == "known") known else fitted
         views <- if (count) "pooled" else c("pooled", "roles")
         for (view in views) {
-          elapsed <- system.time(result <- do.call(check_residuals, list(
+          elapsed <- system.time(result <- do.call(check_dyad_residuals, list(
             simulations, dyad = "dyad", role = if (view == "roles") "role" else NULL,
             data = data, seed = 95000L + iteration, plot = FALSE
           )))[["elapsed"]]

@@ -17,9 +17,9 @@ model <- glmmTMB::glmmTMB(outcome ~ role + support,
                          family = gaussian(), data = model_data)
 stopifnot(model$fit$convergence == 0, model$sdr$pdHess)
 simulations <- simulate_dyad_responses(model, nsim = 1000, seed = 123)
-residual_check <- check_residuals(simulations, dyad = dyad, role = role,
+residual_check <- check_dyad_residuals(simulations, dyad = dyad, role = role,
   data = model_data, predictors = "support", plot = FALSE)
-outcome_check <- check_outcomes(simulations, dyad = dyad, role = role,
+outcome_check <- check_dyad_outcomes(simulations, dyad = dyad, role = role,
   data = model_data, plot = FALSE)
 partner_check <- check_partner_dependence(simulations, dyad = dyad, role = role,
   data = model_data, plot = FALSE)

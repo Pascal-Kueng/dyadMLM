@@ -2,7 +2,7 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
   simulations <- distribution_check_fixture()
   withr::local_seed(392)
   random_state <- .Random.seed
-  result <- withVisible(check_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE))
+  result <- withVisible(check_dyad_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE))
   expect_false(result$visible)
   expect_s3_class(result$value, "dyadMLM_outcome_check")
   expect_identical(attr(result$value, "dyadMLM"), attr(simulations, "dyadMLM"))
@@ -25,7 +25,7 @@ test_that("outcome summaries use all simulations and each role's fitted rows", {
 test_that("outcome SDs match partner role SDs for complete distinct-role dyads", {
   simulations <- distribution_check_fixture()
   simulations$observed_response[1] <- simulations$observed_response[1] + 1
-  outcomes <- check_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE)
+  outcomes <- check_dyad_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE)
   partners <- check_partner_dependence(simulations, dyad = "dyad", role = "role", plot = FALSE)
   for (role in c("A", "B")) {
     expect_equal(unname(outcomes$compositions[[1]]$statistics[[role]]["Response SD", ]),
@@ -50,8 +50,8 @@ test_that("outcome pages retain composition headings and restore graphics settin
       graphics::par(mfrow = c(2, 1), mar = c(4, 3, 2, 1), cex = .9, mex = 1.2, las = 2)
       settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "cex.main", "mfg", "las", "plt", "new"))
       grDevices::devAskNewPage(TRUE)
-      result <- check_outcomes(simulations, dyad = "dyad", role = "role",
-                               panels = panels, ask = FALSE)
+      result <- check_dyad_outcomes(simulations, dyad = "dyad", role = "role",
+                                    panels = panels, ask = FALSE)
       expect_equal(graphics::par(names(settings)), settings)
       expect_true(grDevices::devAskNewPage())
     }, width = 7, height = 7)
@@ -71,7 +71,7 @@ test_that("outcome plotting restores settings after failure", {
   settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "cex.main", "mfg", "las", "plt", "new"))
   grDevices::devAskNewPage(TRUE)
   local_mocked_bindings(hist = function(...) stop("forced plotting failure"), .package = "graphics")
-  expect_error(check_outcomes(simulations, role = NULL, ask = FALSE), "forced plotting failure")
+  expect_error(check_dyad_outcomes(simulations, role = NULL, ask = FALSE), "forced plotting failure")
   expect_equal(graphics::par(names(settings)), settings)
   expect_true(grDevices::devAskNewPage())
 })
@@ -88,22 +88,22 @@ test_that("outcome checks retain lone responses and accept one simulated dataset
     subset$predicted_response <- simulations$predicted_response[rows]
     subset$simulated_responses <- simulations$simulated_responses[1, rows, drop = FALSE]
     subset$model_frame <- simulations$model_frame[rows, , drop = FALSE]
-    expect_no_error(result <- check_outcomes(subset, dyad = "dyad", role = "role",
+    expect_no_error(result <- check_dyad_outcomes(subset, dyad = "dyad", role = "role",
                                               data = fitting_data, ask = FALSE))
     expect_named(result$compositions[[1]]$statistics, c("A", "B"))
     expect_equal(ncol(result$compositions[[1]]$statistics$A), 2)
     if (length(rows) <= 2) expect_true(all(is.na(result$compositions[[1]]$statistics$A["Response SD", ])))
     if (!2 %in% rows) expect_null(result$compositions[[1]]$statistics$B)
   }
-  expect_error(check_outcomes(unclass(simulations)), "simulate_dyad_responses")
-  expect_error(check_outcomes(simulations, check_zeros = NA), "check_zeros")
+  expect_error(check_dyad_outcomes(unclass(simulations)), "simulate_dyad_responses")
+  expect_error(check_dyad_outcomes(simulations, check_zeros = NA), "check_zeros")
 })
 
 
 test_that("zero counts include every dataset and can be selected explicitly", {
   simulations <- distribution_check_fixture()
   nsim <- nrow(simulations$simulated_responses)
-  result <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  result <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
   expect_identical(rownames(result$compositions[[1]]$statistics[[1]]),
                    c("Response SD", "Largest absolute deviation"))
 
@@ -112,23 +112,23 @@ test_that("zero counts include every dataset and can be selected explicitly", {
   # A Gaussian model never simulates an exact zero, so an observed zero alone
   # (e.g. on a rating scale) does not add the row; count and Tweedie families,
   # which can produce zeros, compare it.
-  result <- check_outcomes(observed_zero, role = NULL, plot = FALSE)
+  result <- check_dyad_outcomes(observed_zero, role = NULL, plot = FALSE)
   expect_false("Number of zeros" %in% rownames(result$compositions[[1]]$statistics[[1]]))
   for (family in c("poisson", "tweedie")) {
     attr(observed_zero, "dyadMLM")$family <- family
-    result <- check_outcomes(observed_zero, role = NULL, plot = FALSE)
+    result <- check_dyad_outcomes(observed_zero, role = NULL, plot = FALSE)
     expect_equal(unname(result$compositions[[1]]$statistics[[1]]["Number of zeros", ]),
                  c(1, rep(0, nsim)))
   }
-  result <- check_outcomes(observed_zero, role = NULL, check_zeros = FALSE, plot = FALSE)
+  result <- check_dyad_outcomes(observed_zero, role = NULL, check_zeros = FALSE, plot = FALSE)
   expect_false("Number of zeros" %in% rownames(result$compositions[[1]]$statistics[[1]]))
 
   # Include early and later simulations, without a separate reference-bank split.
   simulations$simulated_responses[c(1, 21:23), 1] <- 0
-  result <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  result <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
   expect_equal(unname(result$compositions[[1]]$statistics[[1]]["Number of zeros", ]),
                c(0, as.numeric(seq_len(nsim) %in% c(1, 21:23))))
-  result <- check_outcomes(distribution_check_fixture(), role = NULL,
+  result <- check_dyad_outcomes(distribution_check_fixture(), role = NULL,
                             check_zeros = TRUE, plot = FALSE)
   expect_equal(unname(result$compositions[[1]]$statistics[[1]]["Number of zeros", ]),
                rep(0, nsim + 1))
@@ -155,7 +155,7 @@ test_that("outcome ECDF paths retain ties, constant samples, and both tails", {
     if (missing(y)) original_lines(x, ...) else original_lines(x, y, ...)
   }, .package = "graphics")
 
-  check_outcomes(simulations, role = NULL, ask = FALSE)
+  check_dyad_outcomes(simulations, role = NULL, ask = FALSE)
   expect_length(paths, 31)
   expect_true(all(vapply(paths, `[[`, "", "type") == "s"))
   limits <- paths[[1]]$limits
@@ -175,7 +175,7 @@ test_that("discrete outcome panels use saved role proportions, bounds, and categ
   simulations$observed_response <- c(0, 0, 1, 0, 1, 2, 2, 3, 0, 1, 2, 3)
   simulations$simulated_responses <- matrix(as.integer(abs(sin(seq_len(40 * 12))) * 4), 40)
   attr(simulations, "dyadMLM") <- list(family = "poisson")
-  result <- check_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE)
+  result <- check_dyad_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE)
   distribution <- result$compositions[[1]]$distribution
   expect_equal(as.numeric(distribution$labels), 0:3)
   rows_by_role <- split(seq_len(12), simulations$model_frame$role)
@@ -217,7 +217,7 @@ test_that("discrete outcome panels use saved role proportions, bounds, and categ
     simulations$model_frame
   )
   attr(simulations, "dyadMLM") <- list(family = "ordinal")
-  result <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  result <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
   plot_outcome_distribution(result$compositions[[1]]$distribution, 1)
   expect_identical(bars[[3]]$labels, categories)
   expect_equal(unname(bars[[3]]$values[5]), 0)
@@ -233,7 +233,7 @@ test_that("zero-count inclusion is shared across roles within each composition",
       changed$observed_response[3] <- 0
       attr(changed, "dyadMLM")$family <- "poisson"
     } else changed$simulated_responses[1, 3] <- 0
-    result <- check_outcomes(changed, dyad = "dyad", role = "role", plot = FALSE)
+    result <- check_dyad_outcomes(changed, dyad = "dyad", role = "role", plot = FALSE)
     statistics <- lapply(result$compositions, `[[`, "statistics")
     expect_false("Number of zeros" %in% rownames(statistics[[1]][[1]]))
     expect_false("Number of zeros" %in% rownames(statistics[[3]][[1]]))
@@ -253,7 +253,7 @@ test_that("count categories follow observed support and retain simulated other v
   # Many unobserved values must not switch the display to an ECDF or vanish.
   simulations$simulated_responses[, 10:12] <- seq_len(nsim * 3) + 10
   attr(simulations, "dyadMLM")$family <- "poisson"
-  result <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  result <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
   distribution <- result$compositions[[1]]$distribution
   expect_identical(distribution$labels, c("0", "1", "2", "Other values"))
   expect_true(distribution$has_other_values)
@@ -262,7 +262,7 @@ test_that("count categories follow observed support and retain simulated other v
 
   # One simulated dataset provides no finite rank limits; category support is [0, 1].
   simulations$simulated_responses <- simulations$simulated_responses[1, , drop = FALSE]
-  small <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  small <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
   expect_equal(small$compositions[[1]]$distribution$roles[[1]]$bounds,
                matrix(c(0, 1), 2, 4))
 
@@ -270,7 +270,7 @@ test_that("count categories follow observed support and retain simulated other v
   simulations$predicted_response <- rep(0, 21)
   simulations$simulated_responses <- matrix(rep(1:21, each = nsim), nsim)
   simulations$model_frame <- data.frame(response = 1:21)
-  many <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  many <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
   expect_null(many$compositions[[1]]$distribution$labels)
 })
 
@@ -283,7 +283,7 @@ test_that("unobserved count values show simulations without an artificial red ze
     simulated_responses = matrix(rpois(1000 * 20, 100), 1000),
     model_frame = data.frame(outcome = observed)
   ), class = "dyadMLM_response_simulations", dyadMLM = list(family = "poisson"))
-  result <- check_outcomes(simulations, role = NULL, plot = FALSE)
+  result <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
   distribution <- result$compositions[[1]]$distribution
   other <- match("Other values", distribution$labels)
   # Even a correct model can assign substantial mass to values absent by chance.
@@ -323,7 +323,7 @@ test_that("outcome results can be calculated without graphics and plotted later"
   simulations$simulated_responses[1, 1] <- 0
   device <- grDevices::dev.cur()
   result <- with_mocked_bindings(
-    check_outcomes(simulations, role = NULL, plot = FALSE, ask = "ignored", panels = "ignored"),
+    check_dyad_outcomes(simulations, role = NULL, plot = FALSE, ask = "ignored", panels = "ignored"),
     plot.new = function(...) stop("Unexpected drawing"), .package = "graphics"
   )
   expect_identical(grDevices::dev.cur(), device)
@@ -334,8 +334,8 @@ test_that("outcome results can be calculated without graphics and plotted later"
   saved <- unserialize(serialize(result, NULL))
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
-  expect_identical(check_outcomes(simulations, role = NULL, ask = FALSE), result)
-  expect_identical(check_outcomes(simulations, role = NULL, panels = FALSE, ask = FALSE), result)
+  expect_identical(check_dyad_outcomes(simulations, role = NULL, ask = FALSE), result)
+  expect_identical(check_dyad_outcomes(simulations, role = NULL, panels = FALSE, ask = FALSE), result)
   expect_identical(plot(saved, ask = FALSE), result)
   expect_identical(plot(saved, panels = FALSE, ask = FALSE), result)
 

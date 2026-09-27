@@ -7,7 +7,7 @@
 \method{plot}{dyadMLM_residual_check}(x, ask = NULL, panels = TRUE, ...)
 }
 \arguments{
-\item{x}{A result from \code{\link[=check_residuals]{check_residuals()}}.}
+\item{x}{A result from \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.}
 
 \item{ask}{Whether to pause between figures on an interactive device.
 \code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
@@ -24,6 +24,6 @@ Only the arrangement changes; results and checks stay the same.}
 \code{x}, invisibly.
 }
 \description{
-Draw the checks calculated by \code{\link[=check_residuals]{check_residuals()}} without recalculating PIT.
+Draw the checks calculated by \code{\link[=check_dyad_residuals]{check_dyad_residuals()}} without recalculating PIT.
 }
 \keyword{internal}

@@ -3,7 +3,7 @@
 #' `r lifecycle::badge("experimental")`
 #' Check where each observed outcome falls among its simulated values, using
 #' complete datasets from [simulate_dyad_responses()].
-#' For checks on the outcome scale, use [check_outcomes()].
+#' For checks on the outcome scale, use [check_dyad_outcomes()].
 #'
 #' @param simulations An object from [simulate_dyad_responses()]. At least 200
 #'   datasets are required; 1,000 or more are recommended.
@@ -154,22 +154,22 @@
 #' Global envelope tests for spatial point patterns. *Journal of the Royal
 #' Statistical Society: Series B*, 79, 381--404. \doi{10.1111/rssb.12172}.
 #'
-#' @seealso [check_outcomes()], [check_partner_dependence()]
+#' @seealso [check_dyad_outcomes()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
 #' model <- glmmTMB::glmmTMB(
 #'   closeness ~ gender + provided_support + (1 | coupleID), data = dyads_cross
 #' )
 #' # Use at least 1,000 draws when checking a model.
 #' simulations <- simulate_dyad_responses(model, nsim = 200, seed = 123)
-#' check_residuals(simulations, dyad = coupleID, role = gender,
-#'                 predictors = "provided_support", ask = FALSE)
+#' check_dyad_residuals(simulations, dyad = coupleID, role = gender,
+#'                      predictors = "provided_support", ask = FALSE)
 #' # Save the same checks without drawing, then plot individual figures.
-#' result <- check_residuals(simulations, predictors = "provided_support", plot = FALSE)
+#' result <- check_dyad_residuals(simulations, predictors = "provided_support", plot = FALSE)
 #' plot(result, panels = FALSE, ask = FALSE)
 #' @export
-check_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL,
-                            predictors = NULL, seed = 123, plot = TRUE,
-                            ask = NULL, panels = TRUE, data = NULL) {
+check_dyad_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL,
+                                 predictors = NULL, seed = 123, plot = TRUE,
+                                 ask = NULL, panels = TRUE, data = NULL) {
   if (!inherits(simulations, "dyadMLM_response_simulations"))
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
   frame <- simulations$model_frame
@@ -309,7 +309,7 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows) {
 #' Print saved residual or outcome checks
 #'
 #' Lists the checked compositions without printing the stored results.
-#' @param x A result from [check_residuals()] or [check_outcomes()].
+#' @param x A result from [check_dyad_residuals()] or [check_dyad_outcomes()].
 #' @param ... Unused.
 #' @return `x`, invisibly.
 #' @keywords internal
@@ -320,9 +320,9 @@ print.dyadMLM_residual_check <- function(x, ...) {
 
 #' Plot saved residual checks
 #'
-#' Draw the checks calculated by [check_residuals()] without recalculating PIT.
-#' @param x A result from [check_residuals()].
-#' @inheritParams check_residuals
+#' Draw the checks calculated by [check_dyad_residuals()] without recalculating PIT.
+#' @param x A result from [check_dyad_residuals()].
+#' @inheritParams check_dyad_residuals
 #' @param ... Unused.
 #' @return `x`, invisibly.
 #' @keywords internal

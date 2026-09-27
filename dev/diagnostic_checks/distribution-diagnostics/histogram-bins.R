@@ -37,8 +37,8 @@ for (example in examples) {
     model <- glmmTMB::glmmTMB(formula, family = family, dispformula = ~1, data = model_data)
     simulations <- simulate_dyad_responses(model, nsim = nsim, seed = simulation_seed)
     predictor <- if (example == "nbinom2-gaussian") "support" else "predictor"
-    result <- check_residuals(simulations, dyad = dyad, role = role, data = model_data,
-                              predictors = predictor, seed = 123, plot = FALSE)
+    result <- check_dyad_residuals(simulations, dyad = dyad, role = role, data = model_data,
+                                   predictors = predictor, seed = 123, plot = FALSE)
     stopifnot(length(result$compositions) == 1L)
     composition <- result$compositions[[1]]
     comparison <- list()

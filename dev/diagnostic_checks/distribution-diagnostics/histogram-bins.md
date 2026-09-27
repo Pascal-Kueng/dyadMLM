@@ -28,7 +28,7 @@ are estimated when fitting. Exact formulas, seeds and fit results are in
 The original code comparison confirmed unchanged PITs, QQ envelopes, pattern
 curves and displayed scalar summaries. The current script verifies:
 
-- The ten-bin histogram summary matches the saved `check_residuals()` result.
+- The ten-bin histogram summary matches the saved `check_dyad_residuals()` result.
 - Every 10-bin density equals the average of its two adjacent 20-bin densities,
   for the observed data and every simulation. Each density integrates to one
   within numerical tolerance (`1e-12`).

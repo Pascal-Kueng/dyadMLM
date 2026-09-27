@@ -11,7 +11,7 @@
 \method{print}{dyadMLM_residual_check}(x, ...)
 }
 \arguments{
-\item{x}{A result from \code{\link[=check_residuals]{check_residuals()}} or \code{\link[=check_outcomes]{check_outcomes()}}.}
+\item{x}{A result from \code{\link[=check_dyad_residuals]{check_dyad_residuals()}} or \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}.}
 
 \item{...}{Unused.}
 }

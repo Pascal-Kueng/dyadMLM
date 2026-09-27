@@ -105,8 +105,8 @@ for data requirements and examples.
 | [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
 | [Check partner dependence — cross-sectional](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
-| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_residuals.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
-| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_outcomes.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
 Predictive checks compare residual and outcome distributions,
 variability, and partner dependence with simulations from the fitted
@@ -274,8 +274,8 @@ establish whether fixed effects should be pooled ([nested model
 comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
 can help assess those restrictions).
 
-The same `simulations` can be reused with `check_residuals()` and
-`check_outcomes()`.
+The same `simulations` can be reused with `check_dyad_residuals()` and
+`check_dyad_outcomes()`.
 
 ## Vignettes and examples
 

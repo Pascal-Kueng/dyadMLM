@@ -94,7 +94,7 @@ test_that("supported scalar families and alternative links share the response-ch
     expect_true(all(is.finite(simulated_statistics)))
 
     rows_by_role <- split(seq_len(nrow(data)), data$role)
-    residuals <- check_residuals(
+    residuals <- check_dyad_residuals(
       simulations, dyad = "dyad", role = "role", plot = FALSE
     )
     expect_s3_class(residuals, "dyadMLM_residual_check")
@@ -102,7 +102,7 @@ test_that("supported scalar families and alternative links share the response-ch
     expect_identical(residuals$compositions[[1]]$rows, rows_by_role)
     expect_true(all(is.finite(residuals$pit) & residuals$pit > 0 & residuals$pit < 1))
 
-    outcomes <- check_outcomes(
+    outcomes <- check_dyad_outcomes(
       simulations, dyad = "dyad", role = "role", plot = FALSE
     )
     expect_s3_class(outcomes, "dyadMLM_outcome_check")

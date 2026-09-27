@@ -1,7 +1,7 @@
 test_that("PIT ranks use every dataset symmetrically", {
   simulations <- distribution_check_fixture()
 
-  result <- withVisible(check_residuals(simulations, role = NULL, plot = FALSE))
+  result <- withVisible(check_dyad_residuals(simulations, role = NULL, plot = FALSE))
   responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
   expect_false(result$visible)
   expect_equal(dim(result$value$pit), c(12L, 201L))
@@ -12,11 +12,11 @@ test_that("PIT ranks use every dataset symmetrically", {
 
   # Grouping and predictor choices must not change the residuals being checked.
   simulations$model_frame$X <- seq_len(12)
-  expect_equal(check_residuals(simulations, role = NULL, predictors = c("role", "X"),
+  expect_equal(check_dyad_residuals(simulations, role = NULL, predictors = c("role", "X"),
                               plot = FALSE)$pit, result$value$pit)
-  expect_identical(check_residuals(simulations, dyad = "dyad", role = "role",
+  expect_identical(check_dyad_residuals(simulations, dyad = "dyad", role = "role",
                                  member = "member", plot = FALSE)$pit, result$value$pit)
-  expect_identical(check_residuals(simulations, dyad = "dyad", role = NULL,
+  expect_identical(check_dyad_residuals(simulations, dyad = "dyad", role = NULL,
                                  plot = FALSE)$pit, result$value$pit)
 })
 
@@ -32,7 +32,7 @@ test_that("discrete PIT randomizes ties and preserves the caller's RNG", {
   withr::local_seed(392)
   random_state <- .Random.seed
 
-  result <- check_residuals(simulations, role = NULL, seed = 143, plot = FALSE)
+  result <- check_dyad_residuals(simulations, role = NULL, seed = 143, plot = FALSE)
   pit <- result$pit
   responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
   for (row in seq_len(nrow(responses))) {
@@ -44,10 +44,10 @@ test_that("discrete PIT randomizes ties and preserves the caller's RNG", {
                  seq_len(ncol(responses)))
   }
   expect_identical(.Random.seed, random_state)
-  expect_identical(check_residuals(simulations, role = NULL, seed = 143, plot = FALSE), result)
+  expect_identical(check_dyad_residuals(simulations, role = NULL, seed = 143, plot = FALSE), result)
 
   rm(".Random.seed", envir = .GlobalEnv)
-  expect_identical(check_residuals(simulations, role = NULL, seed = 143, plot = FALSE), result)
+  expect_identical(check_dyad_residuals(simulations, role = NULL, seed = 143, plot = FALSE), result)
   expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
 })
 
@@ -59,8 +59,8 @@ test_that("residual results calculate without graphics and can be plotted later"
   result <- local({
     local_mocked_bindings(plot.new = function(...) stop("unexpected graphics"),
                           .package = "graphics")
-    check_residuals(simulations, dyad = "dyad", role = "role",
-                    predictors = "age", plot = FALSE)
+    check_dyad_residuals(simulations, dyad = "dyad", role = "role",
+                         predictors = "age", plot = FALSE)
   })
   expect_s3_class(result, "dyadMLM_residual_check")
   expect_identical(grDevices::dev.cur(), current_device)
@@ -72,9 +72,9 @@ test_that("residual results calculate without graphics and can be plotted later"
 
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
-  expect_identical(check_residuals(simulations, dyad = "dyad", role = "role",
+  expect_identical(check_dyad_residuals(simulations, dyad = "dyad", role = "role",
     predictors = "age", ask = FALSE), result)
-  expect_identical(check_residuals(simulations, dyad = "dyad", role = "role",
+  expect_identical(check_dyad_residuals(simulations, dyad = "dyad", role = "role",
     predictors = "age", panels = FALSE, ask = FALSE), result)
   withr::local_seed(392)
   random_state <- .Random.seed
@@ -119,8 +119,8 @@ test_that("rare binary groups and observed factor levels remain visible", {
   role <- factor(rep(c("A", "B"), 6), levels = c("A", "B", "Unused"))
   simulations$model_frame$Binary <- c(rep(0, 11), 1)
   simulations$model_frame$Role <- role
-  result <- check_residuals(simulations, role = NULL, predictors = c("Binary", "Role"),
-                            ask = FALSE)
+  result <- check_dyad_residuals(simulations, role = NULL, predictors = c("Binary", "Role"),
+                                 ask = FALSE)
   expect_true(any(vapply(axes, function(axis) {
     isTRUE(all.equal(unname(axis$at), c(0, 1)))
   }, logical(1))))
@@ -141,11 +141,11 @@ test_that("rare binary groups and observed factor levels remain visible", {
 
 test_that("missing plotting predictors affect only their own panels", {
   simulations <- distribution_check_fixture()
-  expected <- check_residuals(simulations, role = NULL, plot = FALSE)$pit
+  expected <- check_dyad_residuals(simulations, role = NULL, plot = FALSE)$pit
   incomplete <- c(0, NA, 0, 1, 1, NA, 0, 1, 0, NA, 1, 0)
   simulations$model_frame$Incomplete <- incomplete
-  expect_warning(result <- check_residuals(simulations, role = NULL, predictors = "Incomplete",
-                                           plot = FALSE), "Incomplete.*3")
+  expect_warning(result <- check_dyad_residuals(simulations, role = NULL, predictors = "Incomplete",
+                                                plot = FALSE), "Incomplete.*3")
   expect_identical(result$pit, expected)
   pattern <- result$compositions[[1]]$patterns[[2]][[1]]
   expect_equal(unname(pattern$positions), c(0, 1))
@@ -163,14 +163,14 @@ test_that("missing plotting predictors affect only their own panels", {
                  lapply(joint, `[`, (1:2) + (i - 1L) * 2L))
 
   simulations$model_frame$Empty <- rep(NA, 12)
-  expect_warning(result <- check_residuals(simulations, role = NULL, predictors = "Empty",
-                                           plot = FALSE), "Empty.*12")
+  expect_warning(result <- check_dyad_residuals(simulations, role = NULL, predictors = "Empty",
+                                                plot = FALSE), "Empty.*12")
   expect_identical(result$pit, expected)
   expect_length(result$predictors, 0)
   expect_length(result$compositions[[1]]$patterns, 1)
   simulations$model_frame$Role <- factor(c(NA, rep(c("A", "B"), 5), "A"), exclude = NULL)
-  expect_warning(result <- check_residuals(simulations, role = NULL, predictors = "Role",
-                                           plot = FALSE), "Role.*1")
+  expect_warning(result <- check_dyad_residuals(simulations, role = NULL, predictors = "Role",
+                                                plot = FALSE), "Role.*1")
   expect_identical(result$pit, expected)
 })
 
@@ -181,7 +181,7 @@ test_that("predictor names match unchanged fitting data to fitted rows", {
   simulations$model_frame$stress <- factor(rep(c("low", "medium", "high"), 4))
   fitting_data <- simulations$model_frame
   calculate <- function(predictors, data = NULL) {
-    check_residuals(simulations, role = NULL, predictors = predictors, data = data, plot = FALSE)
+    check_dyad_residuals(simulations, role = NULL, predictors = predictors, data = data, plot = FALSE)
   }
 
   columns <- c("age", "stress")
@@ -217,12 +217,12 @@ test_that("plotting restores graphics settings after success and failure", {
   settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "cex.main", "mfg", "las", "plt", "new"))
   grDevices::devAskNewPage(TRUE)
 
-  check_residuals(simulations, role = NULL, ask = FALSE)
+  check_dyad_residuals(simulations, role = NULL, ask = FALSE)
   expect_equal(graphics::par(names(settings)), settings)
   expect_true(grDevices::devAskNewPage())
   local_mocked_bindings(plot.new = function(...) stop("forced plotting failure"),
                         .package = "graphics")
-  expect_error(check_residuals(simulations, role = NULL, ask = FALSE),
+  expect_error(check_dyad_residuals(simulations, role = NULL, ask = FALSE),
                "forced plotting failure")
   expect_equal(graphics::par(names(settings)), settings)
   expect_true(grDevices::devAskNewPage())
@@ -235,7 +235,7 @@ test_that("complete role panels fit the default graphics device", {
   on.exit(grDevices::dev.off(), add = TRUE)
   settings <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex", "cex.main", "mfg", "las", "plt", "new"))
 
-  expect_no_error(check_residuals(simulations, dyad = "dyad", role = "role",
+  expect_no_error(check_dyad_residuals(simulations, dyad = "dyad", role = "role",
                                  ask = FALSE))
   expect_equal(graphics::par(names(settings)), settings)
 })
@@ -256,7 +256,7 @@ test_that("overview and optional panels use predictable pages", {
   )
   for (case in cases) {
     pages <- count_pdf_pages(
-      do.call(check_residuals, c(list(simulations, ask = FALSE), case$arguments)),
+      do.call(check_dyad_residuals, c(list(simulations, ask = FALSE), case$arguments)),
       width = 12, height = 10
     )
     expect_equal(pages, case$pages)
@@ -268,16 +268,16 @@ test_that("all check functions pause consistently only on interactive devices", 
   simulations <- distribution_check_fixture()
   simulations$model_frame$age <- seq_len(12)
   single <- list(
-    check_outcomes(simulations, role = NULL, plot = FALSE),
+    check_dyad_outcomes(simulations, role = NULL, plot = FALSE),
     check_partner_dependence(simulations, "dyad", role = NULL, plot = FALSE)
   )
   multiple <- list(
-    check_residuals(simulations, role = NULL, plot = FALSE),
-    check_residuals(simulations, role = NULL, predictors = "age", plot = FALSE)
+    check_dyad_residuals(simulations, role = NULL, plot = FALSE),
+    check_dyad_residuals(simulations, role = NULL, predictors = "age", plot = FALSE)
   )
   simulations$model_frame$role <- c(rep("A", 6), rep(c("A", "B"), 3))
   multiple <- c(multiple, list(
-    check_outcomes(simulations, "dyad", "role", plot = FALSE),
+    check_dyad_outcomes(simulations, "dyad", "role", plot = FALSE),
     check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
   ))
   grDevices::pdf(NULL, width = 12, height = 10)
@@ -316,23 +316,23 @@ test_that("all check functions pause consistently only on interactive devices", 
 
 test_that("residual and outcome checks suggest roles only when role is omitted", {
   simulations <- distribution_check_fixture()
-  expect_message(check_residuals(simulations, plot = FALSE), "No role supplied", fixed = TRUE)
-  expect_message(check_outcomes(simulations, plot = FALSE), "No role supplied", fixed = TRUE)
-  expect_no_message(check_residuals(simulations, role = NULL, plot = FALSE))
-  expect_no_message(check_outcomes(simulations, "dyad", "role", plot = FALSE))
+  expect_message(check_dyad_residuals(simulations, plot = FALSE), "No role supplied", fixed = TRUE)
+  expect_message(check_dyad_outcomes(simulations, plot = FALSE), "No role supplied", fixed = TRUE)
+  expect_no_message(check_dyad_residuals(simulations, role = NULL, plot = FALSE))
+  expect_no_message(check_dyad_outcomes(simulations, "dyad", "role", plot = FALSE))
 })
 
 
 test_that("saved residual and outcome checks print a short overview", {
   simulations <- distribution_check_fixture()
   simulations$model_frame$age <- seq_len(12)
-  residuals <- check_residuals(simulations, "dyad", "role", predictors = "age", plot = FALSE)
+  residuals <- check_dyad_residuals(simulations, "dyad", "role", predictors = "age", plot = FALSE)
   printed <- capture.output(returned <- withVisible(print(residuals)))
   expect_false(returned$visible)
   expect_identical(returned$value, residuals)
   expect_identical(printed, c("<dyadMLM residual check>", "A - B: 6 dyads; 12 observations",
                               "Predictors: age", "Use plot(x) to view the checks."))
-  expect_identical(capture.output(print(check_outcomes(simulations, role = NULL, plot = FALSE))),
+  expect_identical(capture.output(print(check_dyad_outcomes(simulations, role = NULL, plot = FALSE))),
                    c("<dyadMLM outcome check>", "All observations: 12 observations",
                      "Use plot(x) to view the checks."))
 })
@@ -356,7 +356,7 @@ test_that("every residual page identifies its composition and page contents", {
   )
   for (case in cases) {
     margins <- list()
-    pages <- count_pdf_pages(pit <- do.call(check_residuals, c(list(simulations,
+    pages <- count_pdf_pages(pit <- do.call(check_dyad_residuals, c(list(simulations,
       dyad = "dyad", role = "role", member = "member", ask = FALSE), case$arguments)),
       width = 12, height = 10)
     expect_equal(pages, 3 * length(case$pages))
@@ -379,8 +379,8 @@ test_that("every residual page identifies its composition and page contents", {
 test_that("individual residual figures retain composition, role and guidance", {
   simulations <- distribution_check_fixture()
   simulations$model_frame$age <- seq_len(12)
-  result <- check_residuals(simulations, dyad = "dyad", role = "role",
-                            predictors = "age", plot = FALSE)
+  result <- check_dyad_residuals(simulations, dyad = "dyad", role = "role",
+                                 predictors = "age", plot = FALSE)
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
   figures <- list()
@@ -419,7 +419,7 @@ test_that("individual residual figures retain composition, role and guidance", {
 
 test_that("role columns use their own observations and simulated references", {
   simulations <- distribution_check_fixture()
-  result <- check_residuals(simulations, dyad = "dyad", role = "role", plot = FALSE)
+  result <- check_dyad_residuals(simulations, dyad = "dyad", role = "role", plot = FALSE)
   responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
   rows_by_role <- split(seq_len(12), simulations$model_frame$role)
   for (i in seq_along(rows_by_role)) {
@@ -439,7 +439,7 @@ test_that("role columns use their own observations and simulated references", {
 
 
 test_that("residual plots draw each role's saved curves and scalar summaries", {
-  result <- check_residuals(distribution_check_fixture(), dyad = "dyad", role = "role", plot = FALSE)
+  result <- check_dyad_residuals(distribution_check_fixture(), dyad = "dyad", role = "role", plot = FALSE)
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
   observed <- bounds <- scalars <- list()
@@ -472,7 +472,7 @@ test_that("residual plots draw each role's saved curves and scalar summaries", {
 
 
 test_that("histogram positions match the bin count in new and saved results", {
-  result <- check_residuals(distribution_check_fixture(), role = NULL, plot = FALSE)
+  result <- check_dyad_residuals(distribution_check_fixture(), role = NULL, plot = FALSE)
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
   positions <- limits <- NULL
@@ -513,8 +513,8 @@ test_that("empty and single-observation roles remain plottable", {
     simulations$predicted_response <- simulations$predicted_response[rows]
     simulations$simulated_responses <- simulations$simulated_responses[, rows]
     simulations$model_frame <- simulations$model_frame[rows, , drop = FALSE]
-    pooled <- check_residuals(simulations, role = NULL, ask = FALSE)$pit
-    expect_identical(check_residuals(simulations, dyad = "dyad", role = "role",
+    pooled <- check_dyad_residuals(simulations, role = NULL, ask = FALSE)$pit
+    expect_identical(check_dyad_residuals(simulations, dyad = "dyad", role = "role",
                                     data = fitting_data, ask = FALSE)$pit, pooled)
   }
 })
@@ -544,7 +544,7 @@ test_that("predictor groups absent in one role leave gaps on shared axes", {
 
   role <- simulations$model_frame$role
   simulations$model_frame$Separated <- as.integer(role == "B")
-  pit <- check_residuals(simulations, dyad = "dyad", role = "role",
+  pit <- check_dyad_residuals(simulations, dyad = "dyad", role = "role",
                         predictors = "Separated", ask = FALSE)$pit
   expect_length(curves, 6)
   expect_false(nonfinite_polygon)
@@ -590,7 +590,7 @@ test_that("numeric patterns use each role's bins and identical smoothing for ref
   }, .package = "graphics")
 
   simulations$model_frame$Dense <- seq_len(n)
-  pit <- check_residuals(simulations, dyad = "dyad", role = "role", member = "member",
+  pit <- check_dyad_residuals(simulations, dyad = "dyad", role = "role", member = "member",
                         predictors = "Dense", ask = FALSE)$pit
   # Role A has 60 observations (three bins); role B has 180 (eight bins, smoothed).
   expect_length(curves, 6)
@@ -645,7 +645,7 @@ test_that("numeric patterns use each role's bins and identical smoothing for ref
   tied <- numeric(n)
   tied[tail(which(simulations$model_frame$role == "B"), 20)] <- seq_len(20)
   simulations$model_frame$Dense <- tied
-  expect_identical(check_residuals(simulations, dyad = "dyad", role = "role",
+  expect_identical(check_dyad_residuals(simulations, dyad = "dyad", role = "role",
     member = "member", predictors = "Dense", ask = FALSE)$pit, pit)
   expect_equal(lengths(lapply(curves, `[[`, "x")), rep(1L, 6))
   expect_length(bands, 0)
@@ -707,7 +707,7 @@ test_that("fallback quartile offsets stay visible on small and clustered scales"
     simulations$observed_response <- sin(seq_len(n))
     simulations$simulated_responses <- matrix(sin(seq_len(200 * n)), 200)
     simulations$model_frame$Edge <- scales[[i]]
-    check_residuals(simulations, role = NULL, predictors = "Edge", ask = FALSE)
+    check_dyad_residuals(simulations, role = NULL, predictors = "Edge", ask = FALSE)
     expect_equal(lengths(observed_x), rep(i, 3))
     expect_equal(observed_x, interval_x)
     expect_true(all(observed_x[[1]] < observed_x[[2]] & observed_x[[2]] < observed_x[[3]]))
@@ -721,13 +721,13 @@ test_that("fallback quartile offsets stay visible on small and clustered scales"
 
 test_that("invalid simulation inputs and unsupported predictor forms fail clearly", {
   simulations <- distribution_check_fixture()
-  expect_error(check_residuals(unclass(simulations)), "simulate_dyad_responses")
+  expect_error(check_dyad_residuals(unclass(simulations)), "simulate_dyad_responses")
   for (predictors in list(list(age = 1:12), data.frame(age = 1:12), ~ age, 1:12))
-    expect_error(check_residuals(simulations, predictors = predictors, plot = FALSE),
+    expect_error(check_dyad_residuals(simulations, predictors = predictors, plot = FALSE),
                  "predictors.*(column names|character)")
-  expect_error(check_residuals(simulations, details = TRUE), "unused argument")
+  expect_error(check_dyad_residuals(simulations, details = TRUE), "unused argument")
   simulations$simulated_responses <- simulations$simulated_responses[1:199, ]
-  expect_error(check_residuals(simulations), "200 simulated datasets")
+  expect_error(check_dyad_residuals(simulations), "200 simulated datasets")
 })
 
 
@@ -743,9 +743,9 @@ test_that("strict response extrema exclude tied minima and maxima", {
 
 test_that("centring precedes role splits and all PIT summaries use it", {
   simulations <- distribution_check_fixture()
-  uncentred <- check_residuals(simulations, role = NULL, plot = FALSE)
+  uncentred <- check_dyad_residuals(simulations, role = NULL, plot = FALSE)
   attr(simulations, "dyadMLM")$free_conditional_intercept <- TRUE
-  centred <- check_residuals(simulations, dyad = "dyad", role = "role", plot = FALSE)
+  centred <- check_dyad_residuals(simulations, dyad = "dyad", role = "role", plot = FALSE)
   z <- qnorm(uncentred$pit)
   expected <- pnorm(sweep(z, 2, apply(z, 2, median)))
   expect_equal(centred$pit, expected)
@@ -761,7 +761,7 @@ test_that("centring precedes role splits and all PIT summaries use it", {
                  quantile(expected[rows, 1], seq(0, 1, length.out = 201)))
   }
   # The raw-response outlier count is independent of centring.
-  pooled <- check_residuals(simulations, role = NULL, plot = FALSE)
+  pooled <- check_dyad_residuals(simulations, role = NULL, plot = FALSE)
   expect_identical(pooled$pit, centred$pit)
   expect_identical(pooled$compositions[[1]]$statistics[[1]]$outliers,
                    uncentred$compositions[[1]]$statistics[[1]]$outliers)
@@ -772,13 +772,13 @@ test_that("NULL seed advances RNG without warnings and saved plotting uses none"
   simulations <- distribution_check_fixture()
   withr::local_seed(97)
   original <- .Random.seed
-  expect_no_warning(result <- check_residuals(simulations, role = NULL,
+  expect_no_warning(result <- check_dyad_residuals(simulations, role = NULL,
                                              seed = NULL, plot = FALSE))
   expect_false(identical(original, .Random.seed))
   after <- .Random.seed
-  expect_identical(check_residuals(simulations, role = NULL, plot = FALSE),
-                   check_residuals(simulations, role = NULL, plot = FALSE))
+  expect_identical(check_dyad_residuals(simulations, role = NULL, plot = FALSE),
+                   check_dyad_residuals(simulations, role = NULL, plot = FALSE))
   expect_identical(.Random.seed, after)
-  expect_false(identical(result$pit, check_residuals(simulations, role = NULL,
+  expect_false(identical(result$pit, check_dyad_residuals(simulations, role = NULL,
                                                    seed = NULL, plot = FALSE)$pit))
 })

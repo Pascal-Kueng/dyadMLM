@@ -53,14 +53,14 @@ Start with everyone together. The first page checks the residual distribution;
 the second checks patterns across predicted outcomes.
 
 ```{r residual-pooled, fig.height=12, fig.alt="Pooled residual distribution and patterns across predicted outcomes"}
-check_residuals(gaussian_simulations, role = NULL, seed = 123, ask = FALSE)
+check_dyad_residuals(gaussian_simulations, role = NULL, seed = 123, ask = FALSE)
 ```
 
 Now separate women and men using the same simulations. `predictors` adds a page
 showing how residuals change with the predictor. This call produces three pages.
 
-```{r residual, fig.height=12, fig.alt="Complete panels produced by check_residuals"}
-check_residuals(
+```{r residual, fig.height=12, fig.alt="Complete panels produced by check_dyad_residuals"}
+check_dyad_residuals(
   gaussian_simulations, dyad = dyad, role = role, data = tweedie_data,
   predictors = "predictor",
   seed = 123, ask = FALSE
@@ -80,8 +80,8 @@ the horizontal lines at 0.25, 0.50 and 0.75 are guides.
 the raw outcome distribution, SDs and largest deviations after
 subtracting predictions, and zero counts.
 
-```{r outcome, fig.alt="Complete panels produced by check_outcomes"}
-check_outcomes(
+```{r outcome, fig.alt="Complete panels produced by check_dyad_outcomes"}
+check_dyad_outcomes(
   gaussian_simulations, dyad = dyad, role = role, data = tweedie_data,
   check_zeros = TRUE, ask = FALSE
 )

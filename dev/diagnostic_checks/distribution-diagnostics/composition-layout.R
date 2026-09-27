@@ -18,12 +18,12 @@ simulations <- simulate_dyad_responses(model, nsim = 1000, seed = 123)
 output <- "dev/diagnostic_checks/distribution-diagnostics/results"
 grDevices::svg(file.path(output, "residual-composition-%02d.svg"),
                width = 12, height = 12, onefile = FALSE)
-check_residuals(simulations, dyad = coupleID, role = gender, ask = FALSE)
+check_dyad_residuals(simulations, dyad = coupleID, role = gender, ask = FALSE)
 dev.off()
 
 grDevices::svg(file.path(output, "outcome-composition-%02d.svg"),
                width = 12, height = 18, onefile = FALSE)
-check_outcomes(simulations, dyad = coupleID, role = gender, ask = FALSE)
+check_dyad_outcomes(simulations, dyad = coupleID, role = gender, ask = FALSE)
 dev.off()
 
 grDevices::svg(file.path(output, "partner-composition-%02d.svg"),
