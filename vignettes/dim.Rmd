@@ -446,20 +446,20 @@ dyadMLM::check_partner_dependence(
 )
 ```
 
-The top row shows the common member SD and partner correlation. The bottom
-row shows the same information using dyad averages and half the differences
-between partners. Histograms show simulated values and red lines mark observed
-values. A red line far from most simulations suggests a mismatch.
+Red lines show observed summaries; blue histograms show model simulations.
+Large differences suggest a mismatch.
 
-By default, the check subtracts the model's fixed-effect predictions from
-observed and simulated responses. Good agreement is often expected for variances
-and correlations estimated from the same data. See the
-[function help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
-for details and interpretation. Simulation studies show how often the check
-detects [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
-and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often it raises false alarms. These checks currently support cross-sectional
-dyads only.
+The check subtracts fixed-effect predictions before comparing variability and
+dependence. See the [APIM example](apim.html#checking-partner-dependence)
+for guidance on reading these plots.
+
+Reuse `dim_simulations` with
+[`check_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_residuals.html)
+for residual distributions and patterns, or
+[`check_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_outcomes.html)
+for outcome distributions. Use the same `dyad`, `role` and `data` arguments as above.
+
+`check_partner_dependence()` currently supports cross-sectional dyads only.
 
 ## Intensive Longitudinal DIM
 
