@@ -72,7 +72,9 @@ select_dyad_columns <- function(data, cols_quo, arg) {
 # Use fitted columns first; otherwise match rows in the original fitting data.
 resolve_fitted_row_argument <- function(argument_quo, argument_name, model_frame,
                                        data = NULL, allow_null = FALSE) {
-  if (allow_null && rlang::quo_is_null(argument_quo)) return(NULL)
+  # A missing quosure comes from `{{ argument }}` omitted in a wrapper's call.
+  if (allow_null && (rlang::quo_is_null(argument_quo) ||
+                     rlang::quo_is_missing(argument_quo))) return(NULL)
   column_expression <- rlang::quo_get_expr(argument_quo)
   if (!rlang::is_symbol(column_expression) && !rlang::is_string(column_expression)) {
     stop("`", argument_name, "` must be a column name, with or without quotes. ",

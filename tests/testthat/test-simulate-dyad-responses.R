@@ -379,4 +379,18 @@ test_that("unsupported predictive-check inputs fail clearly", {
 
   weighted_model <- predictive_check_test_model(weights = rep(c(1, 2), 20))
   expect_error(simulate_dyad_responses(weighted_model), "unweighted models")
+
+  # glmmTMB fits smooths as random effects, which simulations would redraw.
+  skip_if_not_installed("mgcv")
+  smooth_data <- model$frame
+  smooth_data$x <- seq(-1, 1, length.out = nrow(smooth_data))
+  for (formulas in list(
+    list(outcome ~ s(x, k = 4) + (1 | dyad), ~1),
+    list(outcome ~ 1 + (1 | dyad), ~ s(x, k = 4))
+  )) {
+    smooth_model <- suppressWarnings(glmmTMB::glmmTMB(
+      formulas[[1]], dispformula = formulas[[2]], data = smooth_data
+    ))
+    expect_error(simulate_dyad_responses(smooth_model), "Smooth terms")
+  }
 })
