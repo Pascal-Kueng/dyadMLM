@@ -54,9 +54,9 @@
 #' Blue histograms show simulated summaries. Red lines mark observed values.
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
-#' The composition heading follows the same layout as [check_dyad_residuals()].
-#' Below it are the number of usable dyads and the total across all compositions.
-#' The top row shows member SDs and partner correlation. The bottom row shows the same information using dyad averages
+#' The heading shows the dyad composition, its number of usable dyads, and the
+#' total across all compositions. The top row shows member SDs and partner
+#' correlation. The bottom row shows the same information using dyad averages
 #' and partner differences.
 #'
 #' An observed value far from most simulated values may indicate that the
@@ -170,11 +170,7 @@
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
-#'   Methods, 10*(2), 139-158. \doi{10.1037/1082-989X.10.2.139}.
-#'
-#' Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
-#' assessment of model fitness via realized discrepancies. *Statistica Sinica,
-#' 6*, 733-807.
+#'   Methods, 10*(2), 139--158. \doi{10.1037/1082-989X.10.2.139}.
 #'
 #' @export
 check_partner_dependence <- function(

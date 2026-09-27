@@ -56,7 +56,7 @@ draw it later with \code{plot(result)}. Graphics settings are restored afterward
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Compare observed outcomes with complete datasets from
-\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Uses every simulated dataset directly.
+\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
 For PIT residual patterns, use \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
 }
 \section{Reading the plots}{
@@ -68,8 +68,8 @@ Every page repeats its composition heading. Available responses are retained
 when the composition is known; unknown compositions are omitted with a warning.
 
 \strong{Red shows observed data; blue shows simulations.} The first row compares
-outcome distributions. Ordinal responses and counts with up to 20 distinct
-observed values use category frequencies. All defined ordinal categories are
+outcome distributions. Ordinal responses and count-family responses with up to
+20 distinct observed values use category frequencies. All defined ordinal categories are
 retained; simulated counts at unobserved values are grouped as "Other values"
 and shown only in blue, without an observed comparison.
 Blue ranges show the middle 95\% for each category separately, so with many
@@ -111,7 +111,7 @@ correlations with \code{\link[=check_partner_dependence]{check_partner_dependenc
 model <- glmmTMB::glmmTMB(
   closeness ~ gender + (1 | coupleID), data = dyads_cross
 )
-# Use at least 1,000 draws when checking a model.
+# Use at least 1,000 simulations when checking a model.
 simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
 check_dyad_outcomes(simulations, dyad = coupleID, role = gender, ask = FALSE)
 \dontshow{\}) # examplesIf}

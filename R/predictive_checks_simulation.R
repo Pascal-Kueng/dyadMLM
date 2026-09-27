@@ -74,7 +74,8 @@
 #'
 #' Fitted parameters and predictors, including any lagged responses, stay fixed.
 #' The model is not refitted, and uncertainty in parameter estimates is not
-#' included. This is a *plug-in predictive reference*. If dyads are the only grouping factor, the simulations
+#' included. This is a *plug-in predictive reference* (Gelman et al., 1996,
+#' p. 797). If dyads are the only grouping factor, the simulations
 #' represent hypothetical new dyads under the same study design.
 #'
 #' `predicted_response` contains predicted mean responses with random effects
@@ -88,6 +89,10 @@
 #' Both random effects and observation-level noise still
 #' contribute to response variance. With nonlinear links, setting random effects
 #' to zero generally differs from averaging predictions over them.
+#'
+#' @references Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior
+#'   predictive assessment of model fitness via realized discrepancies.
+#'   *Statistica Sinica, 6*(4), 733--807.
 #'
 #' @export
 simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {

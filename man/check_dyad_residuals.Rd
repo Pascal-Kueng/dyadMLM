@@ -95,20 +95,21 @@ Use a tall plotting window or save a large figure to keep all rows readable.
 PIT (probability integral transform) residuals rank each outcome from 0 (low)
 to 1 (high) relative to its own simulated values. A suitable model should
 produce ranks roughly evenly spread between 0 and 1, allowing for the
-variation shown in blue.
+variation shown in blue. Red above the diagonal or its blue range, or a
+histogram rising to the right, means outcomes higher than simulated; a
+U-shaped histogram means more extreme outcomes.
 Blue curve envelopes cover positions jointly within each panel, with the
 three quartiles treated together. They use a nominal 95\% extreme-rank-length
 envelope; coverage is not simultaneous across roles, predictors, or pages.
-Scalar rows show simulated values as a blue histogram and the observed value
-as a red line; dashed limits use simulation order statistics. Values exactly on
-a limit count as inside. Because the model was fitted to these same data,
+The outlier and mean-distance rows show simulated values as a blue histogram
+and the observed value as a red line; dashed lines mark the middle 95\%.
+Values exactly on a limit count as inside. Because the model was fitted to these same data,
 the references can make departures look smaller or larger.
 The lines at 0.25, 0.50 and 0.75 are visual guides. Judge the red quartiles
 against their matching blue bands.
 
-Each additional predictor gets a page with quartile and distance plots. Numeric
-predictors with more than eight distinct values in a composition use up to
-eight bins per role, aiming for about 20 observations per bin. For these
+Numeric predictors with more than eight distinct values in a composition use
+up to eight bins per role, with at least about 20 observations per bin. For these
 predictors, fewer than 40 available observations in a role give one bin.
 Repeated values can reduce the number of bins and hide local patterns, such as
 differences between zero and positive predictor values.
@@ -157,25 +158,26 @@ uniform 0--1 scale.
 At each fitted row, rank the observed and all simulated outcomes together,
 breaking ties randomly. For rank \code{r} among \code{m} datasets, use \code{(r - U) / m},
 where \code{U} is uniform between 0 and 1. This treats all datasets symmetrically
-and keeps finite-bank PIT values strictly inside 0--1.
+and keeps PIT values strictly inside 0--1.
 
 When the conditional model can freely shift its overall location, whether
 fitted with an intercept or separate role means, transform each dataset's PIT
 to normal scores, subtract its median across all fitted rows, then transform
 back. This removes overall location before splitting by
 role or predictor. Patterns describe residuals relative to that overall
-location. This empirically supported adjustment reduces one source of
+location. In our simulations, this adjustment reduced one source of
 conservativeness; it does not account for every effect of fitting.
 PIT residuals are not centred for ordinal models.
 
-Outlier counts use the original responses: a dataset contributes an outlier
+Outlier counts, adapted from DHARMa's \code{testOutliers()}, use the original
+responses: a dataset contributes an outlier
 when it alone has the smallest or largest outcome at that fitted row. Tied
 extremes do not count. These are outcomes beyond the finite simulated range,
 not outcomes impossible under the model. Counts usually fall as simulations
 are added. With continuous exchangeable datasets, their expected count is
 \code{2 * n / (nsim + 1)}; ties and fitted parameters change this benchmark.
 
-Global envelopes use extreme-rank-length ordering (Myllymaki et al., 2017),
+Global envelopes use extreme-rank-length ordering (Myllymäki et al., 2017),
 retaining ties at the boundary and rounding coverage conservatively.
 }
 
@@ -184,26 +186,28 @@ retaining ties at the boundary and rounding coverage conservatively.
 model <- glmmTMB::glmmTMB(
   closeness ~ gender + provided_support + (1 | coupleID), data = dyads_cross
 )
-# Use at least 1,000 draws when checking a model.
+# Use at least 1,000 simulations when checking a model.
 simulations <- simulate_dyad_responses(model, nsim = 200, seed = 123)
 check_dyad_residuals(simulations, dyad = coupleID, role = gender,
                      predictors = "provided_support", ask = FALSE)
-# Save the same checks without drawing, then plot individual figures.
-result <- check_dyad_residuals(simulations, predictors = "provided_support", plot = FALSE)
+# Save a pooled check without drawing, then plot each figure separately.
+result <- check_dyad_residuals(simulations, role = NULL,
+                               predictors = "provided_support", plot = FALSE)
 plot(result, panels = FALSE, ask = FALSE)
 \dontshow{\}) # examplesIf}
 }
 \references{
-Hartig, F. DHARMa: Residual Diagnostics for Hierarchical (Multi-Level / Mixed)
-Regression Models. \doi{10.32614/CRAN.package.DHARMa}.
+Hartig, F. (2026). DHARMa: Residual Diagnostics for Hierarchical (Multi-Level /
+Mixed) Regression Models. R package version 0.5.0.
+\doi{10.32614/CRAN.package.DHARMa}.
 
-Dunn, P. K., and Smyth, G. K. (1996). Randomized quantile residuals.
+Dunn, P. K., & Smyth, G. K. (1996). Randomized quantile residuals.
 \emph{Journal of Computational and Graphical Statistics}, 5(3), 236--244.
 \doi{10.2307/1390802}.
 
-Myllymaki, M., Mrkvicka, T., Grabarnik, P., Seijo, H., and Hahn, U. (2017).
-Global envelope tests for spatial point patterns. \emph{Journal of the Royal
-Statistical Society: Series B}, 79, 381--404. \doi{10.1111/rssb.12172}.
+Myllymäki, M., Mrkvička, T., Grabarnik, P., Seijo, H., & Hahn, U. (2017).
+Global envelope tests for spatial processes. \emph{Journal of the Royal
+Statistical Society: Series B}, 79(2), 381--404. \doi{10.1111/rssb.12172}.
 }
 \seealso{
 \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}, \code{\link[=check_partner_dependence]{check_partner_dependence()}}

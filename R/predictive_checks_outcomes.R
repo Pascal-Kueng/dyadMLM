@@ -2,7 +2,7 @@
 #'
 #' `r lifecycle::badge("experimental")`
 #' Compare observed outcomes with complete datasets from
-#' [simulate_dyad_responses()]. Uses every simulated dataset directly.
+#' [simulate_dyad_responses()].
 #' For PIT residual patterns, use [check_dyad_residuals()].
 #'
 #' @param simulations An object from [simulate_dyad_responses()]. Use 1,000 or
@@ -25,8 +25,8 @@
 #' when the composition is known; unknown compositions are omitted with a warning.
 #'
 #' **Red shows observed data; blue shows simulations.** The first row compares
-#' outcome distributions. Ordinal responses and counts with up to 20 distinct
-#' observed values use category frequencies. All defined ordinal categories are
+#' outcome distributions. Ordinal responses and count-family responses with up to
+#' 20 distinct observed values use category frequencies. All defined ordinal categories are
 #' retained; simulated counts at unobserved values are grouped as "Other values"
 #' and shown only in blue, without an observed comparison.
 #' Blue ranges show the middle 95% for each category separately, so with many
@@ -65,7 +65,7 @@
 #' model <- glmmTMB::glmmTMB(
 #'   closeness ~ gender + (1 | coupleID), data = dyads_cross
 #' )
-#' # Use at least 1,000 draws when checking a model.
+#' # Use at least 1,000 simulations when checking a model.
 #' simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
 #' check_dyad_outcomes(simulations, dyad = coupleID, role = gender, ask = FALSE)
 #' @export

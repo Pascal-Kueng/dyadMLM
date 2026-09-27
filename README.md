@@ -275,7 +275,8 @@ comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_mod
 can help assess those restrictions).
 
 The same `simulations` can be reused with `check_dyad_residuals()` and
-`check_dyad_outcomes()`.
+`check_dyad_outcomes()`. Use the same `dyad`, `role` and `data`
+arguments.
 
 ## Vignettes and examples
 

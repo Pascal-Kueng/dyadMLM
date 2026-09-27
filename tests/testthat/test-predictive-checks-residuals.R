@@ -725,6 +725,9 @@ test_that("invalid simulation inputs and unsupported predictor forms fail clearl
   for (predictors in list(list(age = 1:12), data.frame(age = 1:12), ~ age, 1:12))
     expect_error(check_dyad_residuals(simulations, predictors = predictors, plot = FALSE),
                  "predictors.*(column names|character)")
+  # A bare name gets the same guidance instead of "object not found".
+  expect_error(check_dyad_residuals(simulations, predictors = age, plot = FALSE),
+               "quoted column names")
   expect_error(check_dyad_residuals(simulations, details = TRUE), "unused argument")
   simulations$simulated_responses <- simulations$simulated_responses[1:199, ]
   expect_error(check_dyad_residuals(simulations), "200 simulated datasets")
