@@ -10,7 +10,7 @@
 #' @inheritParams check_residuals
 #' @param check_zeros Include zero counts? `NULL` (default) includes them for all
 #'   roles in a composition if any simulated outcome there is zero, or, for
-#'   count families, any observed outcome.
+#'   count and Tweedie families, any observed outcome.
 #'
 #' @return Invisibly returns a `dyadMLM_outcome_check` list containing compositions,
 #'   role-specific summary matrices, and outcome distributions. Matrix columns
@@ -92,7 +92,7 @@ check_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
     composition_rows <- unlist(composition$rows, use.names = FALSE)
     # Other families only count zeros their simulations produce; otherwise an
     # observed 0 on a rating scale would always look like excess zeros.
-    zero_columns <- if (family %in% count_families) TRUE else -1
+    zero_columns <- if (family %in% c(count_families, "tweedie")) TRUE else -1
     include_zeros <- if (is.null(check_zeros))
       any(responses[composition_rows, zero_columns] == 0) else check_zeros
     composition$statistics <- lapply(composition$rows, function(rows) {

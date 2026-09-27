@@ -110,13 +110,16 @@ test_that("zero counts include every dataset and can be selected explicitly", {
   observed_zero <- simulations
   observed_zero$observed_response[1] <- 0
   # A Gaussian model never simulates an exact zero, so an observed zero alone
-  # (e.g. on a rating scale) does not add the row; count families compare it.
+  # (e.g. on a rating scale) does not add the row; count and Tweedie families,
+  # which can produce zeros, compare it.
   result <- check_outcomes(observed_zero, role = NULL, plot = FALSE)
   expect_false("Number of zeros" %in% rownames(result$compositions[[1]]$statistics[[1]]))
-  attr(observed_zero, "dyadMLM")$family <- "poisson"
-  result <- check_outcomes(observed_zero, role = NULL, plot = FALSE)
-  expect_equal(unname(result$compositions[[1]]$statistics[[1]]["Number of zeros", ]),
-               c(1, rep(0, nsim)))
+  for (family in c("poisson", "tweedie")) {
+    attr(observed_zero, "dyadMLM")$family <- family
+    result <- check_outcomes(observed_zero, role = NULL, plot = FALSE)
+    expect_equal(unname(result$compositions[[1]]$statistics[[1]]["Number of zeros", ]),
+                 c(1, rep(0, nsim)))
+  }
   result <- check_outcomes(observed_zero, role = NULL, check_zeros = FALSE, plot = FALSE)
   expect_false("Number of zeros" %in% rownames(result$compositions[[1]]$statistics[[1]]))
 

@@ -29,7 +29,7 @@ the pooled overview.}
 
 \item{check_zeros}{Include zero counts? \code{NULL} (default) includes them for all
 roles in a composition if any simulated outcome there is zero, or, for
-count families, any observed outcome.}
+count and Tweedie families, any observed outcome.}
 
 \item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
 If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
