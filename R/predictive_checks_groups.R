@@ -2,7 +2,7 @@
 build_check_groups <- function(model_frame, dyad_quo, role_quo,
                                        member_quo, data = NULL) {
   fitted_rows <- seq_len(nrow(model_frame))
-  if (rlang::quo_is_null(role_quo)) {
+  if (rlang::quo_is_null(role_quo) || rlang::quo_is_missing(role_quo)) {
     dyad_ids <- resolve_fitted_row_argument(
       dyad_quo, "dyad", model_frame, data, allow_null = TRUE
     )
@@ -12,7 +12,7 @@ build_check_groups <- function(model_frame, dyad_quo, role_quo,
         length(unique(dyad_ids[!is.na(dyad_ids) & !is.na(as.character(dyad_ids))]))
     )))
   }
-  if (rlang::quo_is_null(dyad_quo)) {
+  if (rlang::quo_is_null(dyad_quo) || rlang::quo_is_missing(dyad_quo)) {
     stop("`dyad` is required when `role` is supplied.", call. = FALSE)
   }
 

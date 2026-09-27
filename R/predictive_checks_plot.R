@@ -66,11 +66,8 @@ plot_check_role_panels <- function(composition, checks, title, draw, panels = TR
       for (check in checks) for (role in seq_along(composition$rows)) draw(check, role)
     })
   } else {
-    for (check in checks) for (role in seq_along(composition$rows)) {
-      individual <- composition
-      individual$rows <- composition$rows[role]
-      plot_check_role_page(individual, 1, title, draw(check, role))
-    }
+    for (check in checks) for (role in seq_along(composition$rows))
+      plot_check_role_page(composition, 1, title, draw(check, role), roles = role)
   }
 }
 
@@ -92,8 +89,9 @@ print_check_overview <- function(x, title, predictors = NULL) {
 }
 
 # Add the shared counts and role headings to a composition page.
-plot_check_role_page <- function(composition, rows, title, draw) {
-  role_rows <- composition$rows
+plot_check_role_page <- function(composition, rows, title, draw,
+                                 roles = seq_along(composition$rows)) {
+  role_rows <- composition$rows[roles]
   plot_check_page(composition$label, paste(title, check_counts(composition), sep = " - "),
     c(rows, length(role_rows)), draw,
     column_titles = paste0(names(role_rows), " (n = ", lengths(role_rows), ")"),
@@ -106,11 +104,11 @@ plot_check_page <- function(composition, title, panels, draw,
                             column_titles = NULL, footer = NULL,
                             mar = c(7.8, 4.5, 3.2, .8)) {
   previous <- graphics::par(c("mfrow", "mar", "oma", "mgp", "cex", "mex",
-                              "mfg", "las", "plt", "cex.main", "new"))
+                              "las", "plt", "cex.main"))
   on.exit({
     graphics::par(previous)
     # Layout restoration resets scaling, which also changes the plot region.
-    graphics::par(previous[c("cex", "mex", "plt", "new")])
+    graphics::par(previous[c("cex", "mex", "plt")])
   }, add = TRUE)
   plot_scale <- min(1, grDevices::dev.size("in") / c(5 * panels[2], 3 * panels[1] + 1))
   heading_scale <- min(1, grDevices::dev.size("in")[1] / 8)

@@ -257,3 +257,14 @@ test_that("panel plotting restores graphics settings after success and errors", 
                previous_graphics_settings)
   expect_true(grDevices::devAskNewPage())
 })
+
+
+test_that("a failed plot on a new device does not overlay the next plot", {
+  check_result <- partner_check_plot_fixture()
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  local_mocked_bindings(hist = function(...) stop("test histogram failure"),
+                        .package = "graphics")
+  expect_error(plot(check_result, ask = FALSE), "test histogram failure")
+  expect_false(graphics::par("new"))
+})

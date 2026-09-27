@@ -220,7 +220,7 @@ test_that("plotting restores graphics settings after success and failure", {
   check_residuals(simulations, role = NULL, ask = FALSE)
   expect_equal(graphics::par(names(settings)), settings)
   expect_true(grDevices::devAskNewPage())
-  local_mocked_bindings(hist = function(...) stop("forced plotting failure"),
+  local_mocked_bindings(plot.new = function(...) stop("forced plotting failure"),
                         .package = "graphics")
   expect_error(check_residuals(simulations, ask = FALSE), "forced plotting failure")
   expect_equal(graphics::par(names(settings)), settings)

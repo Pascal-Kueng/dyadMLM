@@ -11,6 +11,10 @@ test_that("omitting role retains every fitted observation without requiring IDs"
                                 rows = list(Pooled = 1:4), n_dyads = NULL)))
   expect_equal(residual_check_groups(frame, dyad)[[1]]$n_dyads, 2)
   expect_equal(residual_check_groups(frame, dyad)[[1]]$rows$Pooled, 1:4)
+  # Wrapper formals without defaults forward an empty quosure when omitted.
+  without_defaults <- function(dyad, role) residual_check_groups(frame, {{ dyad }}, {{ role }})
+  expect_equal(without_defaults(), groups)
+  expect_error(without_defaults(role = role), "`dyad` is required")
 })
 
 test_that("compositions use one pooled or two role columns in role order", {
