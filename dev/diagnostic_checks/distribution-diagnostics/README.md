@@ -1,7 +1,7 @@
 # Distribution-check examples
 
-`check_residuals()` checks where each observed outcome falls among its simulated
-values (PIT residuals). `check_outcomes()` checks
+`check_dyad_residuals()` checks where each observed outcome falls among its simulated
+values (PIT residuals). `check_dyad_outcomes()` checks
 response distributions, spread, extremes, and zero counts. Both reuse complete
 simulated datasets and retain their partner and time dependence in the references.
 
@@ -12,14 +12,14 @@ simulated datasets; they are descriptive checks, with no significance tests.
 
 ```r
 simulations <- simulate_dyad_responses(model, seed = 123)
-check_residuals(simulations)
-check_outcomes(simulations)
+check_dyad_residuals(simulations)
+check_dyad_outcomes(simulations)
 
 # Separate compositions and roles, even if the model pools them.
-check_residuals(
+check_dyad_residuals(
   simulations, dyad = coupleID, role = gender, data = model_data
 )
-check_outcomes(
+check_dyad_outcomes(
   simulations, dyad = coupleID, role = gender, data = model_data
 )
 ```
@@ -71,19 +71,19 @@ of exact calibration. Fitting can make references conservative or biased. With
 few observations per random effect, ordinal Laplace fits can bias partner
 dependence; refitting with the same approximation need not remove that bias.
 
-In `check_residuals()`, use `predictors = c("x", "z")` for extra predictor panels.
+In `check_dyad_residuals()`, use `predictors = c("x", "z")` for extra predictor panels.
 Columns come from the model frame; if absent, supply the original fitting data
 with `data` and excluded rows are handled automatically. `predictors = NULL`
 (default) omits these extra pages. Each supplied predictor gets quartile and
 PIT-distance plots. "Predicted outcome" means the model's
 prediction with random effects set to zero, not the observed outcome. Additional
 predictor pages use the supplied predictor values.
-See `?check_residuals` and `?check_outcomes` for plot meanings and limits.
+See `?check_dyad_residuals` and `?check_dyad_outcomes` for plot meanings and limits.
 
 All three checks can be saved without plotting, then displayed later:
 
 ```r
-residual_check <- check_residuals(simulations, plot = FALSE)
+residual_check <- check_dyad_residuals(simulations, plot = FALSE)
 plot(residual_check, ask = FALSE)
 ```
 
@@ -92,6 +92,11 @@ It changes the layout, not which checks are shown. By default, plots pause only
 when there are multiple figures on an interactive device; file output never pauses.
 
 ## Validation
+
+The [focused simulation study](../simulation-studies/README.md#residual-and-outcome-checks)
+extends this pilot to paired PIT centring, outcome checks, several sample sizes,
+and a small longitudinal design. Its report uses saved results and identifies
+incomplete or pilot runs.
 
 The [10-bin comparison](histogram-bins.md) records paired 20-versus-10-bin
 envelopes, figures and implementation checks for four example datasets.
@@ -148,4 +153,4 @@ Scripts, reports and numerical results remain tracked. All development examples 
 excluded from the built R package. `results/` retains package versions and
 fit summaries. Its tail ratio is the 1st-to-99th percentile range divided by the
 interquartile range, after subtracting fixed-effect predictions. Its references
-use all simulated datasets, as `check_outcomes()` does.
+use all simulated datasets, as `check_dyad_outcomes()` does.

@@ -64,6 +64,7 @@ articles:
   contents:
   - articles/partner-dependence-simulation
   - articles/covariance-pooling
+  - articles/distribution-checks
 
 reference:
 - title: Main functions

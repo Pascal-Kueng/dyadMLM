@@ -9,6 +9,7 @@ Public report sources stay in `vignettes/articles/`.
 | [family-comparison](family-comparison/run.R) | Raw versus model-centred correlation checks across response families | [Full report](../../../vignettes/articles/partner-dependence-simulation.Rmd) |
 | [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
+| [distribution-checks](distribution-checks/run.R) | Residual and outcome flags, pooled versus role checks, and paired PIT centring | [Report](../../../vignettes/articles/distribution-checks.Rmd) |
 | [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
 [Shared family generators](shared/family-margins.R) are used by both family studies.
@@ -36,6 +37,56 @@ from exported tables without refitting. New diagnostics may require refitting;
 changes to the study design require a new run. Failed fits remain recorded and
 are excluded from check rates. Reference simulations keep fitted parameters fixed.
 Reported rate intervals are 95% Wilson intervals.
+
+## Residual and outcome checks
+
+This focused study extends the earlier [distribution-check pilot](../distribution-diagnostics/calibration-summary.md).
+It uses Gaussian and negative-binomial outcomes at 40, 100, and 400 dyads.
+Gaussian settings cover correct specification, two omitted role mean differences,
+and two role SD ratios. Count settings cover correct NB2 models, two amounts of
+NB2 overdispersion fitted as Poisson, and two omitted zero-inflation probabilities.
+All fitted models retain actor and partner effects and a shared dyad intercept.
+Four additional conditions cover stronger dyad dependence and Gaussian
+longitudinal data with six occasions and person-specific AR(1) processes.
+There are 34 conditions, with 500 datasets and 1,000 reference simulations per
+dataset in a full run.
+
+The fitted centred and uncentred residual checks share their data, fitted model,
+simulation bank, and PIT seed. Outcome checks reuse the same bank. Correct-model
+conditions also use a separate known-parameter reference, evaluated regardless
+of fitting success. Both pooled and role-specific checks are recorded.
+
+Rates describe individual panels and the union of numerical flags across panels
+and roles. The union has no promised 5% false-alarm rate. Count-category ranges
+are pointwise and use observed categories, so their availability and crossing
+rates are reported separately. Blue-only "Other" values have no observed
+comparison. The continuous ECDF display has no numerical flag rule.
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/check.R
+Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/run.R 500 1000 6 run
+```
+
+Arguments are datasets per condition, reference simulations, workers, and `run`
+or `summarise`. An optional fifth argument selects comma-separated condition
+numbers. Seeds do not depend on workers or selection. Checkpoints save every
+five datasets under `results/distribution-checks/<settings>/`; rerun the same
+command to resume. Changed generators, package code, or software versions require
+archiving the old run before restarting. Use at most ten workers across jobs.
+
+For a short workflow check, use `5 200 4 run`. This is a pilot, not evidence of
+precise flag rates. Render its report with the saved output's absolute path as
+the `results_directory` parameter. `summarise` updates tables without fitting.
+Only a complete 500-by-1,000 run exports public tables and renders the report.
+
+Saved checkpoints contain per-dataset flags, scalar limits, seeds, warnings,
+errors, and fitting diagnostics, without fitted models or simulation matrices.
+The report tables contain conditions, flag rates with 95% Wilson intervals and
+Monte Carlo SEs, paired centring differences and their SEs, and fit/check failure
+counts. Source hashes and session information accompany the full results.
+Rates exclude failed fits and checks without retry; unavailable statistics do
+not count as agreement. Longitudinal conditions evaluate these marginal checks
+under time dependence, not their ability to detect serial-correlation errors.
 
 ## Gaussian covariance pooling
 
@@ -144,6 +195,7 @@ After changing text or plots, rebuild from the compact tables without simulation
 ```r
 pkgdown::build_article("articles/partner-dependence-simulation")
 pkgdown::build_article("articles/covariance-pooling")
+pkgdown::build_article("articles/distribution-checks")
 ```
 
 After updating saved family-comparison results, first refresh its exported tables:

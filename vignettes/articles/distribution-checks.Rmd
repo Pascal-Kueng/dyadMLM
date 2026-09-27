@@ -1,0 +1,282 @@
+---
+title: "Residual and outcome distribution checks"
+description: "Flags under correct models, detection of selected mismatches, and the effect of PIT centring."
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    self_contained: true
+params:
+  results_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/distribution-checks"
+---
+
+```{r availability, echo=FALSE, results='asis'}
+required_files <- c("conditions.csv", "summary.csv", "paired-comparison.csv", "fits.csv")
+if (!all(file.exists(file.path(params$results_directory, required_files)))) {
+  cat("**Full results are not yet available.** The focused study is implemented, but its planned run has not been completed and exported. See the [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md) for the design and running instructions.\n")
+  knitr::knit_exit()
+}
+```
+
+```{r setup, include=FALSE}
+library(dplyr)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+  fig.width = 13, fig.height = 7, dpi = 180, fig.retina = 1, out.width = "100%")
+source("../../dev/diagnostic_checks/simulation-studies/distribution-checks/plot.R")
+read_results <- function(filename) read.csv(file.path(params$results_directory, filename))
+conditions <- read_results("conditions.csv")
+summary <- read_results("summary.csv")
+paired <- read_results("paired-comparison.csv")
+fits <- read_results("fits.csv")
+fitted_counts <- filter(fits, reference == "fitted")
+complete_run <- setequal(fitted_counts$condition, conditions$condition) &&
+  all(fitted_counts$attempted == fitted_counts$repetitions)
+default_summary <- summary |> filter(
+  (check %in% c("residual", "both") & reference == "fitted-centred") |
+    (check == "outcome" & reference == "fitted"),
+  (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All"))
+format_rate <- function(rate, lower, upper, checked) {
+  ifelse(checked == 0, "Unavailable", sprintf("%.1f%% (%.1f–%.1f); n = %s",
+    100 * rate, 100 * lower, 100 * upper, checked))
+}
+rate_table <- function(data) {
+  data |> mutate(Family = unname(distribution_family_labels[family]),
+    View = ifelse(view == "pooled", "Pooled", "Either role"),
+    Check = recode(check, residual = "Residuals", outcome = "Outcomes", both = "Both checks"),
+    Rate = format_rate(rate, rate_lower, rate_upper, checked)) |>
+    select(Family, scenario_label, n_dyads, View, Check, Rate)
+}
+```
+
+```{r study-size, results='asis'}
+if (!complete_run) {
+  cat("**Incomplete results:** some datasets or conditions have not yet been run. The results below describe only the available checks.\n\n")
+} else if (any(conditions$repetitions < 500 | conditions$reference_draws < 1000)) {
+  cat("**Pilot results:** these runs use fewer than the planned 500 datasets or 1,000 reference simulations per condition. They check the study workflow and are too imprecise for general conclusions.\n\n")
+}
+cat(if (complete_run) "The saved run uses **" else "The run settings request **",
+  paste(unique(conditions$repetitions), collapse = ", "),
+  " datasets per condition** and **", paste(unique(conditions$reference_draws), collapse = ", "),
+  " reference simulations per dataset**.\n", sep = "")
+```
+
+## What these plots compare
+
+`check_dyad_residuals()` compares probability integral transform (PIT) residuals with
+model simulations. `check_dyad_outcomes()` compares distributions and summaries on the
+outcome scale. We study how often their numerical panels flag a departure under
+correct Gaussian and negative-binomial models, and how often they detect selected
+model mismatches. Both checks use the **same datasets, fitted models, and complete
+reference simulations**.
+
+We compare pooling all observations with checking the two partner roles
+separately. We also compare the default residual check with the same calculation
+without median centring. This isolates the adjustment's effect because both
+versions use identical PIT randomization.
+
+A **flag** means that an observed scalar falls strictly outside its simulated
+95% limits, or a curve leaves its global envelope. An **any flag** rate counts
+datasets with at least one flagged numerical panel. A flag in either role counts
+once. Neither multiple panels nor multiple roles have a joint 5% error rate.
+The ECDF display has no numerical limit and is excluded from these rates.
+
+These are descriptive checks. Fitting can make their references conservative or
+liberal, and more flags under a mismatch do not alone establish a better check.
+Compare detection with the correct-model results. This focused study does not
+validate other families, missing-data patterns, or every form of dependence.
+The [partner-dependence study](partner-dependence-simulation.html) evaluates
+omitted partner correlation, and the [covariance-pooling study](covariance-pooling.html)
+evaluates differences between dyad compositions.
+
+<details>
+<summary>Study design and interpretation</summary>
+
+The main conditions use 40, 100, or 400 complete dyads, each containing roles A
+and B. Standard-normal predictors correlate 0.3 between partners. Actor and
+partner effects are 0.5 and 0.3. A shared normal dyad intercept has SD 0.6.
+Gaussian outcomes have intercept 1 and residual SD 1. Negative-binomial outcomes
+use a log link, intercept log(3), and conditional variance
+$\mu + \mu^2/k$, where $k$ is the size parameter.
+
+Gaussian mismatches either omit role shifts of ±0.2 or ±0.4, or impose a common
+residual SD when the true role SD ratio is 1.25 or 1.50. The variance conditions
+keep the average residual variance at 1. Count mismatches either fit a Poisson
+model to negative-binomial outcomes with size 10 or 3, or omit an extra-zero
+probability of 0.10 or 0.25 from a negative-binomial model. One feature changes at
+a time. The count mean before adding extra zeros is adjusted to preserve the
+overall conditional expectation. The settings table below records the baseline
+size and fitted family.
+
+Two additional correct-model conditions increase the dyad SD to 1.2 at 100
+dyads. Two Gaussian longitudinal conditions use 100 dyads and six occasions,
+with either a correct mean model or omitted role shifts of ±0.2. They add an
+independent stationary AR(1) process for each person, with SD 0.6 and lag-one
+correlation 0.5, and independent residual noise with SD 0.8. The fitted model
+includes the shared dyad intercept and the person-specific AR(1) process.
+
+Reference simulations redraw all random effects while keeping predictors and
+model parameters fixed. Models are not refitted within the reference simulations.
+For correct-model conditions, a separate reference bank uses the true generating
+parameters, without PIT centring. These known-parameter checks are run even when
+fitting fails. They distinguish the behavior of the reference calculation from
+the effects of estimating parameters.
+
+Residual panels include the QQ envelope, histogram envelope, outlier count,
+mean PIT distance, and the quartile and distance envelopes against predicted
+outcomes. No additional predictor pages are requested. Outcome panels include
+the SD after subtracting fixed-effect predictions, largest absolute deviation,
+zero count where available, and displayed category frequencies. Counts use
+category displays only when there are at most 20 distinct observed values.
+Their categories are selected from the observations, so category-specific rates
+are conditional on being displayed. The blue-only "Other" category has no
+observed comparison and is excluded. Category intervals are separate, so a flag
+in any category is not a single 5% check.
+
+Rates use available checks. Failed fits, convergence or Hessian problems, and
+failed checks are recorded and excluded without retry. Known-parameter and
+fitted-reference rates can therefore have different denominators. Bars show 95%
+Wilson intervals for Monte Carlo uncertainty. The paired centring comparison
+reports the difference in rates and its paired Monte Carlo standard error.
+Counts and uncertainty are reported following the guidance of
+[Morris, White, and Crowther (2019)](https://doi.org/10.1002/sim.8086).
+
+The PIT approach builds on
+[Dunn and Smyth (1996)](https://doi.org/10.2307/1390802).
+The global envelopes use extreme-rank-length ordering, described in
+[Myllymäki and Mrkvička (2024)](https://doi.org/10.18637/jss.v111.i03).
+Neither reference establishes calibration of the package's fitted-model
+references or its median-centring adjustment. That is what this study examines
+in the selected settings.
+
+The report reads saved CSV files and does not fit models. See the
+[study code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/distribution-checks/run.R),
+[plot code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/distribution-checks/plot.R),
+and [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md).
+
+```{r settings}
+conditions |> filter(n_times == 1, dyad_sd == .6) |>
+  distinct(family, scenario_label, role_mean, sd_ratio, nb_size, zero_probability, fit_family) |>
+  mutate(nb_size = ifelse(family == "gaussian", NA_real_, nb_size),
+    family = unname(distribution_family_labels[family])) |>
+  knitr::kable(col.names = c("Generated family", "Setting", "Role shift (±)",
+    "SD ratio", "NB size", "Extra-zero probability", "Fitted family"), digits = 2)
+```
+
+</details>
+
+## Correct models
+
+Each row below is one numerical panel with all observations pooled. Grey points
+use known parameters, blue points use the fitted model with the package defaults,
+and orange points omit PIT centring. The dashed line marks 5% as a benchmark,
+not a guaranteed fitted-model flag rate. The outcome summaries and original-scale
+outlier counts do not depend on PIT centring.
+
+```{r correct-panels, fig.height=8, fig.alt='Individual-panel flag rates under correct Gaussian and negative-binomial models, comparing known parameters, fitted defaults, and uncentred fitted PIT residuals.'}
+plot_distribution_panels(summary)
+```
+
+<details>
+<summary>Any flags and category-frequency flags under correct models</summary>
+
+The table counts any numerical flag within each check, or across both checks.
+The latter is a union within each dataset, not a sum of the two rates. Role-based
+rates count either role, and their additional comparisons can increase the rate.
+Each entry gives the percentage, its 95% Wilson interval, and the denominator.
+
+```{r correct-any}
+default_summary |> filter(scenario == "correct", n_times == 1, dyad_sd == .6,
+    statistic == "any") |>
+  rate_table() |> select(-scenario_label) |>
+  knitr::kable(col.names = c("Family", "Dyads", "View", "Check", "Any flag; datasets checked"))
+```
+
+```{r correct-categories}
+default_summary |> filter(scenario == "correct", n_times == 1, dyad_sd == .6,
+    check == "outcome", statistic == "category_any", checked > 0) |>
+  rate_table() |> select(-scenario_label, -Check) |>
+  knitr::kable(col.names = c("Family", "Dyads", "View", "Any displayed category flagged; datasets checked"))
+```
+
+</details>
+
+## Detecting model mismatches
+
+The plots count any numerical flag for each default check. Solid lines count a
+flag in either role, while dotted lines pool all observations. These are different
+sets of comparisons, so the role-based check may flag more often even under a
+correct model.
+
+```{r gaussian-detection, fig.alt='Gaussian mismatch detection by sample size, comparing pooled and role-based residual and outcome checks.'}
+plot_distribution_detection(summary, "gaussian")
+```
+
+```{r count-detection, fig.alt='Negative-binomial mismatch detection by sample size, comparing pooled and role-based residual and outcome checks.'}
+plot_distribution_detection(summary, "nbinom2")
+```
+
+## Effect of median centring
+
+This comparison changes only median centring, leaving the fitted model,
+simulations, and PIT randomization unchanged. Positive differences mean more
+flags after centring. More correct-model flags may indicate less conservative
+references or an excessive flag rate; interpret them alongside the absolute
+rates above. Fewer flags under a mismatch may indicate a pattern the adjustment
+hides. The plot shows 100 dyads; the saved table includes every sample size and
+individual panel.
+
+```{r centring, fig.height=7, fig.alt='Paired differences between centred and uncentred residual flag rates at 100 dyads, under correct and misspecified models.'}
+plot_distribution_centring(paired)
+```
+
+## Additional designs and exclusions
+
+The extra conditions check stronger dyad dependence and one longitudinal model.
+They extend the baseline study without covering all dependence structures.
+
+```{r additional-designs}
+default_summary |> filter((n_times > 1 | dyad_sd > .6), statistic == "any") |>
+  mutate(scenario_label = paste0(scenario_label,
+    ifelse(n_times > 1, "; six occasions", "; dyad SD 1.2"))) |>
+  rate_table() |>
+  knitr::kable(col.names = c("Family", "Setting", "Dyads", "View", "Check", "Any flag; datasets checked"))
+```
+
+<details>
+<summary>Fit availability and complete saved results</summary>
+
+Warnings are counted whether or not they cause an exclusion. Known-parameter
+checks do not require a fitted model. The rate denominators can be smaller than
+the usable-fit counts when a particular summary is unavailable.
+
+```{r fit-availability}
+fits |> filter(!is.na(reference)) |> group_by(reference) |>
+  summarise(across(c(attempted, usable, with_warnings, fit_errors, fit_problems, check_errors), sum),
+    .groups = "drop") |>
+  knitr::kable(col.names = c("Reference", "Attempted", "Usable",
+    "With warnings", "Fit errors", "Fit problems", "Check errors"))
+```
+
+```{r fit-exclusions, results='asis'}
+excluded <- fits |> filter(usable < attempted)
+if (nrow(excluded)) {
+  cat("\n\n**Conditions with unavailable checks**\n\n")
+  excluded |> mutate(Setting = paste(distribution_family_labels[family], scenario_label,
+      paste0(n_times, " occasion(s); dyad SD ", dyad_sd), sep = "; ")) |>
+    select(Setting, n_dyads, reference, attempted, usable, fit_errors, fit_problems, check_errors) |>
+    knitr::kable(col.names = c("Setting", "Dyads", "Reference", "Attempted", "Usable",
+      "Fit errors", "Fit problems", "Check errors")) |> print()
+}
+```
+
+The saved [summary table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/distribution-checks/summary.csv)
+contains every panel, category, role, and aggregate rate, with denominators and
+Monte Carlo standard errors. The
+[fit table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/distribution-checks/fits.csv)
+records availability for every condition. The
+[paired table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/distribution-checks/paired-comparison.csv)
+records how often only the centred version, only the uncentred version, both, or
+neither flagged the same dataset.
+
+</details>
