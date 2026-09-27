@@ -45,8 +45,8 @@
 #' - `glmmTMB::ordinal()` (currently only available in the development version
 #'   of `glmmTMB`)
 #'
-#' Smooth terms (`s()`) are not supported, because glmmTMB fits them as random
-#' effects. Fixed-effect splines, such as `splines::ns()`, are supported.
+#' Smooth terms (`s()`) are not supported: simulations would draw new curves.
+#' Fixed-effect splines such as `splines::ns()` are supported.
 #'
 #' Zero-inflated and hurdle versions are supported where available. Checks
 #' describe the combined response, including zeros, rather than each model

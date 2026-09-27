@@ -60,8 +60,8 @@ Supports unweighted \code{glmmTMB} models with the following families:
 of \code{glmmTMB})
 }
 
-Smooth terms (\code{s()}) are not supported, because glmmTMB fits them as random
-effects. Fixed-effect splines, such as \code{splines::ns()}, are supported.
+Smooth terms (\code{s()}) are not supported: simulations would draw new curves.
+Fixed-effect splines such as \code{splines::ns()} are supported.
 
 Zero-inflated and hurdle versions are supported where available. Checks
 describe the combined response, including zeros, rather than each model

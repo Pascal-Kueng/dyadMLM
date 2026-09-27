@@ -58,8 +58,8 @@ it when \code{dyad} or \code{role} is not in the model formulas.}
 The comparison plots (shown by default) are the main output. The
 function invisibly returns a \code{dyadMLM_partner_check} object containing the
 \code{compositions} table with pair counts and a statistics tibble for each
-composition with at least three complete dyads (\code{NULL} for smaller
-compositions, which are not checked). Each tibble has one observed row
+composition. Compositions with fewer than three complete dyads are skipped
+and have \code{NULL} statistics. Each tibble has one observed row
 followed by one row per simulation, identified by \code{dataset}. \code{summary}
 compares each \code{observed} statistic with the middle 95\% of its simulations
 (\code{lower}, \code{upper}) and marks those \code{outside} it. The object includes
