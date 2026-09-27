@@ -36,11 +36,15 @@ default_summary <- summary |> filter(
   (check %in% c("residual", "both") & reference == "fitted-centred") |
     (check == "outcome" & reference == "fitted"),
   (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All"))
+# Checkpoints are read alphabetically (1, 10, 11, ...), so sort every table.
+arrange_conditions <- function(data, ...) arrange(data, family, n_times, dyad_sd,
+  match(scenario, distribution_scenario_order), n_dyads, ...)
 format_rate <- function(rate, lower, upper, checked) {
   ifelse(checked == 0, "Unavailable", sprintf("%.1f%% (%.1f–%.1f); n = %s",
     100 * rate, 100 * lower, 100 * upper, checked))
 }
 rate_table <- function(data) {
+  data <- arrange_conditions(data, view, match(check, c("residual", "outcome", "both")))
   data |> mutate(Family = unname(distribution_family_labels[family]),
     View = ifelse(view == "pooled", "Pooled", "Either role"),
     Check = recode(check, residual = "Residuals", outcome = "Outcomes", both = "Both checks"),
@@ -155,7 +159,7 @@ The report reads saved CSV files and does not fit models. See the
 and [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md).
 
 ```{r settings}
-conditions |> filter(n_times == 1, dyad_sd == .6) |>
+conditions |> filter(n_times == 1, dyad_sd == .6) |> arrange_conditions() |>
   distinct(family, scenario_label, role_mean, sd_ratio, nb_size, zero_probability, fit_family) |>
   mutate(nb_size = ifelse(family == "gaussian", NA_real_, nb_size),
     family = unname(distribution_family_labels[family])) |>
@@ -175,7 +179,18 @@ outlier counts do not depend on PIT centring.
 
 ```{r correct-panels, fig.height=8, fig.alt='Individual-panel flag rates under correct Gaussian and negative-binomial models, comparing known parameters, fitted defaults, and uncentred fitted PIT residuals.'}
 plot_distribution_panels(summary)
+known <- summary |> filter(reference == "known", role != "All",
+  statistic %in% names(distribution_panel_labels), checked > 0)
+known_maximum <- slice_max(known, rate, n = 1, with_ties = FALSE)
 ```
+
+With known parameters, the limits come from the model that generated the data.
+Each panel then flags at most 5% of datasets by construction, apart from Monte
+Carlo error. Across all `r nrow(known)` known-parameter rates (every
+correct-model condition and panel, pooled and per role), the average is
+`r sprintf("%.1f%%", 100 * mean(known$rate))` and the highest is
+`r with(known_maximum, sprintf("%.1f%% (%.1f–%.1f)", 100 * rate, 100 * rate_lower, 100 * rate_upper))`.
+This checks the implementation; it is not a finding about fitted references.
 
 <details>
 <summary>Any flags and category-frequency flags under correct models</summary>
@@ -193,10 +208,23 @@ default_summary |> filter(scenario == "correct", n_times == 1, dyad_sd == .6,
 ```
 
 ```{r correct-categories}
-default_summary |> filter(scenario == "correct", n_times == 1, dyad_sd == .6,
-    check == "outcome", statistic == "category_any", checked > 0) |>
-  rate_table() |> select(-scenario_label, -Check) |>
-  knitr::kable(col.names = c("Family", "Dyads", "View", "Any displayed category flagged; datasets checked"))
+categories <- default_summary |> filter(family == "nbinom2", scenario == "correct",
+  n_times == 1, dyad_sd == .6, check == "outcome", statistic == "category_any") |>
+  arrange_conditions(view)
+displayed <- filter(categories, view == "pooled")
+```
+
+Counts use category frequencies only with up to 20 distinct observed values.
+Under the correct count model, this held at
+`r paste(displayed$n_dyads, collapse = " / ")` dyads in
+`r knitr::combine_words(paste(displayed$checked, "of", displayed$usable))` usable datasets.
+
+```{r correct-category-table}
+categories |> transmute(n_dyads, View = ifelse(view == "pooled", "Pooled", "Either role"),
+    Displayed = paste(checked, "of", usable),
+    Rate = format_rate(rate, rate_lower, rate_upper, checked)) |>
+  knitr::kable(col.names = c("Dyads", "View", "Categories displayed; usable datasets",
+    "Any displayed category flagged; datasets checked"))
 ```
 
 </details>
@@ -206,15 +234,90 @@ default_summary |> filter(scenario == "correct", n_times == 1, dyad_sd == .6,
 The plots count any numerical flag for each default check. Solid lines count a
 flag in either role, while dotted lines pool all observations. These are different
 sets of comparisons, so the role-based check may flag more often even under a
-correct model.
+correct model. Grey lines repeat the correct-model rate of the same check and
+view, the false-alarm baseline.
 
-```{r gaussian-detection, fig.alt='Gaussian mismatch detection by sample size, comparing pooled and role-based residual and outcome checks.'}
+```{r gaussian-detection, fig.alt='Gaussian mismatch detection by sample size, comparing pooled and role-based residual and outcome checks with the correct-model baseline.'}
 plot_distribution_detection(summary, "gaussian")
+pooled_outcome <- default_summary |> filter(family == "gaussian", n_times == 1,
+    dyad_sd == .6, check == "outcome", view == "pooled", statistic == "any") |>
+  group_by(correct = scenario == "correct") |>
+  summarise(rate = max(rate, na.rm = TRUE))
 ```
 
-```{r count-detection, fig.alt='Negative-binomial mismatch detection by sample size, comparing pooled and role-based residual and outcome checks.'}
+Pooled outcome checks flag at most
+`r distribution_percent(pooled_outcome$rate[!pooled_outcome$correct])` of datasets
+under these Gaussian mismatches and at most
+`r distribution_percent(pooled_outcome$rate[pooled_outcome$correct])` under the
+correct model. The fitted model already reproduces the pooled SD, so pooled
+outcome summaries have little to detect.
+
+```{r count-detection, fig.alt='Negative-binomial mismatch detection by sample size, comparing pooled and role-based residual and outcome checks with the correct-model baseline.'}
 plot_distribution_detection(summary, "nbinom2")
 ```
+
+The tables show how often each panel flags each mismatch in either role, as
+percentages of datasets at 40 / 100 / 400 dyads with the package defaults. The
+correct-model column is the false-alarm baseline.
+
+```{r panel-detection, results='asis'}
+separator <- "\u202f/\u202f" # Narrow no-break spaces keep each entry on one line.
+panel_rates <- function(rate, checked) if (all(checked == 0)) NA else
+  paste(ifelse(checked > 0, round(100 * rate), "–"), collapse = separator)
+for (family_name in names(distribution_family_labels)) {
+  rates <- default_summary |> filter(family == family_name, n_times == 1, dyad_sd == .6,
+      view == "roles", statistic %in% names(distribution_panel_labels)) |>
+    arrange_conditions()
+  settings <- unique(rates$scenario_label)
+  rates |> group_by(scenario_label, statistic) |>
+    summarise(Rates = panel_rates(rate, checked), .groups = "drop") |>
+    filter(!is.na(Rates)) |>
+    tidyr::pivot_wider(names_from = scenario_label, values_from = Rates) |>
+    arrange(match(statistic, names(distribution_panel_labels))) |>
+    mutate(statistic = distribution_panel_labels[statistic]) |>
+    select(statistic, all_of(settings)) |>
+    knitr::kable(col.names = c("Panel", settings),
+      caption = paste(distribution_family_labels[family_name], "models")) |> print()
+}
+```
+
+<details>
+<summary>What the fitted models estimate</summary>
+
+A fitted model can absorb part of a mismatch into its estimates. The table gives
+the median fitted dyad SD and the median residual SD (Gaussian) or NB2 size over
+usable fits, at 40 / 100 / 400 dyads. The data were generated with dyad SD 0.6,
+an average Gaussian residual variance of 1, and the NB2 sizes in the settings table.
+
+```{r fitted-estimates}
+fit_at_400 <- function(family_name, scenario_name, column) {
+  row <- fits |> filter(reference == "fitted", family == family_name,
+    scenario == scenario_name, n_dyads == 400, n_times == 1, dyad_sd == .6)
+  sprintf("%.2f", row[[column]])
+}
+fits |> filter(reference == "fitted", n_times == 1, dyad_sd == .6) |>
+  arrange_conditions() |>
+  group_by(family, scenario, scenario_label, fit_family) |>
+  summarise(dyad = paste(sprintf("%.2f", median_dyad_sd), collapse = separator),
+    dispersion = if (first(fit_family) == "poisson") "None (Poisson)" else
+      paste(sprintf("%.2f", median_dispersion), collapse = separator), .groups = "drop") |>
+  arrange(family, match(scenario, distribution_scenario_order)) |>
+  transmute(Family = unname(distribution_family_labels[family]), scenario_label, dyad, dispersion) |>
+  knitr::kable(col.names = c("Family", "Setting", "Dyad SD", "Residual SD or NB2 size"))
+```
+
+At 400 dyads, omitted role means of ±0.4 give a residual SD of
+`r fit_at_400("gaussian", "mean_large", "median_dispersion")`, compared with
+`r fit_at_400("gaussian", "correct", "median_dispersion")` under the correct model.
+Poisson fits to NB2 data with size 3 give a dyad SD of
+`r fit_at_400("nbinom2", "dispersion_large", "median_dyad_sd")`, compared with
+`r fit_at_400("nbinom2", "correct", "median_dyad_sd")` under the correct count model.
+With 25% omitted zero inflation, the NB2 size is
+`r fit_at_400("nbinom2", "zeros_large", "median_dispersion")`, compared with
+`r fit_at_400("nbinom2", "correct", "median_dispersion")` (a smaller size means
+more overdispersion).
+
+</details>
 
 ## Effect of median centring
 
@@ -223,12 +326,25 @@ simulations, and PIT randomization unchanged. Positive differences mean more
 flags after centring. More correct-model flags may indicate less conservative
 references or an excessive flag rate; interpret them alongside the absolute
 rates above. Fewer flags under a mismatch may indicate a pattern the adjustment
-hides. The plot shows 100 dyads; the saved table includes every sample size and
-individual panel.
+hides. The plots show each panel at 100 and 400 dyads; the saved table includes
+every sample size.
 
-```{r centring, fig.height=7, fig.alt='Paired differences between centred and uncentred residual flag rates at 100 dyads, under correct and misspecified models.'}
-plot_distribution_centring(paired)
+```{r gaussian-centring, fig.height=7, fig.alt='Paired differences between centred and uncentred residual flag rates per panel for Gaussian models at 100 and 400 dyads, under correct and misspecified models.'}
+plot_distribution_centring(paired, "gaussian")
 ```
+
+```{r count-centring, fig.height=7, fig.alt='Paired differences between centred and uncentred residual flag rates per panel for count models at 100 and 400 dyads, under correct and misspecified models.'}
+plot_distribution_centring(paired, "nbinom2")
+loss <- paired |> filter(scenario != "correct", n_times == 1, dyad_sd == .6,
+    n_dyads == 400, check == "residual", statistic %in% names(distribution_panel_labels),
+    (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All")) |>
+  slice_min(centred_minus_uncentred, n = 1, with_ties = FALSE)
+```
+
+At 400 dyads, the largest loss of flags after centring is
+`r sprintf("%.1f", -100 * loss$centred_minus_uncentred)` percentage points, for the
+`r distribution_panel_labels[[loss$statistic]]` under
+"`r loss$scenario_label`" (`r ifelse(loss$view == "pooled", "pooled", "either role")`).
 
 ## Additional designs and exclusions
 
@@ -241,6 +357,17 @@ default_summary |> filter((n_times > 1 | dyad_sd > .6), statistic == "any") |>
     ifelse(n_times > 1, "; six occasions", "; dyad SD 1.2"))) |>
   rate_table() |>
   knitr::kable(col.names = c("Family", "Setting", "Dyads", "View", "Check", "Any flag; datasets checked"))
+```
+
+```{r fit-failures, results='asis'}
+failed <- fits |> filter(reference == "fitted",
+    (fit_errors + fit_problems) / attempted > .02) |> arrange_conditions()
+if (nrow(failed)) cat("More than 2% of fits had errors or problems in: ",
+  paste0(distribution_family_labels[failed$family], ", ", failed$scenario_label, ", ",
+    failed$n_dyads, " dyads", ifelse(failed$n_times > 1, ", six occasions", ""),
+    ifelse(failed$dyad_sd > .6, ", dyad SD 1.2", ""), " (",
+    failed$fit_errors + failed$fit_problems, " of ", failed$attempted, ")", collapse = "; "),
+  ". Their rates use the remaining datasets.\n", sep = "")
 ```
 
 <details>
@@ -259,7 +386,7 @@ fits |> filter(!is.na(reference)) |> group_by(reference) |>
 ```
 
 ```{r fit-exclusions, results='asis'}
-excluded <- fits |> filter(usable < attempted)
+excluded <- fits |> filter(usable < attempted) |> arrange_conditions(reference)
 if (nrow(excluded)) {
   cat("\n\n**Conditions with unavailable checks**\n\n")
   excluded |> mutate(Setting = paste(distribution_family_labels[family], scenario_label,
@@ -274,7 +401,7 @@ The saved [summary table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/
 contains every panel, category, role, and aggregate rate, with denominators and
 Monte Carlo standard errors. The
 [fit table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/distribution-checks/fits.csv)
-records availability for every condition. The
+records availability and median fitted estimates for every condition. The
 [paired table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/distribution-checks/paired-comparison.csv)
 records how often only the centred version, only the uncentred version, both, or
 neither flagged the same dataset.

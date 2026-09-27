@@ -4,17 +4,17 @@ summarise_distribution_study <- function(conditions, fits, statistics) {
   fit_counts <- fits |>
     dplyr::group_by(condition, reference) |>
     dplyr::summarise(
+      # Median fitted dyad SD and residual SD or NB2 size, for misfits the fit absorbs.
+      # These come first because `usable` becomes a count below.
+      median_dyad_sd = median(dyad_sd[usable], na.rm = TRUE),
+      median_dispersion = median(dispersion[usable], na.rm = TRUE),
       attempted = dplyr::n(), usable = sum(usable, na.rm = TRUE),
       with_warnings = sum(!is.na(warnings) & nzchar(warnings)),
       fit_errors = sum(status == "fit_error", na.rm = TRUE),
       fit_problems = sum(status == "fit_problem", na.rm = TRUE),
       check_errors = sum(status == "check_error", na.rm = TRUE),
       fit_seconds = sum(fit_seconds, na.rm = TRUE),
-      check_seconds = sum(check_seconds, na.rm = TRUE),
-      # Mean fitted dyad SD and residual SD or NB2 size, for misfits the fit absorbs.
-      mean_dyad_sd = if (any(usable & !is.na(dyad_sd))) mean(dyad_sd[usable], na.rm = TRUE) else NA_real_,
-      mean_dispersion = if (any(usable & !is.na(dispersion)))
-        mean(dispersion[usable], na.rm = TRUE) else NA_real_, .groups = "drop")
+      check_seconds = sum(check_seconds, na.rm = TRUE), .groups = "drop")
   fit_summary <- dplyr::left_join(conditions, fit_counts, by = "condition")
 
   summary <- statistics |>

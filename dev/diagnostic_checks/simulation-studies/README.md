@@ -83,8 +83,9 @@ Only a complete 500-by-1,000 run exports public tables and renders the report.
 Saved checkpoints contain per-dataset flags, scalar limits, seeds, warnings,
 errors, and fitting diagnostics, without fitted models or simulation matrices.
 The report tables contain conditions, flag rates with 95% Wilson intervals and
-Monte Carlo SEs, paired centring differences and their SEs, and fit/check failure
-counts. Source hashes and session information accompany the full results.
+Monte Carlo SEs, paired centring differences and their SEs, fit/check failure
+counts, and median fitted dyad SDs and dispersion. Source hashes and session
+information accompany the full results.
 Rates exclude failed fits and checks without retry; unavailable statistics do
 not count as agreement. Longitudinal conditions evaluate these marginal checks
 under time dependence, not their ability to detect serial-correlation errors.
