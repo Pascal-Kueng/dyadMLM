@@ -64,7 +64,8 @@ comparison. The continuous ECDF display has no numerical flag rule.
 
 ```sh
 Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/check.R
-Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/run.R 500 1000 6 run
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+  Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/run.R 500 1000 6 run
 ```
 
 Arguments are datasets per condition, reference simulations, workers, and `run`

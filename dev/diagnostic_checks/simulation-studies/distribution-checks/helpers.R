@@ -164,8 +164,8 @@ add_distribution_unions <- function(rows) {
   aggregate_flags <- function(data, groups) data |>
     dplyr::group_by(dplyr::across(dplyr::all_of(groups))) |>
     dplyr::summarise(dplyr::across(dplyr::all_of(columns), distribution_any), .groups = "drop")
-  # Category-specific rows already contribute through category_any.
-  panels <- rows[!startsWith(rows$statistic, "category:"), ]
+  # Pointwise category ranges are reported separately (category_any).
+  panels <- rows[!startsWith(rows$statistic, "category"), ]
   per_role <- aggregate_flags(panels, c("reference", "view", "role", "check")) |>
     dplyr::mutate(statistic = "any")
   all_roles <- aggregate_flags(dplyr::bind_rows(rows, per_role),
@@ -228,8 +228,8 @@ run_distribution_dataset <- function(condition, repetition, reference_draws) {
   results <- lapply(references, function(reference) {
     status <- data.frame(condition = condition$condition, repetition, reference, dataset_seed,
       usable = FALSE, status = if (reference == "known") "check_error" else "fit_error",
-      convergence = NA_integer_, positive_hessian = NA, warnings = "", error = "",
-      fit_seconds = 0, check_seconds = 0)
+      convergence = NA_integer_, positive_hessian = NA, dyad_sd = NA_real_,
+      dispersion = NA_real_, warnings = "", error = "", fit_seconds = 0, check_seconds = 0)
     warnings <- character()
     statistics <- tryCatch(withCallingHandlers({
       if (reference == "known") {
@@ -245,6 +245,9 @@ run_distribution_dataset <- function(condition, repetition, reference_draws) {
           formula, data = data, family = family))[["elapsed"]]
         status$convergence <- model$fit$convergence
         status$positive_hessian <- isTRUE(model$sdr$pdHess)
+        # Show whether the fit absorbs a misfit: dyad SD and residual SD or NB2 size.
+        status$dyad_sd <- attr(glmmTMB::VarCorr(model)$cond$dyad, "stddev")[[1]]
+        status$dispersion <- stats::sigma(model)
         if (status$convergence != 0L || !status$positive_hessian) {
           status$status <- "fit_problem"
           stop("Convergence or Hessian problem.")

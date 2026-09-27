@@ -10,7 +10,11 @@ summarise_distribution_study <- function(conditions, fits, statistics) {
       fit_problems = sum(status == "fit_problem", na.rm = TRUE),
       check_errors = sum(status == "check_error", na.rm = TRUE),
       fit_seconds = sum(fit_seconds, na.rm = TRUE),
-      check_seconds = sum(check_seconds, na.rm = TRUE), .groups = "drop")
+      check_seconds = sum(check_seconds, na.rm = TRUE),
+      # Mean fitted dyad SD and residual SD or NB2 size, for misfits the fit absorbs.
+      mean_dyad_sd = if (any(usable & !is.na(dyad_sd))) mean(dyad_sd[usable], na.rm = TRUE) else NA_real_,
+      mean_dispersion = if (any(usable & !is.na(dispersion)))
+        mean(dispersion[usable], na.rm = TRUE) else NA_real_, .groups = "drop")
   fit_summary <- dplyr::left_join(conditions, fit_counts, by = "condition")
 
   summary <- statistics |>
