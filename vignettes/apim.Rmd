@@ -415,6 +415,12 @@ dyadMLM::check_partner_dependence(
 )
 ```
 
+The top row shows role-specific SDs and partner correlation. The bottom
+row shows the same information using dyad averages and half the differences
+between partners. Half-difference SD describes how these differences vary across
+dyads. For exchangeable partners, RMS (root mean square) describes their typical
+size, regardless of partner order.
+
 Red lines show observed summaries; blue histograms show model simulations.
 
 Here, the restricted model produces a lower partner correlation than observed.

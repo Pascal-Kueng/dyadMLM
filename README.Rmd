@@ -112,14 +112,15 @@ for data requirements and examples.
 | [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
 | [Check partner dependence — cross-sectional](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_residuals.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_outcomes.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
-Predictive checks assess whether a model reproduces response variances and
-partner correlations. See the
-[function help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
-for supported models and interpretation, and the simulation studies on
+Predictive checks compare residual and outcome distributions, variability,
+and partner dependence with simulations from the fitted model. Follow the
+function links above for supported models and interpretation. Simulation studies
+show how often the partner check detects
 [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
-and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
-for how often the check detects mismatches.
+and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html).
 
 ## Quick example
 
@@ -203,6 +204,8 @@ check_partner_dependence(
 
 The function groups the six plots in one figure. Use `panels = FALSE` to show
 them separately.
+
+The same `simulations` can be reused with `check_residuals()` and `check_outcomes()`.
 
 Here, simulations produce weaker partner correlations and larger SDs of partner
 half-differences than observed (red lines), suggesting **misfit**.
