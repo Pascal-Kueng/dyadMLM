@@ -88,6 +88,10 @@ Supports unweighted `glmmTMB` models with the following families:
 - `glmmTMB::ordinal()` (currently only available in the development
   version of `glmmTMB`)
 
+Smooth terms (`s()`) are not supported: simulations would draw new
+curves. Fixed-effect splines such as
+[`splines::ns()`](https://rdrr.io/r/splines/ns.html) are supported.
+
 Zero-inflated and hurdle versions are supported where available. Checks
 describe the combined response, including zeros, rather than each model
 component separately. Good agreement does not establish that the zero

@@ -86,11 +86,13 @@ check_partner_dependence(
 The comparison plots (shown by default) are the main output. The
 function invisibly returns a `dyadMLM_partner_check` object containing
 the `compositions` table with pair counts and a statistics tibble for
-each composition. Each tibble has one observed row followed by one row
-per simulation, identified by `dataset`. `summary` compares each
-`observed` statistic with the middle 95% of its simulations (`lower`,
-`upper`) and marks those `outside` it. The object includes omission
-counts and settings, and can be saved and plotted later.
+each composition. Compositions with fewer than three complete dyads are
+skipped and have `NULL` statistics. Each tibble has one observed row
+followed by one row per simulation, identified by `dataset`. `summary`
+compares each `observed` statistic with the middle 95% of its
+simulations (`lower`, `upper`) and marks those `outside` it. The object
+includes omission counts and settings, and can be saved and plotted
+later.
 
 ## Reading the plots
 
