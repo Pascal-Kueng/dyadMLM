@@ -210,6 +210,15 @@ test_that("wrappers preserve identifier expressions and an omitted role", {
   expect_equal(check_from_wrapper(simulations, dyad, role, data = fitting_data), expected)
   # A broken expression must not fall back to the wrapper formal's column name.
   expect_error(check_from_wrapper(simulations, does_not_exist), "does_not_exist")
+
+  # Wrapper formals without defaults forward an empty quosure when omitted.
+  check_without_defaults <- function(simulations, dyad, role) {
+    check_partner_dependence(simulations, {{ dyad }}, {{ role }}, plot = FALSE)
+  }
+  simulations <- partner_check_test_simulations()
+  expect_equal(check_without_defaults(simulations, dyad),
+               check_partner_dependence(simulations, dyad, NULL, plot = FALSE))
+  expect_error(check_without_defaults(simulations), "`dyad` must identify")
 })
 
 
