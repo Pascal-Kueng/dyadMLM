@@ -182,15 +182,47 @@ plot_distribution_panels(summary)
 known <- summary |> filter(reference == "known", role != "All",
   statistic %in% names(distribution_panel_labels), checked > 0)
 known_maximum <- slice_max(known, rate, n = 1, with_ties = FALSE)
+known_panels <- known |> group_by(statistic) |> summarise(rate = mean(rate))
+other_panels <- filter(known_panels, statistic != "outliers")$rate
+# Chance that a 95% Wilson interval lies above 5% when the true rate is exactly 5%.
+chance_above <- function(n) {
+  x <- 0:n; z <- qnorm(.975)
+  lower <- (x + z^2 / 2 - z * sqrt(x * (n - x) / n + z^2 / 4)) / (n + z^2)
+  sum(dbinom(x[lower > .05], n, .05))
+}
+percent <- function(rate) sprintf("%.1f%%", 100 * rate)
+fitted_levels <- default_summary |> filter(scenario == "correct", view == "pooled",
+    statistic %in% c("response_sd", "zeros", "mean_distance")) |>
+  group_by(statistic) |> summarise(rate = max(rate, na.rm = TRUE))
+fitted_level <- function(name) percent(fitted_levels$rate[fitted_levels$statistic == name])
+correct_both <- default_summary |> filter(scenario == "correct", check == "both", statistic == "any")
+both_range <- function(name) with(filter(correct_both, view == name),
+  sprintf("%.0f–%.0f%%", 100 * min(rate), 100 * max(rate)))
 ```
 
 With known parameters, the limits come from the model that generated the data.
 Each panel then flags at most 5% of datasets by construction, apart from Monte
 Carlo error. Across all `r nrow(known)` known-parameter rates (every
 correct-model condition and panel, pooled and per role), the average is
-`r sprintf("%.1f%%", 100 * mean(known$rate))` and the highest is
+`r percent(mean(known$rate))`. Per panel, the average ranges from
+`r percent(min(other_panels))` to `r percent(max(other_panels))`, except for the
+outlier count (`r percent(known_panels$rate[known_panels$statistic == "outliers"])`):
+its lower limit is usually 0, so it can flag only an excess. The highest single rate is
 `r with(known_maximum, sprintf("%.1f%% (%.1f–%.1f)", 100 * rate, 100 * rate_lower, 100 * rate_upper))`.
+Even if every rate were exactly 5%, about
+`r percent(mean(sapply(known$checked, chance_above)))` of intervals would lie
+entirely above 5%; here `r sum(known$rate_lower > .05)` of `r nrow(known)` do
+(`r percent(mean(known$rate_lower > .05))`).
 This checks the implementation; it is not a finding about fitted references.
+
+With fitted models and all observations pooled, the response SD, zero count, and
+mean PIT distance flag in at most `r fitted_level("response_sd")`,
+`r fitted_level("zeros")`, and `r fitted_level("mean_distance")` of datasets.
+The fitted model already matches these overall levels.
+
+Reading every panel of both checks for both roles, at least one flag appears in
+`r both_range("roles")` of datasets under every correct model. With all
+observations pooled, this is `r both_range("pooled")`.
 
 <details>
 <summary>Any flags and category-frequency flags under correct models</summary>
@@ -225,7 +257,23 @@ categories |> transmute(n_dyads, View = ifelse(view == "pooled", "Pooled", "Eith
     Rate = format_rate(rate, rate_lower, rate_upper, checked)) |>
   knitr::kable(col.names = c("Dyads", "View", "Categories displayed; usable datasets",
     "Any displayed category flagged; datasets checked"))
+known_categories <- summary |> filter(family == "nbinom2", scenario == "correct",
+  n_times == 1, dyad_sd == .6, n_dyads == 40, reference == "known", view == "pooled",
+  role == "Pooled", startsWith(statistic, "category"))
+known_any <- filter(known_categories, statistic == "category_any")
+category_rates <- known_categories |> filter(statistic != "category_any") |>
+  group_by(rare = checked < .05 * known_any$checked) |>
+  summarise(rate = sum(flagged) / sum(checked))
 ```
+
+Even with the true parameters, at least one displayed category flags in
+`r distribution_percent(known_any$rate)` of datasets with category displays at 40 dyads
+(pooled). Part of this comes from rare high counts. Categories are taken from the
+observed values, so a rare high count is displayed whenever it occurs, and its
+observed frequency then often lies above the simulated limits: categories displayed
+in fewer than 5% of datasets flag in
+`r distribution_percent(category_rates$rate[category_rates$rare])` of their
+displays, the others in `r distribution_percent(category_rates$rate[!category_rates$rare])`.
 
 </details>
 
@@ -279,7 +327,36 @@ for (family_name in names(distribution_family_labels)) {
     knitr::kable(col.names = c("Panel", settings),
       caption = paste(distribution_family_labels[family_name], "models")) |> print()
 }
+rates_at <- function(family_name, scenario_name, check_name, statistic_name, view_name = "roles")
+  default_summary |> filter(family == family_name, scenario == scenario_name,
+      check == check_name, statistic == statistic_name, view == view_name, n_times == 1,
+      dyad_sd == .6, n_dyads %in% c(100, 400)) |>
+    arrange(n_dyads) |> pull(rate) |> distribution_percent() |> paste(collapse = separator)
 ```
+
+The main patterns, at 100 / 400 dyads in either role unless noted:
+
+- **Omitted role means** show mainly in the role view of residual checks (±0.2:
+  `r rates_at("gaussian", "mean_small", "residual", "any")`). The pooled residual
+  view and the outcome checks stay near their correct-model rates
+  (`r rates_at("gaussian", "mean_small", "residual", "any", "pooled")` versus
+  `r rates_at("gaussian", "correct", "residual", "any", "pooled")`, and
+  `r rates_at("gaussian", "mean_small", "outcome", "any")` versus
+  `r rates_at("gaussian", "correct", "outcome", "any")`). The exception is the
+  per-role response SD at ±0.4 (`r rates_at("gaussian", "mean_large", "outcome", "response_sd")`),
+  which reacts to the inflated fitted residual SD.
+- **Role SD differences** show most in the per-role response SD and mean PIT
+  distance (ratio 1.50: `r rates_at("gaussian", "variance_large", "outcome", "response_sd")`
+  and `r rates_at("gaussian", "variance_large", "residual", "mean_distance")`).
+- **NB2 overdispersion fitted as Poisson** is partly absorbed by a larger fitted
+  dyad SD (see below). Residual checks flag either role in
+  `r rates_at("nbinom2", "dispersion_large", "residual", "any")` of datasets for
+  size 3, compared with `r rates_at("nbinom2", "correct", "residual", "any")`
+  under the correct model.
+- **Omitted zero inflation** shows most in the PIT QQ envelope (25% extra zeros:
+  `r rates_at("nbinom2", "zeros_large", "residual", "qq")`). The zero count stays
+  weak (`r rates_at("nbinom2", "zeros_large", "outcome", "zeros")`) because a
+  smaller fitted NB2 size absorbs the extra zeros (see below).
 
 <details>
 <summary>What the fitted models estimate</summary>
@@ -396,12 +473,18 @@ loss <- paired |> filter(scenario != "correct", n_times == 1, dyad_sd == .6,
     n_dyads == 400, check == "residual", statistic %in% names(distribution_panel_labels),
     (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All")) |>
   slice_min(centred_minus_uncentred, n = 1, with_ties = FALSE)
+loss_any <- summary |> filter(condition == loss$condition, view == loss$view,
+    role == loss$role, check == "residual", statistic == "any") |>
+  pull(rate, reference)
 ```
 
 At 400 dyads, the largest loss of flags after centring is
 `r sprintf("%.1f", -100 * loss$centred_minus_uncentred)` percentage points, for the
 `r distribution_panel_labels[[loss$statistic]]` under
 "`r loss$scenario_label`" (`r ifelse(loss$view == "pooled", "pooled", "either role")`).
+Other panels flag more often there, so the residual any flag rate rises from
+`r distribution_percent(loss_any[["fitted-uncentred"]])` without centring to
+`r distribution_percent(loss_any[["fitted-centred"]])` with it.
 
 ## Additional designs and exclusions
 
@@ -414,7 +497,16 @@ default_summary |> filter((n_times > 1 | dyad_sd > .6), statistic == "any") |>
     ifelse(n_times > 1, "; six occasions", "; dyad SD 1.2"))) |>
   rate_table() |>
   knitr::kable(col.names = c("Family", "Setting", "Dyads", "View", "Check", "Any flag; datasets checked"))
+role_means <- default_summary |> filter(family == "gaussian", n_dyads == 100, dyad_sd == .6,
+    check == "residual", view == "roles", statistic == "any")
+role_means_rate <- function(scenario_name, occasions) distribution_percent(
+  role_means$rate[role_means$scenario == scenario_name & role_means$n_times == occasions])
 ```
+
+At 100 dyads, the role view of residual checks flags omitted role means of ±0.2
+in `r role_means_rate("mean_small", 6)` of datasets with six occasions (correct model:
+`r role_means_rate("correct", 6)`), compared with `r role_means_rate("mean_small", 1)`
+with one occasion. Six occasions give each role six times as many rows.
 
 ```{r fit-failures, results='asis'}
 failed <- fits |> filter(reference == "fitted",
@@ -425,7 +517,14 @@ if (nrow(failed)) cat("More than 2% of fits had errors or problems in: ",
     ifelse(failed$dyad_sd > .6, ", dyad SD 1.2", ""), " (",
     failed$fit_errors + failed$fit_problems, " of ", failed$attempted, ")", collapse = "; "),
   ". Their rates use the remaining datasets.\n", sep = "")
+longitudinal <- filter(fits, n_times > 1, scenario == "correct")
 ```
+
+In the longitudinal correct model, all
+`r longitudinal$fit_problems[longitudinal$reference == "fitted"]` fits with problems
+estimated the residual SD at about zero: six occasions separate the person-level
+AR(1) process from independent noise only weakly. The known-parameter rates there
+still use all `r longitudinal$usable[longitudinal$reference == "known"]` datasets.
 
 <details>
 <summary>Fit availability and complete saved results</summary>
