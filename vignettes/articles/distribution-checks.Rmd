@@ -319,6 +319,63 @@ more overdispersion).
 
 </details>
 
+## Are mismatches that distort estimates or SEs detected?
+
+```{r consequences-availability, results='asis'}
+consequences_available <- all(file.exists(file.path(params$results_directory,
+  c("inference.csv", "severe-summary.csv"))))
+if (!consequences_available) cat("These results are not yet available.\n")
+```
+
+```{asis, echo=consequences_available}
+Each fitted model gives 95% Wald intervals for the actor (0.5) and partner (0.3)
+effects. **Coverage** is the percentage of intervals that contain the true value
+and should be near 95%. The **SE ratio** divides the average SE by the SD of the
+estimates; below 1, the SEs are too small. Low coverage with an SE ratio near 1
+means the estimates are biased. **Flagged** is the percentage of datasets with any
+flag in either check and either role, as above.
+
+Three severe mismatches were added to distort inference. Omitting the partner
+effect biases the actor effect. A residual SD that rises with the actor predictor,
+exp(actor − 1), and Poisson fits to NB2 outcomes with size 1 make the SEs too
+small. These settings use 100 / 400 dyads, dyad SD 1.2, and a residual page for
+each predictor. The correct model gives their false-alarm rate.
+```
+
+```{r consequences-severe, eval=consequences_available}
+inference <- read_results("inference.csv")
+flag_rates <- bind_rows(summary, read_results("severe-summary.csv")) |>
+  filter(check == "both", reference == "fitted-centred", view == "roles", role == "All",
+    statistic == "any")
+consequence_table <- function(selected) {
+  collapse_sizes <- function(values) paste(ifelse(is.na(values), "–", values), collapse = separator)
+  inference |> filter(condition %in% selected) |>
+    transmute(condition, family, scenario, scenario_label, n_dyads, n_times, dyad_sd,
+      term = sub("_predictor", "", term), coverage = round(100 * coverage),
+      se_ratio = sprintf("%.2f", se_ratio)) |>
+    tidyr::pivot_wider(names_from = term, values_from = c(coverage, se_ratio)) |>
+    left_join(transmute(flag_rates, condition, flagged = round(100 * rate)), by = "condition") |>
+    arrange_conditions() |>
+    group_by(family, scenario, scenario_label) |>
+    summarise(across(c(coverage_actor, coverage_partner, se_ratio_actor, se_ratio_partner,
+      flagged), collapse_sizes), .groups = "drop") |>
+    arrange(family, match(scenario, c(distribution_scenario_order, "omitted_partner"))) |>
+    mutate(family = unname(distribution_family_labels[family])) |>
+    select(-scenario) |>
+    knitr::kable(col.names = c("Family", "Setting", "Actor coverage (%)",
+      "Partner coverage (%)", "Actor SE ratio", "Partner SE ratio", "Flagged (%)"))
+}
+consequence_table(inference$condition[inference$severe])
+```
+
+```{asis, echo=consequences_available}
+The main mismatches, at 40 / 100 / 400 dyads:
+```
+
+```{r consequences-main, eval=consequences_available}
+consequence_table(conditions$condition[conditions$n_times == 1 & conditions$dyad_sd == .6])
+```
+
 ## Effect of median centring
 
 This comparison changes only median centring, leaving the fitted model,

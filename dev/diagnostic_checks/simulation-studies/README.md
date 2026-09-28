@@ -90,6 +90,28 @@ Rates exclude failed fits and checks without retry; unavailable statistics do
 not count as agreement. Longitudinal conditions evaluate these marginal checks
 under time dependence, not their ability to detect serial-correlation errors.
 
+### Do the checks detect mismatches that distort inference?
+
+[consequences.R](distribution-checks/consequences.R) refits each main-study
+dataset from its seed and records the actor and partner estimates, SEs, and 95%
+Wald coverage; the flags of these datasets are in the main study's summary. It
+also runs the default checks, with a residual page for each predictor, on three
+severe mismatches at 100 and 400 dyads with dyad SD 1.2: an omitted partner
+effect, NB2 size 1 fitted as Poisson, and a residual SD that rises with the
+actor predictor. The correct Gaussian model with the same pages gives their
+false-alarm rate.
+
+```sh
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+  Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/consequences.R 500 1000 6
+```
+
+Arguments and modes match `run.R`. Checkpoints are saved under
+`results/distribution-checks-consequences/<settings>/`. Complete 500-by-1,000
+runs export `inference.csv` and `severe-summary.csv` to
+`report-data/distribution-checks/`. The run takes about 13 CPU hours, nearly
+all for the severe conditions, or about three hours with six workers.
+
 ## Gaussian covariance pooling
 
 Both models use the package's data preparation and covariance terms, with the
