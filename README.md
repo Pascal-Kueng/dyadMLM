@@ -93,7 +93,7 @@ selected compositions as exchangeable, centering predictors, and
 creating within-/between-person components and lagged predictors.
 
 Prepared data can be used with **glmmTMB**, **brms**, and other
-multilevel modelling packages that support the required model structure.
+multilevel modeling packages that support the required model structure.
 See the [Getting Started
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html)
 for data requirements and examples.
@@ -105,16 +105,17 @@ for data requirements and examples.
 | [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
 | [Check partner dependence — cross-sectional](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
-Predictive checks assess whether a model reproduces response variances
-and partner correlations. See the [function
-help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
-for supported models and interpretation, and the simulation studies on
-[omitted partner
+Predictive checks compare residual and outcome distributions,
+variability, and partner dependence with simulations from the fitted
+model. Follow the function links above for supported models and
+interpretation. Simulation studies show how often the partner check
+detects [omitted partner
 dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance
-pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
-for how often the check detects mismatches.
+pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html).
 
 ## Quick example
 
@@ -179,8 +180,8 @@ print(prepared_data, n = 4)
 #> #                               retained non-missing observations
 #> #
 #> # A tibble: 240 × 15
-#>   personID coupleID gender closeness provided_support .composition
-#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>
+#>   personID coupleID gender closeness provided_support .composition 
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>        
 #> 1        1        1 female      4.71             4.49 female_x_male
 #> 2        2        1 male        4.61             4.76 female_x_male
 #> 3        3        2 female      6.69             4.09 female_x_male
@@ -223,13 +224,13 @@ covariance <- recover_exchangeable_covariance(model)
 
 print(covariance, representation = "sdcor")
 #> Recovered exchangeable member-level covariance
-#>
+#> 
 #> Pair `pair_1`
 #> Shared:     us(1 | coupleID)
 #> Difference: us(0 + .member_contrast_arbitrary | coupleID)
-#>
+#> 
 #> Standard deviations and correlations:
-#>                        1      2
+#>                        1      2     
 #> 1 member1: (Intercept) 1.089  -0.039
 #> 2 member2: (Intercept) -0.039 1.089
 ```
@@ -272,6 +273,10 @@ in variances or partner correlations. These checks alone do not
 establish whether fixed effects should be pooled ([nested model
 comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
 can help assess those restrictions).
+
+The same `simulations` can be reused with `check_dyad_residuals()` and
+`check_dyad_outcomes()`. Use the same `dyad`, `role` and `data`
+arguments.
 
 ## Vignettes and examples
 

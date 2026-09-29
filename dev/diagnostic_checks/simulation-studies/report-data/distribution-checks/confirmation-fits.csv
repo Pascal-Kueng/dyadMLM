@@ -1,0 +1,15 @@
+"role_mean","zero_probability","n_times","dyad_sd","condition","family","scenario","scenario_label","sd_ratio","nb_size","fit_family","n_dyads","repetitions","reference_draws","reference","median_dyad_sd","median_dispersion","attempted","usable","with_warnings","fit_errors","fit_problems","check_errors","fit_seconds","check_seconds"
+0,0,1,0.6,1,"gaussian","correct","Correct model",1,3,"gaussian",100,500,1000,"fitted",0.589023043750243,0.988882345053886,500,500,0,0,0,0,37.2030000000053,5616.623
+0,0,1,0.6,2,"gaussian","correct","Correct model",1,3,"gaussian",400,500,1000,"fitted",0.59871459220752,0.99903849347173,500,500,0,0,0,0,73.6650000000062,7281.962
+0,0,1,0.6,3,"gaussian","variance_large","Role SD ratio: 1.50",1.5,3,"gaussian",100,500,1000,"fitted",0.582710933522296,0.992788249423354,500,500,0,0,0,0,36.1660000000005,5470.868
+0,0,1,0.6,4,"gaussian","variance_large","Role SD ratio: 1.50",1.5,3,"gaussian",400,500,1000,"fitted",0.594655303317319,0.998287261627614,500,500,0,0,0,0,72.8210000000022,7343.874
+0,0,1,0.6,5,"gaussian","heteroscedastic","Residual SD rises with actor predictor",1,3,"gaussian",100,500,1000,"fitted",0.580708029077689,0.888046118052414,500,500,0,0,0,0,36.1480000000042,5656.82699999999
+0,0,1,0.6,6,"gaussian","heteroscedastic","Residual SD rises with actor predictor",1,3,"gaussian",400,500,1000,"fitted",0.593659633988503,0.941263520108512,500,500,0,0,0,0,72.4350000000066,7353.723
+0,0,1,0.6,7,"gaussian","omitted_partner","Omitted partner effect",1,3,"gaussian",100,500,1000,"fitted",0.600296906401018,1.02389133649496,500,500,0,0,0,0,31.1759999999999,5539.71200000001
+0,0,1,0.6,8,"gaussian","omitted_partner","Omitted partner effect",1,3,"gaussian",400,500,1000,"fitted",0.613673162923374,1.03105750876663,500,500,0,0,0,0,63.571999999981,7266.63500000001
+0,0,1,0.6,9,"nbinom2","correct","Correct model",1,3,"nbinom2",100,500,1000,"fitted",0.568879950421668,3.07115463428445,500,500,0,0,0,0,85.094000000011,5345.999
+0,0,1,0.6,10,"nbinom2","correct","Correct model",1,3,"nbinom2",400,500,1000,"fitted",0.585278377787259,3.02762324905252,500,500,0,0,0,0,289.737000000008,6944.704
+0,0,1,0.6,11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",1,10,"poisson",100,500,1000,"fitted",0.633838489343878,1,500,500,0,0,0,0,41.0610000000079,5486.59400000001
+0,0,1,0.6,12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",1,10,"poisson",400,500,1000,"fitted",0.633580629027217,1,500,500,0,0,0,0,78.3499999999894,6430.22899999999
+0,0,1,0.6,13,"ordinal","correct","Correct model",1,3,"ordinal",100,500,1000,"fitted",0.97642349861999,1,500,500,0,0,0,0,68.0089999999755,5341.15299999997
+0,0,1,0.6,14,"ordinal","correct","Correct model",1,3,"ordinal",400,500,1000,"fitted",0.994129888242115,1,500,500,0,0,0,0,192.369999999984,6232.05000000004

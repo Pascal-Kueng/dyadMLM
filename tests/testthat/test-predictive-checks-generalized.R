@@ -92,6 +92,18 @@ test_that("supported scalar families and alternative links share the response-ch
     simulated_statistics <- as.matrix(result$compositions$statistics[[1]][-1, -1])
     expect_identical(dim(simulated_statistics), c(20L, 6L))
     expect_true(all(is.finite(simulated_statistics)))
+
+    rows_by_role <- split(seq_len(nrow(data)), data$role)
+    outcomes <- check_dyad_outcomes(
+      simulations, dyad = "dyad", role = "role", plot = FALSE
+    )
+    expect_s3_class(outcomes, "dyadMLM_outcome_check")
+    expect_identical(outcomes$compositions[[1]]$rows, rows_by_role)
+    for (statistics in outcomes$compositions[[1]]$statistics) {
+      expect_true(nrow(statistics) %in% c(2L, 3L))
+      expect_identical(ncol(statistics), 21L)
+      expect_true(all(is.finite(statistics)))
+    }
   }
 })
 
@@ -169,30 +181,31 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
 
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
-  subtitles <- character()
+  captions <- character()
   limits <- list()
-  original_segments <- graphics::segments
-  original_title <- graphics::title
+  original_abline <- graphics::abline
+  original_mtext <- graphics::mtext
   testthat::local_mocked_bindings(
-    title = function(main = NULL, sub = NULL, ...) {
-      subtitles <<- c(subtitles, sub)
-      original_title(main = main, sub = sub, ...)
+    mtext = function(text, ...) {
+      captions <<- c(captions, text)
+      original_mtext(text, ...)
     },
     .package = "graphics"
   )
   testthat::local_mocked_bindings(
-    segments = function(x0, y0, x1, y1, ...) {
-      if (identical(list(...)$lty, 2)) limits[[length(limits) + 1L]] <<- x0
-      original_segments(x0, y0, x1, y1, ...)
+    abline = function(...) {
+      arguments <- list(...)
+      if (identical(arguments$lty, 2)) limits[[length(limits) + 1L]] <<- arguments$v
+      original_abline(...)
     },
     .package = "graphics"
   )
   plot(result, ask = FALSE)
-  expect_true(any(grepl(count, subtitles, fixed = TRUE)))
+  expect_true(any(grepl(count, captions, fixed = TRUE)))
   partner_column <- match("Partner correlation (female and male)",
                           names(statistics)[-1])
   expect_equal(unname(limits[[partner_column]]),
-               unname(stats::quantile(defined, c(0.025, 0.975))))
+               simulated_rank_limits(defined))
 })
 
 

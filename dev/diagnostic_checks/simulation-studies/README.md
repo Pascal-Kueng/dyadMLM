@@ -9,6 +9,7 @@ Public report sources stay in `vignettes/articles/`.
 | [family-comparison](family-comparison/run.R) | Raw versus model-centred correlation checks across response families | [Full report](../../../vignettes/articles/partner-dependence-simulation.Rmd) |
 | [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
+| [distribution-checks](distribution-checks/run.R) | Residual and outcome flags, pooled versus role checks, and paired PIT centring | [Report](../../../vignettes/articles/distribution-checks.Rmd) |
 | [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
 [Shared family generators](shared/family-margins.R) are used by both family studies.
@@ -36,6 +37,133 @@ from exported tables without refitting. New diagnostics may require refitting;
 changes to the study design require a new run. Failed fits remain recorded and
 are excluded from check rates. Reference simulations keep fitted parameters fixed.
 Reported rate intervals are 95% Wilson intervals.
+
+## Residual and outcome checks
+
+This study uses Gaussian and negative-binomial outcomes at 40, 100, and 400 dyads.
+Gaussian settings cover correct specification, two omitted role mean differences,
+and two role SD ratios. Count settings cover correct NB2 models, two amounts of
+NB2 overdispersion fitted as Poisson, and two omitted zero-inflation probabilities.
+All fitted models retain actor and partner effects and a shared dyad intercept.
+Four additional conditions cover stronger dyad dependence and Gaussian
+longitudinal data with six occasions and person-specific AR(1) processes.
+There are 34 conditions, with 500 datasets and 1,000 reference simulations per
+dataset in a full run.
+
+The fitted centred and uncentred residual checks share their data, fitted model,
+simulation bank, and PIT seed. Outcome checks reuse the same bank. Correct-model
+conditions also use a separate known-parameter reference, evaluated regardless
+of fitting success. Both pooled and role-specific checks are recorded.
+
+Rates describe individual panels and the union of numerical flags across panels
+and roles. The union has no promised 5% false-alarm rate. Count-category ranges
+are pointwise and use observed categories, so their availability and crossing
+rates are reported separately. Blue-only "Other" values have no observed
+comparison. The continuous ECDF display has no numerical flag rule.
+Some of these panels have since been removed; see
+[Confirmation run](#confirmation-run). The scripts below reproduce the saved
+tables only at commit `0ceacd4c` (PR #77); later package versions no longer
+return the histogram or outlier count.
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/check.R
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+  Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/run.R 500 1000 6 run
+```
+
+Arguments are datasets per condition, reference simulations, workers, and `run`
+or `summarise`. An optional fifth argument selects comma-separated condition
+numbers. Seeds do not depend on workers or selection. Checkpoints save every
+five datasets under `results/distribution-checks/<settings>/`; rerun the same
+command to resume. Changed generators, package code, or software versions require
+archiving the old run before restarting. Use at most ten workers across jobs.
+
+For a short workflow check, use `5 200 4 run`. This is a pilot, not evidence of
+precise flag rates. `summarise` updates tables without fitting.
+Only a complete 500-by-1,000 run exports public tables and renders the report.
+
+Saved checkpoints contain per-dataset flags, scalar limits, seeds, warnings,
+errors, and fitting diagnostics, without fitted models or simulation matrices.
+The report tables contain conditions, flag rates with 95% Wilson intervals and
+Monte Carlo SEs, paired centring differences and their SEs, fit/check failure
+counts, and median fitted dyad SDs and dispersion. Source hashes and session
+information accompany the full results.
+Rates exclude failed fits and checks without retry; unavailable statistics do
+not count as agreement. Longitudinal conditions evaluate these marginal checks
+under time dependence, not their ability to detect serial-correlation errors.
+
+### Do the checks detect mismatches that distort inference?
+
+[consequences.R](distribution-checks/consequences.R) refits each main-study
+dataset from its seed and records the actor and partner estimates, SEs, and 95%
+Wald coverage; the flags of these datasets are in the main study's summary. It
+also runs the default checks, with a residual page for each predictor, on three
+severe mismatches at 100 and 400 dyads with dyad SD 1.2: an omitted partner
+effect, NB2 size 1 fitted as Poisson, and a residual SD that rises with the
+actor predictor. The correct Gaussian model with the same pages gives their
+false-alarm rate.
+
+```sh
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+  Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/consequences.R 500 1000 6
+```
+
+Arguments and modes match `run.R`. Checkpoints are saved under
+`results/distribution-checks-consequences/<settings>/`. Complete 500-by-1,000
+runs export `inference.csv` and `severe-summary.csv` to
+`report-data/distribution-checks/`. The run takes about 13 CPU hours, nearly
+all for the severe conditions, or about three hours with six workers.
+
+### Confirmation run
+
+The main study and its add-on reproduce at commit `0ceacd4c`. They record
+panels that the package has since removed: the PIT histogram, the outlier
+count, and count category bars. [dropped-panels.R](distribution-checks/dropped-panels.R)
+recomputes their default flag unions with and without the histogram and
+outlier count and writes `report-data/distribution-checks/dropped-panels.csv`.
+The add-on's unions include its predictor pages. Its optional argument is the
+`results/` directory of both runs. With all panels, it must reproduce the
+reported rates.
+
+[confirmation.R](distribution-checks/confirmation.R) confirms, on fresh seeds,
+how often the remaining panels flag correct and mismatched models. Its design
+was fixed before the run:
+
+- Cross-sectional data at 100 and 400 dyads, dyad SD 0.6, and the main study's
+  predictors. Gaussian: correct model, role SD ratio 1.5, residual SD
+  exp(actor predictor - 1), and an omitted partner effect. NB2: correct model
+  (size 3), and size 10 fitted as Poisson. Ordinal: correct model, with the
+  Gaussian model's predictors and dyad effect, without intercept, scaled by
+  pi/sqrt(3), plus standard logistic noise, cut at -3.05, -1.23, 1.23, and 3.05
+  into five categories (about 10/20/40/20/10%).
+- Every condition runs the same displays: pooled (with `dyad`) and by role,
+  both with actor and partner predictor pages, package defaults, and only the
+  fitted reference.
+- The *core* union contains QQ, mean PIT distance, PIT quartiles and distance
+  across predicted outcomes, response SD, largest absolute deviation, and the
+  zero count where shown. The *pages* union adds the four predictor-page
+  panels. Both are reported for each check and both checks together, pooled
+  or in either role. Ordinal category ranges (`category_any`) are reported
+  separately and never enter a union.
+- Tables give each rate with its 95% Wilson interval and usable datasets, fit
+  failures, and how often the ordinal largest-deviation range has equal limits.
+- Dataset seeds are 910,000,000 + 100,000 × condition + dataset; simulation
+  and PIT seeds add 10,000,000 and 30,000,000. 500 datasets and 1,000 reference
+  simulations per dataset. Roxygen lines are left out of the settings check,
+  so help text can change during the run.
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/dropped-panels.R
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+  Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/confirmation.R 500 1000 6
+```
+
+Arguments and modes match `run.R`. Checkpoints are saved under
+`results/distribution-checks/confirmation-<settings>/`. A complete 500-by-1,000
+run copies its summary, fits, largest-deviation ties, and session information
+to `report-data/distribution-checks/` with the prefix `confirmation-`. The run
+needs glmmTMB with `ordinal()` and takes about 18 CPU hours, or about four hours
+with six workers.
 
 ## Gaussian covariance pooling
 
@@ -144,6 +272,7 @@ After changing text or plots, rebuild from the compact tables without simulation
 ```r
 pkgdown::build_article("articles/partner-dependence-simulation")
 pkgdown::build_article("articles/covariance-pooling")
+pkgdown::build_article("articles/distribution-checks")
 ```
 
 After updating saved family-comparison results, first refresh its exported tables:

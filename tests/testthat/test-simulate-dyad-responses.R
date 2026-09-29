@@ -37,7 +37,8 @@ test_that("complete response simulations retain fitted-row alignment", {
   expect_identical(attr(simulations, "dyadMLM"), list(
     backend = "glmmTMB", family = "gaussian", link = "identity",
     reference = "plug-in predictive", random_effects = "new",
-    parameter_uncertainty = "excluded", seed = 123L
+    parameter_uncertainty = "excluded", free_conditional_intercept = TRUE,
+    seed = 123L
   ))
 
   result <- check_partner_dependence(simulations, dyad = "dyad", role = NULL, plot = FALSE)
@@ -54,6 +55,36 @@ test_that("complete response simulations retain fitted-row alignment", {
 
   single <- simulate_dyad_responses(model, nsim = 1, seed = 124)
   expect_identical(dim(single$simulated_responses), c(1L, 40L))
+})
+
+
+test_that("simulation metadata respects fixed and tied conditional coefficients", {
+  skip_if_not_installed("glmmTMB")
+  withr::local_seed(9243)
+  fitting_data <- data.frame(predictor = stats::rnorm(80), role = gl(2, 1, 80))
+  fitting_data$outcome <- 1 + 0.4 * fitting_data$predictor + stats::rnorm(80)
+  model <- glmmTMB::glmmTMB(outcome ~ predictor, data = fitting_data)
+  models <- list(
+    free = model,
+    absent = stats::update(model, . ~ . - 1),
+    role_means = stats::update(model, . ~ 0 + role + predictor),
+    zero_dispersion = stats::update(model, dispformula = ~0),
+    fixed = stats::update(model, start = list(beta = c(1, 0)),
+                          map = list(beta = factor(c(NA, 1)))),
+    shared = stats::update(model, map = list(beta = factor(c(1, 1)))),
+    shared_roles = stats::update(model, . ~ 0 + role + predictor,
+                                 map = list(beta = factor(c(1, 1, 2)))),
+    fixed_slope = stats::update(model, start = list(beta = c(0, 0.4)),
+                                map = list(beta = factor(c(1, NA))))
+  )
+  free_intercepts <- vapply(models, function(fit) {
+    simulations <- simulate_dyad_responses(fit, nsim = 1, seed = 9244)
+    attr(simulations, "dyadMLM")$free_conditional_intercept
+  }, logical(1))
+  expect_identical(free_intercepts, c(
+    free = TRUE, absent = FALSE, role_means = TRUE, zero_dispersion = TRUE, fixed = FALSE,
+    shared = FALSE, shared_roles = TRUE, fixed_slope = TRUE
+  ))
 })
 
 
@@ -325,6 +356,7 @@ test_that("ordinal checks use category scores in the declared order", {
       expect_message(simulations <- simulate_dyad_responses(
         model, nsim = number_of_simulations, seed = 9242
       ), "Ordinal categories are scored 1, 2, ..., K", fixed = TRUE)
+      expect_false(attr(simulations, "dyadMLM")$free_conditional_intercept)
       expect_identical(dim(simulations$simulated_responses),
                        c(number_of_simulations, 356L))
       expect_identical(simulations$observed_response,

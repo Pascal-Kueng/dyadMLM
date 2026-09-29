@@ -1,0 +1,305 @@
+"condition","family","scenario","scenario_label","fit_family","n_dyads","n_times","dyad_sd","view","check","panel_set","checked","flagged","rate","rate_lower","rate_upper"
+1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"pooled","both","all",500,59,0.118,0.0925930082515065,0.149231987861119
+1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"pooled","both","without histogram and outliers",500,43,0.086,0.0644731424036077,0.113839811498558
+1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"pooled","residual","all",500,54,0.108,0.0837228096370504,0.138254673284807
+1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"pooled","residual","without histogram and outliers",500,38,0.076,0.0558690270374278,0.102596413673968
+1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"roles","both","all",500,155,0.31,0.271038911273569,0.351858338101821
+1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"roles","both","without histogram and outliers",500,135,0.27,0.232948539203106,0.310558657409208
+1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"roles","residual","all",500,130,0.26,0.223485723185383,0.300173960236162
+1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"roles","residual","without histogram and outliers",500,109,0.218,0.184033726435988,0.256266401584327
+2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled","both","all",500,54,0.108,0.0837228096370504,0.138254673284807
+2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled","both","without histogram and outliers",500,33,0.066,0.0473785263597739,0.0912394011608535
+2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled","residual","all",500,40,0.08,0.0592981294098526,0.107106316577851
+2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled","residual","without histogram and outliers",500,19,0.038,0.0244601180558304,0.0585847725306439
+2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles","both","all",500,142,0.284,0.246237771955659,0.325055943123732
+2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles","both","without histogram and outliers",500,118,0.236,0.200881295471559,0.275144356292141
+2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles","residual","all",500,114,0.228,0.193381769115001,0.266765872096084
+2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles","residual","without histogram and outliers",500,86,0.172,0.141454119843651,0.207547447499127
+3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled","both","all",500,58,0.116,0.0908136565110379,0.147041836963434
+3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled","both","without histogram and outliers",500,49,0.098,0.0749239188646062,0.127206050866482
+3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled","residual","all",500,42,0.084,0.0627441368038304,0.111599314460181
+3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled","residual","without histogram and outliers",500,32,0.064,0.0456960160447894,0.0889524088376841
+3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles","both","all",500,143,0.286,0.248140053216093,0.327123164501452
+3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles","both","without histogram and outliers",500,120,0.24,0.204637860033381,0.279326797006626
+3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles","residual","all",500,114,0.228,0.193381769115001,0.266765872096084
+3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles","residual","without histogram and outliers",500,86,0.172,0.141454119843651,0.207547447499127
+4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"pooled","both","all",500,43,0.086,0.0644731424036077,0.113839811498558
+4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"pooled","both","without histogram and outliers",500,34,0.068,0.0490665074249069,0.0935209227338743
+4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"pooled","residual","all",500,33,0.066,0.0473785263597739,0.0912394011608535
+4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"pooled","residual","without histogram and outliers",500,24,0.048,0.0324652069413532,0.07042719683589
+4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"roles","both","all",500,409,0.818,0.781797364670608,0.849353554795844
+4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"roles","both","without histogram and outliers",500,401,0.802,0.764826020930416,0.834568877430807
+4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"roles","residual","all",500,407,0.814,0.777545905940215,0.84566600824993
+4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"roles","residual","without histogram and outliers",500,399,0.798,0.760597113760494,0.830858779324421
+5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"pooled","both","all",500,71,0.142,0.114129360445696,0.175329667324775
+5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"pooled","both","without histogram and outliers",500,50,0.1,0.0766775627373017,0.12942190963194
+5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"pooled","residual","all",500,57,0.114,0.0890369009940029,0.144849089842315
+5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"pooled","residual","without histogram and outliers",500,35,0.07,0.0507597429450181,0.0957971898519168
+5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"roles","both","all",500,499,0.998,0.988759293294853,0.999646863605441
+5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"roles","both","without histogram and outliers",500,498,0.996,0.985534284784823,0.998902369477317
+5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"roles","residual","all",500,498,0.996,0.985534284784823,0.998902369477317
+5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"roles","residual","without histogram and outliers",500,497,0.994,0.982509747895947,0.99795740372804
+6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"pooled","both","all",500,74,0.148,0.119561405389205,0.181806130295727
+6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"pooled","both","without histogram and outliers",500,54,0.108,0.0837228096370504,0.138254673284807
+6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"pooled","residual","all",500,50,0.1,0.0766775627373017,0.12942190963194
+6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"pooled","residual","without histogram and outliers",500,28,0.056,0.0390256206831515,0.0797447936467069
+6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"roles","both","all",500,500,1,0.992375659538448,1
+6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"roles","both","without histogram and outliers",500,500,1,0.992375659538448,1
+6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"roles","residual","all",500,500,1,0.992375659538448,1
+6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"roles","residual","without histogram and outliers",500,500,1,0.992375659538448,1
+7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"pooled","both","all",500,51,0.102,0.0784343521031695,0.131634622904226
+7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"pooled","both","without histogram and outliers",500,33,0.066,0.0473785263597739,0.0912394011608535
+7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"pooled","residual","all",500,44,0.088,0.0662059844749289,0.11607647206539
+7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"pooled","residual","without histogram and outliers",500,26,0.052,0.0357302651157053,0.0751011439378455
+7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"roles","both","all",500,209,0.418,0.375553048071933,0.461697343763761
+7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"roles","both","without histogram and outliers",500,192,0.384,0.342407674617792,0.427361172369288
+7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"roles","residual","all",500,202,0.404,0.361879224693068,0.44758464867555
+7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"roles","residual","without histogram and outliers",500,183,0.366,0.324947604882213,0.409095718361483
+8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"pooled","both","all",500,72,0.144,0.11593807411035,0.177490456298275
+8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"pooled","both","without histogram and outliers",500,59,0.118,0.0925930082515065,0.149231987861119
+8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"pooled","residual","all",500,53,0.106,0.0819570502729703,0.136050930010733
+8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"pooled","residual","without histogram and outliers",500,39,0.078,0.0575813934761616,0.104853549873389
+8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"roles","both","all",500,349,0.698,0.656372312057082,0.736608449120143
+8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"roles","both","without histogram and outliers",500,329,0.658,0.615356215080009,0.69823449333414
+8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"roles","residual","all",500,338,0.676,0.633771514389349,0.715544717768184
+8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"roles","residual","without histogram and outliers",500,317,0.634,0.590904281638517,0.675052395117786
+9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"pooled","both","all",500,79,0.158,0.128652697864436,0.192562351011266
+9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"pooled","both","without histogram and outliers",500,58,0.116,0.0908136565110379,0.147041836963434
+9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"pooled","residual","all",500,61,0.122,0.0961592783150937,0.15360472307384
+9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"pooled","residual","without histogram and outliers",500,40,0.08,0.0592981294098526,0.107106316577851
+9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"roles","both","all",500,500,1,0.992375659538448,1
+9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"roles","both","without histogram and outliers",500,500,1,0.992375659538448,1
+9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"roles","residual","all",500,500,1,0.992375659538448,1
+9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"roles","residual","without histogram and outliers",500,500,1,0.992375659538448,1
+10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"pooled","both","all",500,67,0.134,0.106915001871521,0.166666015346335
+10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"pooled","both","without histogram and outliers",500,58,0.116,0.0908136565110379,0.147041836963434
+10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"pooled","residual","all",500,44,0.088,0.0662059844749289,0.11607647206539
+10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"pooled","residual","without histogram and outliers",500,34,0.068,0.0490665074249069,0.0935209227338743
+10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"roles","both","all",500,253,0.506,0.462298638833493,0.549609869080968
+10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"roles","both","without histogram and outliers",500,235,0.47,0.426648051851946,0.513809408575747
+10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"roles","residual","all",500,218,0.436,0.393185603123056,0.479790312456023
+10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"roles","residual","without histogram and outliers",500,198,0.396,0.354081703502757,0.439504159313246
+11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled","both","all",500,78,0.156,0.126830791403845,0.190414754833703
+11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled","both","without histogram and outliers",500,70,0.14,0.112322660187864,0.173166864944454
+11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled","residual","all",500,56,0.112,0.0872628001941023,0.142653688004062
+11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled","residual","without histogram and outliers",500,45,0.09,0.0679425478891394,0.118309411289333
+11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles","both","all",500,402,0.804,0.766942507613641,0.836421893385736
+11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles","both","without histogram and outliers",500,392,0.784,0.745837119472032,0.817832255145806
+11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles","residual","all",500,352,0.704,0.662554664322289,0.742334604769398
+11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles","residual","without histogram and outliers",500,324,0.648,0.605154037114123,0.688589158109257
+12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled","both","all",500,114,0.228,0.193381769115001,0.266765872096084
+12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled","both","without histogram and outliers",500,82,0.164,0.134128920315872,0.198994636474291
+12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled","residual","all",500,94,0.188,0.156179964134967,0.224577624313042
+12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled","residual","without histogram and outliers",500,56,0.112,0.0872628001941023,0.142653688004062
+12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles","both","all",500,500,1,0.992375659538448,1
+12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles","both","without histogram and outliers",500,500,1,0.992375659538448,1
+12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles","residual","all",500,496,0.992,0.979612964165895,0.996884684819938
+12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles","residual","without histogram and outliers",500,495,0.99,0.976806900244269,0.99572124610341
+13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"pooled","both","all",500,43,0.086,0.0644731424036077,0.113839811498558
+13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"pooled","both","without histogram and outliers",500,32,0.064,0.0456960160447894,0.0889524088376841
+13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"pooled","residual","all",500,35,0.07,0.0507597429450181,0.0957971898519168
+13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"pooled","residual","without histogram and outliers",500,24,0.048,0.0324652069413532,0.07042719683589
+13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"roles","both","all",500,164,0.328,0.28829618984059,0.370326583278184
+13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"roles","both","without histogram and outliers",500,143,0.286,0.248140053216093,0.327123164501452
+13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"roles","residual","all",500,137,0.274,0.236740625665821,0.314705576222801
+13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"roles","residual","without histogram and outliers",500,115,0.23,0.19525492517447,0.268862218674768
+14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"pooled","both","all",500,68,0.136,0.108715443407237,0.168835076448773
+14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"pooled","both","without histogram and outliers",500,61,0.122,0.0961592783150937,0.15360472307384
+14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"pooled","residual","all",500,49,0.098,0.0749239188646062,0.127206050866482
+14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"pooled","residual","without histogram and outliers",500,42,0.084,0.0627441368038304,0.111599314460181
+14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"roles","both","all",500,240,0.48,0.436528426573732,0.52377654704473
+14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"roles","both","without histogram and outliers",500,223,0.446,0.40300639158533,0.489817037184518
+14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"roles","residual","all",500,193,0.386,0.344351476714006,0.429386872911228
+14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"roles","residual","without histogram and outliers",500,170,0.34,0.299838858453714,0.382600930493983
+15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"pooled","both","all",500,68,0.136,0.108715443407237,0.168835076448773
+15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"pooled","both","without histogram and outliers",500,52,0.104,0.0801942067698911,0.133844270875658
+15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"pooled","residual","all",500,52,0.104,0.0801942067698911,0.133844270875658
+15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"pooled","residual","without histogram and outliers",500,33,0.066,0.0473785263597739,0.0912394011608535
+15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"roles","both","all",500,437,0.874,0.842032282280136,0.900264711054623
+15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"roles","both","without histogram and outliers",500,427,0.854,0.82035073377969,0.882251233173531
+15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"roles","residual","all",500,385,0.77,0.731137781325232,0.80474507482553
+15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"roles","residual","without histogram and outliers",500,367,0.734,0.693592210484465,0.770839598179529
+16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"pooled","both","all",499,49,0.0981963927855711,0.0750757109596538,0.127456234316977
+16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"pooled","both","without histogram and outliers",499,38,0.0761523046092184,0.0559820117602431,0.102798568918098
+16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"pooled","residual","all",499,42,0.0841683366733467,0.0628711103288772,0.111819057476115
+16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"pooled","residual","without histogram and outliers",499,31,0.062124248496994,0.0441081197420967,0.0868306834646059
+16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"roles","both","all",499,138,0.276553106212425,0.239127526159069,0.317392732685541
+16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"roles","both","without histogram and outliers",499,109,0.218436873747495,0.184409711247574,0.256766040928819
+16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"roles","residual","all",499,119,0.238476953907816,0.203173802552951,0.277775917440069
+16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"roles","residual","without histogram and outliers",499,89,0.178356713426854,0.147264343077817,0.214363473465321
+17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled","both","all",500,64,0.128,0.101526823995237,0.160145685308158
+17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled","both","without histogram and outliers",500,46,0.092,0.0696827236804521,0.120538738136175
+17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled","residual","all",500,57,0.114,0.0890369009940029,0.144849089842315
+17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled","residual","without histogram and outliers",500,39,0.078,0.0575813934761616,0.104853549873389
+17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles","both","all",500,137,0.274,0.236740625665821,0.314705576222801
+17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles","both","without histogram and outliers",500,114,0.228,0.193381769115001,0.266765872096084
+17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles","residual","all",500,109,0.218,0.184033726435988,0.256266401584327
+17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles","residual","without histogram and outliers",500,85,0.17,0.139620366103961,0.205411698600663
+18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled","both","all",500,82,0.164,0.134128920315872,0.198994636474291
+18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled","both","without histogram and outliers",500,68,0.136,0.108715443407237,0.168835076448773
+18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled","residual","all",500,63,0.126,0.099735288945377,0.157967717719864
+18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled","residual","without histogram and outliers",500,47,0.094,0.0714264085922213,0.122764555862559
+18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles","both","all",500,153,0.306,0.267213463731136,0.347744780367946
+18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles","both","without histogram and outliers",500,140,0.28,0.242436043041275,0.320918666761808
+18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles","residual","all",500,113,0.226,0.191509780865554,0.264668357707377
+18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles","residual","without histogram and outliers",500,99,0.198,0.165431122569193,0.235173979069584
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"pooled","both","all",500,109,0.218,0.184033726435988,0.256266401584327
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"pooled","both","without histogram and outliers",500,93,0.186,0.15433399175007,0.222454094059785
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"pooled","residual","all",500,92,0.184,0.152489479378161,0.22032910379354
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"pooled","residual","without histogram and outliers",500,75,0.15,0.121375957691388,0.183961080631698
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"roles","both","all",500,239,0.478,0.434550960393876,0.521784510586432
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"roles","both","without histogram and outliers",500,228,0.456,0.412844817581755,0.499826124378862
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"roles","residual","all",500,208,0.416,0.373597466793146,0.459683422404394
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"roles","residual","without histogram and outliers",500,196,0.392,0.350187377789679,0.435459479750016
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"pooled","both","all",500,174,0.348,0.307550302056948,0.390767497443364
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"pooled","both","without histogram and outliers",500,163,0.326,0.286375316035247,0.368277954445373
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"pooled","residual","all",500,137,0.274,0.236740625665821,0.314705576222801
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"pooled","residual","without histogram and outliers",500,126,0.252,0.215933848381372,0.291847824487558
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"roles","both","all",500,295,0.59,0.546362688124597,0.632264930592324
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"roles","both","without histogram and outliers",500,276,0.552,0.508179738010616,0.595027330581383
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"roles","residual","all",500,259,0.518,0.474232111367919,0.561493412375465
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"roles","residual","without histogram and outliers",500,239,0.478,0.434550960393876,0.521784510586432
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"pooled","both","all",500,441,0.882,0.850768012138881,0.907406991748493
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"pooled","both","without histogram and outliers",500,431,0.862,0.82899798640472,0.889481991101116
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"pooled","residual","all",500,394,0.788,0.750047884182445,0.821560495711701
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"pooled","residual","without histogram and outliers",500,378,0.756,0.716495193143907,0.791601144539778
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"roles","both","all",500,466,0.932,0.906479077266126,0.950933492575093
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"roles","both","without histogram and outliers",500,463,0.926,0.899665246677769,0.945838815248988
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"roles","residual","all",500,440,0.88,0.848580401375589,0.905625099873631
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"roles","residual","without histogram and outliers",500,425,0.85,0.816038919368302,0.878624042308612
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"pooled","both","all",500,70,0.14,0.112322660187864,0.173166864944454
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"pooled","both","without histogram and outliers",500,55,0.11,0.0854914151566031,0.140455570403408
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"pooled","residual","all",500,58,0.116,0.0908136565110379,0.147041836963434
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"pooled","residual","without histogram and outliers",500,43,0.086,0.0644731424036077,0.113839811498558
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"roles","both","all",500,139,0.278,0.240536607528625,0.318848599636304
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"roles","both","without histogram and outliers",500,115,0.23,0.19525492517447,0.268862218674768
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"roles","residual","all",500,121,0.242,0.206517808551129,0.281416351127032
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"roles","residual","without histogram and outliers",500,96,0.192,0.159876218595883,0.228820375128433
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled","both","all",500,75,0.15,0.121375957691388,0.183961080631698
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled","both","without histogram and outliers",500,63,0.126,0.099735288945377,0.157967717719864
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled","residual","all",500,61,0.122,0.0961592783150937,0.15360472307384
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled","residual","without histogram and outliers",500,48,0.096,0.073173504665419,0.124986962427515
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles","both","all",500,166,0.332,0.292140441857513,0.374421336537568
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles","both","without histogram and outliers",500,153,0.306,0.267213463731136,0.347744780367946
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles","residual","all",500,143,0.286,0.248140053216093,0.327123164501452
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles","residual","without histogram and outliers",500,127,0.254,0.217820254915187,0.293930920591897
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled","both","all",500,124,0.248,0.212164208345948,0.287678459246675
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled","both","without histogram and outliers",500,101,0.202,0.169141220675579,0.239402886239506
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled","residual","all",500,103,0.206,0.172856641273367,0.243626470918025
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled","residual","without histogram and outliers",500,80,0.16,0.130476372350164,0.194708179163691
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles","both","all",500,249,0.498,0.454356860591708,0.541673636770138
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles","both","without histogram and outliers",500,217,0.434,0.391223572633178,0.477782840307747
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles","residual","all",500,215,0.43,0.387301647590359,0.473765760074258
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles","residual","without histogram and outliers",500,179,0.358,0.317207603401289,0.400957709289792
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"pooled","both","all",500,130,0.26,0.223485723185383,0.300173960236162
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"pooled","both","without histogram and outliers",500,109,0.218,0.184033726435988,0.256266401584327
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"pooled","residual","all",500,125,0.25,0.214048496747821,0.289763673482955
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"pooled","residual","without histogram and outliers",500,103,0.206,0.172856641273367,0.243626470918025
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"roles","both","all",500,194,0.388,0.346296029350054,0.431411822913334
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"roles","both","without histogram and outliers",500,174,0.348,0.307550302056948,0.390767497443364
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"roles","residual","all",500,170,0.34,0.299838858453714,0.382600930493983
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"roles","residual","without histogram and outliers",500,148,0.296,0.257665395230602,0.337445335677711
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"pooled","both","all",500,213,0.426,0.383382578366752,0.469745824021558
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"pooled","both","without histogram and outliers",500,184,0.368,0.326884548378757,0.411128277503093
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"pooled","residual","all",500,206,0.412,0.369688475931219,0.455653407990014
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"pooled","residual","without histogram and outliers",500,177,0.354,0.313342305196902,0.396884002217872
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"roles","both","all",500,264,0.528,0.484195771664216,0.571377265269937
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"roles","both","without histogram and outliers",500,235,0.47,0.426648051851946,0.513809408575747
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"roles","residual","all",500,252,0.504,0.460312154390353,0.547626850885955
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"roles","residual","without histogram and outliers",500,222,0.444,0.40104081918142,0.487813106950274
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"pooled","both","all",500,487,0.974,0.956028509165776,0.984743616076673
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"pooled","both","without histogram and outliers",500,476,0.952,0.92957280316411,0.967534793058647
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"pooled","residual","all",500,486,0.972,0.953553597325051,0.983249025279244
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"pooled","residual","without histogram and outliers",500,475,0.95,0.927231838828453,0.965906254756151
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"roles","both","all",500,472,0.944,0.920255206353293,0.960974379316848
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"roles","both","without histogram and outliers",500,457,0.914,0.886160188501443,0.935526857596392
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"roles","residual","all",500,464,0.928,0.901931595983038,0.947541968581874
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"roles","residual","without histogram and outliers",500,446,0.892,0.861745326715193,0.91627719036295
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"pooled","both","all",500,79,0.158,0.128652697864436,0.192562351011266
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"pooled","both","without histogram and outliers",500,63,0.126,0.099735288945377,0.157967717719864
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"pooled","residual","all",500,72,0.144,0.11593807411035,0.177490456298275
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"pooled","residual","without histogram and outliers",500,56,0.112,0.0872628001941023,0.142653688004062
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"roles","both","all",500,139,0.278,0.240536607528625,0.318848599636304
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"roles","both","without histogram and outliers",500,125,0.25,0.214048496747821,0.289763673482955
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"roles","residual","all",500,113,0.226,0.191509780865554,0.264668357707377
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"roles","residual","without histogram and outliers",500,97,0.194,0.161726466643237,0.230939629719233
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"pooled","both","all",500,101,0.202,0.169141220675579,0.239402886239506
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"pooled","both","without histogram and outliers",500,84,0.168,0.137788232976844,0.203274329089627
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"pooled","residual","all",500,95,0.19,0.158027378829729,0.226699712256433
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"pooled","residual","without histogram and outliers",500,75,0.15,0.121375957691388,0.183961080631698
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"roles","both","all",500,194,0.388,0.346296029350054,0.431411822913334
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"roles","both","without histogram and outliers",500,168,0.336,0.295988007827049,0.37851277584434
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"roles","residual","all",500,164,0.328,0.28829618984059,0.370326583278184
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"roles","residual","without histogram and outliers",500,133,0.266,0.229160401820471,0.306407789515535
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"pooled","both","all",500,223,0.446,0.40300639158533,0.489817037184518
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"pooled","both","without histogram and outliers",500,201,0.402,0.359928740326145,0.445565630404319
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"pooled","residual","all",500,200,0.4,0.357978990794738,0.443545877297573
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"pooled","residual","without histogram and outliers",500,174,0.348,0.307550302056948,0.390767497443364
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"roles","both","all",500,300,0.6,0.556454122702427,0.642021009205262
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"roles","both","without histogram and outliers",500,279,0.558,0.514191529649283,0.600924046857177
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"roles","residual","all",500,249,0.498,0.454356860591708,0.541673636770138
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"roles","residual","without histogram and outliers",500,224,0.448,0.404972669418617,0.491820261989384
+31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"pooled","both","all",500,47,0.094,0.0714264085922213,0.122764555862559
+31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"pooled","both","without histogram and outliers",500,35,0.07,0.0507597429450181,0.0957971898519168
+31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"pooled","residual","all",500,39,0.078,0.0575813934761616,0.104853549873389
+31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"pooled","residual","without histogram and outliers",500,27,0.054,0.0373743501810575,0.0774265615106471
+31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles","both","all",500,135,0.27,0.232948539203106,0.310558657409208
+31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles","both","without histogram and outliers",500,107,0.214,0.180302999987595,0.252058122756413
+31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles","residual","all",500,112,0.224,0.189638971259908,0.262569664674868
+31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles","residual","without histogram and outliers",500,79,0.158,0.128652697864436,0.192562351011266
+32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"pooled","both","all",500,64,0.128,0.101526823995237,0.160145685308158
+32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"pooled","both","without histogram and outliers",500,49,0.098,0.0749239188646062,0.127206050866482
+32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"pooled","residual","all",500,61,0.122,0.0961592783150937,0.15360472307384
+32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"pooled","residual","without histogram and outliers",500,44,0.088,0.0662059844749289,0.11607647206539
+32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"roles","both","all",500,131,0.262,0.225376269417238,0.302252916642461
+32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"roles","both","without histogram and outliers",500,107,0.214,0.180302999987595,0.252058122756413
+32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"roles","residual","all",500,119,0.238,0.202759019180792,0.277236135221061
+32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"roles","residual","without histogram and outliers",500,91,0.182,0.150646445204156,0.218202635329392
+33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"pooled","both","all",480,67,0.139583333333333,0.111433237448496,0.17345648481025
+33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"pooled","both","without histogram and outliers",480,55,0.114583333333333,0.0890976382679134,0.146189058945197
+33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"pooled","residual","all",480,48,0.1,0.0762566499236719,0.13009494934615
+33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"pooled","residual","without histogram and outliers",480,34,0.0708333333333333,0.0511288863039106,0.0973525170793363
+33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"roles","both","all",480,147,0.30625,0.26668840302853,0.34888815286779
+33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"roles","both","without histogram and outliers",480,121,0.252083333333333,0.215311942778548,0.29279139218556
+33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"roles","residual","all",480,113,0.235416666666667,0.199655892323962,0.275378759276389
+33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"roles","residual","without histogram and outliers",480,83,0.172916666666667,0.141716753365483,0.209310335620778
+34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"pooled","both","all",498,57,0.114457831325301,0.0893988463893626,0.145419255521979
+34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"pooled","both","without histogram and outliers",498,42,0.0843373493975904,0.0629985989129596,0.112039667210206
+34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"pooled","residual","all",498,46,0.0923694779116466,0.0699655096848263,0.121014045981853
+34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"pooled","residual","without histogram and outliers",498,31,0.0622489959839357,0.0441973902790875,0.087002329599415
+34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"roles","both","all",498,498,1,0.992345274083729,1
+34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"roles","both","without histogram and outliers",498,497,0.997991967871486,0.988714506662988,0.999645445034862
+34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"roles","residual","all",498,498,1,0.992345274083729,1
+34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"roles","residual","without histogram and outliers",498,497,0.997991967871486,0.988714506662988,0.999645445034862
+101,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles","both","all",500,186,0.372,0.330760748488524,0.415191082669634
+101,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles","both","without histogram and outliers",500,161,0.322,0.282536092425501,0.364178172778811
+101,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles","residual","all",500,162,0.324,0.284455282231816,0.366228485610651
+101,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles","residual","without histogram and outliers",500,134,0.268,0.231053973436348,0.308483720537812
+102,"gaussian","correct","Correct model","gaussian",400,1,1.2,"roles","both","all",500,226,0.452,0.408907337809289,0.49582459887502
+102,"gaussian","correct","Correct model","gaussian",400,1,1.2,"roles","both","without histogram and outliers",500,198,0.396,0.354081703502757,0.439504159313246
+102,"gaussian","correct","Correct model","gaussian",400,1,1.2,"roles","residual","all",500,192,0.384,0.342407674617792,0.427361172369288
+102,"gaussian","correct","Correct model","gaussian",400,1,1.2,"roles","residual","without histogram and outliers",500,163,0.326,0.286375316035247,0.368277954445373
+103,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,1.2,"roles","both","all",500,312,0.624,0.580749179384767,0.665359984180768
+103,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,1.2,"roles","both","without histogram and outliers",500,303,0.606,0.562517809307217,0.647865830514934
+103,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,1.2,"roles","residual","all",500,298,0.596,0.55241535132445,0.638120775306932
+103,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,1.2,"roles","residual","without histogram and outliers",500,288,0.576,0.532265218043708,0.618575882206136
+104,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,1.2,"roles","both","all",500,478,0.956,0.934280557127672,0.970766044371393
+104,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,1.2,"roles","both","without histogram and outliers",500,475,0.95,0.927231838828453,0.965906254756151
+104,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,1.2,"roles","residual","all",500,474,0.948,0.924898856062154,0.964269734884295
+104,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,1.2,"roles","residual","without histogram and outliers",500,470,0.94,0.91563893687478,0.957651643519054
+105,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,1.2,"roles","both","all",500,437,0.874,0.842032282280136,0.900264711054623
+105,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,1.2,"roles","both","without histogram and outliers",500,430,0.86,0.826833135055546,0.887677339812136
+105,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,1.2,"roles","residual","all",500,370,0.74,0.699826039763838,0.776514276814617
+105,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,1.2,"roles","residual","without histogram and outliers",500,334,0.668,0.625578663462432,0.707859558142487
+106,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,1.2,"roles","both","all",500,500,1,0.992375659538448,1
+106,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,1.2,"roles","both","without histogram and outliers",500,500,1,0.992375659538448,1
+106,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,1.2,"roles","residual","all",500,499,0.998,0.988759293294853,0.999646863605441
+106,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,1.2,"roles","residual","without histogram and outliers",500,498,0.996,0.985534284784823,0.998902369477317
+107,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",100,1,1.2,"roles","both","all",500,407,0.814,0.777545905940215,0.84566600824993
+107,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",100,1,1.2,"roles","both","without histogram and outliers",500,395,0.79,0.752155153040702,0.823422729491597
+107,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",100,1,1.2,"roles","residual","all",500,357,0.714,0.672876835498548,0.751859946783907
+107,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",100,1,1.2,"roles","residual","without histogram and outliers",500,339,0.678,0.635821827221189,0.717463907574499
+108,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",400,1,1.2,"roles","both","all",500,500,1,0.992375659538448,1
+108,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",400,1,1.2,"roles","both","without histogram and outliers",500,500,1,0.992375659538448,1
+108,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",400,1,1.2,"roles","residual","all",500,473,0.946,0.922573438489353,0.962625649818942
+108,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",400,1,1.2,"roles","residual","without histogram and outliers",500,471,0.942,0.917943812143745,0.959316270888243

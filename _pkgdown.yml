@@ -64,6 +64,7 @@ articles:
   contents:
   - articles/partner-dependence-simulation
   - articles/covariance-pooling
+  - articles/distribution-checks
 
 reference:
 - title: Main functions
@@ -73,10 +74,12 @@ reference:
   - recover_exchangeable_covariance
 
 - title: Predictive diagnostics
-  desc: Experimental descriptive checks of how well a fitted model reproduces partner dependence.
+  desc: Experimental descriptive checks of response distributions and partner dependence.
   contents:
   - simulate_dyad_responses
   - check_partner_dependence
+  - check_dyad_residuals
+  - check_dyad_outcomes
 
 - title: Example data
   contents:

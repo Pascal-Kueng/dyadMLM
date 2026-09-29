@@ -17,7 +17,7 @@ after the function returns, or when it stops after an error.}
 }
 \value{
 A \code{dyadMLM_response_simulations} object for use with
-\code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+\code{\link[=check_partner_dependence]{check_partner_dependence()}}, \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}, and \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}.
 
 The result keeps all components in fitted-row order (after missing-data
 exclusions):
@@ -36,9 +36,9 @@ the seed.
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Generates new response datasets for the same observations and predictors.
-Reuse them with \code{\link[=check_partner_dependence]{check_partner_dependence()}} to check whether a fitted
-model reproduces features of the observed data. For a complete example
-see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+Reuse them with \code{\link[=check_partner_dependence]{check_partner_dependence()}}, \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}, or
+\code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}} to check whether a fitted model reproduces features of
+the observed data. For a complete example see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 \section{Supported models}{
 
@@ -69,9 +69,12 @@ component separately. Good agreement does not establish that the zero and
 response components each fit well.
 
 Ordinal checks use category scores \verb{1, 2, ..., K} in their fitted order,
-matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The plots compare
-variation and partner correlation in these scores. The scores do not measure
+matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The checks compare
+observed and simulated scores. The scores do not measure
 distances on an underlying continuous scale.
+With few observations per random effect, Laplace estimation can bias ordinal
+random-effect variances and affect the dependence predicted by the model.
+Refitting with the same approximation does not necessarily remove this bias.
 
 The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.
@@ -88,7 +91,8 @@ in the zero-inflation and dispersion models, if present.
 
 Fitted parameters and predictors, including any lagged responses, stay fixed.
 The model is not refitted, and uncertainty in parameter estimates is not
-included. This is a \emph{plug-in predictive reference}. If dyads are the only grouping factor, the simulations
+included. This is a \emph{plug-in predictive reference} (Gelman et al., 1996,
+p. 797). If dyads are the only grouping factor, the simulations
 represent hypothetical new dyads under the same study design.
 
 \code{predicted_response} contains predicted mean responses with random effects
@@ -97,9 +101,15 @@ and hurdle models, this is the conditional response mean multiplied by
 one minus the zero-component probability (Brooks et al., 2017, Appendix A;
 \doi{10.32614/RJ-2017-066}).
 
-By default, later checks subtract these same predictions from observed and
-simulated responses. Both random effects and observation-level noise still
+Partner-dependence checks (by default) and outcome-variability summaries
+subtract these same predictions from observed and simulated responses.
+Both random effects and observation-level noise still
 contribute to response variance. With nonlinear links, setting random effects
 to zero generally differs from averaging predictions over them.
 }
 
+\references{
+Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior
+predictive assessment of model fitness via realized discrepancies.
+\emph{Statistica Sinica, 6}(4), 733--807.
+}
