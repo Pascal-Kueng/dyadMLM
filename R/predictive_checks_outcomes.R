@@ -115,9 +115,8 @@ print.dyadMLM_outcome_check <- function(x, ...) print_check_overview(x, "outcome
 plot.dyadMLM_outcome_check <- function(x, ask = NULL, panels = TRUE, ...) {
   checks <- lapply(x$compositions, function(composition)
     c("distribution", unique(unlist(lapply(composition$statistics, rownames)))))
-  number_of_figures <- if (panels) length(x$compositions) else
-    sum(lengths(checks) * vapply(x$compositions, function(composition) length(composition$rows), integer(1)))
-  local_check_paging(ask, panels, number_of_figures)
+  local_check_paging(ask, panels, if (panels) length(x$compositions) else
+    sum(lengths(checks) * vapply(x$compositions, function(composition) length(composition$rows), integer(1))))
   for (i in seq_along(x$compositions)) {
     composition <- x$compositions[[i]]
     draw <- function(check, role) {

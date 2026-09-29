@@ -314,7 +314,7 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
       lwd = if (i == 2) 2 else 1, col = check_colours$observed)
   }
   draw_pattern <- function(pattern, name = NULL, distance = FALSE) {
-    title <- paste("PIT", if (distance) "distance" else "quantiles")
+    title <- paste("PIT", if (distance) "distance" else "quartiles")
     title <- if (is.null(name)) paste0(title, "\n(",
       if (distance) "residual extremes" else "fit", " across predicted outcomes)")
       else paste0(title, " by ", name, "\n(",
@@ -324,7 +324,7 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
     graphics::plot(pattern$positions, rep(.5, length(pattern$positions)), type = "n", ylim = c(0, 1),
       xlim = pattern$limits, xaxt = if (pattern$binned) "s" else "n", yaxt = "n", main = title,
       xlab = if (is.null(name)) "Predicted outcome" else name,
-      ylab = if (distance) "PIT distance" else "PIT quantiles")
+      ylab = if (distance) "PIT distance" else "PIT quartiles")
     if (!pattern$binned) graphics::axis(1, pattern$positions, pattern$labels, cex.axis = .8)
     graphics::axis(2, c(0, .25, .5, .75, 1))
     graphics::abline(h = c(.25, .5, .75), lty = 2, col = check_colours$reference)

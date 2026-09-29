@@ -61,7 +61,9 @@ are pointwise and use observed categories, so their availability and crossing
 rates are reported separately. Blue-only "Other" values have no observed
 comparison. The continuous ECDF display has no numerical flag rule.
 Some of these panels have since been removed; see
-[Confirmation run](#confirmation-run).
+[Confirmation run](#confirmation-run). The scripts below reproduce the saved
+tables only at commit `0ceacd4c` (PR #77); later package versions no longer
+return the histogram or outlier count.
 
 ```sh
 Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/check.R

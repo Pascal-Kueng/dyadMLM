@@ -54,8 +54,8 @@
 #' response components each fit well.
 #'
 #' Ordinal checks use category scores `1, 2, ..., K` in their fitted order,
-#' matching [glmmTMB's predictions][glmmTMB::family_glmmTMB]. The plots compare
-#' variation and partner correlation in these scores. The scores do not measure
+#' matching [glmmTMB's predictions][glmmTMB::family_glmmTMB]. The checks compare
+#' observed and simulated scores. The scores do not measure
 #' distances on an underlying continuous scale.
 #' With few observations per random effect, Laplace estimation can bias ordinal
 #' random-effect variances and affect the dependence predicted by the model.
@@ -145,8 +145,7 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     observed <- as.numeric(observed)
     rlang::inform(paste0(
       "Ordinal categories are scored 1, 2, ..., K in both observed and ",
-      "simulated data. The plots show whether the model reproduces ",
-      "variation and partner correlation in these scores."
+      "simulated data. The checks compare observed and simulated scores."
     ), .frequency = "once", .frequency_id = "dyadMLM_ordinal_scores")
   }
   if (!is.numeric(observed) || !is.null(dim(observed)) ||

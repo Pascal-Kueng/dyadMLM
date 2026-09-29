@@ -151,7 +151,7 @@ A **flag** means that an observed scalar falls strictly outside its simulated
 95% limits, or a curve leaves its global envelope. An **any flag** rate counts
 datasets with at least one flagged numerical panel. A flag in either role counts
 once. Neither multiple panels nor multiple roles have a joint 5% error rate.
-The ECDF display has no numerical limit and is excluded from these rates.
+The ECDF display and count category ranges are excluded from these rates.
 
 These are descriptive checks. Fitting can make their references conservative or
 liberal, and more flags under a mismatch do not alone establish a better check.

@@ -69,8 +69,8 @@ component separately. Good agreement does not establish that the zero and
 response components each fit well.
 
 Ordinal checks use category scores \verb{1, 2, ..., K} in their fitted order,
-matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The plots compare
-variation and partner correlation in these scores. The scores do not measure
+matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The checks compare
+observed and simulated scores. The scores do not measure
 distances on an underlying continuous scale.
 With few observations per random effect, Laplace estimation can bias ordinal
 random-effect variances and affect the dependence predicted by the model.
