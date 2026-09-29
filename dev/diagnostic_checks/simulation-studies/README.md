@@ -61,6 +61,8 @@ and roles. The union has no promised 5% false-alarm rate. Count-category ranges
 are pointwise and use observed categories, so their availability and crossing
 rates are reported separately. Blue-only "Other" values have no observed
 comparison. The continuous ECDF display has no numerical flag rule.
+Some of these panels have since been removed; see
+[Confirmation run](#confirmation-run).
 
 ```sh
 Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/check.R
@@ -76,8 +78,7 @@ command to resume. Changed generators, package code, or software versions requir
 archiving the old run before restarting. Use at most ten workers across jobs.
 
 For a short workflow check, use `5 200 4 run`. This is a pilot, not evidence of
-precise flag rates. Render its report with the saved output's absolute path as
-the `results_directory` parameter. `summarise` updates tables without fitting.
+precise flag rates. `summarise` updates tables without fitting.
 Only a complete 500-by-1,000 run exports public tables and renders the report.
 
 Saved checkpoints contain per-dataset flags, scalar limits, seeds, warnings,

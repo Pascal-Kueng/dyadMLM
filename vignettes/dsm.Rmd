@@ -650,6 +650,7 @@ Reuse `dsm_simulations` with
 for residual distributions and patterns, or
 [`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)
 for outcome distributions. Use the same `dyad`, `role` and `data` arguments as above.
+The [APIM vignette](apim.html#checking-residuals-and-outcomes) shows a worked example.
 
 `check_partner_dependence()` currently supports cross-sectional dyads only.
 

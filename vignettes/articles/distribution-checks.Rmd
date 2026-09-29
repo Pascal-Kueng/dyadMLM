@@ -1,6 +1,6 @@
 ---
 title: "Residual and outcome distribution checks"
-description: "Flags under correct models, detection of selected mismatches, and the effect of PIT centring."
+description: "Flags under correct models, detection of selected mismatches, the effect of PIT centring, and a confirmation run."
 output:
   html_document:
     toc: true
@@ -12,7 +12,8 @@ params:
 ---
 
 ```{r availability, echo=FALSE, results='asis'}
-required_files <- c("conditions.csv", "summary.csv", "paired-comparison.csv", "fits.csv")
+required_files <- c("conditions.csv", "summary.csv", "paired-comparison.csv", "fits.csv",
+  "dropped-panels.csv", "inference.csv", "severe-summary.csv")
 if (!all(file.exists(file.path(params$results_directory, required_files)))) {
   cat("**Full results are not yet available.** The focused study is implemented, but its planned run has not been completed and exported. See the [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md) for the design and running instructions.\n")
   knitr::knit_exit()
@@ -64,6 +65,87 @@ cat(if (complete_run) "The saved run uses **" else "The run settings request **"
   " datasets per condition** and **", paste(unique(conditions$reference_draws), collapse = ", "),
   " reference simulations per dataset**.\n", sep = "")
 ```
+
+## Summary
+
+```{r summary-numbers}
+percent_range <- function(rate) paste0(paste(unique(sprintf("%.0f", 100 * range(rate))),
+  collapse = "–"), "%")
+current_panels <- setdiff(names(distribution_panel_labels), c("histogram", "outliers"))
+panel_maximum <- summary |> filter(scenario == "correct", role %in% c("Pooled", "A", "B"),
+    statistic %in% current_panels, reference %in% c("fitted-centred", "fitted")) |>
+  pull(rate) |> max(na.rm = TRUE)
+# Unions of both checks, with all recorded panels or only those the package still shows.
+dropped <- read_results("dropped-panels.csv") |> filter(check == "both")
+reduced <- filter(dropped, panel_set != "all")
+reduced_range <- function(view_name, main_study = TRUE) with(filter(reduced,
+  scenario == "correct", view == view_name, (condition %in% conditions$condition) == main_study),
+  percent_range(rate))
+detection <- filter(reduced, view == "roles", n_times == 1, dyad_sd == .6,
+  condition %in% conditions$condition)
+detected <- function(n, scenarios, keep = TRUE)
+  detection$rate[detection$n_dyads == n & (detection$scenario %in% scenarios) == keep]
+# Default references, either role, at 400 dyads; the add-on supplies the partner page.
+flag_rate <- function(scenario_name, statistic_name) bind_rows(summary,
+    read_results("severe-summary.csv")) |>
+  filter(scenario == scenario_name, statistic == statistic_name, n_dyads == 400,
+    view == "roles", role == "All", reference %in% c("fitted-centred", "fitted")) |>
+  pull(rate) |> distribution_percent()
+inference <- read_results("inference.csv")
+coverage_range <- function(scenario_name) with(filter(inference, scenario == scenario_name,
+  n_dyads == 400, n_times == 1, dyad_sd == .6), percent_range(coverage))
+centring <- paired |> filter(check == "residual", statistic == "any", n_times == 1,
+  dyad_sd == .6, (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All"))
+centring_change <- function(correct) with(filter(centring, (scenario == "correct") == correct),
+  sprintf("%.0f", 100 * range(centred_minus_uncentred)))
+```
+
+Unless noted, this summary counts only the panels the package still shows.
+
+- **Single panels rarely flag a correct model, but flags add up.** Each panel
+  flagged at most `r distribution_percent(panel_maximum)` of datasets under
+  correct models, pooled or in one role. In the settings studied, at least one
+  flag appeared in `r reduced_range("pooled")` of datasets with all observations
+  pooled, `r reduced_range("roles")` in either role, and
+  `r reduced_range("roles", FALSE)` in either role with actor and partner
+  predictor pages (dyad SD 1.2). So look for a consistent pattern, not any
+  single flag.
+- **Detection depends strongly on sample size.** With 40 dyads, most
+  mismatches were hard to detect: apart from omitted role means of ±0.4
+  (`r distribution_percent(detected(40, "mean_large"))`), mismatches were flagged
+  in either role in `r percent_range(detected(40, c("correct", "mean_large"), FALSE))`
+  of datasets, against `r percent_range(detected(40, "correct"))` under correct models.
+  With 400 dyads, most were flagged in
+  `r percent_range(detected(400, c("correct", "dispersion_small", "zeros_small"), FALSE))`,
+  but NB2 size 10 fitted as Poisson only in
+  `r distribution_percent(detected(400, "dispersion_small"))` and 10% extra zeros in
+  `r distribution_percent(detected(400, "zeros_small"))`, against
+  `r percent_range(detected(400, "correct"))` under correct models.
+- **Each problem shows in a few panels**, listed in the help under "Reading
+  flags". At 400 dyads, for example, 25% extra zeros flagged the QQ envelope in
+  `r flag_rate("zeros_large", "qq")` of datasets but the zero count in
+  `r flag_rate("zeros_large", "zeros")`, and an omitted partner effect (dyad SD
+  1.2) flagged the PIT quartiles across the partner's predictor in
+  `r flag_rate("omitted_partner", "partner_predictor_quantiles")` but the QQ
+  envelope in `r flag_rate("omitted_partner", "qq")`. Panels suggest possible
+  problems, not their cause.
+- **A flag, or its absence, does not show whether estimates or SEs are wrong.**
+  Harm depended on the kind of mismatch. At 400 dyads, omitted role means of ±0.4
+  were flagged in `r distribution_percent(detected(400, "mean_large"))` of datasets,
+  yet actor and partner intervals covered `r coverage_range("mean_large")`
+  (predictors were distributed alike in both roles). NB2 size 10 fitted as
+  Poisson lowered coverage to `r coverage_range("dispersion_small")` but was
+  flagged in only `r distribution_percent(detected(400, "dispersion_small"))`.
+  After a flag, fit the model the pattern suggests and compare the estimates and
+  SEs you report.
+- **Centring adds a few false alarms and helps detect some mismatches.** Median
+  centring is applied automatically when the model has a freely estimated
+  overall location (not for ordinal models). It raised the residual check's flag
+  rate (all recorded panels) by `r paste(centring_change(TRUE), collapse = "–")`
+  percentage points under correct models and by up to `r centring_change(FALSE)[2]`
+  under mismatches, mainly omitted role means and extra zeros. Residuals then
+  lose their overall median shift, so single panels can flag less often (see
+  [Effect of median centring](#effect-of-median-centring)).
 
 ## What these plots compare
 
@@ -135,7 +217,9 @@ category displays only when there are at most 20 distinct observed values.
 Their categories are selected from the observations, so category-specific rates
 are conditional on being displayed. The blue-only "Other" category has no
 observed comparison and is excluded. Category intervals are separate, so a flag
-in any category is not a single 5% check.
+in any category is not a single 5% check. The package has since removed the
+histogram, the outlier count, and count category displays; the study recorded
+them (see [Panels removed after the study](#panels-removed-after-the-study)).
 
 Rates use available checks. Failed fits, convergence or Hessian problems, and
 failed checks are recorded and excluded without retry. Known-parameter and
@@ -222,7 +306,9 @@ The fitted model already matches these overall levels.
 
 Reading every panel of both checks for both roles, at least one flag appears in
 `r both_range("roles")` of datasets under every correct model. With all
-observations pooled, this is `r both_range("pooled")`.
+observations pooled, this is `r both_range("pooled")`. The panels the package
+still shows flag less often (see
+[Panels removed after the study](#panels-removed-after-the-study)).
 
 <details>
 <summary>Any flags and category-frequency flags under correct models</summary>
@@ -250,6 +336,7 @@ Counts use category frequencies only with up to 20 distinct observed values.
 Under the correct count model, this held at
 `r paste(displayed$n_dyads, collapse = " / ")` dyads in
 `r knitr::combine_words(paste(displayed$checked, "of", displayed$usable))` usable datasets.
+The package now shows counts as an ECDF instead.
 
 ```{r correct-category-table}
 categories |> transmute(n_dyads, View = ifelse(view == "pooled", "Pooled", "Either role"),
@@ -283,7 +370,9 @@ The plots count any numerical flag for each default check. Solid lines count a
 flag in either role, while dotted lines pool all observations. These are different
 sets of comparisons, so the role-based check may flag more often even under a
 correct model. Grey lines repeat the correct-model rate of the same check and
-view, the false-alarm baseline.
+view, the false-alarm baseline. These rates include the PIT histogram and
+outlier count, which the package has since removed (see
+[Panels removed after the study](#panels-removed-after-the-study)).
 
 ```{r gaussian-detection, fig.alt='Gaussian mismatch detection by sample size, comparing pooled and role-based residual and outcome checks with the correct-model baseline.'}
 plot_distribution_detection(summary, "gaussian")
@@ -398,32 +487,21 @@ more overdispersion).
 
 ## Are mismatches that distort estimates or SEs detected?
 
-```{r consequences-availability, results='asis'}
-consequences_available <- all(file.exists(file.path(params$results_directory,
-  c("inference.csv", "severe-summary.csv"))))
-if (!consequences_available) cat("These results are not yet available.\n")
-```
-
-```{asis, echo=consequences_available}
 Each fitted model gives 95% Wald intervals for the actor (0.5) and partner (0.3)
 effects. **Coverage** is the percentage of intervals that contain the true value
 and should be near 95%. The **SE ratio** divides the average SE by the SD of the
 estimates; below 1, the SEs are too small. Low coverage with an SE ratio near 1
 means the estimates are biased. **Flagged** is the percentage of datasets with any
-flag in either check and either role, as above.
+flag in either check and either role, with the panels the package still shows.
 
 Three severe mismatches were added to distort inference. Omitting the partner
 effect biases the actor effect. A residual SD that rises with the actor predictor,
 exp(actor − 1), and Poisson fits to NB2 outcomes with size 1 make the SEs too
 small. These settings use 100 / 400 dyads, dyad SD 1.2, and a residual page for
 each predictor. The correct model gives their false-alarm rate.
-```
 
-```{r consequences-severe, eval=consequences_available}
-inference <- read_results("inference.csv")
-flag_rates <- bind_rows(summary, read_results("severe-summary.csv")) |>
-  filter(check == "both", reference == "fitted-centred", view == "roles", role == "All",
-    statistic == "any")
+```{r consequences-severe}
+flag_rates <- filter(reduced, view == "roles")
 consequence_table <- function(selected) {
   collapse_sizes <- function(values) paste(ifelse(is.na(values), "–", values), collapse = separator)
   inference |> filter(condition %in% selected) |>
@@ -445,11 +523,9 @@ consequence_table <- function(selected) {
 consequence_table(inference$condition[inference$severe])
 ```
 
-```{asis, echo=consequences_available}
 The main mismatches, at 40 / 100 / 400 dyads:
-```
 
-```{r consequences-main, eval=consequences_available}
+```{r consequences-main}
 consequence_table(conditions$condition[conditions$n_times == 1 & conditions$dyad_sd == .6])
 ```
 
@@ -563,3 +639,141 @@ records how often only the centred version, only the uncentred version, both, or
 neither flagged the same dataset.
 
 </details>
+
+## Panels removed after the study
+
+```{r dropped-panels}
+cost <- dropped |> group_by(condition, scenario, scenario_label, n_dyads, view) |>
+  summarise(cost = rate[panel_set == "all"] - rate[panel_set != "all"], .groups = "drop")
+example <- dropped |> filter(scenario == "dispersion_small", n_dyads == 400,
+  view == "roles") |> arrange(panel_set != "all") |> pull(rate)
+```
+
+After this study, the package removed three displays. The PIT histogram shows
+the same residual distribution as the QQ plot, and the outlier count can
+usually flag only an excess of outcomes beyond the simulated range. Together,
+these two added `r paste(sprintf("%.1f", 100 * range(cost$cost[cost$scenario == "correct"])), collapse = "–")`
+percentage points of flags under correct models (both checks, pooled or in
+either role), while detection of mismatches without them fell by at most
+`r sprintf("%.1f", 100 * max(cost$cost[cost$scenario != "correct"]))` points.
+For example, NB2 size 10 fitted as Poisson at 400 dyads was flagged in either
+role in `r distribution_percent(example[1])` of datasets with all panels and in
+`r distribution_percent(example[2])` without them.
+
+Count categories were taken from the observed values, so a rare high count got
+its own category and often fell outside its range: at least one category
+flagged in `r percent_range(filter(categories, view == "roles", checked > 0)$rate)`
+of correct count models in either role, where shown. Counts now use the ECDF,
+which has no flag rule and is excluded from the rates. Ordinal outcomes keep
+bars with per-category ranges.
+
+The summary uses the remaining panels; the
+[dropped-panel table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/distribution-checks/dropped-panels.csv)
+gives the flag unions with and without the histogram and outlier count.
+
+## Why not use DHARMa directly?
+
+[DHARMa](https://CRAN.R-project.org/package=DHARMa) supports mixed models, but
+its residual tests, such as the uniformity and outlier tests, assume
+independent residuals. When random effects are redrawn, partners' residuals stay
+correlated, so these tests' error rates need not hold, as DHARMa's help also
+notes. With DHARMa's default since version 0.5.0, random effects keep their
+fitted values; if they absorb all residual variation, the simulations reproduce
+the data almost exactly. With random effects redrawn, grouping by dyad
+(`recalculateResiduals(group = dyad)`) sums partners, which is valid but lets
+role differences cancel. Selecting one role (`sel`) is valid for
+cross-sectional dyads but not for repeated measures, and the rotation option
+needs the full residual covariance, which for non-Gaussian models usually must
+be estimated, imprecisely, from the simulations. dyadMLM instead builds each panel's
+reference from whole simulated datasets, which keep the fitted partner and time
+dependence; this study did not compare the two approaches.
+
+## Limitations
+
+- Predictors were distributed alike in both roles. When predictor means differ
+  by role, omitted role means can bias actor and partner effects, so their good
+  coverage here need not hold.
+- Actor and partner effects were the same in both roles, so the study does not
+  show how well the panels reveal role-specific effects.
+- The panels the package still shows were chosen on this study's data, which
+  can make their rates look better than they are. The
+  [confirmation run](#confirmation-run) checks them on fresh seeds.
+- No heavy-tailed residuals, gross outliers, or data errors were simulated, so
+  the study does not show whether the remaining panels, such as the QQ plot and
+  the largest absolute deviation, reveal them.
+
+## Confirmation run
+
+A confirmation run, whose design was fixed before it started (see the
+[study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md#confirmation-run)),
+checks the remaining panels on fresh seeds at 100 and 400 dyads with dyad SD
+0.6: correct Gaussian, negative-binomial, and five-category ordinal models;
+Gaussian models with a role SD ratio of 1.5, a residual SD that rises with the
+actor predictor, or an omitted partner effect; and NB2 size 10 fitted as
+Poisson. Each dataset is checked pooled and by role, with actor and partner
+predictor pages. The *core* union covers QQ, mean PIT distance, PIT quartiles
+and distance across predicted outcomes, response SD, largest absolute
+deviation, and the zero count where shown; *with pages* adds the four
+predictor-page panels. Ordinal category ranges enter no union.
+
+```{r confirmation-availability, results='asis'}
+confirmation_files <- paste0("confirmation-", c("summary.csv", "fits.csv",
+  "maximum-deviation-ties.csv"))
+if (!all(file.exists(file.path(params$results_directory, confirmation_files)))) {
+  cat("Its results are not yet available.\n")
+  knitr::knit_exit()
+}
+```
+
+```{r confirmation}
+confirmation <- read_results("confirmation-summary.csv")
+confirmation_fits <- read_results("confirmation-fits.csv")
+family_labels <- c(distribution_family_labels, ordinal = "Ordinal")
+unions <- confirmation |> filter(check == "both", statistic %in% c("core", "pages"),
+  (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All"))
+# A no-break space and a word joiner keep each entry on one line.
+unions |> arrange(condition, view, statistic) |>
+  transmute(Family = unname(family_labels[family]), scenario_label, n_dyads,
+    column = paste(view, statistic),
+    rate = sprintf("%.0f\u00a0(%.0f–\u2060%.0f)", 100 * rate, 100 * rate_lower, 100 * rate_upper)) |>
+  tidyr::pivot_wider(names_from = column, values_from = rate) |>
+  knitr::kable(col.names = c("Family", "Setting", "Dyads", "Pooled: core",
+    "Pooled: with pages", "Either role: core", "Either role: with pages"))
+union_range <- function(view_name, union) with(filter(unions, scenario == "correct",
+  view == view_name, statistic == union), percent_range(rate))
+# Each mismatch against the correct model of the same family and sample size.
+matched <- unions |> filter(view == "roles", statistic == "pages") |>
+  group_by(family, n_dyads) |> mutate(baseline = rate[scenario == "correct"]) |>
+  ungroup() |> filter(scenario != "correct")
+weakest <- slice_min(matched, rate - baseline, n = 1, with_ties = FALSE)
+ordinal_categories <- confirmation |> filter(family == "ordinal", statistic == "category_any",
+  (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All")) |>
+  arrange(n_dyads)
+ordinal_rates <- function(view_name) paste(distribution_percent(
+  ordinal_categories$rate[ordinal_categories$view == view_name]), collapse = separator)
+ties <- filter(read_results("confirmation-maximum-deviation-ties.csv"), family == "ordinal")
+failed <- filter(confirmation_fits, usable < attempted)
+fit_note <- if (!nrow(failed)) "All fits and checks succeeded." else paste0(
+  "Fits or checks failed in ", knitr::combine_words(paste0(family_labels[failed$family],
+    ", ", failed$scenario_label, ", ", failed$n_dyads, " dyads (",
+    failed$attempted - failed$usable, " of ", failed$attempted, ")")),
+  "; their rates use the remaining datasets.")
+```
+
+Entries give the percentage of datasets with at least one flag across both
+checks, with its 95% Wilson interval, from `r unique(confirmation_fits$repetitions)`
+datasets per setting and `r unique(confirmation_fits$reference_draws)` reference
+simulations per dataset. Under correct models, at least one core panel flagged
+`r union_range("pooled", "core")` of datasets pooled and
+`r union_range("roles", "core")` in either role; with predictor pages,
+`r union_range("pooled", "pages")` and `r union_range("roles", "pages")`. In
+either role with pages, mismatches were flagged in
+`r percent_range(matched$rate[matched$n_dyads == 100])` of datasets at 100 dyads
+and `r percent_range(matched$rate[matched$n_dyads == 400])` at 400; the smallest
+difference from the matching correct model was for "`r weakest$scenario_label`" at
+`r weakest$n_dyads` dyads (`r distribution_percent(weakest$rate)` versus
+`r distribution_percent(weakest$baseline)`). For correct ordinal models, at least
+one category fell outside its range in `r ordinal_rates("pooled")` of datasets
+pooled and `r ordinal_rates("roles")` in either role (100 / 400 dyads), and the
+largest absolute deviation had equal limits in `r percent_range(ties$rate)` of
+checks (at least 95% of simulated datasets gave the same value). `r fit_note`

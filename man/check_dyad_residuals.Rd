@@ -132,7 +132,8 @@ at least one panel of the residual and outcome checks (ECDFs and category
 bars not counted) flagged about 7--14\% of correct models when pooled, 21--28\%
 in either role, and 32--40\% in either role with actor and partner predictor
 pages. So look for a consistent pattern, not any single flag. With about 40
-dyads, subtle mismatches were often missed; no flag does not show a good fit.
+dyads, most mismatches studied were hard to detect; no flag does not show a
+good fit.
 Panels suggest possible problems, not their cause. Neither a flag nor its
 absence shows whether estimates or standard errors are wrong: fit the model
 the pattern suggests and compare the estimates and standard errors you

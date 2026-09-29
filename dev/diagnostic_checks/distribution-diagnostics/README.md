@@ -34,21 +34,17 @@ can be established from the fitting data.
 Roles determine the display; simulations retain the fitted model's assumptions,
 including its partner dependence and any role-specific variability.
 
-The first residual page shows a PIT QQ plot, a 10-bin PIT histogram, the number of outcomes
-outside their simulation reference range, and mean PIT distance. The next page
+The first residual page shows a PIT QQ plot and mean PIT distance. The next page
 shows PIT quartiles and distance across predicted outcomes. Each supplied
 predictor gets another two-row pattern page. All pages for one composition
-appear together. The QQ plot and histogram are two views
-of the same distribution; agreement is not independent evidence.
+appear together.
 Outcome pages show the raw response distribution, SDs,
 largest deviations, and relevant zero counts. SDs and deviations are
 calculated after subtracting the same model predictions from each dataset.
 They include random effects, so variability does not isolate the model's residual
 variance or dispersion parameter.
-Outcome distributions use category frequencies for ordinal outcomes and small
-count ranges (at most 20 observed values), with an "Other values" range for
-unobserved simulated values, shown only in blue without an observed comparison;
-otherwise, the proportion at or below each outcome value.
+Outcome distributions use category frequencies for ordinal outcomes;
+otherwise, including counts, the proportion at or below each outcome value.
 
 Each plot has a short reading guide. Numeric residual plots use bins chosen
 within each role, then smooth nearby quartiles with the same weights for observed
@@ -57,14 +53,14 @@ matching line styles identify the other quartiles and their bands. Sparse numeri
 values and categories retain separate reference intervals.
 Red shows observed data; blue shows simulated references. Residual curve envelopes
 cover positions jointly within each panel, including all three quartiles, but not
-across roles or pages. Outcome category ranges remain pointwise. Scalar limits
+across roles or pages. Ordinal category ranges remain pointwise. Scalar limits
 use simulation order statistics with ties retained at the limits.
 
 PIT uses observed data and all simulations symmetrically. When the conditional
 mean has a free overall location, whether fitted as an intercept or separate
 role means, each complete dataset is median-centred on the normal-score scale
 before any grouping. Ordinal models remain uncentred. The one resulting PIT matrix
-is used throughout; outlier counts use strict extrema of the original responses.
+is used throughout.
 At least 200 simulations are required for residual checks; 1,000 are recommended.
 Fitted parameters stay fixed. Centring is an empirical adjustment, not a guarantee
 of exact calibration. Fitting can make references conservative or biased. With
@@ -96,10 +92,13 @@ when there are multiple figures on an interactive device; file output never paus
 The [focused simulation study](../simulation-studies/README.md#residual-and-outcome-checks)
 extends this pilot to paired PIT centring, outcome checks, several sample sizes,
 and a small longitudinal design. Its report uses saved results and identifies
-incomplete or pilot runs.
+incomplete or pilot runs. It recorded panels since removed; the
+[confirmation run](../simulation-studies/README.md#confirmation-run) checks the
+current panels on fresh seeds.
 
 The [10-bin comparison](histogram-bins.md) records paired 20-versus-10-bin
-envelopes, figures and implementation checks for four example datasets.
+envelopes, figures and implementation checks for four example datasets. The
+histogram has since been removed.
 
 [validate-envelopes.R](validate-envelopes.R) compares the global envelopes with
 GET, used only as a development reference. [calibration-check.R](calibration-check.R)

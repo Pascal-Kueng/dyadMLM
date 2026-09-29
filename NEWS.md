@@ -8,10 +8,15 @@
   dependence in their references, separate dyad compositions and roles, and
   report no p-values. Residual distributions and patterns across predicted
   outcomes have separate pages; additional predictor pages are optional.
+  PIT is centred automatically when the model has a freely estimated overall
+  location (not for ordinal models).
   Checks can be saved with `plot = FALSE` and plotted later.
   Residual checks need at least 200 simulations; 1,000 are recommended.
   PIT calculations are internal, following Florian Hartig's DHARMa approach and
   Dunn and Smyth's (1996) randomized quantile residuals; DHARMa is not required.
+  The help section "Reading flags" explains how to read and follow up flags,
+  based on a
+  [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html).
 
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),

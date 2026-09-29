@@ -435,13 +435,65 @@ for details, and the studies of
 [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html).
 
-Reuse `apim_simulations` with
-[`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)
-for residual distributions and patterns, or
-[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)
-for outcome distributions. Use the same `dyad`, `role` and `data` arguments as above.
-
 `check_partner_dependence()` currently supports cross-sectional dyads only.
+
+## Checking residuals and outcomes {#checking-residuals-and-outcomes}
+
+We reuse `apim_simulations` with
+[`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)
+and
+[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html).
+We check by gender, although the restricted model treats partners as
+exchangeable, because opposite role differences can cancel when all
+observations are pooled (here, the pooled QQ plot shows no flag). We also add a
+page for the partner's provided support.
+
+```{r check-residuals-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution for women and men: uniform QQ plots with blue envelopes in the top row and mean PIT distance histograms in the bottom row. Red marks observed values.", "Residual patterns for women and men: PIT quartiles in the top row and PIT distance in the bottom row, each across predicted outcomes with blue envelopes. Red curves show observed values.", "Residual patterns for women and men: PIT quartiles in the top row and PIT distance in the bottom row, each across the partner's provided support with blue envelopes. Red curves show observed values.")}
+dyadMLM::check_dyad_residuals(
+  apim_simulations,
+  dyad = coupleID,
+  role = gender,
+  predictors = ".provided_support_gmc_partner",
+  data = apim_distinguishable_data
+)
+```
+
+```{r check-outcomes-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 9, out.width = "100%", fig.alt = "Outcome checks for women and men: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Red marks observed values."}
+dyadMLM::check_dyad_outcomes(
+  apim_simulations,
+  dyad = coupleID,
+  role = gender,
+  data = apim_distinguishable_data
+)
+```
+
+Look for red curves or values outside their blue ranges that form one
+consistent pattern. Here, women's closeness is higher than simulated and men's
+is lower, in the QQ plots, the PIT quartiles, and the outcome ECDFs. For men,
+the gap grows at high predicted outcomes and high partner support, where their
+PIT distance also rises.
+Mean PIT distance, response SDs, and largest deviations stay within their limits.
+The pattern suggests omitted gender differences, at least in mean closeness,
+so we add gender-specific intercepts and compare the actor and partner
+estimates:
+
+```{r compare-role-means-apim, eval = has_glmmTMB}
+apim_role_means_model <- update(
+  apim_exchangeable_model, . ~ . - 1 + .is_female + .is_male
+)
+actor_partner <- c(".provided_support_gmc_actor", ".provided_support_gmc_partner")
+summary(apim_exchangeable_model)$coefficients$cond[actor_partner, 1:2]
+summary(apim_role_means_model)$coefficients$cond[actor_partner, 1:2]
+```
+
+With gender-specific intercepts, the actor estimate is smaller, the partner
+estimate larger, and both standard errors smaller. Women provide slightly more
+support than men here, so omitting their difference in mean closeness shifted
+both effects. Checking this model again (not shown) still flags men's PIT
+quartiles and distance across predicted outcomes, which suggests further
+gender differences; the distinguishable APIM shows no flags. The
+[simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
+shows how often these panels flag correct and mismatched models.
 
 
 ## Intensive longitudinal APIMs
