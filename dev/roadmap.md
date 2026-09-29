@@ -824,8 +824,10 @@ prototype branches as references; port validated behavior selectively.
 
 ## Proposed Version 0.2.2 Scope - Gaussian ILD Partner Dependence
 
-Status: proposed after the cross-sectional increments above. Extend the same
-`check_partner_dependence()` entry point with `member` and factor-valued `time`.
+Status: in development. `check_partner_dependence()` now takes `member` and
+`time` and checks member means and same-occasion deviations for all supported
+families ([plan](diagnostic_checks/ild-partner-dependence-plan.md)). Lagged
+statistics follow separately; validation of the whole feature is pending.
 
 - Recompute available-series member means and within-member deviations for
   the observed response and every complete simulated dataset.

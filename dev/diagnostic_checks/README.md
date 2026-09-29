@@ -21,8 +21,8 @@ them in each development document.
 
 ## Scope and extension
 
-Current checks cover unweighted cross-sectional `glmmTMB` models, including
-zero-inflated and hurdle models. See `?simulate_dyad_responses` for supported
+Current checks cover unweighted cross-sectional and repeated-occasion `glmmTMB`
+models, including zero-inflated and hurdle models. See `?simulate_dyad_responses` for supported
 families. The model's fitted link is used for prediction and simulation.
 Nonlinear-link centring is not a residual covariance decomposition.
 
@@ -33,11 +33,12 @@ to observed and simulated responses. Undefined observed statistics or entirely
 undefined references cause errors; partial undefined draws are reported and
 counted, with references conditional on defined values.
 
-Future ILD work can reuse simulation and paired statistics, with exact
-scheduled-time pair maps. Recompute member demeaning for
-every dataset. Lagged outcomes used as fixed predictors are not recursively
-simulated. Preserve the prototype branches as references; weighting and
-minimum-reference rules need separate decisions.
+With `member` and `time`, each dataset is split into member means (paired by
+dyad) and deviations from them (paired by dyad and occasion), and both levels
+reuse the same statistics. The [ILD plan](ild-partner-dependence-plan.md)
+records the design, its documented limits, and the pending validation. Lagged
+statistics follow separately. Lagged outcomes used as fixed predictors are not
+recursively simulated.
 
 ## Validation
 

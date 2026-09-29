@@ -70,13 +70,11 @@ response components each fit well.
 
 Ordinal checks use category scores \verb{1, 2, ..., K} in their fitted order,
 matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The plots compare
-variation and partner correlation in these scores. The scores do not measure
+variance and partner correlation in these scores. The scores do not measure
 distances on an underlying continuous scale.
 
 The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.
-
-\code{\link[=check_partner_dependence]{check_partner_dependence()}} currently requires cross-sectional dyads.
 }
 
 \section{Technical details}{

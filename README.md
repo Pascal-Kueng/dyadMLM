@@ -84,13 +84,14 @@ validates dyadic data and creates model-ready columns for:
 - ✅ **Dyad-Individual Model (DIM):** exchangeable dyads.
 - ✅ **Dyadic Score Model (DSM):** distinguishable dyads.
 
-It supports cross-sectional and intensive longitudinal dyadic data
-(e.g., daily diary data). The package also supports datasets containing
-multiple dyad compositions.
+All models support cross-sectional and intensive longitudinal dyadic
+data (e.g., daily diary data). The package also supports datasets
+containing multiple dyad compositions.
 
-Preparation options include selecting and pooling compositions, treating
-selected compositions as exchangeable, centering predictors, and
-creating within-/between-person components and lagged predictors.
+Preparation options include selecting and pooling compositions, and
+treating selected compositions as exchangeable. APIM/DIM/DSM predictors
+can be centered, decomposed into within-/between-person components, and
+lagged.
 
 Prepared data can be used with **glmmTMB**, **brms**, and other
 multilevel modelling packages that support the required model structure.
@@ -104,23 +105,16 @@ for data requirements and examples.
 |----|----|----|
 | [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
-| [Check partner dependence — cross-sectional](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Model diagnostics: Check partner dependence<sup>\*</sup>](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
-Predictive checks assess whether a model reproduces response variances
-and partner correlations. See the [function
-help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
-for supported models and interpretation, and the simulation studies on
-[omitted partner
-dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
-and [incorrect covariance
-pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
-for how often the check detects mismatches.
+<sup>\*</sup>Predictive checks assess whether a model reproduces the
+datas’ response variances and partner correlations.
 
 ## Quick example
 
 Using the bundled simulated data, we select female–male dyads and, for
 illustration, fit an APIM that treats partners as exchangeable. We then
-check whether it reproduces gender-specific variation and partner
+check whether it reproduces gender-specific variances and partner
 dependence.
 
 This example requires the development version of **dyadMLM**. It also
@@ -179,8 +173,8 @@ print(prepared_data, n = 4)
 #> #                               retained non-missing observations
 #> #
 #> # A tibble: 240 × 15
-#>   personID coupleID gender closeness provided_support .composition
-#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>
+#>   personID coupleID gender closeness provided_support .composition 
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>        
 #> 1        1        1 female      4.71             4.49 female_x_male
 #> 2        2        1 male        4.61             4.76 female_x_male
 #> 3        3        2 female      6.69             4.09 female_x_male
@@ -223,13 +217,13 @@ covariance <- recover_exchangeable_covariance(model)
 
 print(covariance, representation = "sdcor")
 #> Recovered exchangeable member-level covariance
-#>
+#> 
 #> Pair `pair_1`
 #> Shared:     us(1 | coupleID)
 #> Difference: us(0 + .member_contrast_arbitrary | coupleID)
-#>
+#> 
 #> Standard deviations and correlations:
-#>                        1      2
+#>                        1      2     
 #> 1 member1: (Intercept) 1.089  -0.039
 #> 2 member2: (Intercept) -0.039 1.089
 ```
@@ -272,6 +266,10 @@ in variances or partner correlations. These checks alone do not
 establish whether fixed effects should be pooled ([nested model
 comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
 can help assess those restrictions).
+
+For intensive longitudinal data, also supply `member` and `time`. The
+check then compares member means and same-occasion deviations from them
+separately.
 
 ## Vignettes and examples
 

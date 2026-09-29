@@ -481,7 +481,7 @@ test_that("checks plot by default, forward plot settings, and return invisibly",
     simulations, "dyad", plot = FALSE, ask = TRUE, panels = FALSE
   )), "Use `role = NULL` to pool without this message.", fixed = TRUE)
   expect_message(pooled <- withVisible(check_partner_dependence(
-    simulations, "dyad", NULL, FALSE
+    simulations, "dyad", NULL, plot = FALSE
   )), NA)
   expect_message(roles <- withVisible(check_partner_dependence(
     simulations, "dyad", role = "role", plot = FALSE
@@ -491,7 +491,7 @@ test_that("checks plot by default, forward plot settings, and return invisibly",
   expect_identical(plot_calls, list(list(ask = NULL, panels = TRUE)))
   for (ask in c(FALSE, TRUE)) {
     plotted <- withVisible(check_partner_dependence(
-      simulations, "dyad", NULL, TRUE, "raw", ask = ask, panels = FALSE
+      simulations, "dyad", NULL, plot = TRUE, response = "raw", ask = ask, panels = FALSE
     ))
     expect_false(plotted$visible)
     expect_identical(plotted$value$response, "raw")
