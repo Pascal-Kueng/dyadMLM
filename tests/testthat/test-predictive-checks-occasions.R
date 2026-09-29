@@ -163,10 +163,23 @@ test_that("rows with missing dyad IDs or roles are left out of both levels", {
   expect_identical(c(check$n_missing_dyad_rows, check$n_missing_role_rows), c(1L, 1L))
 })
 
+test_that("dyads that lose all rows to missing roles count as incomplete", {
+  simulations <- occasion_check_simulations()
+  simulations$model_frame$role[simulations$model_frame$dyad == 4] <- NA
+
+  expect_warning(
+    check <- check_occasions(simulations, role = "role"),
+    "Omitted: 1 incomplete dyad, with ID: 4; fitted rows with missing roles (n = 8)",
+    fixed = TRUE
+  )
+  expect_identical(check$n_incomplete_dyads, 1L)
+  expect_identical(check$n_pairs, 3L)
+})
+
 test_that("repeated occasions need member and time, and one row per member and occasion", {
   simulations <- occasion_check_simulations()
   expect_error(check_partner_dependence(simulations, "dyad", time = "time", plot = FALSE),
-               "Repeated occasions need `member` as well as `time`.", fixed = TRUE)
+               "`time` requires `member` to be supplied.", fixed = TRUE)
   # Without `time`, `member` is ignored, so repeated rows still point to `time`.
   expect_error(check_partner_dependence(simulations, "dyad", role = NULL, member = "member",
                                         plot = FALSE),
@@ -193,6 +206,14 @@ test_that("repeated occasions need member and time, and one row per member and o
   third_member <- simulations
   third_member$model_frame$member[4] <- "c"
   expect_error(check_occasions(third_member),
+               "Each dyad must have at most two members.", fixed = TRUE)
+
+  # The structure is checked before rows with missing roles are dropped.
+  repeated_occasion$model_frame$role[2] <- NA
+  expect_error(check_occasions(repeated_occasion, role = "role"),
+               "Each member can have at most one fitted row per `time`.", fixed = TRUE)
+  third_member$model_frame$role[4] <- NA
+  expect_error(check_occasions(third_member, role = "role"),
                "Each dyad must have at most two members.", fixed = TRUE)
 })
 

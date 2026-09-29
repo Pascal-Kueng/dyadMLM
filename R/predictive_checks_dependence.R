@@ -139,6 +139,8 @@
 #'   then invalid, and model-centred checks are valid only with an identity
 #'   link.
 #' - For ordinal and beta responses, same-occasion effects are often poorly
+#'   estimated. Within rows may flag even though the model is correctly specified.
+#'
 #' @section Technical details:
 #' After any centring, paired responses `a` and `b` are used to compute
 #' dyad averages `M = (a + b) / 2` and half-differences `D = (a - b) / 2`.
@@ -266,13 +268,25 @@ check_partner_dependence <- function(
 
   response <- match.arg(response)
   fitted_model_frame <- simulations$model_frame
+  dyad_ids <- resolve_fitted_row_argument(rlang::enquo(dyad), "dyad", fitted_model_frame, data)
+  role_values <- resolve_fitted_row_argument(rlang::enquo(role), "role", fitted_model_frame,
+                                             data, allow_null = TRUE)
+  occasion_ids <- resolve_fitted_row_argument(rlang::enquo(time), "time", fitted_model_frame,
+                                              data, allow_null = TRUE)
+  has_repeated_occasions <- !is.null(occasion_ids)
 
-  # The pair table identifies both partners' positions in the fitted data.
-  partner_row_map <- prepare_partner_pairs(
-    resolve_fitted_row_argument(rlang::enquo(dyad), "dyad", fitted_model_frame, data),
-    resolve_fitted_row_argument(rlang::enquo(role), "role", fitted_model_frame,
-                                data, allow_null = TRUE)
-  )
+  # The pair table identifies both partners' positions in each dataset's responses.
+  if (has_repeated_occasions) {
+    # `member` is only needed, and only looked up, for repeated occasions.
+    member_ids <- resolve_fitted_row_argument(rlang::enquo(member), "member",
+                                              fitted_model_frame, data, allow_null = TRUE)
+    if (is.null(member_ids)) {
+      stop("`time` requires `member` to be supplied.", call. = FALSE)
+    }
+    partner_row_map <- prepare_occasion_pairs(dyad_ids, member_ids, occasion_ids, role_values)
+  } else {
+    partner_row_map <- prepare_partner_pairs(dyad_ids, role_values)
+  }
   compositions <- partner_row_map$compositions
   checked_composition_indices <- which(compositions$n_pairs >= 3L)
   skipped_composition_indices <- which(compositions$n_pairs < 3L)
@@ -285,6 +299,20 @@ check_partner_dependence <- function(
   )
   if (response == "model-centred") {
     responses_by_dataset <- sweep(responses_by_dataset, 2, simulations$predicted_response, "-")
+  }
+  if (has_repeated_occasions) {
+    # Split every dataset into member means and deviations from them. Both sit
+    # side by side, at the positions used by the occasion pair table.
+    member_occasions <- partner_row_map$member_occasions
+    occasion_responses <- responses_by_dataset[, member_occasions$fitted_row, drop = FALSE]
+    member_numbers <- member_occasions$member_number
+    # rowsum() adds up rows by group, so transpose to add up each member's
+    # columns. It sorts groups by member number, the order tabulate() counts in.
+    member_totals <- t(rowsum(t(occasion_responses), member_numbers))
+    member_means <- sweep(member_totals, 2, tabulate(member_numbers), "/")
+    deviations_from_member_means <- occasion_responses -
+      member_means[, member_numbers, drop = FALSE]
+    responses_by_dataset <- cbind(member_means, deviations_from_member_means)
   }
   dataset_labels <- c("observed", paste0("simulation_", seq_len(n_simulations)))
 
@@ -359,7 +387,7 @@ check_partner_dependence <- function(
   check_result <- list(
     compositions = compositions,
     summary = dplyr::bind_rows(summary_by_composition),
-    n_pairs = nrow(partner_row_map$pairs),
+    n_pairs = partner_row_map$n_complete_dyads,
     n_simulations = n_simulations,
     n_incomplete_dyads = length(partner_row_map$incomplete_dyad_ids),
     n_missing_dyad_rows = length(partner_row_map$missing_dyad_rows),
@@ -429,7 +457,8 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
   original_dyad_sizes <- table(partner_rows$dyad_number[!is_dyad_id_missing])
   if (any(original_dyad_sizes > 2L)) {
     stop("Each dyad must have at most two fitted responses after rows with ",
-         "missing dyad IDs are omitted.", call. = FALSE)
+         "missing dyad IDs are omitted. For repeated occasions, supply `member` ",
+         "and `time`.", call. = FALSE)
   }
 
   # Remove rows with missing dyad IDs or (if supplied) missing roles.
@@ -490,13 +519,123 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
   # Include known dyads that lost both rows when missing roles were removed.
   return(list(
     pairs = dplyr::select(pairs, "composition_index", "first_partner_row", "second_partner_row"),
-    role_orders = role_orders, compositions = compositions,
+    role_orders = role_orders,
+    compositions = compositions,
+    n_complete_dyads = nrow(pairs),
     incomplete_dyad_ids = unique(dyad_ids[
       !is_dyad_id_missing & !dyad_ids %in% dyad_ids[partner_rows$fitted_row]
     ]),
     missing_dyad_rows = which(is_dyad_id_missing),
     # Report missing roles only on rows with a known dyad ID.
     missing_role_rows = which(is_role_missing & !is_dyad_id_missing)
+  ))
+}
+
+
+# Build the pair map for repeated occasions. Each dataset's responses are later
+# split into member means (positions 1 to the number of members), followed by
+# each usable fitted row's deviation from its member mean. Between pairs link
+# the partners' means; within pairs link their deviations on the same occasion.
+prepare_occasion_pairs <- function(dyad_ids, member_ids, occasion_ids, role_values = NULL) {
+  # Treat missing factor labels as missing values too, as prepare_partner_pairs() does.
+  is_missing <- function(values) is.na(values) | is.na(as.character(values))
+  if (any(is_missing(member_ids) | is_missing(occasion_ids))) {
+    stop("`member` and `time` must be known for every fitted row.", call. = FALSE)
+  }
+  is_dyad_id_missing <- is_missing(dyad_ids)
+  # Report missing roles only on rows with a known dyad ID.
+  is_role_missing <- if (is.null(role_values)) {
+    rep(FALSE, length(dyad_ids))
+  } else {
+    is_missing(role_values) & !is_dyad_id_missing
+  }
+
+  occasion_rows <- tibble::tibble(
+    fitted_row = seq_along(dyad_ids),
+    dyad = dyad_ids,
+    member = member_ids,
+    occasion = occasion_ids,
+    role = if (is.null(role_values)) NA else role_values,
+    is_role_missing = is_role_missing
+  ) |>
+    dplyr::filter(!is_dyad_id_missing)
+
+  # Check the structure before dropping missing roles, as prepare_partner_pairs()
+  # does, so repeated occasions or extra members cannot be hidden.
+  if (anyDuplicated(occasion_rows[c("dyad", "member", "occasion")]) > 0L) {
+    stop("Each member can have at most one fitted row per `time`.", call. = FALSE)
+  }
+  if (any(table(unique(occasion_rows[c("dyad", "member")])$dyad) > 2L)) {
+    stop("Each dyad must have at most two members.", call. = FALSE)
+  }
+
+  # Drop rows with missing roles and number the members in order of first appearance.
+  member_occasions <- occasion_rows |>
+    dplyr::filter(!.data$is_role_missing) |>
+    dplyr::mutate(member_number = dplyr::cur_group_id(), .by = c("dyad", "member"))
+
+  # The between level pairs one row per member, like cross-sectional data. Each
+  # member keeps the role of their first row. Sorted by member number, row i of
+  # `members` is member i. So the between pairs' partner rows are member numbers,
+  # which are also the positions of the member means.
+  members <- member_occasions |>
+    dplyr::slice_head(n = 1, by = "member_number") |>
+    dplyr::arrange(.data$member_number)
+  between <- prepare_partner_pairs(
+    members$dyad, role_values = if (is.null(role_values)) NULL else members$role
+  )
+  n_members <- nrow(members)
+  n_compositions <- nrow(between$compositions)
+
+  # The deviations follow the member means, in the row order of `member_occasions`.
+  deviation_positions <- member_occasions |>
+    dplyr::mutate(deviation_position = n_members + dplyr::row_number()) |>
+    dplyr::select("member_number", "occasion", "deviation_position")
+  # The within level joins both partners' deviations on the same occasion, so
+  # each pair keeps its dyad's composition and role order. The suffixes tell
+  # the two partners' positions apart.
+  shared_occasions <- between$pairs |>
+    dplyr::mutate(dyad_number = dplyr::row_number()) |>
+    dplyr::inner_join(deviation_positions, by = c(first_partner_row = "member_number")) |>
+    dplyr::inner_join(deviation_positions,
+                      by = c(second_partner_row = "member_number", "occasion"),
+                      suffix = c("_first_partner", "_second_partner"))
+
+  # The within level counts dyads that share at least one occasion, keeping zeros.
+  dyads_sharing_an_occasion <- unique(shared_occasions[c("dyad_number", "composition_index")])
+  within_compositions <- dplyr::mutate(
+    between$compositions,
+    n_pairs = tabulate(dyads_sharing_an_occasion$composition_index, n_compositions)
+  )
+
+  # Within compositions follow the between ones, so their indices are shifted.
+  within_pairs <- shared_occasions |>
+    dplyr::mutate(composition_index = .data$composition_index + n_compositions) |>
+    dplyr::select("composition_index",
+                  first_partner_row = "deviation_position_first_partner",
+                  second_partner_row = "deviation_position_second_partner")
+  # Labels name the level, so messages, printouts, and plots show it.
+  compositions <- dplyr::bind_rows(
+    between = between$compositions,
+    within = within_compositions,
+    .id = "level"
+  ) |>
+    dplyr::mutate(label = paste0(.data$label, " (", .data$level, ")"))
+
+  # As prepare_partner_pairs() does, dyads that lost all rows to missing roles
+  # also count as incomplete.
+  complete_dyad_ids <- members$dyad[between$pairs$first_partner_row]
+  incomplete_dyad_ids <- unique(dyad_ids[!is_dyad_id_missing & !dyad_ids %in% complete_dyad_ids])
+
+  return(list(
+    pairs = dplyr::bind_rows(between$pairs, within_pairs),
+    role_orders = rep(between$role_orders, 2L),
+    compositions = compositions,
+    member_occasions = member_occasions,
+    n_complete_dyads = between$n_complete_dyads,
+    incomplete_dyad_ids = incomplete_dyad_ids,
+    missing_dyad_rows = which(is_dyad_id_missing),
+    missing_role_rows = which(is_role_missing)
   ))
 }
 
