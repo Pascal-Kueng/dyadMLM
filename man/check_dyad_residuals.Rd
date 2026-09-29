@@ -25,14 +25,13 @@ datasets are required; 1,000 or more are recommended.}
 dyads, roles, and members within dyads. Looked up in the fitted model frame
 or \code{data}. With \code{role = NULL}, all observations are pooled. Otherwise supply
 \code{dyad}; also supply \code{member} for repeated observations, with \code{role} unchanged
-within each member. Supplying \code{dyad} without \code{role} adds the dyad count to
-the pooled overview.}
+within each member.}
 
 \item{predictors}{Optional column names, e.g. \code{c("age", "stress")}, looked up
 in the model frame or \code{data}. Pass predictors the model omits or may
 misspecify, especially the partner's. \code{NULL} (default) omits additional
 predictor pages. Missing or infinite values are omitted only from that
-predictor's plots. Predicted outcomes are always checked.}
+predictor's plots.}
 
 \item{seed}{Seed for randomized PIT residuals. The caller's random-number
 state is restored afterwards. With \code{NULL}, use and advance the caller's RNG.}
@@ -46,8 +45,7 @@ and \code{FALSE} draws without pausing. File devices never pause.}
 
 \item{panels}{If \code{TRUE} (default), arrange checks in complete panels by
 composition, with one column per role or a pooled column. If \code{FALSE}, draw
-each check and role separately, retaining headings and interpretation tips.
-Only the arrangement changes; results and checks stay the same.}
+each check and role separately.}
 
 \item{data}{The unchanged data used to fit the model. Supply it when required
 columns are absent from the model frame, or to identify compositions using
@@ -56,11 +54,8 @@ partners whose responses were excluded during fitting.}
 \value{
 Invisibly returns a \code{dyadMLM_residual_check} list with the \code{pit} matrix
 and calculated summaries in \code{compositions}. PIT rows are fitted observations;
-columns are observed data followed by all simulated datasets. This matrix
-uses about 77 MiB for 10,080 observations and 1,000 simulations. The \code{dyadMLM}
-attribute records whether PIT was centred in \code{pit_centered}.
+columns are observed data followed by all simulated datasets.
 Save it with \code{plot = FALSE} and draw it later with \code{plot(result)}.
-Graphics settings are restored afterwards.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -78,49 +73,27 @@ characteristic, use that variable as \code{role}.
 
 A composition is the combination of partners' roles. Each composition gets
 one pooled column for same-role partners, or separate columns for distinct
-roles. Every page repeats the composition heading.
-Supplying roles does not change the model's assumptions. Available responses
-are retained when the composition is known; unknown compositions are omitted
-with a warning.
+roles. Supplying roles does not change the model's assumptions. Unknown
+compositions are omitted with a warning.
 
-\strong{Red shows observed data; blue shows simulated references.} The first page
-shows uniform QQ and mean PIT distance. The second shows PIT quartiles
-and distance against predicted outcomes. Each supplied predictor gets another
-two-row pattern page. All pages for one composition appear together.
+The first page shows uniform QQ and mean PIT distance. The second shows PIT
+quartiles and distance against predicted outcomes. Each supplied predictor
+gets another page like the second.
 
 PIT (probability integral transform) residuals rank each outcome from 0 (low)
 to 1 (high) relative to its own simulated values. A suitable model should
 produce ranks roughly evenly spread between 0 and 1, allowing for the
-variation shown in blue. Red above the diagonal or its blue range means
-outcomes higher than simulated.
-Blue curve envelopes cover positions jointly within each panel, with the
-three quartiles treated together. They use a nominal 95\% extreme-rank-length
-envelope; coverage is not simultaneous across roles, predictors, or pages.
-The mean-distance row shows simulated values as a blue histogram
-and the observed value as a red line; dashed lines mark the middle 95\%.
-Values exactly on a limit count as inside. Because the model was fitted to
-these same data, departures often look smaller than they are, as in the
-settings studied by Robins et al. (2000) and in our simulations.
-The lines at 0.25, 0.50 and 0.75 are visual guides. Judge the red quartiles
-against their matching blue bands.
+variation shown in blue. PIT distance is \code{2 * abs(PIT - 0.5)}. Blue curve
+envelopes are nominal 95\% global envelopes within each panel, not across
+roles, predictors, or pages. Because the model was fitted to these same data,
+departures often look smaller than they are, as in the settings studied by
+Robins et al. (2000) and in our simulations.
 
-Numeric predictors with more than eight distinct values in a composition use
-up to eight bins per role, with at least about 20 observations per bin. For these
-predictors, fewer than 40 available observations in a role give one bin.
-Repeated values can reduce the number of bins and hide local patterns, such as
-differences between zero and positive predictor values.
-With at least four bins, nearby quartiles are averaged into smooth curves using
-the same weights for observed and simulated data; blue bands are calculated
-afterwards. These are smoothed local summaries, not quantile regressions.
-Curves span each role's predictor range on a shared axis and can hide patterns
-within bins.
-Dashed, solid, and dotted lines identify the 25th, 50th, and 75th percentiles;
-the median is drawn more heavily. Faint points show individual observed residuals.
-Sparse numeric predictors use unsmoothed intervals; categorical boxes show the
-middle 50\% and median, with blue quartile ranges offset from left to right.
-Distance is \code{2 * abs(PIT - 0.5)}; large values can reflect location or spread
-errors. These are full-model residuals, not partial effects; separate predictors
-and bins can hide interactions or finer patterns.
+Predicted outcomes and numeric predictors with more than eight distinct values
+are grouped into up to eight bins per role, with at least about 20
+observations per bin; with four or more bins, quartiles are smoothed across
+neighboring bins. These are full-model residuals, not partial effects; bins
+and separate predictors can hide local patterns and interactions.
 }
 
 \section{Reading flags}{
@@ -131,9 +104,9 @@ alone rarely flags a correct model, but flags add up across panels. In our
 at least one panel of the residual and outcome checks (ECDFs and category
 bars not counted) flagged about 7--14\% of correct Gaussian and count models
 when pooled, 21--28\% in either role, and 32--45\% in either role with actor
-and partner predictor pages; ordinal models were flagged less often. So look for a consistent pattern, not any single flag. With about 40
-dyads, most mismatches studied were hard to detect; no flag does not show a
-good fit.
+and partner predictor pages; ordinal models were flagged less often. So look
+for a consistent pattern, not any single flag. With about 40 dyads, most
+mismatches studied were hard to detect; no flag does not show a good fit.
 Panels suggest possible problems, not their cause. Neither a flag nor its
 absence shows whether estimates or standard errors are wrong: fit the model
 the pattern suggests and compare the estimates and standard errors you
@@ -145,33 +118,27 @@ report. Mismatches showed mainly in these panels:
 \item Different role SDs: response SD and mean PIT distance, by role.
 \item Spread rising with a predictor: PIT distance panels, largest absolute deviation.
 \item Omitted partner effect: PIT quartiles across the partner's predictor
-(supply it in \code{predictors}).
+(supply it in \code{predictors} of \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}).
 }
 }
 
 \section{Scope}{
 
-Observed and simulated datasets are ranked and transformed together. These
-envelopes retain the fitted partner and time dependence and any modeled
-differences in variability between roles, without whitening.
-Simulations redraw all random effects; DHARMa's default since version 0.5.0
-holds their fitted values fixed.
-They are dyadMLM's descriptive checks, not DHARMa's plots or tests. DHARMa's
-residual tests assume independent residuals, which partners' residuals are
-not when random effects are redrawn. Held fixed, random effects that absorb
-all residual variation reproduce the data almost exactly, and grouping by
-dyad sums partners, so role differences can cancel. Parameters stay fixed,
-and the observed data were used to fit them; parameter uncertainty is not
-included. Neither ranking nor centring makes fitted-data references
-exact. For cross-sectional data, check partner correlations with
-\code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+Complete simulated datasets keep the fitted partner and time dependence and
+any modeled differences in variability between roles. Unlike DHARMa's default
+(since version 0.5.0), simulations redraw all random effects: if held fixed,
+random effects that absorb all residual variation would reproduce the data
+almost exactly. Parameters stay fixed at their fitted values; parameter
+uncertainty is not included. These are descriptive checks, not significance tests, and
+differ from DHARMa's plots and tests (see the
+\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly}{article}).
+They do not directly assess serial correlation.
 
-The "Predicted outcome" axis shows model predictions, not observed outcomes
-or predictions of residuals. Random effects are set to zero, which differs
-from averaging over random effects for nonlinear links. Additional predictor
-plots use the supplied predictor values instead. Uses the families
-and fitted rows supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}: missing responses are
-not imputed, and time gaps follow the fitted model. Observations have equal weight.
+Predicted outcomes set random effects to zero, which differs from averaging
+over random effects for nonlinear links. Uses the families and fitted rows
+supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}; observations have equal weight. For
+cross-sectional data, check partner correlations with
+\code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 
 \section{Method and credit}{
@@ -183,20 +150,16 @@ uniform 0--1 scale.
 
 At each fitted row, rank the observed and all simulated outcomes together,
 breaking ties randomly. For rank \code{r} among \code{m} datasets, use \code{(r - U) / m},
-where \code{U} is uniform between 0 and 1. This treats all datasets symmetrically
-and keeps PIT values strictly inside 0--1.
+where \code{U} is uniform between 0 and 1.
 
-When the conditional model can freely shift its overall location, whether
-fitted with an intercept or separate role means, PIT is centred automatically
-(not for ordinal models): transform each dataset's PIT to normal scores,
-subtract its median across all fitted rows, then transform back. This removes
-overall location before splitting by role or predictor: patterns describe
-residuals relative to it, so panels such as QQ and mean PIT distance can show
-less of an overall shift. In our simulations, this adjustment reduced one
-source of conservativeness; it does not account for every effect of fitting.
+When the model freely estimates an overall location (an intercept or separate
+role means; not ordinal models), PIT is centred automatically: each dataset's
+PIT is transformed to normal scores, centred on its median across all fitted
+rows, and transformed back. Panels then show residuals relative to this
+overall location, so QQ and mean PIT distance can show less of an overall
+shift. This offsets part of the conservativeness caused by fitting.
 
-Global envelopes use extreme-rank-length ordering (Myllymäki et al., 2017),
-retaining ties at the boundary and rounding coverage conservatively.
+Global envelopes use extreme-rank-length ordering (Myllymäki et al., 2017).
 }
 
 \examples{

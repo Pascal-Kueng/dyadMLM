@@ -3,20 +3,13 @@
 * Changed the package license from MIT to GPL-3.
 
 * Added experimental `check_dyad_residuals()` for simulated PIT residuals and
-  `check_dyad_outcomes()` for response distributions, SDs, extremes, and
-  zero counts. Both reuse complete simulated datasets, retain partner and time
-  dependence in their references, separate dyad compositions and roles, and
-  report no p-values. Residual distributions and patterns across predicted
-  outcomes have separate pages; additional predictor pages are optional.
-  PIT is centred automatically when the model has a freely estimated overall
-  location (not for ordinal models).
-  Checks can be saved with `plot = FALSE` and plotted later.
-  Residual checks need at least 200 simulations; 1,000 are recommended.
-  PIT calculations are internal, following Florian Hartig's DHARMa approach and
-  Dunn and Smyth's (1996) randomized quantile residuals; DHARMa is not required.
-  The help section "Reading flags" explains how to read and follow up flags,
-  based on a
-  [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html).
+  `check_dyad_outcomes()` for response distributions, SDs, extremes, and zero
+  counts. Both reuse `simulate_dyad_responses()` output, keep partner and time
+  dependence in their references, and can show dyad compositions and roles
+  separately. PIT follows Florian Hartig's DHARMa approach and Dunn and Smyth's
+  (1996) randomized quantile residuals; DHARMa is not required. A
+  [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
+  shows how often the checks flag correct and mismatched models.
 
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),

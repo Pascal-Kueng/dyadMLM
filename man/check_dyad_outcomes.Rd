@@ -9,7 +9,6 @@ check_dyad_outcomes(
   dyad = NULL,
   role = NULL,
   member = NULL,
-  check_zeros = NULL,
   plot = TRUE,
   ask = NULL,
   panels = TRUE,
@@ -24,12 +23,7 @@ more simulated datasets for stable comparisons.}
 dyads, roles, and members within dyads. Looked up in the fitted model frame
 or \code{data}. With \code{role = NULL}, all observations are pooled. Otherwise supply
 \code{dyad}; also supply \code{member} for repeated observations, with \code{role} unchanged
-within each member. Supplying \code{dyad} without \code{role} adds the dyad count to
-the pooled overview.}
-
-\item{check_zeros}{Include zero counts? \code{NULL} (default) includes them for all
-roles in a composition if any simulated outcome there is zero, or, for
-count and Tweedie families, any observed outcome.}
+within each member.}
 
 \item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
 If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
@@ -40,8 +34,7 @@ and \code{FALSE} draws without pausing. File devices never pause.}
 
 \item{panels}{If \code{TRUE} (default), arrange checks in complete panels by
 composition, with one column per role or a pooled column. If \code{FALSE}, draw
-each check and role separately, retaining headings and interpretation tips.
-Only the arrangement changes; results and checks stay the same.}
+each check and role separately.}
 
 \item{data}{The unchanged data used to fit the model. Supply it when required
 columns are absent from the model frame, or to identify compositions using
@@ -51,7 +44,7 @@ partners whose responses were excluded during fitting.}
 Invisibly returns a \code{dyadMLM_outcome_check} list containing compositions,
 role-specific summary matrices, and outcome distributions. Matrix columns
 are observed data followed by simulations. Save it with \code{plot = FALSE} and
-draw it later with \code{plot(result)}. Graphics settings are restored afterwards.
+draw it later with \code{plot(result)}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -61,48 +54,21 @@ For PIT residual patterns, use \code{\link[=check_dyad_residuals]{check_dyad_res
 }
 \section{Reading the plots}{
 
-Each combination of partners' roles gets one pooled column for same-role
-partners, or separate columns for distinct roles, as in \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
-Roles define the display without changing the model's assumptions.
-Every page repeats its composition heading. Available responses are retained
-when the composition is known; unknown compositions are omitted with a warning.
+Compositions and role columns are arranged as in \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
 
-\strong{Red shows observed data; blue shows simulations.} The first row compares
-outcome distributions. Ordinal responses use bars for all defined categories.
-Blue ranges show the middle 95\% for each category separately, so with several
-categories one red point outside can occur by chance. Other outcomes show the
-proportion at or below each outcome value (ECDF), for the observations and up
-to 30 simulated datasets; the axis spans the observed values and the middle
-98\% of simulated values. Counts use the ECDF because categories chosen from
-the observed values gave many false alarms.
+The first row compares outcome distributions. Ordinal responses use bars for
+all defined categories, with separate 95\% ranges per category, so one red
+point outside can occur by chance. Other outcomes show the proportion at or
+below each value (ECDF) for the observations and up to 30 simulated datasets.
 
 The remaining rows compare the SD (standard deviation) of outcome minus
 prediction, the largest absolute deviation from prediction, and zero counts
-where relevant. Each blue histogram shows simulated values; the red line shows
-the observed value. A red line far to the right or left means more or less than
-the model usually produces. Dashed lines mark the middle 95\%.
-SD needs at least two observations.
-For complete cross-sectional dyads with distinct roles, these SDs match the
-default role SDs in \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
-Use a tall plotting window to keep all rows readable.
-}
-
-\section{Scope}{
-
-These are descriptive predictive checks, not significance tests. Complete
-simulations retain fitted partner and time dependence and any modeled
-differences in variability between roles. Parameters stay fixed;
-the observed data were used to fit them, and parameter uncertainty is not included.
-
-Predictions have random effects set to zero; for nonlinear links they differ
-from averages over random effects. Variability includes random effects; it does
-not isolate the model's residual variance or dispersion parameter.
-Ordinal variability and deviation summaries depend on the category scores;
-zero counts describe the combined response distribution for zero-inflated models.
-Uses the families and fitted rows supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}:
-missing responses are not imputed, time gaps follow the fitted model, and
-observations have equal weight. For cross-sectional data, check partner
-correlations with \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+when the composition has simulated zeros, or observed zeros for count and
+Tweedie families. The SD includes random effects; it does not isolate the
+model's residual variance or dispersion parameter. For complete
+cross-sectional dyads with distinct roles, these SDs match the default role
+SDs in \code{\link[=check_partner_dependence]{check_partner_dependence()}}. Ordinal summaries depend on the category
+scores. Use a tall plotting window to keep all rows readable.
 }
 
 \section{Reading flags}{
@@ -113,9 +79,9 @@ alone rarely flags a correct model, but flags add up across panels. In our
 at least one panel of the residual and outcome checks (ECDFs and category
 bars not counted) flagged about 7--14\% of correct Gaussian and count models
 when pooled, 21--28\% in either role, and 32--45\% in either role with actor
-and partner predictor pages; ordinal models were flagged less often. So look for a consistent pattern, not any single flag. With about 40
-dyads, most mismatches studied were hard to detect; no flag does not show a
-good fit.
+and partner predictor pages; ordinal models were flagged less often. So look
+for a consistent pattern, not any single flag. With about 40 dyads, most
+mismatches studied were hard to detect; no flag does not show a good fit.
 Panels suggest possible problems, not their cause. Neither a flag nor its
 absence shows whether estimates or standard errors are wrong: fit the model
 the pattern suggests and compare the estimates and standard errors you
@@ -127,8 +93,27 @@ report. Mismatches showed mainly in these panels:
 \item Different role SDs: response SD and mean PIT distance, by role.
 \item Spread rising with a predictor: PIT distance panels, largest absolute deviation.
 \item Omitted partner effect: PIT quartiles across the partner's predictor
-(supply it in \code{predictors}).
+(supply it in \code{predictors} of \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}).
 }
+}
+
+\section{Scope}{
+
+Complete simulated datasets keep the fitted partner and time dependence and
+any modeled differences in variability between roles. Unlike DHARMa's default
+(since version 0.5.0), simulations redraw all random effects: if held fixed,
+random effects that absorb all residual variation would reproduce the data
+almost exactly. Parameters stay fixed at their fitted values; parameter
+uncertainty is not included. These are descriptive checks, not significance tests, and
+differ from DHARMa's plots and tests (see the
+\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly}{article}).
+They do not directly assess serial correlation.
+
+Predicted outcomes set random effects to zero, which differs from averaging
+over random effects for nonlinear links. Uses the families and fitted rows
+supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}; observations have equal weight. For
+cross-sectional data, check partner correlations with
+\code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 
 \examples{

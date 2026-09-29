@@ -1,7 +1,0 @@
-"composition","statistic","observed","lower","upper","outside"
-"female - male","SD (female)",5.46977081943187,5.33636646649248,6.40795973315389,FALSE
-"female - male","SD (male)",6.24696013807587,5.35241308600354,6.38129240170055,FALSE
-"female - male","Partner correlation (female and male)",0.326805699576776,-0.134585568938484,0.125801123056001,TRUE
-"female - male","Dyad-average SD",4.77693519553094,3.78253810695033,4.50460232620011,TRUE
-"female - male","Half-difference SD (female minus male)",3.41355269911077,3.78761690511116,4.49686142397008,TRUE
-"female - male","Dyad-average/role-difference correlation (female minus male)",-0.13961025744536,-0.131965518296465,0.123593256944615,TRUE

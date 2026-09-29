@@ -102,9 +102,6 @@
 #' Use a suitable model comparison to formally test a specific covariance
 #' restriction when both models can be fitted (see [compare_nested_models()]).
 #'
-#' For ordinal responses, these summaries depend on the category scores, not only
-#' their order; they do not describe dependence on the model's latent scale.
-#'
 #' Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
 #'
 #' @section Technical details:

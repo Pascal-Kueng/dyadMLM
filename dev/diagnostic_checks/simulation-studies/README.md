@@ -40,8 +40,7 @@ Reported rate intervals are 95% Wilson intervals.
 
 ## Residual and outcome checks
 
-This focused study extends the earlier [distribution-check pilot](../distribution-diagnostics/calibration-summary.md).
-It uses Gaussian and negative-binomial outcomes at 40, 100, and 400 dyads.
+This study uses Gaussian and negative-binomial outcomes at 40, 100, and 400 dyads.
 Gaussian settings cover correct specification, two omitted role mean differences,
 and two role SD ratios. Count settings cover correct NB2 models, two amounts of
 NB2 overdispersion fitted as Poisson, and two omitted zero-inflation probabilities.

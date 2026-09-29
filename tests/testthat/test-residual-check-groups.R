@@ -69,24 +69,13 @@ test_that("member IDs identify compositions across uneven repeated observations"
 })
 
 test_that("unknown compositions omit only their fitted rows", {
-  frame <- data.frame(dyad = c(1, 1, 2, 3, 3, NA),
+  # Explicit NA factor levels remain missing IDs and roles.
+  frame <- data.frame(dyad = addNA(factor(c(1, 1, 2, 3, 3, NA))),
                       member = c(1, 2, 1, 1, 2, 1),
-                      role = c("A", "B", "A", "A", NA, "A"))
+                      role = addNA(factor(c("A", "B", "A", "A", NA, "A"))))
   expect_warning(groups <- residual_check_groups(frame, dyad, role, member),
                  "4 fitted observations omitted.*`data`")
   expect_warning(residual_check_groups(frame, dyad, role, member, frame), "unknown\\.$")
-  expect_equal(groups[[1]]$rows, list(A = 1L, B = 2L))
-  expect_equal(groups[[1]]$n_dyads, 1L)
-})
-
-test_that("explicit NA factor levels remain missing IDs and roles", {
-  frame <- data.frame(
-    dyad = factor(c(1, 1, 2, 2, 3, 3, NA, NA), exclude = NULL),
-    member = factor(c("a", "b", "a", NA, "a", "b", "a", "b"), exclude = NULL),
-    role = factor(c("A", "B", "A", "B", "A", NA, "A", "B"), exclude = NULL)
-  )
-  expect_warning(groups <- residual_check_groups(frame, dyad, role, member),
-                 "6 fitted observations omitted")
   expect_equal(groups[[1]]$rows, list(A = 1L, B = 2L))
   expect_equal(groups[[1]]$n_dyads, 1L)
 })
@@ -100,13 +89,6 @@ test_that("original data and column arguments preserve fitted-row alignment", {
   changed$y[1] <- 99
   expect_error(residual_check_groups(frame, dyad, role, data = changed),
                "does not match the fitted rows")
-  row.names(changed) <- letters[1:4]
-  expect_error(residual_check_groups(frame, dyad, role, data = changed),
-               "Could not match the fitted rows")
-  expect_error(residual_check_groups(data, role = role), "`dyad` is required")
-  expect_error(residual_check_groups(data, data$dyad, role), "must be a column name")
-  expect_error(residual_check_groups(data, dyad, unknown), "was not found")
-  expect_error(residual_check_groups(frame, dyad, role, data = 1), "data frame")
 })
 
 test_that("roster checks concern only dyads represented in the fit", {

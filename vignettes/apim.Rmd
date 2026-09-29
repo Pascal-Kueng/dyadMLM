@@ -417,25 +417,22 @@ dyadMLM::check_partner_dependence(
 
 The top row shows role-specific SDs and partner correlation. The bottom
 row shows the same information using dyad averages and half the differences
-between partners. Half-difference SD describes how these differences vary across
-dyads. For exchangeable partners, RMS (root mean square) describes their typical
-size, regardless of partner order.
-
-Red lines show observed summaries; blue histograms show model simulations.
+between partners. Histograms show simulated values and red lines mark observed
+values. A red line far from most simulations suggests a mismatch.
 
 Here, the restricted model produces a lower partner correlation than observed.
 It also overstates how much the partner differences vary across dyads. The
 plots do not identify which restriction causes the mismatch.
 
-The check subtracts fixed-effect predictions from observed and simulated
-responses. Agreement is often expected for variances and correlations fitted
-to the same data. See the
+By default, the check subtracts the model's fixed-effect predictions from
+observed and simulated responses. Good agreement is often expected for variances
+and correlations estimated from the same data. See the
 [function help](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)
-for details, and the studies of
-[omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
-and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html).
-
-`check_partner_dependence()` currently supports cross-sectional dyads only.
+for details and interpretation. Simulation studies show how often the check
+detects [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
+and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
+and how often it raises false alarms. This check currently supports cross-sectional
+dyads only.
 
 ## Checking residuals and outcomes {#checking-residuals-and-outcomes}
 
@@ -497,10 +494,6 @@ shows how often these panels flag correct and mismatched models.
 
 
 ## Intensive longitudinal APIMs
-
-`check_dyad_residuals()` and `check_dyad_outcomes()` also support these models. When
-splitting by role, also supply `member = personID`. These checks do not directly
-assess serial correlation.
 
 For longitudinal APIMs, time-varying predictors are decomposed into
 within-person and between-person components before actor and partner variables

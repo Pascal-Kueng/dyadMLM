@@ -8,58 +8,31 @@
 #' @param simulations An object from [simulate_dyad_responses()]. Use 1,000 or
 #'   more simulated datasets for stable comparisons.
 #' @inheritParams check_dyad_residuals
-#' @param check_zeros Include zero counts? `NULL` (default) includes them for all
-#'   roles in a composition if any simulated outcome there is zero, or, for
-#'   count and Tweedie families, any observed outcome.
 #'
 #' @return Invisibly returns a `dyadMLM_outcome_check` list containing compositions,
 #'   role-specific summary matrices, and outcome distributions. Matrix columns
 #'   are observed data followed by simulations. Save it with `plot = FALSE` and
-#'   draw it later with `plot(result)`. Graphics settings are restored afterwards.
+#'   draw it later with `plot(result)`.
 #'
 #' @section Reading the plots:
-#' Each combination of partners' roles gets one pooled column for same-role
-#' partners, or separate columns for distinct roles, as in [check_dyad_residuals()].
-#' Roles define the display without changing the model's assumptions.
-#' Every page repeats its composition heading. Available responses are retained
-#' when the composition is known; unknown compositions are omitted with a warning.
+#' Compositions and role columns are arranged as in [check_dyad_residuals()].
 #'
-#' **Red shows observed data; blue shows simulations.** The first row compares
-#' outcome distributions. Ordinal responses use bars for all defined categories.
-#' Blue ranges show the middle 95% for each category separately, so with several
-#' categories one red point outside can occur by chance. Other outcomes show the
-#' proportion at or below each outcome value (ECDF), for the observations and up
-#' to 30 simulated datasets; the axis spans the observed values and the middle
-#' 98% of simulated values. Counts use the ECDF because categories chosen from
-#' the observed values gave many false alarms.
+#' The first row compares outcome distributions. Ordinal responses use bars for
+#' all defined categories, with separate 95% ranges per category, so one red
+#' point outside can occur by chance. Other outcomes show the proportion at or
+#' below each value (ECDF) for the observations and up to 30 simulated datasets.
 #'
 #' The remaining rows compare the SD (standard deviation) of outcome minus
 #' prediction, the largest absolute deviation from prediction, and zero counts
-#' where relevant. Each blue histogram shows simulated values; the red line shows
-#' the observed value. A red line far to the right or left means more or less than
-#' the model usually produces. Dashed lines mark the middle 95%.
-#' SD needs at least two observations.
-#' For complete cross-sectional dyads with distinct roles, these SDs match the
-#' default role SDs in [check_partner_dependence()].
-#' Use a tall plotting window to keep all rows readable.
+#' when the composition has simulated zeros, or observed zeros for count and
+#' Tweedie families. The SD includes random effects; it does not isolate the
+#' model's residual variance or dispersion parameter. For complete
+#' cross-sectional dyads with distinct roles, these SDs match the default role
+#' SDs in [check_partner_dependence()]. Ordinal summaries depend on the category
+#' scores. Use a tall plotting window to keep all rows readable.
 #'
 #' @inheritSection check_dyad_residuals Reading flags
-#'
-#' @section Scope:
-#' These are descriptive predictive checks, not significance tests. Complete
-#' simulations retain fitted partner and time dependence and any modeled
-#' differences in variability between roles. Parameters stay fixed;
-#' the observed data were used to fit them, and parameter uncertainty is not included.
-#'
-#' Predictions have random effects set to zero; for nonlinear links they differ
-#' from averages over random effects. Variability includes random effects; it does
-#' not isolate the model's residual variance or dispersion parameter.
-#' Ordinal variability and deviation summaries depend on the category scores;
-#' zero counts describe the combined response distribution for zero-inflated models.
-#' Uses the families and fitted rows supported by [simulate_dyad_responses()]:
-#' missing responses are not imputed, time gaps follow the fitted model, and
-#' observations have equal weight. For cross-sectional data, check partner
-#' correlations with [check_partner_dependence()].
+#' @inheritSection check_dyad_residuals Scope
 #'
 #' @seealso [check_dyad_residuals()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
@@ -71,12 +44,10 @@
 #' check_dyad_outcomes(simulations, dyad = coupleID, role = gender, ask = FALSE)
 #' @export
 check_dyad_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
-                                check_zeros = NULL, plot = TRUE, ask = NULL,
+                                plot = TRUE, ask = NULL,
                                 panels = TRUE, data = NULL) {
   if (!inherits(simulations, "dyadMLM_response_simulations"))
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
-  if (!is.null(check_zeros) && !rlang::is_bool(check_zeros))
-    stop("`check_zeros` must be NULL, TRUE, or FALSE.", call. = FALSE)
   frame <- simulations$model_frame
   compositions <- build_check_groups(
     frame, rlang::enquo(dyad), rlang::enquo(role), rlang::enquo(member), data
@@ -86,16 +57,15 @@ check_dyad_outcomes <- function(simulations, dyad = NULL, role = NULL, member = 
                      t(simulations$simulated_responses))
   centred <- sweep(responses, 1, simulations$predicted_response, "-")
   family <- attr(simulations, "dyadMLM")$family
-  count_families <- c("poisson", "compois", "genpois", "bell", "nbinom1", "nbinom2", "nbinom12",
-                     "truncated_poisson", "truncated_nbinom1", "truncated_nbinom2",
-                     "truncated_compois", "truncated_genpois")
+  # Other families only count zeros their simulations produce; otherwise an
+  # observed 0 on a rating scale would always look like excess zeros.
+  zero_columns <- if (grepl("pois|nbinom|bell|tweedie", family)) TRUE else -1
+  # Ordinal scores are category positions 1, ..., K.
+  category_labels <- if (identical(family, "ordinal"))
+    if (is.factor(frame[[1]])) levels(frame[[1]]) else seq_len(max(responses))
   compositions <- lapply(compositions, function(composition) {
     composition_rows <- unlist(composition$rows, use.names = FALSE)
-    # Other families only count zeros their simulations produce; otherwise an
-    # observed 0 on a rating scale would always look like excess zeros.
-    zero_columns <- if (family %in% c(count_families, "tweedie")) TRUE else -1
-    include_zeros <- if (is.null(check_zeros))
-      any(responses[composition_rows, zero_columns] == 0) else check_zeros
+    include_zeros <- any(responses[composition_rows, zero_columns] == 0)
     composition$statistics <- lapply(composition$rows, function(rows) {
       if (!length(rows)) return(NULL)
       statistics <- rbind(
@@ -106,13 +76,6 @@ check_dyad_outcomes <- function(simulations, dyad = NULL, role = NULL, member = 
         `Number of zeros` = colSums(responses[rows, , drop = FALSE] == 0))
       statistics
     })
-    support <- category_labels <- NULL
-    if (identical(family, "ordinal") && is.factor(frame[[1]])) {
-      category_labels <- levels(frame[[1]])
-      support <- seq_along(category_labels)
-    } else if (identical(family, "ordinal")) {
-      support <- category_labels <- sort(unique(as.vector(responses[composition_rows, ])))
-    }
     # Store plain plotting data, so the saved check needs no model or simulation object.
     composition$distribution <- list(
       # A few extreme simulated values should not squash the observed ECDF.
@@ -122,11 +85,8 @@ check_dyad_outcomes <- function(simulations, dyad = NULL, role = NULL, member = 
       roles = lapply(composition$rows, function(rows) {
         if (!length(rows)) return(NULL)
         values <- responses[rows, , drop = FALSE]
-        if (!is.null(support)) {
-          frequencies <- vapply(seq_len(ncol(values)), function(dataset)
-            tabulate(match(values[, dataset], support), nbins = length(support)) / nrow(values),
-            numeric(length(support)))
-          frequencies <- matrix(frequencies, nrow = length(support))
+        if (!is.null(category_labels)) {
+          frequencies <- apply(values, 2, tabulate, nbins = length(category_labels)) / nrow(values)
           bounds <- apply(frequencies[, -1, drop = FALSE], 1, simulated_rank_limits)
           bounds[] <- pmax(0, pmin(1, bounds))
           list(observed = frequencies[, 1],
@@ -148,17 +108,9 @@ check_dyad_outcomes <- function(simulations, dyad = NULL, role = NULL, member = 
   invisible(result)
 }
 
-#' @rdname print.dyadMLM_residual_check
 #' @export
 print.dyadMLM_outcome_check <- function(x, ...) print_check_overview(x, "outcome check")
 
-#' Plot saved outcome checks
-#'
-#' @param x An object returned by [check_dyad_outcomes()].
-#' @inheritParams check_dyad_residuals
-#' @param ... Unused.
-#' @return Invisibly returns `x`.
-#' @keywords internal
 #' @export
 plot.dyadMLM_outcome_check <- function(x, ask = NULL, panels = TRUE, ...) {
   checks <- lapply(x$compositions, function(composition)

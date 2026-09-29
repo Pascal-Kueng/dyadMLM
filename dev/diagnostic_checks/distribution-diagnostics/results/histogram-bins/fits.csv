@@ -1,5 +1,0 @@
-"example","formula","family","data_seed","nsim","simulation_seed","pit_seed","convergence","pdHess","warning_count","warnings"
-"nbinom2-gaussian","outcome ~ role + support","gaussian",NA,1000,123,123,0,TRUE,0,""
-"tweedie-gaussian","outcome ~ predictor + (1 | dyad)","gaussian",NA,2000,100105,123,0,TRUE,0,""
-"gaussian-correct","outcome ~ predictor + (1 | dyad)","gaussian",20260928,1000,123,123,0,TRUE,0,""
-"nbinom1-correct","outcome ~ predictor + (1 | dyad)","nbinom1",20260929,1000,123,123,0,TRUE,0,""

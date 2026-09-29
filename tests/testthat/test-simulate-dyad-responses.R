@@ -61,71 +61,30 @@ test_that("complete response simulations retain fitted-row alignment", {
 test_that("simulation metadata respects fixed and tied conditional coefficients", {
   skip_if_not_installed("glmmTMB")
   withr::local_seed(9243)
-  fitting_data <- data.frame(predictor = stats::rnorm(80))
+  fitting_data <- data.frame(predictor = stats::rnorm(80), role = gl(2, 1, 80))
   fitting_data$outcome <- 1 + 0.4 * fitting_data$predictor + stats::rnorm(80)
   model <- glmmTMB::glmmTMB(outcome ~ predictor, data = fitting_data)
   models <- list(
     free = model,
     absent = stats::update(model, . ~ . - 1),
+    role_means = stats::update(model, . ~ 0 + role + predictor),
+    zero_dispersion = stats::update(model, dispformula = ~0),
     fixed = stats::update(model, start = list(beta = c(1, 0)),
                           map = list(beta = factor(c(NA, 1)))),
     shared = stats::update(model, map = list(beta = factor(c(1, 1)))),
-    separate = stats::update(model, map = list(beta = factor(c(1, 2)))),
+    shared_roles = stats::update(model, . ~ 0 + role + predictor,
+                                 map = list(beta = factor(c(1, 1, 2)))),
     fixed_slope = stats::update(model, start = list(beta = c(0, 0.4)),
-                                map = list(beta = factor(c(1, NA)))),
-    all_fixed = stats::update(model, start = list(beta = c(1, 0.4)),
-                              map = list(beta = factor(c(NA, NA))))
+                                map = list(beta = factor(c(1, NA))))
   )
   free_intercepts <- vapply(models, function(fit) {
     simulations <- simulate_dyad_responses(fit, nsim = 1, seed = 9244)
     attr(simulations, "dyadMLM")$free_conditional_intercept
   }, logical(1))
   expect_identical(free_intercepts, c(
-    free = TRUE, absent = FALSE, fixed = FALSE, shared = FALSE,
-    separate = TRUE, fixed_slope = TRUE, all_fixed = FALSE
+    free = TRUE, absent = FALSE, role_means = TRUE, zero_dispersion = TRUE, fixed = FALSE,
+    shared = FALSE, shared_roles = TRUE, fixed_slope = TRUE
   ))
-})
-
-
-test_that("centring recognises equivalent role codings with zero dispersion", {
-  skip_if_not_installed("glmmTMB")
-  withr::local_seed(260927)
-  fitting_data <- data.frame(
-    dyad = factor(rep(seq_len(80), each = 2)),
-    role = factor(rep(c("A", "B"), 80)), predictor = stats::rnorm(160)
-  )
-  fitting_data$outcome <- 1 + 0.4 * (fitting_data$role == "B") +
-    0.3 * fitting_data$predictor +
-    stats::rnorm(80, sd = 0.7)[fitting_data$dyad] + stats::rnorm(160)
-  intercept <- glmmTMB::glmmTMB(
-    outcome ~ role + predictor + us(0 + role | dyad),
-    data = fitting_data, dispformula = ~0
-  )
-  role_means <- stats::update(intercept, . ~ . - 1)
-  expect_equal(stats::predict(intercept, re.form = NA),
-               stats::predict(role_means, re.form = NA), tolerance = 1e-4)
-
-  for (model in list(intercept, role_means)) {
-    expect_identical(model$fit$convergence, 0L)
-    expect_true(model$sdr$pdHess)
-    simulations <- simulate_dyad_responses(model, nsim = 200, seed = 7261)
-    expect_true(attr(simulations, "dyadMLM")$free_conditional_intercept)
-    result <- check_dyad_residuals(simulations, role = NULL, plot = FALSE)
-    expect_true(attr(result, "dyadMLM")$pit_centered)
-    expect_equal(apply(stats::qnorm(result$pit), 2, stats::median),
-                 rep(0, 201), ignore_attr = TRUE, tolerance = 1e-12)
-  }
-
-  mapped_models <- list(
-    fixed_role = stats::update(role_means, start = list(beta = c(1, 1.4, 0.3)),
-                               map = list(beta = factor(c(NA, 1, 2)))),
-    shared_roles = stats::update(role_means, map = list(beta = factor(c(1, 1, 2))))
-  )
-  free_location <- vapply(mapped_models, function(model) {
-    simulations <- simulate_dyad_responses(model, nsim = 1, seed = 7261)
-    attr(simulations, "dyadMLM")$free_conditional_intercept
-  }, logical(1))
-  expect_identical(free_location, c(fixed_role = FALSE, shared_roles = TRUE))
 })
 
 

@@ -11,16 +11,6 @@ params:
   results_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/distribution-checks"
 ---
 
-```{r availability, echo=FALSE, results='asis'}
-required_files <- c("conditions.csv", "summary.csv", "paired-comparison.csv", "fits.csv",
-  "dropped-panels.csv", "inference.csv", "severe-summary.csv",
-  paste0("confirmation-", c("summary.csv", "fits.csv", "maximum-deviation-ties.csv")))
-if (!all(file.exists(file.path(params$results_directory, required_files)))) {
-  cat("**Full results are not yet available.** The focused study is implemented, but its planned run has not been completed and exported. See the [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md) for the design and running instructions.\n")
-  knitr::knit_exit()
-}
-```
-
 ```{r setup, include=FALSE}
 library(dplyr)
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
@@ -31,9 +21,6 @@ conditions <- read_results("conditions.csv")
 summary <- read_results("summary.csv")
 paired <- read_results("paired-comparison.csv")
 fits <- read_results("fits.csv")
-fitted_counts <- filter(fits, reference == "fitted")
-complete_run <- setequal(fitted_counts$condition, conditions$condition) &&
-  all(fitted_counts$attempted == fitted_counts$repetitions)
 default_summary <- summary |> filter(
   (check %in% c("residual", "both") & reference == "fitted-centred") |
     (check == "outcome" & reference == "fitted"),
@@ -53,18 +40,6 @@ rate_table <- function(data) {
     Rate = format_rate(rate, rate_lower, rate_upper, checked)) |>
     select(Family, scenario_label, n_dyads, View, Check, Rate)
 }
-```
-
-```{r study-size, results='asis'}
-if (!complete_run) {
-  cat("**Incomplete results:** some datasets or conditions have not yet been run. The results below describe only the available checks.\n\n")
-} else if (any(conditions$repetitions < 500 | conditions$reference_draws < 1000)) {
-  cat("**Pilot results:** these runs use fewer than the planned 500 datasets or 1,000 reference simulations per condition. They check the study workflow and are too imprecise for general conclusions.\n\n")
-}
-cat(if (complete_run) "The saved run uses **" else "The run settings request **",
-  paste(unique(conditions$repetitions), collapse = ", "),
-  " datasets per condition** and **", paste(unique(conditions$reference_draws), collapse = ", "),
-  " reference simulations per dataset**.\n", sep = "")
 ```
 
 ## Summary
@@ -106,6 +81,8 @@ union_range <- function(view_name, union) with(filter(unions, scenario == "corre
   view == view_name, statistic == union), percent_range(rate))
 ```
 
+The study uses `r unique(conditions$repetitions)` datasets per condition and
+`r format(unique(conditions$reference_draws), big.mark = ",")` reference simulations per dataset.
 Unless noted, this summary counts only the panels the package still shows.
 
 - **Single panels rarely flag a correct model, but flags add up.** Each panel
@@ -221,30 +198,16 @@ Residual panels include the QQ envelope, histogram envelope, outlier count,
 mean PIT distance, and the quartile and distance envelopes against predicted
 outcomes. No additional predictor pages are requested. Outcome panels include
 the SD after subtracting fixed-effect predictions, largest absolute deviation,
-zero count where available, and displayed category frequencies. Counts use
-category displays only when there are at most 20 distinct observed values.
-Their categories are selected from the observations, so category-specific rates
-are conditional on being displayed. The blue-only "Other" category has no
-observed comparison and is excluded. Category intervals are separate, so a flag
-in any category is not a single 5% check. The package has since removed the
-histogram, the outlier count, and count category displays; the study recorded
-them (see [Panels removed after the study](#panels-removed-after-the-study)).
+zero count where available, and count category frequencies. The package has
+since removed the histogram, the outlier count, and count category displays (see
+[Panels removed after the study](#panels-removed-after-the-study)).
 
 Rates use available checks. Failed fits, convergence or Hessian problems, and
 failed checks are recorded and excluded without retry. Known-parameter and
 fitted-reference rates can therefore have different denominators. Bars show 95%
-Wilson intervals for Monte Carlo uncertainty. The paired centring comparison
-reports the difference in rates and its paired Monte Carlo standard error.
+Wilson intervals for Monte Carlo uncertainty.
 Counts and uncertainty are reported following the guidance of
 [Morris, White, and Crowther (2019)](https://doi.org/10.1002/sim.8086).
-
-The PIT approach builds on
-[Dunn and Smyth (1996)](https://doi.org/10.2307/1390802).
-The global envelopes use extreme-rank-length ordering, described in
-[Myllymäki and Mrkvička (2024)](https://doi.org/10.18637/jss.v111.i03).
-Neither reference establishes calibration of the package's fitted-model
-references or its median-centring adjustment. That is what this study examines
-in the selected settings.
 
 The report reads saved CSV files and does not fit models. See the
 [study code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/distribution-checks/run.R),
@@ -274,15 +237,6 @@ outlier counts do not depend on PIT centring.
 plot_distribution_panels(summary)
 known <- summary |> filter(reference == "known", role != "All",
   statistic %in% names(distribution_panel_labels), checked > 0)
-known_maximum <- slice_max(known, rate, n = 1, with_ties = FALSE)
-known_panels <- known |> group_by(statistic) |> summarise(rate = mean(rate))
-other_panels <- filter(known_panels, statistic != "outliers")$rate
-# Chance that a 95% Wilson interval lies above 5% when the true rate is exactly 5%.
-chance_above <- function(n) {
-  x <- 0:n; z <- qnorm(.975)
-  lower <- (x + z^2 / 2 - z * sqrt(x * (n - x) / n + z^2 / 4)) / (n + z^2)
-  sum(dbinom(x[lower > .05], n, .05))
-}
 percent <- function(rate) sprintf("%.1f%%", 100 * rate)
 fitted_levels <- default_summary |> filter(scenario == "correct", view == "pooled",
     statistic %in% c("response_sd", "zeros", "mean_distance")) |>
@@ -293,19 +247,9 @@ both_range <- function(name) with(filter(correct_both, view == name),
   sprintf("%.0f–%.0f%%", 100 * min(rate), 100 * max(rate)))
 ```
 
-With known parameters, the limits come from the model that generated the data.
-Each panel then flags at most 5% of datasets by construction, apart from Monte
-Carlo error. Across all `r nrow(known)` known-parameter rates (every
-correct-model condition and panel, pooled and per role), the average is
-`r percent(mean(known$rate))`. Per panel, the average ranges from
-`r percent(min(other_panels))` to `r percent(max(other_panels))`, except for the
-outlier count (`r percent(known_panels$rate[known_panels$statistic == "outliers"])`):
-its lower limit is usually 0, so it can flag only an excess. The highest single rate is
-`r with(known_maximum, sprintf("%.1f%% (%.1f–%.1f)", 100 * rate, 100 * rate_lower, 100 * rate_upper))`.
-Even if every rate were exactly 5%, about
-`r percent(mean(sapply(known$checked, chance_above)))` of intervals would lie
-entirely above 5%; here `r sum(known$rate_lower > .05)` of `r nrow(known)` do
-(`r percent(mean(known$rate_lower > .05))`).
+With known parameters, the limits come from the model that generated the data,
+so each panel should flag at most about 5% of datasets. Across all
+`r nrow(known)` known-parameter rates, the average is `r percent(mean(known$rate))`.
 This checks the implementation; it is not a finding about fitted references.
 
 With fitted models and all observations pooled, the response SD, zero count, and
@@ -313,14 +257,13 @@ mean PIT distance flag in at most `r fitted_level("response_sd")`,
 `r fitted_level("zeros")`, and `r fitted_level("mean_distance")` of datasets.
 The fitted model already matches these overall levels.
 
-Reading every panel of both checks for both roles, at least one flag appears in
+Reading every panel of both checks for both roles, including the since-removed
+histogram and outlier count, at least one flag appears in
 `r both_range("roles")` of datasets under every correct model. With all
-observations pooled, this is `r both_range("pooled")`. The panels the package
-still shows flag less often (see
-[Panels removed after the study](#panels-removed-after-the-study)).
+observations pooled, this is `r both_range("pooled")`.
 
 <details>
-<summary>Any flags and category-frequency flags under correct models</summary>
+<summary>Any flags under correct models</summary>
 
 The table counts any numerical flag within each check, or across both checks.
 The latter is a union within each dataset, not a sum of the two rates. Role-based
@@ -334,43 +277,6 @@ default_summary |> filter(scenario == "correct", n_times == 1, dyad_sd == .6,
   knitr::kable(col.names = c("Family", "Dyads", "View", "Check", "Any flag; datasets checked"))
 ```
 
-```{r correct-categories}
-categories <- default_summary |> filter(family == "nbinom2", scenario == "correct",
-  n_times == 1, dyad_sd == .6, check == "outcome", statistic == "category_any") |>
-  arrange_conditions(view)
-displayed <- filter(categories, view == "pooled")
-```
-
-Counts use category frequencies only with up to 20 distinct observed values.
-Under the correct count model, this held at
-`r paste(displayed$n_dyads, collapse = " / ")` dyads in
-`r knitr::combine_words(paste(displayed$checked, "of", displayed$usable))` usable datasets.
-The package now shows counts as an ECDF instead.
-
-```{r correct-category-table}
-categories |> transmute(n_dyads, View = ifelse(view == "pooled", "Pooled", "Either role"),
-    Displayed = paste(checked, "of", usable),
-    Rate = format_rate(rate, rate_lower, rate_upper, checked)) |>
-  knitr::kable(col.names = c("Dyads", "View", "Categories displayed; usable datasets",
-    "Any displayed category flagged; datasets checked"))
-known_categories <- summary |> filter(family == "nbinom2", scenario == "correct",
-  n_times == 1, dyad_sd == .6, n_dyads == 40, reference == "known", view == "pooled",
-  role == "Pooled", startsWith(statistic, "category"))
-known_any <- filter(known_categories, statistic == "category_any")
-category_rates <- known_categories |> filter(statistic != "category_any") |>
-  group_by(rare = checked < .05 * known_any$checked) |>
-  summarise(rate = sum(flagged) / sum(checked))
-```
-
-Even with the true parameters, at least one displayed category flags in
-`r distribution_percent(known_any$rate)` of datasets with category displays at 40 dyads
-(pooled). Part of this comes from rare high counts. Categories are taken from the
-observed values, so a rare high count is displayed whenever it occurs, and its
-observed frequency then often lies above the simulated limits: categories displayed
-in fewer than 5% of datasets flag in
-`r distribution_percent(category_rates$rate[category_rates$rare])` of their
-displays, the others in `r distribution_percent(category_rates$rate[!category_rates$rare])`.
-
 </details>
 
 ## Detecting model mismatches
@@ -379,9 +285,8 @@ The plots count any numerical flag for each default check. Solid lines count a
 flag in either role, while dotted lines pool all observations. These are different
 sets of comparisons, so the role-based check may flag more often even under a
 correct model. Grey lines repeat the correct-model rate of the same check and
-view, the false-alarm baseline. These rates include the PIT histogram and
-outlier count, which the package has since removed (see
-[Panels removed after the study](#panels-removed-after-the-study)).
+view, the false-alarm baseline. These rates include the since-removed PIT
+histogram and outlier count.
 
 ```{r gaussian-detection, fig.alt='Gaussian mismatch detection by sample size, comparing pooled and role-based residual and outcome checks with the correct-model baseline.'}
 plot_distribution_detection(summary, "gaussian")
@@ -459,10 +364,8 @@ The main patterns, at 100 / 400 dyads in either role unless noted:
 <details>
 <summary>What the fitted models estimate</summary>
 
-A fitted model can absorb part of a mismatch into its estimates. The table gives
-the median fitted dyad SD and the median residual SD (Gaussian) or NB2 size over
-usable fits, at 40 / 100 / 400 dyads. The data were generated with dyad SD 0.6,
-an average Gaussian residual variance of 1, and the NB2 sizes in the settings table.
+A fitted model can absorb part of a mismatch into its estimates (medians over
+usable fits; data generated with dyad SD 0.6 and average residual variance 1).
 
 ```{r fitted-estimates}
 fit_at_400 <- function(family_name, scenario_name, column) {
@@ -470,15 +373,6 @@ fit_at_400 <- function(family_name, scenario_name, column) {
     scenario == scenario_name, n_dyads == 400, n_times == 1, dyad_sd == .6)
   sprintf("%.2f", row[[column]])
 }
-fits |> filter(reference == "fitted", n_times == 1, dyad_sd == .6) |>
-  arrange_conditions() |>
-  group_by(family, scenario, scenario_label, fit_family) |>
-  summarise(dyad = paste(sprintf("%.2f", median_dyad_sd), collapse = separator),
-    dispersion = if (first(fit_family) == "poisson") "None (Poisson)" else
-      paste(sprintf("%.2f", median_dispersion), collapse = separator), .groups = "drop") |>
-  arrange(family, match(scenario, distribution_scenario_order)) |>
-  transmute(Family = unname(distribution_family_labels[family]), scenario_label, dyad, dispersion) |>
-  knitr::kable(col.names = c("Family", "Setting", "Dyad SD", "Residual SD or NB2 size"))
 ```
 
 At 400 dyads, omitted role means of ±0.4 give a residual SD of
@@ -540,20 +434,7 @@ consequence_table(conditions$condition[conditions$n_times == 1 & conditions$dyad
 
 ## Effect of median centring
 
-This comparison changes only median centring, leaving the fitted model,
-simulations, and PIT randomization unchanged. Positive differences mean more
-flags after centring. More correct-model flags may indicate less conservative
-references or an excessive flag rate; interpret them alongside the absolute
-rates above. Fewer flags under a mismatch may indicate a pattern the adjustment
-hides. The plots show each panel at 100 and 400 dyads; the saved table includes
-every sample size.
-
-```{r gaussian-centring, fig.height=7, fig.alt='Paired differences between centred and uncentred residual flag rates per panel for Gaussian models at 100 and 400 dyads, under correct and misspecified models.'}
-plot_distribution_centring(paired, "gaussian")
-```
-
-```{r count-centring, fig.height=7, fig.alt='Paired differences between centred and uncentred residual flag rates per panel for count models at 100 and 400 dyads, under correct and misspecified models.'}
-plot_distribution_centring(paired, "nbinom2")
+```{r centring-loss}
 loss <- paired |> filter(scenario != "correct", n_times == 1, dyad_sd == .6,
     n_dyads == 400, check == "residual", statistic %in% names(distribution_panel_labels),
     (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All")) |>
@@ -612,31 +493,7 @@ AR(1) process from independent noise only weakly. The known-parameter rates ther
 still use all `r longitudinal$usable[longitudinal$reference == "known"]` datasets.
 
 <details>
-<summary>Fit availability and complete saved results</summary>
-
-Warnings are counted whether or not they cause an exclusion. Known-parameter
-checks do not require a fitted model. The rate denominators can be smaller than
-the usable-fit counts when a particular summary is unavailable.
-
-```{r fit-availability}
-fits |> filter(!is.na(reference)) |> group_by(reference) |>
-  summarise(across(c(attempted, usable, with_warnings, fit_errors, fit_problems, check_errors), sum),
-    .groups = "drop") |>
-  knitr::kable(col.names = c("Reference", "Attempted", "Usable",
-    "With warnings", "Fit errors", "Fit problems", "Check errors"))
-```
-
-```{r fit-exclusions, results='asis'}
-excluded <- fits |> filter(usable < attempted) |> arrange_conditions(reference)
-if (nrow(excluded)) {
-  cat("\n\n**Conditions with unavailable checks**\n\n")
-  excluded |> mutate(Setting = paste(distribution_family_labels[family], scenario_label,
-      paste0(n_times, " occasion(s); dyad SD ", dyad_sd), sep = "; ")) |>
-    select(Setting, n_dyads, reference, attempted, usable, fit_errors, fit_problems, check_errors) |>
-    knitr::kable(col.names = c("Setting", "Dyads", "Reference", "Attempted", "Usable",
-      "Fit errors", "Fit problems", "Check errors")) |> print()
-}
-```
+<summary>Complete saved results</summary>
 
 The saved [summary table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/distribution-checks/summary.csv)
 contains every panel, category, role, and aggregate rate, with denominators and
@@ -652,6 +509,8 @@ neither flagged the same dataset.
 ## Panels removed after the study
 
 ```{r dropped-panels}
+categories <- default_summary |> filter(family == "nbinom2", scenario == "correct",
+  n_times == 1, dyad_sd == .6, check == "outcome", statistic == "category_any")
 cost <- dropped |> group_by(condition, scenario, scenario_label, n_dyads, view) |>
   summarise(cost = rate[panel_set == "all"] - rate[panel_set != "all"], .groups = "drop")
 example <- dropped |> filter(scenario == "dispersion_small", n_dyads == 400,
@@ -757,7 +616,8 @@ fit_note <- if (!nrow(failed)) "All fits and checks succeeded." else paste0(
 
 Entries give the percentage of datasets with at least one flag across both
 checks, with its 95% Wilson interval, from `r unique(confirmation_fits$repetitions)`
-datasets per setting and `r unique(confirmation_fits$reference_draws)` reference
+datasets per setting and
+`r format(unique(confirmation_fits$reference_draws), big.mark = ",")` reference
 simulations per dataset. Under correct models, at least one core panel flagged
 `r union_range("pooled", "core")` of datasets pooled and
 `r union_range("roles", "core")` in either role; with predictor pages,

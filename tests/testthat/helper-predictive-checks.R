@@ -19,3 +19,11 @@ distribution_check_fixture <- function() {
     )
   ), class = "dyadMLM_response_simulations", dyadMLM = list(family = "gaussian"))
 }
+
+subset_fixture <- function(simulations, rows) {
+  simulations$observed_response <- simulations$observed_response[rows]
+  simulations$predicted_response <- simulations$predicted_response[rows]
+  simulations$simulated_responses <- simulations$simulated_responses[, rows, drop = FALSE]
+  simulations$model_frame <- simulations$model_frame[rows, , drop = FALSE]
+  simulations
+}

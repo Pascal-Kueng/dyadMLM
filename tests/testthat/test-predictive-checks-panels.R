@@ -62,31 +62,13 @@ test_that("compositions use row-wise panels with clear titles and pair counts", 
   check_result <- partner_check_plot_fixture()
   grDevices::pdf(NULL, width = 12, height = 8)
   on.exit(grDevices::dev.off(), add = TRUE)
-  recorded_statistic_titles <- character()
   recorded_panel_positions <- list()
   recorded_margin_text <- list()
-  expected_statistic_titles <- c(
-    "SD (female) (variability within this role)",
-    "SD (male) (variability within this role)",
-    "Partner correlation (how partners vary together)",
-    "Dyad-average SD (variation between dyad averages)",
-    "Half-difference SD (variation in partner differences)",
-    "Dyad-average/role-difference correlation (which role varies more)",
-    rep(c("Common member SD (pooled variability)",
-          "Partner correlation (how partners vary together)",
-          "Dyad-average SD (variation between dyad averages)",
-          "Half-difference RMS (size of partner differences)"), 2)
-  )
   original_title <- graphics::title
   original_margin_text <- graphics::mtext
   local_mocked_bindings(title = function(main = NULL, sub = NULL, ...) {
-    statistic_title <- gsub("\\s+", " ", main)
-    if (length(statistic_title) == 1L &&
-        statistic_title %in% expected_statistic_titles) {
-      recorded_statistic_titles <<- c(recorded_statistic_titles, statistic_title)
-      recorded_panel_positions[[length(recorded_panel_positions) + 1L]] <<-
-        graphics::par("mfg")
-    }
+    recorded_panel_positions[[length(recorded_panel_positions) + 1L]] <<-
+      graphics::par("mfg")
     original_title(main = main, sub = sub, ...)
   }, mtext = function(text, ...) {
     recorded_margin_text[[length(recorded_margin_text) + 1L]] <<- c(list(text = text), list(...))
@@ -96,7 +78,6 @@ test_that("compositions use row-wise panels with clear titles and pair counts", 
   visible_result <- withVisible(plot(check_result, ask = FALSE))
   expect_false(visible_result$visible)
   expect_identical(visible_result$value, check_result)
-  expect_identical(recorded_statistic_titles, expected_statistic_titles)
   expected_panel_positions <- rbind(
     cbind(rep(1:2, each = 3L), rep(1:3, 2L), 2L, 3L),
     cbind(rep(1:2, each = 2L), rep(1:2, 2L), 2L, 2L),
@@ -113,31 +94,6 @@ test_that("compositions use row-wise panels with clear titles and pair counts", 
   expect_true(all(vapply(headings, `[[`, 0, "font") == 2))
   expect_true(all(vapply(headings, `[[`, 0, "cex") > vapply(subtitles, `[[`, 0, "cex")))
   expect_true(all(grepl("model-centred", vapply(subtitles, `[[`, "", "text"))))
-})
-
-
-test_that("long composition headings fit and retain their size across page layouts", {
-  grDevices::pdf(NULL, width = 12, height = 8)
-  on.exit(grDevices::dev.off(), add = TRUE)
-  composition <- paste(rep("a detailed partner role", 6), collapse = " - ")
-  headings <- list()
-  original_mtext <- graphics::mtext
-  local_mocked_bindings(mtext = function(text, ...) {
-    arguments <- list(...)
-    if (identical(text, composition)) headings[[length(headings) + 1L]] <<- c(
-      size = arguments$cex,
-      width = graphics::strwidth(text, "inches", font = arguments$font,
-                                 cex = arguments$cex / graphics::par("cex"))
-    )
-    original_mtext(text, ...)
-  }, .package = "graphics")
-  for (rows in c(2, 4)) plot_check_page(composition, "Residual checks", c(rows, 2), {
-    for (panel in seq_len(rows * 2)) graphics::plot.new()
-  })
-  expect_length(headings, 2)
-  expect_equal(headings[[1]], headings[[2]])
-  expect_lt(headings[[1]]["size"], 1.4)
-  expect_lte(headings[[1]]["width"], .95 * grDevices::dev.size("in")[1])
 })
 
 

@@ -1,6 +1,6 @@
 # Run from the repository root. GET is a development reference, not a package
 # dependency. Example with a temporary installation:
-# R_LIBS=/tmp/dyadmlm-envelope-library Rscript dev/diagnostic_checks/distribution-diagnostics/validate-envelopes.R
+# R_LIBS=/tmp/dyadmlm-envelope-library Rscript dev/diagnostic_checks/validate-envelopes.R
 if (!requireNamespace("GET", quietly = TRUE)) stop("Install GET to run this comparison.")
 source("R/predictive_checks_envelopes.R")
 set.seed(9926)

@@ -25,9 +25,7 @@ distribution_run_caption <- function(data) {
   attempted <- range(data$attempted)
   datasets <- if (diff(attempted) == 0) attempted[1] else paste(attempted, collapse = "–")
   paste0(datasets, " datasets per shown condition; ", unique(data$reference_draws),
-    " reference simulations per bank.",
-    if (any(data$repetitions < 500 | data$reference_draws < 1000)) " Pilot results." else "",
-    "\n")
+    " reference simulations per bank.\n")
 }
 
 plot_distribution_panels <- function(summary) {
@@ -58,7 +56,7 @@ plot_distribution_panels <- function(summary) {
       x = "Datasets flagged (%)", y = NULL, colour = NULL,
       caption = paste0(distribution_run_caption(plot_data),
         "Bars: 95% Wilson intervals for Monte Carlo uncertainty. Dashed line: 5% benchmark.\n",
-        "Fitted references need not attain 5%; centring affects only PIT summaries. Category-frequency flags are reported separately.")) +
+        "Fitted references need not attain 5%; centring affects only PIT summaries.")) +
     distribution_plot_theme()
 }
 
@@ -103,43 +101,5 @@ plot_distribution_detection <- function(summary, family_name) {
       caption = paste0(distribution_run_caption(plot_data),
         "Bars: 95% Wilson intervals for Monte Carlo uncertainty. Rates use available checks.\n",
         "Checking both roles gives more opportunities for a flag. These rates are not calibrated power.")) +
-    distribution_plot_theme()
-}
-
-plot_distribution_centring <- function(paired, family_name) {
-  panels <- c(distribution_panel_labels[c("qq", "histogram", "mean_distance",
-    "predicted_quantiles", "predicted_distance")], any = "Any panel")
-  plot_data <- subset(paired, family == family_name & n_times == 1 & dyad_sd == .6 &
-    n_dyads %in% c(100, 400) & check == "residual" & statistic %in% names(panels) &
-    ((view == "pooled" & role == "Pooled") | (view == "roles" & role == "All")))
-  if (!nrow(plot_data)) return(NULL)
-  plot_data$panel <- factor(plot_data$statistic, levels = rev(names(panels)), labels = rev(panels))
-  plot_data$sample_label <- factor(plot_data$n_dyads,
-    labels = paste(sort(unique(plot_data$n_dyads)), "dyads"))
-  plot_data$view_label <- factor(plot_data$view,
-    levels = c("pooled", "roles"), labels = c("All observations pooled", "Either role flagged"))
-  plot_data$scenario_label <- factor(plot_data$scenario_label,
-    levels = unique(plot_data$scenario_label[order(match(plot_data$scenario, distribution_scenario_order))]))
-  plot_data$lower <- plot_data$centred_minus_uncentred - 1.96 * plot_data$difference_mcse
-  plot_data$upper <- plot_data$centred_minus_uncentred + 1.96 * plot_data$difference_mcse
-  dodge <- ggplot2::position_dodge(width = .6, orientation = "y")
-
-  ggplot2::ggplot(plot_data, ggplot2::aes(x = centred_minus_uncentred,
-    y = panel, shape = view_label)) +
-    ggplot2::geom_vline(xintercept = 0, colour = "grey55", linetype = "dashed") +
-    ggplot2::geom_errorbar(ggplot2::aes(xmin = lower, xmax = upper),
-      orientation = "y", position = dodge, width = .35, show.legend = FALSE) +
-    ggplot2::geom_point(position = dodge, size = 2) +
-    ggplot2::facet_grid(sample_label ~ scenario_label,
-      labeller = ggplot2::labeller(scenario_label = ggplot2::label_wrap_gen(20))) +
-    ggplot2::scale_shape_manual(values = c(1, 16)) +
-    ggplot2::scale_x_continuous(labels = function(values) sprintf("%+.0f", 100 * values)) +
-    ggplot2::labs(title = paste(distribution_family_labels[family_name],
-        "models: what changes when PIT residuals are median-centred?"),
-      subtitle = "Difference in the frequency of flags, per panel",
-      x = "Centred minus uncentred (percentage points)", y = NULL, shape = NULL,
-      caption = paste0(distribution_run_caption(plot_data),
-        "Positive values mean more flags after centring. Both versions use identical fits, draws and PIT randomization.\n",
-        "Bars: difference ± 1.96 paired Monte Carlo SE. The outlier count does not depend on centring and is omitted.")) +
     distribution_plot_theme()
 }

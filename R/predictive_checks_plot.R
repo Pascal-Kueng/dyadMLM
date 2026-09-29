@@ -52,11 +52,7 @@ plot_check_statistic <- function(values, title, xlab = "Summary value",
   if (any(is.finite(limits))) graphics::abline(v = limits[is.finite(limits)],
     lty = 2, col = check_colours$reference)
   graphics::abline(v = values[1], col = check_colours$observed, lwd = 2)
-  guide <- if (is.null(sub))
-    "The red line should usually lie between the dashed limits.\nOutside means an unusually low or high value for this model." else sub
-  if (!any(is.finite(limits)))
-    guide <- "Too few simulations for finite 95% limits."
-  plot_check_caption(guide)
+  plot_check_caption(if (any(is.finite(limits))) sub else "Too few simulations for finite 95% limits.")
 }
 
 # Arrange the same checks together or individually, with context on every figure.
@@ -120,16 +116,12 @@ plot_check_page <- function(composition, title, panels, draw,
   force(draw)
 
   # Physical margins keep headings in place regardless of panel text scaling.
-  # Only narrow devices or long labels reduce their size to fit the page.
   heading <- function(text, position, size, font = 1, side = 3) {
-    size <- size * heading_scale
-    size <- size * min(1, .95 * grDevices::dev.size("in")[1] / length(text) /
-      max(graphics::strwidth(text, "inches", cex = size / graphics::par("cex"), font = font)))
     line <- (graphics::par("omi")[side] - position * heading_scale) /
       (graphics::par("csi") * graphics::par("mex"))
     graphics::mtext(text, outer = TRUE, side = side, line = line,
-                    at = (seq_along(text) - .5) / length(text), cex = size, font = font,
-                    padj = 0)
+                    at = (seq_along(text) - .5) / length(text),
+                    cex = size * heading_scale, font = font, padj = 0)
   }
   heading(composition, .3, 1.4, font = 2)
   heading(title, .58, .9)

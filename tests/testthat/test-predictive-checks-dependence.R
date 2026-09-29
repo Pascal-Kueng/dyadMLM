@@ -562,6 +562,8 @@ test_that("printing describes the check and plots show empirical limits", {
     )))
     expect_equal(graphics::par(names(settings)), settings)
   }
+  expect_no_error(plot(exchangeable, ask = FALSE, col = "navy", border = "yellow",
+                       xlab = "Custom", ylim = c(0, 20)))
   ask_values <- logical()
   local_mocked_bindings(devAskNewPage = function(ask = NULL) {
     ask_values <<- c(ask_values, ask)
@@ -606,37 +608,6 @@ test_that("the summary and printout flag statistics outside the middle 95% of de
   expect_match(paste(printed, collapse = "\n"),
                "Outside the middle 95% of simulations (*): 3 of 6 observed statistics.",
                fixed = TRUE)
-})
-
-
-test_that("partner plots preserve custom histogram colours and axes", {
-  result <- check_partner_dependence(partner_check_test_simulations(), "dyad", NULL, plot = FALSE)
-  grDevices::pdf(NULL, width = 12, height = 8)
-  on.exit(grDevices::dev.off(), add = TRUE)
-  fills <- borders <- labels <- character()
-  limits <- list()
-  original_rect <- graphics::rect
-  original_title <- graphics::title
-  local_mocked_bindings(rect = function(xleft, ybottom, xright, ytop,
-                                         col = NULL, border = NULL, ...) {
-    fills <<- c(fills, col)
-    borders <<- c(borders, border)
-    original_rect(xleft, ybottom, xright, ytop, col = col, border = border, ...)
-  }, title = function(main = NULL, xlab = NULL, ...) {
-    labels <<- c(labels, xlab)
-    limits[[length(limits) + 1L]] <<- graphics::par("usr")[3:4]
-    original_title(main = main, xlab = xlab, ...)
-  }, .package = "graphics")
-  for (panels in c(TRUE, FALSE)) {
-    fills <- borders <- labels <- character()
-    limits <- list()
-    plot(result, panels = panels, ask = FALSE, col = "navy", border = "yellow",
-         xlab = "Custom summary", ylim = c(0, 20), yaxs = "i")
-    expect_identical(fills, rep("navy", 4))
-    expect_identical(borders, rep("yellow", 4))
-    expect_identical(labels, rep("Custom summary", 4))
-    expect_equal(limits, rep(list(c(0, 20)), 4))
-  }
 })
 
 

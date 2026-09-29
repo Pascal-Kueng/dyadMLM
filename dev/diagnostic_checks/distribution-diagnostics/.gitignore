@@ -1,4 +1,0 @@
-# Regenerate figures and HTML reports with the scripts in this folder.
-/results/**/*.svg
-/results/**/*.png
-/results/**/*.html
