@@ -162,6 +162,9 @@ partner's same statistic on the same occasion. Each shared occasion counts once.
 
 An occasion without the partner still counts in the member's mean.
 
+The within check is related to repeated-measures correlation
+(Bakdash & Marusich, 2017).
+
 Known limitations and caveats:
 \itemize{
 \item A misfit at one level can also impact the other level's summaries,
@@ -170,10 +173,8 @@ variance) or nonlinear links. Thus, both levels should be interpreted
 together.
 \item Check dependence across occasions (e.g., autocorrelation) separately.
 If the model omits a temporal dependence, within-person summaries may be incorrect.
-\item Predictors computed from the response, such as lagged outcomes, keep their
-observed values while simulations draw new random effects. Raw checks are
-then invalid, and model-centred checks are valid only with an identity
-link.
+\item If the model includes lagged values of the outcome as predictors, these
+checks may not be valid.
 \item For ordinal and beta responses, same-occasion effects are often poorly
 estimated. Within rows may flag even though the model is correctly specified.
 }
@@ -287,4 +288,7 @@ Methods, 10}(2), 139-158. \doi{10.1037/1082-989X.10.2.139}.
 Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
 assessment of model fitness via realized discrepancies. \emph{Statistica Sinica,
 6}, 733-807.
+
+Bakdash, J. Z., & Marusich, L. R. (2017). Repeated measures correlation.
+\emph{Frontiers in Psychology, 8}, 456. \doi{10.3389/fpsyg.2017.00456}.
 }

@@ -35,10 +35,9 @@ effects `e` (`sig_m^2`, `sig_12`), independent over occasions. Member `m` of dya
   "member means", not "stable dependence".
 - Pooling within pairs across dyads is valid. The same statistic is computed on
   the observed and on every simulated dataset, and each simulated dataset carries
-  the model's dependence. The pairs therefore need not be independent, and
-  finite-sample biases cancel. Centring before pooling keeps the levels apart. For
-  distinct roles, the pooled within correlation is the repeated-measures
-  correlation (Bland & Altman, 1995; Bakdash & Marusich, 2017).
+  the model's dependence. The pairs therefore need not be independent.
+  Centring before pooling keeps the levels apart. The within check is related to
+  repeated-measures correlation (Bakdash & Marusich, 2017).
 - Weighting: between, each dyad counts once. Within, each shared occasion counts
   once.
 - The reference is conditional on the observed rows, the predictors and the
@@ -57,10 +56,8 @@ effects `e` (`sig_m^2`, `sig_12`), independent over occasions. Member `m` of dya
    the rows its free parameters pin (demo, §8). But the simulations then vary too
    little, so within rows tied to restrictions flag too often (11–13% at
    `phi = 0.5`). Lags come in the next PR.
-3. **Predictors computed from the response,** such as lagged outcomes, keep their
-   observed values, while simulations draw new random effects. With such
-   predictors, raw checks are invalid for every family. Model-centred checks are
-   valid only with an identity link.
+3. If the model includes lagged values of the outcome as predictors, these
+   checks may not be valid.
 4. **Ordinal and beta responses:** with two observations per dyad and occasion,
    same-occasion effects are poorly estimated. Within rows can then flag even when
    the model form is right.
