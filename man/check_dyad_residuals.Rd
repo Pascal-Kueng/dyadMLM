@@ -129,9 +129,9 @@ A flag is a red value or curve outside its blue range or limits. Each panel
 alone rarely flags a correct model, but flags add up across panels. In our
 \href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulations},
 at least one panel of the residual and outcome checks (ECDFs and category
-bars not counted) flagged about 7--14\% of correct models when pooled, 21--28\%
-in either role, and 32--40\% in either role with actor and partner predictor
-pages. So look for a consistent pattern, not any single flag. With about 40
+bars not counted) flagged about 7--14\% of correct Gaussian and count models
+when pooled, 21--28\% in either role, and 32--45\% in either role with actor
+and partner predictor pages; ordinal models were flagged less often. So look for a consistent pattern, not any single flag. With about 40
 dyads, most mismatches studied were hard to detect; no flag does not show a
 good fit.
 Panels suggest possible problems, not their cause. Neither a flag nor its

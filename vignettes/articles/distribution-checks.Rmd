@@ -13,7 +13,8 @@ params:
 
 ```{r availability, echo=FALSE, results='asis'}
 required_files <- c("conditions.csv", "summary.csv", "paired-comparison.csv", "fits.csv",
-  "dropped-panels.csv", "inference.csv", "severe-summary.csv")
+  "dropped-panels.csv", "inference.csv", "severe-summary.csv",
+  paste0("confirmation-", c("summary.csv", "fits.csv", "maximum-deviation-ties.csv")))
 if (!all(file.exists(file.path(params$results_directory, required_files)))) {
   cat("**Full results are not yet available.** The focused study is implemented, but its planned run has not been completed and exported. See the [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md) for the design and running instructions.\n")
   knitr::knit_exit()
@@ -98,6 +99,11 @@ centring <- paired |> filter(check == "residual", statistic == "any", n_times ==
   dyad_sd == .6, (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All"))
 centring_change <- function(correct) with(filter(centring, (scenario == "correct") == correct),
   sprintf("%.0f", 100 * range(centred_minus_uncentred)))
+confirmation <- read_results("confirmation-summary.csv")
+unions <- confirmation |> filter(check == "both", statistic %in% c("core", "pages"),
+  (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All"))
+union_range <- function(view_name, union) with(filter(unions, scenario == "correct",
+  view == view_name, statistic == union), percent_range(rate))
 ```
 
 Unless noted, this summary counts only the panels the package still shows.
@@ -108,8 +114,11 @@ Unless noted, this summary counts only the panels the package still shows.
   flag appeared in `r reduced_range("pooled")` of datasets with all observations
   pooled, `r reduced_range("roles")` in either role, and
   `r reduced_range("roles", FALSE)` in either role with actor and partner
-  predictor pages (dyad SD 1.2). So look for a consistent pattern, not any
-  single flag.
+  predictor pages (dyad SD 1.2). On fresh seeds, the
+  [confirmation run](#confirmation-run) gave `r union_range("pooled", "core")`,
+  `r union_range("roles", "core")`, and `r union_range("roles", "pages")`
+  (dyad SD 0.6, including ordinal models). So look for a consistent pattern,
+  not any single flag.
 - **Detection depends strongly on sample size.** With 40 dyads, most
   mismatches were hard to detect: apart from omitted role means of ±0.4
   (`r distribution_percent(detected(40, "mean_large"))`), mismatches were flagged
@@ -716,21 +725,9 @@ and distance across predicted outcomes, response SD, largest absolute
 deviation, and the zero count where shown; *with pages* adds the four
 predictor-page panels. Ordinal category ranges enter no union.
 
-```{r confirmation-availability, results='asis'}
-confirmation_files <- paste0("confirmation-", c("summary.csv", "fits.csv",
-  "maximum-deviation-ties.csv"))
-if (!all(file.exists(file.path(params$results_directory, confirmation_files)))) {
-  cat("Its results are not yet available.\n")
-  knitr::knit_exit()
-}
-```
-
 ```{r confirmation}
-confirmation <- read_results("confirmation-summary.csv")
 confirmation_fits <- read_results("confirmation-fits.csv")
 family_labels <- c(distribution_family_labels, ordinal = "Ordinal")
-unions <- confirmation |> filter(check == "both", statistic %in% c("core", "pages"),
-  (view == "pooled" & role == "Pooled") | (view == "roles" & role == "All"))
 # A no-break space and a word joiner keep each entry on one line.
 unions |> arrange(condition, view, statistic) |>
   transmute(Family = unname(family_labels[family]), scenario_label, n_dyads,
@@ -739,8 +736,6 @@ unions |> arrange(condition, view, statistic) |>
   tidyr::pivot_wider(names_from = column, values_from = rate) |>
   knitr::kable(col.names = c("Family", "Setting", "Dyads", "Pooled: core",
     "Pooled: with pages", "Either role: core", "Either role: with pages"))
-union_range <- function(view_name, union) with(filter(unions, scenario == "correct",
-  view == view_name, statistic == union), percent_range(rate))
 # Each mismatch against the correct model of the same family and sample size.
 matched <- unions |> filter(view == "roles", statistic == "pages") |>
   group_by(family, n_dyads) |> mutate(baseline = rate[scenario == "correct"]) |>
