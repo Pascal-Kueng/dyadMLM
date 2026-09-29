@@ -43,7 +43,9 @@ test_that("an original roster keeps lone responses with known compositions", {
   expect_equal(groups[[2]]$rows, list(A = 1L, B = integer()))
   expect_equal(groups[[3]]$rows, list(Pooled = 3L))
   expect_equal(vapply(groups, `[[`, 0L, "n_dyads"), rep(1L, 3))
-  expect_error(residual_check_groups(frame, dyad, role), "No fitted observations")
+  # Suggest `data` only when it was not supplied.
+  expect_error(residual_check_groups(frame, dyad, role), "No fitted observations.*`data`")
+  expect_error(residual_check_groups(frame, dyad, role, data = frame), "composition\\.$")
 })
 
 test_that("member IDs identify compositions across uneven repeated observations", {
@@ -71,7 +73,8 @@ test_that("unknown compositions omit only their fitted rows", {
                       member = c(1, 2, 1, 1, 2, 1),
                       role = c("A", "B", "A", "A", NA, "A"))
   expect_warning(groups <- residual_check_groups(frame, dyad, role, member),
-                 "4 fitted observations omitted")
+                 "4 fitted observations omitted.*`data`")
+  expect_warning(residual_check_groups(frame, dyad, role, member, frame), "unknown\\.$")
   expect_equal(groups[[1]]$rows, list(A = 1L, B = 2L))
   expect_equal(groups[[1]]$n_dyads, 1L)
 })

@@ -70,15 +70,15 @@ build_check_groups <- function(model_frame, dyad_quo, role_quo,
     dplyr::left_join(members, by = c("dyad_number", "member_number")) |>
     dplyr::left_join(compositions, by = "dyad_number")
   unknown <- is.na(fitted_members$first_role) | is.na(fitted_members$role_index)
+  hint <- if (is.null(data))
+    " Supply the original fitting data with `data` if partners were excluded."
   if (all(unknown)) {
-    stop("No fitted observations have a known two-member composition. ",
-         "Supply the original fitting data with `data` if partners were excluded.",
+    stop("No fitted observations have a known two-member composition.", hint,
          call. = FALSE)
   }
   if (any(unknown)) {
     warning(sum(unknown), " fitted observations omitted because their composition ",
-            "or member role is unknown. Supply the original fitting data with `data` ",
-            "if partners were excluded.", call. = FALSE)
+            "or member role is unknown.", hint, call. = FALSE)
   }
   fitted_members <- fitted_members[!unknown, ] |>
     dplyr::group_by(.data$first_role, .data$second_role) |>

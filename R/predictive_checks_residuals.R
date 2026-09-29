@@ -8,9 +8,10 @@
 #' @param simulations An object from [simulate_dyad_responses()]. At least 200
 #'   datasets are required; 1,000 or more are recommended.
 #' @param predictors Optional column names, e.g. `c("age", "stress")`, looked up
-#'   in the model frame or `data`. `NULL` (default) omits additional predictor
-#'   pages. Missing or infinite values are omitted only from that predictor's
-#'   plots. Predicted outcomes are always checked.
+#'   in the model frame or `data`. Pass predictors the model omits or may
+#'   misspecify, especially the partner's. `NULL` (default) omits additional
+#'   predictor pages. Missing or infinite values are omitted only from that
+#'   predictor's plots. Predicted outcomes are always checked.
 #' @param seed Seed for randomized PIT residuals. The caller's random-number
 #'   state is restored afterwards. With `NULL`, use and advance the caller's RNG.
 #' @inheritParams check_partner_dependence
@@ -37,41 +38,37 @@
 #'   Graphics settings are restored afterwards.
 #'
 #' @section Reading the plots:
-#' Start with everyone pooled (`role = NULL`), then inspect the roles used in
-#' your model. Use `predictors` to examine other measured characteristics. For
-#' separate QQ plots, histograms and summaries by a categorical characteristic,
-#' use that variable as `role`.
+#' Start with everyone pooled (`role = NULL`), then also inspect meaningful
+#' roles, such as gender, even when the model treats partners as exchangeable:
+#' role-specific problems show only there. Use `predictors` to examine other
+#' measured characteristics. For separate QQ plots and summaries by a categorical
+#' characteristic, use that variable as `role`.
 #'
 #' A composition is the combination of partners' roles. Each composition gets
 #' one pooled column for same-role partners, or separate columns for distinct
 #' roles. Every page repeats the composition heading.
-#' Roles define the display even if the model treats partners as exchangeable;
-#' supplying roles does not change the model's assumptions. Available responses
+#' Supplying roles does not change the model's assumptions. Available responses
 #' are retained when the composition is known; unknown compositions are omitted
 #' with a warning.
 #'
 #' **Red shows observed data; blue shows simulated references.** The first page
-#' shows uniform QQ and a PIT histogram; the second shows counts outside the
-#' simulated response range and mean PIT distance. The third shows PIT quartiles
+#' shows uniform QQ and mean PIT distance. The second shows PIT quartiles
 #' and distance against predicted outcomes. Each supplied predictor gets another
 #' two-row pattern page. All pages for one composition appear together.
-#' The histogram and QQ plot show the same residual distribution in different
-#' ways; agreement between them is not independent evidence.
-#' The histogram uses 10 equal-width bins to make broad shapes easier to see.
 #'
 #' PIT (probability integral transform) residuals rank each outcome from 0 (low)
 #' to 1 (high) relative to its own simulated values. A suitable model should
 #' produce ranks roughly evenly spread between 0 and 1, allowing for the
-#' variation shown in blue. Red above the diagonal or its blue range, or a
-#' histogram rising to the right, means outcomes higher than simulated; a
-#' U-shaped histogram means more extreme outcomes.
+#' variation shown in blue. Red above the diagonal or its blue range means
+#' outcomes higher than simulated.
 #' Blue curve envelopes cover positions jointly within each panel, with the
 #' three quartiles treated together. They use a nominal 95% extreme-rank-length
 #' envelope; coverage is not simultaneous across roles, predictors, or pages.
-#' The outlier and mean-distance rows show simulated values as a blue histogram
+#' The mean-distance row shows simulated values as a blue histogram
 #' and the observed value as a red line; dashed lines mark the middle 95%.
 #' Values exactly on a limit count as inside. Because the model was fitted to
-#' these same data, the references can make departures look smaller or larger.
+#' these same data, departures often look smaller than they are, as in the
+#' settings studied by Robins et al. (2000) and in our simulations.
 #' The lines at 0.25, 0.50 and 0.75 are visual guides. Judge the red quartiles
 #' against their matching blue bands.
 #'
@@ -93,15 +90,40 @@
 #' errors. These are full-model residuals, not partial effects; separate predictors
 #' and bins can hide interactions or finer patterns.
 #'
+#' @section Reading flags:
+#' A flag is a red value or curve outside its blue range or limits. Each panel
+#' alone rarely flags a correct model, but flags add up across panels. In our
+#' [simulations](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html),
+#' at least one panel of the residual and outcome checks (ECDFs and category
+#' bars not counted) flagged about 7--14% of correct models when pooled, 21--28%
+#' in either role, and 32--40% in either role with actor and partner predictor
+#' pages. So look for a consistent pattern, not any single flag. With about 40
+#' dyads, subtle mismatches were often missed; no flag does not show a good fit.
+#' Panels suggest possible problems, not their cause. Neither a flag nor its
+#' absence shows whether estimates or standard errors are wrong: fit the model
+#' the pattern suggests and compare the estimates and standard errors you
+#' report. Mismatches showed mainly in these panels:
+#' - Poisson fitted to overdispersed counts: mean PIT distance, number of zeros, QQ.
+#' - Extra zeros: QQ and PIT quartiles; the number of zeros less often.
+#' - Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
+#' - Different role SDs: response SD and mean PIT distance, by role.
+#' - Spread rising with a predictor: PIT distance panels, largest absolute deviation.
+#' - Omitted partner effect: PIT quartiles across the partner's predictor
+#'   (supply it in `predictors`).
+#'
 #' @section Scope:
 #' Observed and simulated datasets are ranked and transformed together. These
 #' envelopes retain the fitted partner and time dependence and any modeled
 #' differences in variability between roles, without whitening.
 #' Simulations redraw all random effects; DHARMa's default since version 0.5.0
 #' holds their fitted values fixed.
-#' They are dyadMLM's descriptive checks, not DHARMa's plots or tests. Parameters
-#' stay fixed, and the observed data were used to fit them; parameter uncertainty
-#' is not included. Neither ranking nor centring makes fitted-data references
+#' They are dyadMLM's descriptive checks, not DHARMa's plots or tests. DHARMa's
+#' residual tests assume independent residuals, which partners' residuals are
+#' not when random effects are redrawn. Held fixed, random effects that absorb
+#' all residual variation reproduce the data almost exactly, and grouping by
+#' dyad sums partners, so role differences can cancel. Parameters stay fixed,
+#' and the observed data were used to fit them; parameter uncertainty is not
+#' included. Neither ranking nor centring makes fitted-data references
 #' exact. For cross-sectional data, check partner correlations with
 #' [check_partner_dependence()].
 #'
@@ -124,21 +146,13 @@
 #' and keeps PIT values strictly inside 0--1.
 #'
 #' When the conditional model can freely shift its overall location, whether
-#' fitted with an intercept or separate role means, transform each dataset's PIT
-#' to normal scores, subtract its median across all fitted rows, then transform
-#' back. This removes overall location before splitting by
-#' role or predictor. Patterns describe residuals relative to that overall
-#' location. In our simulations, this adjustment reduced one source of
-#' conservativeness; it does not account for every effect of fitting.
-#' PIT residuals are not centred for ordinal models.
-#'
-#' Outlier counts, adapted from DHARMa's `testOutliers()`, use the original
-#' responses: a dataset contributes an outlier
-#' when it alone has the smallest or largest outcome at that fitted row. Tied
-#' extremes do not count. These are outcomes beyond the finite simulated range,
-#' not outcomes impossible under the model. Counts usually fall as simulations
-#' are added. With continuous exchangeable datasets, their expected count is
-#' `2 * n / (nsim + 1)`; ties and fitted parameters change this benchmark.
+#' fitted with an intercept or separate role means, PIT is centred automatically
+#' (not for ordinal models): transform each dataset's PIT to normal scores,
+#' subtract its median across all fitted rows, then transform back. This removes
+#' overall location before splitting by role or predictor: patterns describe
+#' residuals relative to it, so panels such as QQ and mean PIT distance can show
+#' less of an overall shift. In our simulations, this adjustment reduced one
+#' source of conservativeness; it does not account for every effect of fitting.
 #'
 #' Global envelopes use extreme-rank-length ordering (Myllymäki et al., 2017),
 #' retaining ties at the boundary and rounding coverage conservatively.
@@ -155,6 +169,11 @@
 #' Myllymäki, M., Mrkvička, T., Grabarnik, P., Seijo, H., & Hahn, U. (2017).
 #' Global envelope tests for spatial processes. *Journal of the Royal
 #' Statistical Society: Series B*, 79(2), 381--404. \doi{10.1111/rssb.12172}.
+#'
+#' Robins, J. M., van der Vaart, A., & Ventura, V. (2000). Asymptotic
+#' distribution of P values in composite null models. *Journal of the American
+#' Statistical Association*, 95(452), 1143--1156.
+#' \doi{10.1080/01621459.2000.10474310}.
 #'
 #' @seealso [check_dyad_outcomes()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
@@ -211,7 +230,6 @@ check_dyad_residuals <- function(simulations, dyad = NULL, role = NULL, member =
 
   # Rows are fitted observations; columns are complete datasets, observed first.
   responses <- cbind(observed, t(draws))
-  outliers <- strict_response_outliers(responses)
   pit <- randomized_pit(responses)
   centered <- isTRUE(attr(simulations, "dyadMLM")$free_conditional_intercept)
   if (centered) {
@@ -223,7 +241,6 @@ check_dyad_residuals <- function(simulations, dyad = NULL, role = NULL, member =
 
   # Matrices retain complete datasets in columns; subset only their rows.
   probabilities <- seq(0, 1, length.out = 201)
-  breaks <- seq(0, 1, length.out = 11)
   for (i in seq_along(compositions)) {
     role_rows <- compositions[[i]]$rows
     compositions[[i]]$statistics <- lapply(role_rows, function(rows) {
@@ -231,9 +248,6 @@ check_dyad_residuals <- function(simulations, dyad = NULL, role = NULL, member =
       values <- pit[rows, , drop = FALSE]
       list(
         qq = residual_curve_summary(apply(values, 2, stats::quantile, probs = probabilities)),
-        histogram = residual_curve_summary(apply(values, 2, function(x)
-          graphics::hist(x, breaks, plot = FALSE)$density)),
-        outliers = colSums(outliers[rows, , drop = FALSE]),
         mean_distance = colMeans(2 * abs(values - .5))
       )
     })
@@ -335,10 +349,10 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #' @export
 plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
   local_check_paging(ask, panels, if (panels)
-    length(x$compositions) * (3L + length(x$predictors)) else
+    length(x$compositions) * (2L + length(x$predictors)) else
     sum(vapply(x$compositions, function(composition) length(composition$rows), integer(1))) *
-      (6L + 2L * length(x$predictors)))
-  draw_envelopes <- function(x, curves, connect = TRUE, boxes = FALSE, smooth = FALSE) {
+      (4L + 2L * length(x$predictors)))
+  draw_envelopes <- function(x, curves, boxes = FALSE, smooth = FALSE) {
     quartiles <- length(curves) == 3L
     spacing <- min(diff(x), diff(graphics::par("usr")[1:2]) / 4)
     offsets <- if (quartiles && !smooth) c(-1, 0, 1) else rep(0, length(curves))
@@ -347,7 +361,7 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
     for (curve_index in seq_along(curves)) {
       curve <- curves[[curve_index]]
       bounds <- rbind(curve$lower, curve$upper)
-      if (connect && (!quartiles || smooth) && all(is.finite(bounds)))
+      if ((!quartiles || smooth) && all(is.finite(bounds)))
         graphics::polygon(c(x, rev(x)), c(bounds[1, ], rev(bounds[2, ])),
                           col = if (smooth) paste0(check_colours$simulated, "40") else check_colours$simulated, border = NA)
       if (smooth) {
@@ -367,8 +381,7 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
                          col = check_colours$observed, lwd = 2)
     } else for (curve_index in seq_along(curves))
       graphics::lines(x + offsets[curve_index], curves[[curve_index]]$observed,
-                      type = if (smooth) "l" else if (connect) "b" else "p",
-                      pch = 16, cex = if (connect) .65 else 1, lty = line_types[curve_index],
+                      type = if (smooth) "l" else "b", pch = 16, cex = .65, lty = line_types[curve_index],
                       lwd = if (quartiles && curve_index == 2) 2 else 1, col = check_colours$observed)
   }
   draw_pattern <- function(pattern, name = NULL, distance = FALSE) {
@@ -392,8 +405,8 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
       graphics::points(pattern$points$predictor, observed, pch = 16, cex = .4,
                         col = paste0(check_colours$observed, "20"))
     }
-    draw_envelopes(pattern$positions, curves, connect = pattern$numeric,
-                   boxes = !pattern$numeric, smooth = pattern$smooth)
+    draw_envelopes(pattern$positions, curves, boxes = !pattern$numeric,
+                   smooth = pattern$smooth)
     guide <- if (distance)
       "Blue ranges form one global envelope for this panel.\nAbove a range: more extreme residuals; below: more central residuals."
       else "Blue ranges form one global envelope for this panel.\nAbove a range: outcomes higher than simulated; below: lower."
@@ -405,11 +418,8 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
   for (composition in x$compositions) {
     draw_check <- function(check, role) {
       statistics <- composition$statistics[[role]]
-      title <- switch(check,
-        qq = "Uniform QQ\n(overall residual distribution)",
-        histogram = "PIT histogram\n(how residuals are distributed)",
-        outliers = "Outside simulated range (outliers)",
-        mean_distance = "Mean PIT distance\n(overall residual spread)")
+      title <- if (check == "qq") "Uniform QQ\n(overall residual distribution)" else
+        "Mean PIT distance\n(overall residual spread)"
       if (is.null(statistics)) return(plot_check_empty(title))
       if (check == "qq") {
         probabilities <- seq(0, 1, length.out = length(statistics$qq$observed))
@@ -418,27 +428,13 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
         draw_envelopes(probabilities, list(statistics$qq))
         graphics::abline(0, 1, lty = 2, col = check_colours$reference)
         plot_check_caption("The red curve should roughly follow the diagonal.\nAbove the diagonal: outcomes higher than simulated; below: lower.\nDepartures outside the blue global envelope suggest a distribution mismatch.")
-      } else if (check == "histogram") {
-        density <- statistics$histogram
-        midpoints <- (seq_along(density$observed) - .5) / length(density$observed)
-        graphics::plot(midpoints, density$observed, type = "n", xlim = c(0, 1), ylim = c(0, max(unlist(density))),
-                       main = title, xlab = "PIT", ylab = "Density")
-        draw_envelopes(midpoints, list(density), connect = FALSE)
-        graphics::abline(h = 1, lty = 2, col = check_colours$reference)
-        plot_check_caption("A binned view of the same residual distribution as the QQ plot.\nPeaks and gaps help identify departures; the blue global envelope\nshows variation across complete simulated datasets.")
-      } else if (check == "outliers") {
-        plot_check_statistic(statistics$outliers, title,
-          xlab = "Number of observations", counts = TRUE,
-          sub = "Counts outcomes below or above all their reference simulations.\nRed should usually lie between the dashed limits.\nBeyond right: more such outcomes than simulated; left: fewer.")
       } else {
         plot_check_statistic(statistics$mean_distance, title, xlab = "Mean distance from PIT 0.5",
-          sub = "Mean of 2 * |PIT - 0.5|, relative to simulated datasets.\nBeyond right: more extreme residuals; left: more central residuals.\nLocation and spread errors can both affect this distance.")
+          sub = "Mean of 2 * |PIT - 0.5|; red should usually lie between the dashed limits.\nBeyond right: more extreme residuals; left: more central residuals.\nLocation and spread errors can both affect this distance.")
       }
     }
-    plot_check_role_panels(composition, c("qq", "histogram"),
+    plot_check_role_panels(composition, c("qq", "mean_distance"),
       "Residual distribution", draw_check, panels)
-    plot_check_role_panels(composition, c("outliers", "mean_distance"),
-      "Residual summaries", draw_check, panels)
     for (i in seq_along(composition$patterns)) {
       name <- if (i == 1L) NULL else x$predictors[i - 1L]
       plot_check_role_panels(composition, c(FALSE, TRUE),
@@ -454,11 +450,4 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
 randomized_pit <- function(responses) {
   ranks <- t(apply(responses, 1, rank, ties.method = "random"))
   (ranks - stats::runif(length(ranks))) / ncol(responses)
-}
-
-# A strict outlier is the unique minimum or maximum among all datasets at a row.
-strict_response_outliers <- function(responses) {
-  lowest <- responses == apply(responses, 1, min)
-  highest <- responses == apply(responses, 1, max)
-  (lowest & rowSums(lowest) == 1L) | (highest & rowSums(highest) == 1L)
 }

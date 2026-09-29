@@ -671,7 +671,7 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
           "Half-difference RMS" = c("Half-difference RMS\n(size of partner differences)",
             "Beyond right: larger partner differences; left: smaller."),
           "Dyad-average/role-difference correlation" = c(
-            "Mean-difference correlation\n(which role varies more)",
+            "Dyad-average/role-difference correlation\n(which role varies more)",
             paste0("Positive: ", sub("^SD \\((.*)\\)$", "\\1", names(composition_statistics)[1]),
               " varies more;\nnegative: ",
               sub("^SD \\((.*)\\)$", "\\1", names(composition_statistics)[2]), " varies more.")))

@@ -246,13 +246,13 @@ test_that("overview and optional panels use predictable pages", {
   simulations$model_frame$age <- rep(c(20, 40), 6)
   simulations$model_frame$stress <- factor(rep(c("low", "high", "medium"), 4))
   cases <- list(
-    list(arguments = list(role = NULL), pages = 3L),
-    list(arguments = list(role = NULL, predictors = NULL), pages = 3L),
-    list(arguments = list(role = NULL, predictors = c("age", "stress")), pages = 5L),
-    list(arguments = list(role = NULL, panels = FALSE), pages = 6L),
-    list(arguments = list(role = NULL, predictors = c("age", "stress"), panels = FALSE), pages = 10L),
-    list(arguments = list(dyad = "dyad", role = "role"), pages = 3L),
-    list(arguments = list(dyad = "dyad", role = "role", panels = FALSE), pages = 12L)
+    list(arguments = list(role = NULL), pages = 2L),
+    list(arguments = list(role = NULL, predictors = NULL), pages = 2L),
+    list(arguments = list(role = NULL, predictors = c("age", "stress")), pages = 4L),
+    list(arguments = list(role = NULL, panels = FALSE), pages = 4L),
+    list(arguments = list(role = NULL, predictors = c("age", "stress"), panels = FALSE), pages = 8L),
+    list(arguments = list(dyad = "dyad", role = "role"), pages = 2L),
+    list(arguments = list(dyad = "dyad", role = "role", panels = FALSE), pages = 8L)
   )
   for (case in cases) {
     pages <- count_pdf_pages(
@@ -350,11 +350,11 @@ test_that("every residual page identifies its composition and page contents", {
     original_mtext(text, ...)
   }, .package = "graphics")
   cases <- list(
-    list(arguments = list(), pages = c("Residual distribution", "Residual summaries",
+    list(arguments = list(), pages = c("Residual distribution",
                                        "Residual patterns: predicted outcome")),
     list(arguments = list(predictors = "X"),
-         pages = c("Residual distribution", "Residual summaries",
-                   "Residual patterns: predicted outcome", "Residual patterns: X"))
+         pages = c("Residual distribution", "Residual patterns: predicted outcome",
+                   "Residual patterns: X"))
   )
   for (case in cases) {
     margins <- list()
@@ -399,7 +399,7 @@ test_that("individual residual figures retain composition, role and guidance", {
     original_mtext(text, ...)
   }, .package = "graphics")
   plot(result, panels = FALSE, ask = FALSE)
-  expect_length(figures, 16)
+  expect_length(figures, 12)
   roles <- character()
   page_titles <- character()
   for (figure in figures) {
@@ -413,9 +413,9 @@ test_that("individual residual figures retain composition, role and guidance", {
       identical(label$side, 1) && nzchar(label$text), figure)
     expect_length(captions, 1)
   }
-  expect_equal(as.integer(table(roles)), c(8L, 8L))
+  expect_equal(as.integer(table(roles)), c(6L, 6L))
   expect_identical(sub(" - .*", "", page_titles),
-    rep(c("Residual distribution", "Residual summaries", "Residual patterns: predicted outcome",
+    rep(c("Residual distribution", "Residual patterns: predicted outcome",
           "Residual patterns: age"), each = 4))
 })
 
@@ -423,7 +423,6 @@ test_that("individual residual figures retain composition, role and guidance", {
 test_that("role columns use their own observations and simulated references", {
   simulations <- distribution_check_fixture()
   result <- check_dyad_residuals(simulations, dyad = "dyad", role = "role", plot = FALSE)
-  responses <- cbind(simulations$observed_response, t(simulations$simulated_responses))
   rows_by_role <- split(seq_len(12), simulations$model_frame$role)
   for (i in seq_along(rows_by_role)) {
     rows <- rows_by_role[[i]]
@@ -431,11 +430,7 @@ test_that("role columns use their own observations and simulated references", {
     statistics <- result$compositions[[1]]$statistics[[i]]
     expected_qq <- apply(values, 2, quantile, probs = seq(0, 1, length.out = 201))
     expect_equal(statistics$qq, residual_curve_summary(expected_qq))
-    expected_histogram <- apply(values, 2, function(x)
-      hist(x, breaks = seq(0, 1, length.out = 11), plot = FALSE)$density)
-    expect_equal(statistics$histogram, residual_curve_summary(expected_histogram))
-    # Strict raw-response extrema remain visible even though PIT has no endpoints.
-    expect_equal(unname(statistics$outliers), colSums(strict_response_outliers(responses)[rows, ]))
+    expect_equal(names(statistics), c("qq", "mean_distance"))
     expect_equal(statistics$mean_distance, colMeans(2 * abs(values - .5)))
   }
 })
@@ -460,49 +455,15 @@ test_that("residual plots draw each role's saved curves and scalar summaries", {
     if (recording) bounds[[length(bounds) + 1L]] <<- unname(rbind(y0, y1))
     original_segments(x0, y0, x1, y1, ...)
   }, .package = "graphics")
-  local_mocked_bindings(plot_check_statistic = function(values, ..., counts = FALSE) {
-    scalars[[length(scalars) + 1L]] <<- list(values = values, counts = counts)
+  local_mocked_bindings(plot_check_statistic = function(values, ...) {
+    scalars[[length(scalars) + 1L]] <<- values
     graphics::plot.new()
   })
   plot(result, ask = FALSE)
   statistics <- result$compositions[[1]]$statistics
   expect_equal(observed, unname(lapply(statistics, function(x) x$qq$observed)))
   expect_equal(bounds, unname(lapply(statistics, function(x) rbind(x$qq$lower, x$qq$upper))))
-  expected <- c(lapply(statistics, `[[`, "outliers"), lapply(statistics, `[[`, "mean_distance"))
-  expect_equal(lapply(scalars, `[[`, "values"), unname(expected))
-  expect_identical(vapply(scalars, `[[`, logical(1), "counts"), c(TRUE, TRUE, FALSE, FALSE))
-})
-
-
-test_that("histogram positions match the bin count in new and saved results", {
-  result <- check_dyad_residuals(distribution_check_fixture(), role = NULL, plot = FALSE)
-  grDevices::pdf(NULL, width = 12, height = 10)
-  on.exit(grDevices::dev.off(), add = TRUE)
-  positions <- limits <- NULL
-  recording <- FALSE
-  original_title <- graphics::title
-  original_lines <- graphics::lines
-  local_mocked_bindings(title = function(main = NULL, ...) {
-    recording <<- identical(main, "PIT histogram\n(how residuals are distributed)")
-    original_title(main = main, ...)
-  }, lines = function(x, y, ...) {
-    if (recording) {
-      positions <<- x
-      limits <<- graphics::par("usr")[1:2]
-    }
-    if (missing(y)) original_lines(x, ...) else original_lines(x, y, ...)
-  }, .package = "graphics")
-  expect_length(result$compositions[[1]]$statistics[[1]]$histogram$observed, 10)
-  for (bins in c(10L, 20L)) {
-    # Existing 20-bin saved checks retain their original bin positions.
-    densities <- apply(result$pit, 2, function(x)
-      hist(x, breaks = seq(0, 1, length.out = bins + 1L), plot = FALSE)$density)
-    result$compositions[[1]]$statistics[[1]]$histogram <- residual_curve_summary(densities)
-    plot(result, ask = FALSE)
-    expect_equal(positions, seq(1 / (2 * bins), 1 - 1 / (2 * bins), length.out = bins))
-    expect_lte(limits[1], 0)
-    expect_gte(limits[2], 1)
-  }
+  expect_equal(scalars, unname(lapply(statistics, `[[`, "mean_distance")))
 })
 
 
@@ -737,16 +698,6 @@ test_that("invalid simulation inputs and unsupported predictor forms fail clearl
 })
 
 
-test_that("strict response extrema exclude tied minima and maxima", {
-  responses <- rbind(c(0, 1, 2, 3), c(0, 0, 1, 2), c(0, 1, 2, 2), rep(1, 4))
-  expected <- rbind(c(TRUE, FALSE, FALSE, TRUE), c(FALSE, FALSE, FALSE, TRUE),
-                    c(TRUE, FALSE, FALSE, FALSE), rep(FALSE, 4))
-  expect_identical(strict_response_outliers(responses), expected)
-  order <- c(4, 2, 1, 3)
-  expect_identical(strict_response_outliers(responses[, order]), expected[, order])
-})
-
-
 test_that("centring precedes role splits and all PIT summaries use it", {
   simulations <- distribution_check_fixture()
   uncentred <- check_dyad_residuals(simulations, role = NULL, plot = FALSE)
@@ -766,11 +717,8 @@ test_that("centring precedes role splits and all PIT summaries use it", {
     expect_equal(statistics$qq$observed,
                  quantile(expected[rows, 1], seq(0, 1, length.out = 201)))
   }
-  # The raw-response outlier count is independent of centring.
-  pooled <- check_dyad_residuals(simulations, role = NULL, plot = FALSE)
-  expect_identical(pooled$pit, centred$pit)
-  expect_identical(pooled$compositions[[1]]$statistics[[1]]$outliers,
-                   uncentred$compositions[[1]]$statistics[[1]]$outliers)
+  expect_identical(check_dyad_residuals(simulations, role = NULL, plot = FALSE)$pit,
+                   centred$pit)
 })
 
 

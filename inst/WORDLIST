@@ -6,6 +6,7 @@ CMD
 Codecov
 Coloured
 Cov
+Crowther
 DHARMa
 DHARMa's
 DIM's
@@ -16,6 +17,8 @@ DSMs
 Distinguishability
 Dyad
 Dyads
+ECDF
+ECDFs
 Exchangeability
 Fi
 Florian
@@ -42,6 +45,7 @@ RDSEM
 RMS
 Reparameterization
 SDs
+SEs
 Sadler
 Sadler's
 STS
@@ -52,6 +56,8 @@ Smyth's
 Statistica
 TMB
 Tweedie
+Vaart
+Ventura
 Zenodo
 al
 bmatrix
@@ -68,6 +74,7 @@ cwp
 dataset's
 ddots
 del
+der
 dev
 distinguishability
 doi
@@ -83,6 +90,7 @@ grey
 ij
 labelled
 mathrm
+misspecify
 operatorname
 personID
 pmatrix
@@ -97,6 +105,7 @@ th
 tibble
 tidyr
 uncentered
+uncentred
 undecomposed
 unpooled
 unsmoothed

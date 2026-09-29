@@ -170,21 +170,21 @@ test_that("outcome ECDF paths retain ties, constant samples, and both tails", {
 })
 
 
-test_that("discrete outcome panels use saved role proportions, bounds, and category labels", {
+test_that("ordinal panels use saved role proportions, bounds, and all category labels", {
   simulations <- distribution_check_fixture()
-  simulations$observed_response <- c(0, 0, 1, 0, 1, 2, 2, 3, 0, 1, 2, 3)
-  simulations$simulated_responses <- matrix(as.integer(abs(sin(seq_len(40 * 12))) * 4), 40)
-  attr(simulations, "dyadMLM") <- list(family = "poisson")
+  simulations$observed_response <- c(1, 1, 2, 1, 2, 3, 3, 4, 1, 2, 3, 4)
+  simulations$simulated_responses <- matrix(as.integer(abs(sin(seq_len(40 * 12))) * 4) + 1, 40)
+  attr(simulations, "dyadMLM") <- list(family = "ordinal")
   result <- check_dyad_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE)
   distribution <- result$compositions[[1]]$distribution
-  expect_equal(as.numeric(distribution$labels), 0:3)
+  expect_equal(as.numeric(distribution$labels), 1:4)
   rows_by_role <- split(seq_len(12), simulations$model_frame$role)
   for (i in seq_along(rows_by_role)) {
     rows <- rows_by_role[[i]]
     expect_equal(unname(distribution$roles[[i]]$observed), tabulate(
-      simulations$observed_response[rows] + 1, nbins = 4) / length(rows))
+      simulations$observed_response[rows], nbins = 4) / length(rows))
     proportions <- t(apply(simulations$simulated_responses[, rows], 1,
-                           function(x) tabulate(x + 1, nbins = 4) / length(x)))
+                           function(x) tabulate(x, nbins = 4) / length(x)))
     expect_equal(unname(distribution$roles[[i]]$bounds),
                  unname(apply(proportions, 2, simulated_rank_limits)))
   }
@@ -192,14 +192,19 @@ test_that("discrete outcome panels use saved role proportions, bounds, and categ
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
   bars <- bounds <- list()
+  caption <- NULL
   original_barplot <- graphics::barplot
   original_segments <- graphics::segments
+  original_mtext <- graphics::mtext
   local_mocked_bindings(barplot = function(height, names.arg = NULL, ...) {
     bars[[length(bars) + 1L]] <<- list(values = height, labels = names.arg)
     original_barplot(height, names.arg = names.arg, ...)
   }, segments = function(x0, y0, x1, y1, ...) {
     bounds[[length(bounds) + 1L]] <<- rbind(y0, y1)
     original_segments(x0, y0, x1, y1, ...)
+  }, mtext = function(text, ...) {
+    caption <<- text
+    original_mtext(text, ...)
   }, .package = "graphics")
   for (i in seq_along(distribution$roles)) {
     plot_outcome_distribution(distribution, i)
@@ -207,16 +212,14 @@ test_that("discrete outcome panels use saved role proportions, bounds, and categ
                                  labels = distribution$labels))
     expect_equal(unname(bounds[[i]]), unname(distribution$roles[[i]]$bounds))
   }
+  expect_match(caption, "one outside can occur by chance")
 
-  simulations$observed_response <- simulations$observed_response + 1
-  simulations$simulated_responses <- simulations$simulated_responses + 1
-  # An ordinal level with this name is still an ordinary observed category.
-  categories <- c("Low", "Middle", "High", "Very high", "Other values")
+  # Declared categories are retained even when no dataset uses them.
+  categories <- c("Low", "Middle", "High", "Very high", "Unused")
   simulations$model_frame <- data.frame(
     response = ordered(categories[simulations$observed_response], levels = categories),
     simulations$model_frame
   )
-  attr(simulations, "dyadMLM") <- list(family = "ordinal")
   result <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
   plot_outcome_distribution(result$compositions[[1]]$distribution, 1)
   expect_identical(bars[[3]]$labels, categories)
@@ -245,74 +248,29 @@ test_that("zero-count inclusion is shared across roles within each composition",
 })
 
 
-test_that("count categories follow observed support and retain simulated other values", {
+test_that("count outcomes use the ECDF instead of observed categories", {
   simulations <- distribution_check_fixture()
-  nsim <- nrow(simulations$simulated_responses)
   simulations$observed_response <- rep(0:2, 4)
-  simulations$simulated_responses <- matrix(rep(simulations$observed_response, each = nsim), nsim)
-  # Many unobserved values must not switch the display to an ECDF or vanish.
-  simulations$simulated_responses[, 10:12] <- seq_len(nsim * 3) + 10
+  simulations$simulated_responses[] <- 0:3
   attr(simulations, "dyadMLM")$family <- "poisson"
-  result <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
-  distribution <- result$compositions[[1]]$distribution
-  expect_identical(distribution$labels, c("0", "1", "2", "Other values"))
-  expect_true(distribution$has_other_values)
-  expect_equal(distribution$roles[[1]]$observed, c(rep(1 / 3, 3), 0))
-  expect_equal(distribution$roles[[1]]$bounds, matrix(.25, 2, 4))
-
-  # One simulated dataset provides no finite rank limits; category support is [0, 1].
-  simulations$simulated_responses <- simulations$simulated_responses[1, , drop = FALSE]
-  small <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
-  expect_equal(small$compositions[[1]]$distribution$roles[[1]]$bounds,
-               matrix(c(0, 1), 2, 4))
-
-  simulations$observed_response <- 1:21
-  simulations$predicted_response <- rep(0, 21)
-  simulations$simulated_responses <- matrix(rep(1:21, each = nsim), nsim)
-  simulations$model_frame <- data.frame(response = 1:21)
-  many <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
-  expect_null(many$compositions[[1]]$distribution$labels)
+  distribution <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)$compositions[[1]]$distribution
+  expect_null(distribution$labels)
+  expect_equal(distribution$roles[[1]][[1]], list(x = 0:2, y = c(1, 2, 3) / 3))
 })
 
 
-test_that("unobserved count values show simulations without an artificial red zero", {
-  withr::local_seed(27)
-  observed <- rpois(20, 100)
-  simulations <- structure(list(
-    observed_response = observed, predicted_response = rep(100, 20),
-    simulated_responses = matrix(rpois(1000 * 20, 100), 1000),
-    model_frame = data.frame(outcome = observed)
-  ), class = "dyadMLM_response_simulations", dyadMLM = list(family = "poisson"))
-  result <- check_dyad_outcomes(simulations, role = NULL, plot = FALSE)
-  distribution <- result$compositions[[1]]$distribution
-  other <- match("Other values", distribution$labels)
-  # Even a correct model can assign substantial mass to values absent by chance.
-  expect_equal(distribution$roles[[1]]$observed[other], 0)
-  expect_gt(distribution$roles[[1]]$bounds[1, other], 0)
-
-  grDevices::pdf(NULL, width = 10, height = 7)
-  on.exit(grDevices::dev.off(), add = TRUE)
-  heights <- marks <- labels <- caption <- NULL
-  original_barplot <- graphics::barplot
-  original_points <- graphics::points
-  original_mtext <- graphics::mtext
-  local_mocked_bindings(barplot = function(height, names.arg, ...) {
-    heights <<- height
-    labels <<- names.arg
-    original_barplot(height, names.arg = names.arg, ...)
-  }, points = function(x, y, ...) {
-    marks <<- y
-    original_points(x, y, ...)
-  }, mtext = function(text, ...) {
-    caption <<- text
-    original_mtext(text, ...)
-  }, .package = "graphics")
-  plot_outcome_distribution(distribution, 1)
-  expect_identical(labels[other], "Other")
-  expect_true(is.na(heights[other]))
-  expect_true(is.na(marks[other]))
-  expect_equal(heights[-other], distribution$roles[[1]]$observed[-other])
-  expect_match(caption, "Other values: simulations only")
+test_that("ECDF axes span observed values and the middle 98% of simulations", {
+  simulations <- distribution_check_fixture()
+  simulations$model_frame$role <- rep(c("A", "A", "A", "B", "B", "B"), 2)
+  simulations$simulated_responses[1, 1] <- 1e6
+  result <- check_dyad_outcomes(simulations, "dyad", "role", plot = FALSE)
+  for (composition in result$compositions) {
+    rows <- unlist(composition$rows)
+    expect_equal(composition$distribution$limits,
+                 range(simulations$observed_response[rows],
+                       quantile(simulations$simulated_responses[, rows], c(.01, .99))))
+  }
+  expect_lt(result$compositions[[1]]$distribution$limits[2], 1e6)
 })
 
 

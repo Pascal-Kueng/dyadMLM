@@ -25,24 +25,25 @@
 #' when the composition is known; unknown compositions are omitted with a warning.
 #'
 #' **Red shows observed data; blue shows simulations.** The first row compares
-#' outcome distributions. Ordinal responses and count-family responses with up to
-#' 20 distinct observed values use category frequencies. All defined ordinal categories are
-#' retained; simulated counts at unobserved values are grouped as "Other values"
-#' and shown only in blue, without an observed comparison.
-#' Blue ranges show the middle 95% for each category separately, so with many
-#' categories one or two red points outside can occur by chance. Other outcomes show
-#' the proportion at or below each outcome value, for the observations and up to
-#' 30 simulated datasets.
+#' outcome distributions. Ordinal responses use bars for all defined categories.
+#' Blue ranges show the middle 95% for each category separately, so with several
+#' categories one red point outside can occur by chance. Other outcomes show the
+#' proportion at or below each outcome value (ECDF), for the observations and up
+#' to 30 simulated datasets; the axis spans the observed values and the middle
+#' 98% of simulated values. Counts use the ECDF because categories chosen from
+#' the observed values gave many false alarms.
 #'
 #' The remaining rows compare the SD (standard deviation) of outcome minus
 #' prediction, the largest absolute deviation from prediction, and zero counts
 #' where relevant. Each blue histogram shows simulated values; the red line shows
 #' the observed value. A red line far to the right or left means more or less than
 #' the model usually produces. Dashed lines mark the middle 95%.
-#' Some departures occur by chance. SD needs at least two observations.
+#' SD needs at least two observations.
 #' For complete cross-sectional dyads with distinct roles, these SDs match the
 #' default role SDs in [check_partner_dependence()].
 #' Use a tall plotting window to keep all rows readable.
+#'
+#' @inheritSection check_dyad_residuals Reading flags
 #'
 #' @section Scope:
 #' These are descriptive predictive checks, not significance tests. Complete
@@ -109,28 +110,23 @@ check_dyad_outcomes <- function(simulations, dyad = NULL, role = NULL, member = 
     if (identical(family, "ordinal") && is.factor(frame[[1]])) {
       category_labels <- levels(frame[[1]])
       support <- seq_along(category_labels)
-    } else if (family %in% c("ordinal", count_families)) {
-      support <- sort(unique(if (family == "ordinal")
-        as.vector(responses[composition_rows, ]) else responses[composition_rows, 1]))
-      if (family != "ordinal" && length(support) > 20) support <- NULL
-      category_labels <- support
-      if (!is.null(support) && family != "ordinal" &&
-          any(!responses[composition_rows, -1, drop = FALSE] %in% support))
-        category_labels <- c(category_labels, "Other values")
+    } else if (identical(family, "ordinal")) {
+      support <- category_labels <- sort(unique(as.vector(responses[composition_rows, ])))
     }
     # Store plain plotting data, so the saved check needs no model or simulation object.
     composition$distribution <- list(
-      limits = range(responses[composition_rows, ]), labels = category_labels,
-      has_other_values = length(category_labels) > length(support),
+      # A few extreme simulated values should not squash the observed ECDF.
+      limits = range(responses[composition_rows, 1], stats::quantile(
+        responses[composition_rows, -1], c(.01, .99), names = FALSE)),
+      labels = category_labels,
       roles = lapply(composition$rows, function(rows) {
         if (!length(rows)) return(NULL)
         values <- responses[rows, , drop = FALSE]
         if (!is.null(support)) {
           frequencies <- vapply(seq_len(ncol(values)), function(dataset)
-            tabulate(match(values[, dataset], support, nomatch = length(support) + 1L),
-                     nbins = length(category_labels)) / nrow(values),
-            numeric(length(category_labels)))
-          frequencies <- matrix(frequencies, nrow = length(category_labels))
+            tabulate(match(values[, dataset], support), nbins = length(support)) / nrow(values),
+            numeric(length(support)))
+          frequencies <- matrix(frequencies, nrow = length(support))
           bounds <- apply(frequencies[, -1, drop = FALSE], 1, simulated_rank_limits)
           bounds[] <- pmax(0, pmin(1, bounds))
           list(observed = frequencies[, 1],
@@ -200,29 +196,19 @@ plot.dyadMLM_outcome_check <- function(x, ask = NULL, panels = TRUE, ...) {
 plot_outcome_distribution <- function(distribution, role) {
   values <- distribution$roles[[role]]
   if (!is.null(distribution$labels)) {
-    observed <- values$observed
-    labels <- distribution$labels
-    # This group excludes observed values by definition; do not compare its zero.
-    if (isTRUE(distribution$has_other_values)) {
-      observed[length(observed)] <- NA_real_
-      labels[length(labels)] <- "Other"
-    }
-    positions <- graphics::barplot(observed, names.arg = labels,
+    positions <- graphics::barplot(values$observed, names.arg = distribution$labels,
       col = check_colours$observed_fill, border = check_colours$observed,
       ylim = c(0, values$maximum), main = "Outcome frequencies\n(category proportions)",
       xlab = "Outcome", ylab = "Proportion")
     graphics::segments(positions, values$bounds[1, ], positions, values$bounds[2, ],
                        col = check_colours$simulated, lwd = 3)
-    graphics::points(positions, observed, col = check_colours$observed, pch = 16, cex = .65)
-    # "Most": with many categories, one or two outside can occur by chance.
-    guide <- paste("Most red points should lie within their blue 95% ranges.",
-      "Above: more observations in that category; below: fewer.", sep = "\n")
-    if (isTRUE(distribution$has_other_values)) guide <- paste(guide,
-      "Other values: simulations only; absent from the observed data.", sep = "\n")
-    plot_check_caption(guide)
+    graphics::points(positions, values$observed, col = check_colours$observed, pch = 16, cex = .65)
+    plot_check_caption(paste("Red points should usually lie within their blue 95% ranges;",
+      "with several categories, one outside can occur by chance.",
+      "Above: more observations in that category; below: fewer.", sep = "\n"))
   } else {
     graphics::plot(distribution$limits, c(0, 1), type = "n", main = "Outcome ECDF\n(distribution shape)",
-      xlab = "Outcome", ylab = "Proportion at or below this value")
+      xlab = "Outcome", ylab = "Cumulative proportion")
     # One step path retains every ECDF jump while keeping vector exports small.
     draw_ecdf <- function(path, ...) {
       graphics::lines(c(graphics::par("usr")[1], path$x, graphics::par("usr")[2]),

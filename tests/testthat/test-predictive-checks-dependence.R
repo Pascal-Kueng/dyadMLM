@@ -555,8 +555,6 @@ test_that("printing describes the check and plots show empirical limits", {
     expected_titles <- names(observed_statistics)
     role_sd <- startsWith(expected_titles, "SD (")
     expected_titles[!role_sd] <- sub(" \\(.*", "", expected_titles[!role_sd])
-    expected_titles <- sub("Dyad-average/role-difference correlation",
-                          "Mean-difference correlation", expected_titles, fixed = TRUE)
     expect_identical(sub("\n.*", "", titles), expected_titles)
     expect_equal(observed_lines, unname(observed_statistics))
     expect_equal(unname(do.call(cbind, limits)), unname(apply(

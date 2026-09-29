@@ -68,21 +68,20 @@ Every page repeats its composition heading. Available responses are retained
 when the composition is known; unknown compositions are omitted with a warning.
 
 \strong{Red shows observed data; blue shows simulations.} The first row compares
-outcome distributions. Ordinal responses and count-family responses with up to
-20 distinct observed values use category frequencies. All defined ordinal categories are
-retained; simulated counts at unobserved values are grouped as "Other values"
-and shown only in blue, without an observed comparison.
-Blue ranges show the middle 95\% for each category separately, so with many
-categories one or two red points outside can occur by chance. Other outcomes show
-the proportion at or below each outcome value, for the observations and up to
-30 simulated datasets.
+outcome distributions. Ordinal responses use bars for all defined categories.
+Blue ranges show the middle 95\% for each category separately, so with several
+categories one red point outside can occur by chance. Other outcomes show the
+proportion at or below each outcome value (ECDF), for the observations and up
+to 30 simulated datasets; the axis spans the observed values and the middle
+98\% of simulated values. Counts use the ECDF because categories chosen from
+the observed values gave many false alarms.
 
 The remaining rows compare the SD (standard deviation) of outcome minus
 prediction, the largest absolute deviation from prediction, and zero counts
 where relevant. Each blue histogram shows simulated values; the red line shows
 the observed value. A red line far to the right or left means more or less than
 the model usually produces. Dashed lines mark the middle 95\%.
-Some departures occur by chance. SD needs at least two observations.
+SD needs at least two observations.
 For complete cross-sectional dyads with distinct roles, these SDs match the
 default role SDs in \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 Use a tall plotting window to keep all rows readable.
@@ -104,6 +103,31 @@ Uses the families and fitted rows supported by \code{\link[=simulate_dyad_respon
 missing responses are not imputed, time gaps follow the fitted model, and
 observations have equal weight. For cross-sectional data, check partner
 correlations with \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+}
+
+\section{Reading flags}{
+
+A flag is a red value or curve outside its blue range or limits. Each panel
+alone rarely flags a correct model, but flags add up across panels. In our
+\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulations},
+at least one panel of the residual and outcome checks (ECDFs and category
+bars not counted) flagged about 7--14\% of correct models when pooled, 21--28\%
+in either role, and 32--40\% in either role with actor and partner predictor
+pages. So look for a consistent pattern, not any single flag. With about 40
+dyads, subtle mismatches were often missed; no flag does not show a good fit.
+Panels suggest possible problems, not their cause. Neither a flag nor its
+absence shows whether estimates or standard errors are wrong: fit the model
+the pattern suggests and compare the estimates and standard errors you
+report. Mismatches showed mainly in these panels:
+\itemize{
+\item Poisson fitted to overdispersed counts: mean PIT distance, number of zeros, QQ.
+\item Extra zeros: QQ and PIT quartiles; the number of zeros less often.
+\item Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
+\item Different role SDs: response SD and mean PIT distance, by role.
+\item Spread rising with a predictor: PIT distance panels, largest absolute deviation.
+\item Omitted partner effect: PIT quartiles across the partner's predictor
+(supply it in \code{predictors}).
+}
 }
 
 \examples{
