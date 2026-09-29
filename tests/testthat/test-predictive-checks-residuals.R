@@ -122,6 +122,22 @@ test_that("predictor groups absent in one role leave gaps on the shared axis", {
 })
 
 
+test_that("quartile offsets stay inside small-scale panels", {
+  simulations <- distribution_check_fixture()
+  simulations$model_frame$Edge <- seq(0, 1e-8, length.out = 12)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  inside <- TRUE
+  original_segments <- graphics::segments
+  local_mocked_bindings(segments = function(x0, ...) {
+    inside <<- inside && all(x0 >= graphics::par("usr")[1] & x0 <= graphics::par("usr")[2])
+    original_segments(x0, ...)
+  }, .package = "graphics")
+  check_dyad_residuals(simulations, role = NULL, predictors = "Edge", ask = FALSE)
+  expect_true(inside)
+})
+
+
 test_that("numeric predictors use each role's bins, smoothed when there are enough", {
   n <- 240
   simulations <- distribution_check_fixture()
