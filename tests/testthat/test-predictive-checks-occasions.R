@@ -145,6 +145,12 @@ test_that("results do not depend on row order, member labels, or key collisions"
     expect_equal(reordered$compositions$statistics, original$compositions$statistics)
     expect_identical(reordered$compositions$n_pairs, original$compositions$n_pairs)
   }
+
+  # Numeric dyad IDs that print alike must stay separate.
+  close_ids <- simulations
+  close_ids$model_frame$dyad <- c(1, 1 + 2^-52, 2, 3)[close_ids$model_frame$dyad]
+  expect_equal(check_occasions(close_ids, role = "role")$compositions$statistics,
+               check_occasions(simulations, role = "role")$compositions$statistics)
 })
 
 test_that("rows with missing dyad IDs or roles are left out of both levels", {

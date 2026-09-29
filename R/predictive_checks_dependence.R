@@ -565,7 +565,9 @@ prepare_occasion_pairs <- function(dyad_ids, member_ids, occasion_ids, role_valu
   if (anyDuplicated(occasion_rows[c("dyad", "member", "occasion")]) > 0L) {
     stop("Each member can have at most one fitted row per `time`.", call. = FALSE)
   }
-  if (any(table(unique(occasion_rows[c("dyad", "member")])$dyad) > 2L)) {
+  members_per_dyad <- occasion_rows |>
+    dplyr::summarise(n_members = dplyr::n_distinct(.data$member), .by = "dyad")
+  if (any(members_per_dyad$n_members > 2L)) {
     stop("Each dyad must have at most two members.", call. = FALSE)
   }
 
