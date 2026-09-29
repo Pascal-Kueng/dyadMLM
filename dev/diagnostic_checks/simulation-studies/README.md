@@ -112,6 +112,57 @@ runs export `inference.csv` and `severe-summary.csv` to
 `report-data/distribution-checks/`. The run takes about 13 CPU hours, nearly
 all for the severe conditions, or about three hours with six workers.
 
+### Confirmation run
+
+The main study and its add-on reproduce at commit `0ceacd4c`. They record
+panels that the package has since removed: the PIT histogram, the outlier
+count, and count category bars. [dropped-panels.R](distribution-checks/dropped-panels.R)
+recomputes their default flag unions with and without the histogram and
+outlier count and writes `report-data/distribution-checks/dropped-panels.csv`.
+The add-on's unions include its predictor pages. Its optional argument is the
+`results/` directory of both runs. With all panels, it must reproduce the
+reported rates.
+
+[confirmation.R](distribution-checks/confirmation.R) confirms, on fresh seeds,
+how often the remaining panels flag correct and mismatched models. Its design
+was fixed before the run:
+
+- Cross-sectional data at 100 and 400 dyads, dyad SD 0.6, and the main study's
+  predictors. Gaussian: correct model, role SD ratio 1.5, residual SD
+  exp(actor predictor - 1), and an omitted partner effect. NB2: correct model
+  (size 3), and size 10 fitted as Poisson. Ordinal: correct model, with the
+  Gaussian model's predictors and dyad effect, without intercept, scaled by
+  pi/sqrt(3), plus standard logistic noise, cut at -3.05, -1.23, 1.23, and 3.05
+  into five categories (about 10/20/40/20/10%).
+- Every condition runs the same displays: pooled (with `dyad`) and by role,
+  both with actor and partner predictor pages, package defaults, and only the
+  fitted reference.
+- The *core* union contains QQ, mean PIT distance, PIT quartiles and distance
+  across predicted outcomes, response SD, largest absolute deviation, and the
+  zero count where shown. The *pages* union adds the four predictor-page
+  panels. Both are reported for each check and both checks together, pooled
+  or in either role. Ordinal category ranges (`category_any`) are reported
+  separately and never enter a union.
+- Tables give each rate with its 95% Wilson interval and usable datasets, fit
+  failures, and how often the ordinal largest-deviation range has equal limits.
+- Dataset seeds are 910,000,000 + 100,000 × condition + dataset; simulation
+  and PIT seeds add 10,000,000 and 30,000,000. 500 datasets and 1,000 reference
+  simulations per dataset. Roxygen lines are left out of the settings check,
+  so help text can change during the run.
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/dropped-panels.R
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+  Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/confirmation.R 500 1000 6
+```
+
+Arguments and modes match `run.R`. Checkpoints are saved under
+`results/distribution-checks/confirmation-<settings>/`. A complete 500-by-1,000
+run copies its summary, fits, largest-deviation ties, and session information
+to `report-data/distribution-checks/` with the prefix `confirmation-`. The run
+needs glmmTMB with `ordinal()` and takes about 18 CPU hours, or about four hours
+with six workers.
+
 ## Gaussian covariance pooling
 
 Both models use the package's data preparation and covariance terms, with the
