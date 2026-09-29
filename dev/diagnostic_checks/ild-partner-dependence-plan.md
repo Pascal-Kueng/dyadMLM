@@ -75,7 +75,8 @@ adds about 100 lines of R code, excluding help text and comments. Most of it is
 the internal `prepare_occasion_pairs()`. The statistics loop, the minimum rule,
 the messages, and the print and plot methods are unchanged:
 
-1. `member = NULL, time = NULL` after `role`, resolved like `role`. Both or neither.
+1. `member = NULL, time = NULL` after `role`, resolved like `role`. `time`
+   requires `member`; `member` is ignored without `time`.
 2. If `time` is supplied:
    - Stop if a member or time is missing. Rows with a missing dyad or (supplied)
      role are dropped and counted in the existing omission warning.

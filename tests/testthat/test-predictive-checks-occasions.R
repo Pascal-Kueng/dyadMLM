@@ -165,10 +165,20 @@ test_that("rows with missing dyad IDs or roles are left out of both levels", {
 
 test_that("repeated occasions need member and time, and one row per member and occasion", {
   simulations <- occasion_check_simulations()
-  expect_error(check_partner_dependence(simulations, "dyad", member = "member", plot = FALSE),
-               "Supply `member` and `time` together", fixed = TRUE)
-  expect_error(check_partner_dependence(simulations, "dyad", role = NULL, plot = FALSE),
+  expect_error(check_partner_dependence(simulations, "dyad", time = "time", plot = FALSE),
+               "Repeated occasions need `member` as well as `time`.", fixed = TRUE)
+  # Without `time`, `member` is ignored, so repeated rows still point to `time`.
+  expect_error(check_partner_dependence(simulations, "dyad", role = NULL, member = "member",
+                                        plot = FALSE),
                "For repeated occasions, supply `member` and `time`", fixed = TRUE)
+
+  # Cross-sectional checks ignore `member`, even a column that does not exist.
+  one_occasion <- keep_simulation_rows(simulations, which(simulations$model_frame$time == 1))
+  expect_identical(
+    check_partner_dependence(one_occasion, "dyad", role = NULL, member = "not_a_column",
+                             plot = FALSE),
+    check_partner_dependence(one_occasion, "dyad", role = NULL, plot = FALSE)
+  )
 
   repeated_occasion <- simulations
   repeated_occasion$model_frame$time[2] <- 1L

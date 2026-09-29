@@ -7,8 +7,8 @@
 #' partners' responses are related. This check computes variances and correlations
 #' of simulated responses based on the model and compares them to the observed
 #' response variances and correlations from the data.
-#' This helps identify mismatches in the model's assumptions. The check
-#' currently supports cross-sectional dyads only (one response per partner).
+#' This helps identify mismatches in the model's assumptions and works for both
+#' cross-sectional and longitudinal models.
 #'
 #' @param simulations An object returned by [simulate_dyad_responses()].
 #' @param dyad The dyad column name. Looked up first
@@ -21,6 +21,13 @@
 #'   female-male) is checked separately,
 #'   using exchangeable summaries for same-role pairs and role-specific
 #'   summaries otherwise.
+#' @param member The column name identifying each member.
+#'   Only needed for repeated occasions, ignored without a `time` argument.
+#'   Looked up first in the fitted model frame, then in `data` if supplied.
+#' @param time For repeated observation, `time` identifies the column name
+#'   identifying each occasion. Requires `member` to be supplied.
+#'   `time` must identify occasions that partners exactly share, such as the diary day.
+#'   Looked up first in the fitted model frame, then in `data` if supplied.
 #' @param plot If `TRUE` (default), draw the comparison plots for visual checks.
 #'   If `FALSE`, `ask` and `panels` are ignored.
 #' @param response `"model-centred"` (default) subtracts the same model predictions
@@ -39,7 +46,7 @@
 #'   two rows and up to three columns. If `FALSE`, draw each statistic separately.
 #'   Graphics settings are restored afterwards.
 #' @param data Optional: the unchanged data frame used to fit the model. Supply
-#'   it when `dyad` or `role` is not in the model formulas.
+#'   it when `dyad`, `role`, `member`, or `time` is not in the model formulas.
 #'
 #' @return The comparison plots (shown by default) are the main output. The
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
@@ -50,6 +57,9 @@
 #'   compares each `observed` statistic with the middle 95% of its simulations
 #'   (`lower`, `upper`) and marks those `outside` it. The object includes
 #'   omission counts and settings, and can be saved and plotted later.
+#'   With repeated occasions, `compositions` has a `level` column (`"between"`
+#'   or `"within"`), and each label ends with its level. Within rows count the
+#'   dyads that share at least one occasion.
 #'
 #' @section Reading the plots:
 #' Histograms show simulated summaries. Red lines mark observed values.
@@ -105,6 +115,30 @@
 #'
 #' Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
 #'
+#' @section Repeated occasions:
+#' With `member` and `time`, every dataset (observed and simulated) is split
+#' into two levels after centering. Each level is checked like
+#' cross-sectional data:
+#' - **Between:** each member's mean over all their fitted occasions, paired
+#'   within the dyad. Each dyad counts once.
+#' - **Within:** each response minus its member's mean, paired with the
+#'   partner's same statistic on the same occasion. Each shared occasion counts once.
+#'
+#' An occasion without the partner still counts in the member's mean.
+#'
+#'Known limitations and caveats:
+#'
+#' - A misfit at one level can also impact the other level's summaries,
+#'   especially with few occasions (due to member means including occasion-level
+#'   variance) or nonlinear links. Thus, both levels should be interpreted
+#'   together.
+#' - Check dependence across occasions (e.g., autocorrelation) separately.
+#'   If the model omits a temporal dependence, within-person summaries may be incorrect.
+#' - Predictors computed from the response, such as lagged outcomes, keep their
+#'   observed values while simulations draw new random effects. Raw checks are
+#'   then invalid, and model-centred checks are valid only with an identity
+#'   link.
+#' - For ordinal and beta responses, same-occasion effects are often poorly
 #' @section Technical details:
 #' After any centring, paired responses `a` and `b` are used to compute
 #' dyad averages `M = (a + b) / 2` and half-differences `D = (a - b) / 2`.
@@ -143,6 +177,8 @@
 #'   seed = 123
 #' )
 #'
+#' # Check whether pooling fits the data. Each composition is checked
+#' # separately, with role-specific summaries for distinguishable compositions.
 #' check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
@@ -160,11 +196,44 @@
 #'   plot = FALSE
 #' )
 #'
-#' # Check how well the model reproduces variances and partner correlations
-#' # within each dyad composition.
 #' plot(check, ask = FALSE, panels = TRUE)
-#' # Composition checks flag differences that the pooled check misses.
 #' print(check)
+#'
+#' # For repeated occasions, also supply `member` and `time`.
+#' example_diary_data <- prepare_dyad_data(
+#'   dyads_ild[dyads_ild$coupleID <= 120, ], # Couples 1 to 120 are female-male.
+#'   dyad = coupleID,
+#'   member = personID,
+#'   role = gender,
+#'   time = diaryday,
+#'   model_types = "none",
+#'   seed = 123
+#' )
+#'
+#' diary_model <- glmmTMB::glmmTMB(
+#'   closeness ~ 0 + gender + gender:diaryday +
+#'
+#'     # Omit the correlation between partners' random intercepts on level 2
+#'     # with a diagonal covariance structure. This is sometimes done when a
+#'     # model does not otherwise converge cleanly.
+#'     diag(0 + gender | coupleID) +
+#'
+#'     # Keep the full structure for the level 1 residuals.
+#'     us(0 + gender | coupleID:diaryday),
+#'   dispformula = ~ 0,
+#'   data = example_diary_data
+#' )
+#'
+#' # The between level flags the omitted partner correlation.
+#' check_partner_dependence(
+#'   simulate_dyad_responses(diary_model, nsim = 100, seed = 123),
+#'   dyad = coupleID,
+#'   role = gender,
+#'   member = personID,
+#'   time = diaryday,
+#'   # Supply the fitting data because personID is not in the model formula.
+#'   data = example_diary_data
+#' )
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
@@ -179,6 +248,8 @@ check_partner_dependence <- function(
   simulations,
   dyad,
   role = NULL,
+  member = NULL,
+  time = NULL,
   plot = TRUE,
   response = c("model-centred", "raw"),
   ask = NULL,

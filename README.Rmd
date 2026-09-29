@@ -120,7 +120,7 @@ partner correlations.
 
 Using the bundled simulated data, we select female–male dyads and, for
 illustration, fit an APIM that treats partners as exchangeable. We then check
-whether it reproduces gender-specific variation and partner dependence.
+whether it reproduces gender-specific variances and partner dependence.
 
 This example requires the development version of **dyadMLM**. It also uses
 **glmmTMB**.
