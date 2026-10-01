@@ -47,6 +47,10 @@ models allow parameters to differ by member role; exchangeable models use the
 same parameters for both members. We adapt the structural equation modeling
 approach of @Bolger2025Unified to a multilevel model.
 
+Joint multilevel APIMs for same- and different-gender couples also have
+methodological and applied precedents
+[@westGenderSexualOrientation2008; @spahrGossipCouples2025].
+
 > **Software.** These models use `glmmTMB`. Standard `brms` models with one
 > outcome variable do not currently support the exact Gaussian residual
 > covariance structures shown here.
@@ -82,6 +86,9 @@ Each composition uses the
 [distinguishable](apim.html#distinguishable-residual-structure) or
 [exchangeable](apim.html#exchangeable-residual-structure) covariance structure
 described in the APIM vignette.
+
+Exchangeable blocks use the sum-and-difference approach
+[@delrosarioPracticalGuideSpecifying2025].
 
 The returned `.member_contrast_*` variables contain `-1` and `1` for the corresponding
 exchangeable composition and `0` for all other compositions.
@@ -327,6 +334,10 @@ Complete dyads and individuals observed alone can share one model. This lets
 us estimate actor effects while accounting for dependence between partners.
 A *singleton* is a person observed alone: either they have no partner or their
 partner did not participate.
+
+Incomplete dyads can be retained using their available outcomes
+[@knaflCrossSectionalFamilyDyads2009]. Estimation can be less reliable with
+few complete dyads and many singletons [@duNumberDyadsEstimation2016].
 
 For this illustration, we simulate new closeness scores using the support
 scores in `dyads_cross`, with **one observation per person**. Each original
@@ -643,7 +654,8 @@ excluded from the fit unless you address the missing data, for example through
 multiple imputation. A missing partner outcome alone does not imply that the
 partner predictor is missing.
 
-With repeated observations, status and partner scores may vary by occasion.
+Two-part relationship predictors can also be used with repeated observations
+[@henryTwoPartFatherChild2022]. Status and partner scores may vary by occasion.
 Because `partner_value` is zero for unpartnered observations, multiplying it
 by `has_partner` does not change it. Account for dependence within people
 and dyads, keeping person IDs stable if relationships change. Model
