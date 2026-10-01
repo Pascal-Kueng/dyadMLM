@@ -149,8 +149,8 @@ Target vignette structure:
     preparation or reporting
   - binary, ordinal, and categorical outcomes deferred until complete examples
     are validated
-- `dev/vignettes/mixed-apim.Rmd`
-  - development-only workflow, omitted from the public vignette index
+- `vignettes/mixed-apim.Rmd`
+  - draft linked in this branch; finalize before merging
   - cross-sectional and ILD APIMs with mixed dyad compositions
   - optimizer and convergence notes
   - heavier mixed-composition ILD models shown carefully, with `eval = FALSE`

@@ -244,3 +244,7 @@ ild_prepared <- prepare_dyad_data(
 print(ild_prepared)
 
 }
+\seealso{
+The \href{https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.html}{mixed-composition APIM vignette}
+shows models combining dyad compositions and people observed alone.
+}

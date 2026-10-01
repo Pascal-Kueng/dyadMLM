@@ -1,7 +1,7 @@
 ---
 title: "APIMs with Mixed Dyad Compositions"
 author: "Pascal Küng"
-bibliography: ../../vignettes/references.bib
+bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{APIMs with Mixed Dyad Compositions}
@@ -17,7 +17,6 @@ knitr::opts_chunk$set(
 
 diagram_candidates <- c(
   "diagram-helpers.Rinc",
-  "../../vignettes/diagram-helpers.Rinc",
   "vignettes/diagram-helpers.Rinc"
 )
 diagram_helper <- diagram_candidates[file.exists(diagram_candidates)][1]
@@ -42,14 +41,19 @@ mixed_apim_fitted_alt <-
   "Fitted mixed-composition APIM diagram unavailable."
 ```
 
-Suppose you study how support relates to closeness in female–male,
-female–female and male–male couples. Some people have no partner, or take part
-without their partner. You want to compare groups while accounting for the
-fact that partners' scores are related.
+Suppose you study how support relates to closeness in female–male
+(distinguishable by gender), female–female, and male–male couples.
+Partners within each same-gender composition are treated as indistinguishable
+here, while variances and partner correlations may differ between the two
+compositions. Some people have no partner throughout the study or at certain
+measurement occasions. Others have partners who do not participate or miss
+some occasions. You want to retain these observations, including
+*singletons*: groups with only one member observed in the supplied data.
 
-This vignette shows how to combine dyad groups in one APIM and how to include
-people observed alone. You can choose which effects, variances and partner
-correlations differ between groups and which are shared.
+This vignette shows how to analyze these groups in one APIM while accounting
+for dependence between partners' scores. You can compare the different
+compositions and choose which effects, variances, and partner correlations
+to estimate separately or share across groups.
 
 Distinguishable models allow parameters to differ by member role; exchangeable
 models use the same parameters for both members. We adapt the structural

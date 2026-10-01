@@ -141,6 +141,9 @@
 #'   package-generated column retained in the returned data. Modifying prepared
 #'   data does not automatically regenerate package-generated columns.
 #'
+#' @seealso The [mixed-composition APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.html)
+#'   shows models combining dyad compositions and people observed alone.
+#'
 #' @examples
 #' data <- data.frame(
 #'   dyad_id = c(1, 1, 2, 2, 3, 3),
