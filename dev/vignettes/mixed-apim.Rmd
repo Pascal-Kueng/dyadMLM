@@ -42,10 +42,18 @@ mixed_apim_fitted_alt <-
   "Fitted mixed-composition APIM diagram unavailable."
 ```
 
-This vignette combines several dyad compositions in one APIM. Distinguishable
-models allow parameters to differ by member role; exchangeable models use the
-same parameters for both members. We adapt the structural equation modeling
-approach of @Bolger2025Unified to a multilevel model.
+Suppose you study how support relates to closeness in female–male,
+female–female and male–male couples. Some people have no partner, or take part
+without their partner. You want to compare groups while accounting for the
+fact that partners' scores are related.
+
+This vignette shows how to combine dyad groups in one APIM and how to include
+people observed alone. You can choose which effects, variances and partner
+correlations differ between groups and which are shared.
+
+Distinguishable models allow parameters to differ by member role; exchangeable
+models use the same parameters for both members. We adapt the structural
+equation modeling approach of @Bolger2025Unified to a multilevel model.
 
 Joint multilevel APIMs for same- and different-gender couples also have
 methodological and applied precedents
@@ -848,9 +856,9 @@ supported by many datasets.
 
 ## Takeaway
 
-Mixed dyad compositions do not always require separate models.
-`dyadMLM` creates the necessary columns to fit a joint model and apply various
-pooling and exchangeability constraints.
+These examples bring established methods into one R workflow: compare dyad
+groups, choose which parameters to share, and include people observed alone.
+`dyadMLM` creates the columns for the mixed-composition models.
 
 It is often useful to begin with separate composition-specific models or
 simpler covariance structures. Combine them when an equality constraint or a
