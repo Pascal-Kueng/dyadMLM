@@ -21,9 +21,8 @@ knitr::opts_chunk$set(
 )
 
 helper_candidates <- c(
-  "../vignettes/diagram-helpers.Rinc",
-  "vignettes/diagram-helpers.Rinc",
-  "../../vignettes/diagram-helpers.Rinc"
+  "../../../vignettes/diagram-helpers.Rinc",
+  "vignettes/diagram-helpers.Rinc"
 )
 helper_file <- helper_candidates[file.exists(helper_candidates)][1]
 

@@ -9,6 +9,7 @@ Public report sources stay in `vignettes/articles/`.
 | [family-comparison](family-comparison/run.R) | Raw versus model-centred correlation checks across response families | [Full report](../../../vignettes/articles/partner-dependence-simulation.Rmd) |
 | [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
+| [mixed-apim-recovery](mixed-apim-recovery/README.md) | Fixed-effect and covariance recovery for mixed-composition Gaussian APIMs | [Recovery report](../../../vignettes/articles/mixed-apim-recovery.Rmd) |
 | [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
 [Shared family generators](shared/family-margins.R) are used by both family studies.
