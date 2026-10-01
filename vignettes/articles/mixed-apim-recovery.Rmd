@@ -1,0 +1,222 @@
+---
+title: "Parameter recovery for mixed-composition APIMs"
+description: "Fixed effects and member-level covariance recovery in correctly specified Gaussian models."
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    self_contained: true
+params:
+  output_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/mixed-apim-recovery"
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+  fig.width = 10, dpi = 180, fig.retina = 1, out.width = "100%")
+read_results <- function(name) read.csv(file.path(params$output_directory, paste0(name, ".csv")))
+conditions <- read_results("conditions")
+design_labels <- c(cross_intercept = "Cross-sectional: intercepts",
+  cross_apim = "Cross-sectional: actor/partner effects",
+  ild_intercept = "Longitudinal: random intercepts", ild_slopes = "Longitudinal: random slopes")
+conditions <- conditions |>
+  arrange(factor(design, levels = names(design_labels)),
+    factor(pooling, levels = c("separate", "pooled")), n_dyads) |>
+  mutate(Model = paste0(design_labels[design], ifelse(pooling == "pooled", " (pooled)", "")),
+    Model = factor(Model, unique(Model)), Dyads = factor(n_dyads))
+fits <- read_results("fits") |> left_join(conditions, by = "condition")
+recovery <- read_results("recovery") |> left_join(conditions, by = "condition")
+fixed <- filter(recovery, kind == "fixed")
+random <- filter(recovery, kind != "fixed")
+is_pilot <- any(conditions$repetitions != 500L) || nrow(fits) != nrow(conditions) ||
+  any(fits$attempted != fits$repetitions)
+study_theme <- theme_bw(base_size = 11) + theme(legend.position = "bottom",
+  panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
+sample_colours <- c("120" = "#0072B2", "360" = "#D55E00")
+```
+
+## What the study checks
+
+Do the mixed-composition Gaussian models recover their true **fixed effects and
+random covariance parameters**? Twelve conditions use 120 or 360 dyads, with equal
+numbers of female–female, female–male and male–male dyads before pooling. Each
+condition targets `r unique(conditions$repetitions)` independently generated
+datasets.
+
+The cross-sectional conditions fit intercept-only or actor–partner models.
+Longitudinal conditions have 14 complete occasions and stable random intercepts,
+with or without within-person actor and partner random slopes. Both retain
+same-occasion partner covariance. Longitudinal conditions either separate all
+compositions or correctly pool the two same-sex compositions. Every fitted model
+matches its generating structure; there is no missingness or additional serial
+dependence.
+Pooled and separate conditions use different generating parameters, so their
+comparison is descriptive.
+
+The generating outcomes use manually computed observed predictor means and
+deviations, then the models use package-prepared columns. This checks the
+specification and coding, not latent centring. Exchangeable shared/difference
+blocks are transformed back to member-level variances, covariances and
+correlations before comparison with truth.
+
+`r if (is_pilot) "**These are pilot or incomplete results. They check the workflow and do not establish parameter recovery.**" else "The completed run contains 500 datasets per condition (6,000 joint-model fitting procedures, plus fits used for starting values)."`
+
+## Fitting and usable estimates
+
+All fits use maximum likelihood and BFGS (`maxit = 1000`, `reltol = 1e-10`),
+without retries. Cross-sectional and random-intercept models use profiling.
+Random-slope models first fit the compositions sequentially with profiling and
+unchanged prepared predictors. Their fitted coefficients and covariance parameters
+provide named starting values for the literal joint model, fitted without
+profiling. Starting values never use the generating parameters.
+
+Recovery requires the final joint fit to converge, have a positive-definite
+Hessian and return finite log-likelihood, estimates and fixed-effect SEs.
+**Start issues** counts datasets with an initializer convergence or Hessian
+problem; finite starts, including boundary estimates, are still used. A thrown
+initialization error records a failed procedure. **Boundary** counts final fits
+with a near-singular covariance block and alone does not exclude them. Warnings
+include all stages. Counts can overlap.
+
+```{r fit-table}
+fits |>
+  arrange(Model, Dyads) |>
+  transmute(Model, Dyads, `Usable / attempted` = paste0(usable, " / ", attempted),
+    `Hessian failures` = not_positive_hessian, Boundary = boundary,
+    `Start issues` = initialization_failures, Errors = fit_errors) |>
+  knitr::kable()
+```
+
+```{r availability-findings, results='asis'}
+if (!is_pilot) {
+  simple <- filter(fits, design != "ild_slopes")
+  cat(sprintf("The cross-sectional and random-intercept models returned **%s/%s** usable fits.\n\n",
+    sum(simple$usable), sum(simple$attempted)))
+  for (size in c(120L, 360L)) {
+    rates <- filter(fits, design == "ild_slopes", n_dyads == size)$usable_rate
+    cat(sprintf("At **%s dyads**, only **%.1f–%.1f%%** of random-slope fits were usable.\n\n",
+      size, 100 * min(rates), 100 * max(rates)))
+  }
+}
+```
+
+## Fixed effects
+
+Each point below represents **one coefficient in one condition**; coefficients
+with the same effect type remain separate. Bias is the mean estimate minus its
+true value. Coverage is the share of available 95% Wald intervals containing the
+true value. Bars show Monte Carlo uncertainty: bias ± 1.96 Monte Carlo SEs and
+Wilson intervals for coverage. At 500 usable estimates, coverage near 95% has a
+Monte Carlo SE of about one percentage point.
+
+```{r fixed-recovery, fig.height=12, fig.alt="Bias and 95 percent interval coverage for every fixed coefficient, separated by effect type, model and number of dyads."}
+effect_labels <- c(intercept = "Intercept", time = "Time", actor = "Actor",
+  partner = "Partner", actor_between = "Actor: between", partner_between = "Partner: between",
+  actor_within = "Actor: within", partner_within = "Partner: within")
+fixed_plot <- fixed |>
+  mutate(Effect = factor(sub(".*:", "", parameter),
+    levels = rev(names(effect_labels)), labels = rev(effect_labels))) |>
+  tidyr::uncount(2L, .id = "metric") |>
+  mutate(Metric = factor(metric, labels = c("Bias", "95% interval coverage")),
+    Value = ifelse(metric == 1L, bias, coverage),
+    Lower = ifelse(metric == 1L, bias - 1.96 * bias_mcse, coverage_lower),
+    Upper = ifelse(metric == 1L, bias + 1.96 * bias_mcse, coverage_upper))
+benchmarks <- tibble::tibble(Metric = factor(c("Bias", "95% interval coverage"),
+  levels = levels(fixed_plot$Metric)), value = c(0, .95))
+dodge <- position_dodge(width = .65, orientation = "y")
+ggplot(fixed_plot, aes(Value, Effect, colour = Dyads, group = interaction(parameter, Dyads))) +
+  geom_vline(data = benchmarks, aes(xintercept = value), colour = "grey55", linetype = 2) +
+  geom_errorbar(aes(xmin = Lower, xmax = Upper), orientation = "y",
+    position = dodge, width = .3, linewidth = .3) +
+  geom_point(position = dodge, size = 1.4) +
+  facet_wrap(vars(Model, Metric), ncol = 2, scales = "free") +
+  scale_colour_manual(values = sample_colours) +
+  labs(x = "Bias / coverage proportion", y = NULL) + study_theme
+```
+
+```{r fixed-findings, results='asis'}
+if (nrow(fixed)) {
+  findings <- fixed |> summarise(min_bias = min(bias), max_bias = max(bias),
+    min_coverage = min(coverage, na.rm = TRUE), max_coverage = max(coverage, na.rm = TRUE),
+    .by = n_dyads) |> arrange(n_dyads)
+  for (i in seq_len(nrow(findings))) {
+    row <- findings[i, ]
+    cat(sprintf("At **%s dyads**, fixed-effect biases ranged from **%.3f to %.3f** and coverage from **%.1f%% to %.1f%%** across coefficients and models.\n\n",
+      row$n_dyads, row$min_bias, row$max_bias, 100 * row$min_coverage, 100 * row$max_coverage))
+  }
+}
+```
+
+```{asis, echo=!is_pilot}
+Point estimates were generally close to truth. Some 95% Wald intervals
+undercovered, including in simpler models; small mean bias alone does not
+establish reliable interval estimates.
+```
+
+## Random covariance parameters
+
+Each point compares one parameter's mean estimate with its true value. Points on
+the diagonal show agreement in the mean; their spread across datasets is reported
+in the CSV below. Variance, covariance and correlation panels use their own
+scales. Signed covariances remain signed, including values close to zero. These
+plots do not assess interval coverage for random parameters.
+
+```{r covariance-recovery, fig.height=7, fig.alt="Mean estimated member-level variances, covariances and correlations plotted against their true values, separated by covariance level."}
+random_plot <- random |>
+  mutate(Component = factor(component, c("residual", "stable", "occasion"),
+    c("Cross-sectional residual", "Stable dyad effects", "Same-occasion residual")),
+    Kind = factor(kind, c("variance", "covariance", "correlation"),
+      c("Variance", "Covariance", "Correlation")))
+ggplot(random_plot, aes(true_value, mean, colour = Dyads)) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey55", linetype = 2) +
+  geom_point(size = 1.8, alpha = .55) +
+  facet_wrap(vars(Component, Kind), ncol = 3, scales = "free") +
+  scale_colour_manual(values = sample_colours) +
+  labs(x = "True value", y = "Mean estimate") + study_theme
+```
+
+```{asis, echo=!is_pilot}
+Simpler models recovered covariance parameters more closely. Their variance
+estimates tended to be low, with smaller bias at 360 dyads. Random-slope models
+had imprecise stable correlations and sometimes overestimated slope variances
+among their usable fits. For example, the female partner-slope variance in
+female–male dyads (true value 0.040) averaged 0.062–0.072 at 120 dyads.
+```
+
+The table shows the range of correlation RMSEs within each model and sample
+size. RMSE measures error in individual datasets; small average bias can coexist
+with imprecise estimates. Variance and covariance RMSEs remain in the full results.
+
+```{r correlation-precision}
+random |>
+  filter(kind == "correlation") |>
+  summarise(RMSE = sprintf("%.3f–%.3f", min(rmse), max(rmse)),
+    .by = c(Model, Dyads)) |>
+  tidyr::pivot_wider(names_from = Dyads, values_from = RMSE,
+    names_glue = "{Dyads} dyads", names_sort = TRUE) |>
+  arrange(Model) |>
+  knitr::kable()
+```
+
+## Full results and scope
+
+```{r csv-link, results='asis'}
+cat(sprintf('<a download="mixed-apim-recovery.csv" href="%s">Full results for every parameter (CSV)</a>',
+  base64enc::dataURI(file = file.path(params$output_directory, "recovery.csv"), mime = "text/csv")))
+cat(sprintf(' · <a download="mixed-apim-conditions.csv" href="%s">Condition definitions (CSV)</a>',
+  base64enc::dataURI(file = file.path(params$output_directory, "conditions.csv"), mime = "text/csv")))
+cat(sprintf(' · <a download="mixed-apim-fits.csv" href="%s">Fit diagnostics (CSV)</a>',
+  base64enc::dataURI(file = file.path(params$output_directory, "fits.csv"), mime = "text/csv")))
+```
+
+The table includes the true value, mean estimate, bias, Monte Carlo SE, empirical
+SD, RMSE, mean absolute error and actual usable denominator. Fixed effects also
+include mean model SEs, their ratio to empirical SD, and interval coverage.
+
+Interpret recovery alongside fit availability: usable-fit summaries can look
+better when difficult fits are excluded. The results concern these correctly
+specified Gaussian designs and sample sizes. They do not establish reliable
+estimation for arbitrary compositions, more complex temporal structures or other
+fitting engines. Dyad-plus-singleton models are outside this study's scope.
