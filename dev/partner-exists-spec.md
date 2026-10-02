@@ -1,9 +1,10 @@
 # Spec: people observed without their partner
 
 Status: agreed design for version 1, not yet implemented. Work happens on
-`mixed-dyad-vignette` in separate commits: (A) print line, error message and
-help for current behavior; (B) version 1 below; (C) `I()` support in
-`recover_exchangeable_covariance()`; (D) vignette.
+`mixed-dyad-vignette` in separate commits, each with its own help and tests:
+(A) print line, error message and help for current behavior, without
+mentioning `partner_exists`; (B) version 1 below; (C) `I()` support in
+`recover_exchangeable_covariance()`; (D) vignette, rendered.
 
 ## In short
 
@@ -67,8 +68,13 @@ anywhere in the data.
 - Values given must be the same within a dyad (E7). If all are `NA`, the person
   becomes `<role>_x_unknown`.
 - Same rules as `role` (not empty, no `_x_`). `"unknown"` and `"NA"` are
-  reserved, for `role` as well (E12). Requires `role` (E6).
-- The resulting composition must exist among complete dyads (E8).
+  reserved, for `role` as well (E10; a validation change noted in NEWS).
+  Requires `role` (E6).
+- A composition may consist only of people observed alone. It supports fixed
+  effects and marginal variances, and can share covariance parameters with
+  another composition through added indicators. Whether a partner covariance
+  is identified is checked in the fitted model, not in preparation; `print()`
+  shows such compositions with their counts.
 - It only places the person in a composition; it says nothing about the
   partner correlation.
 
@@ -81,7 +87,7 @@ composition; a person with no partner becomes `singleton`.
 |---|---|---|---|
 | Both observed | e.g. `female_x_male` | partner's values | 1 |
 | Partner missed this occasion | unchanged | raw, cwp, gmc `NA`; cbp and lag partner's value if available | 1 |
-| No partner at this occasion (in a dyad) | unchanged | 0 | 0 |
+| No partner at this occasion (in a dyad) | unchanged | contemporaneous 0; lagged follow status at t-1 | 0 |
 | Singleton | `singleton_<role>` | 0 | 0 |
 | Partner never in data, role given | real composition | `NA` (0 where `FALSE`) | 1 (0 where `FALSE`) |
 | Partner never in data, role unknown | `<role>_x_unknown` | `NA` (0 where `FALSE`) | 1 (0 where `FALSE`) |
@@ -117,12 +123,12 @@ their composition; only the no-partner occasions change.
   `-` or space). People placed via `partner_role` belong to their composition;
   if it is removed, they are removed and counted in `print()`.
 - `pool_compositions` and `set_exchangeable_compositions` reject singleton and
-  `_x_unknown` labels (E9). Sharing works by adding indicators in the formula.
-- DIM/DSM cannot be combined with `partner_exists` (E10).
+  `_x_unknown` labels (E8). Sharing works by adding indicators in the formula.
+- DIM/DSM cannot be combined with `partner_exists` (E9).
 - `missing_role` applies as before; people observed alone dropped this way are
   counted in `print()`.
-- Only one-person dyads: error (E11).
-- Each person belongs to only one dyad; re-partnering is not supported.
+- The existing minimum of two dyad IDs stays; one-person dyads count.
+- One dyad per person; re-partnering is not supported.
 - Both members `FALSE` in a cross-sectional complete dyad is allowed.
 
 ## Errors
@@ -140,12 +146,10 @@ their composition; only the no-partner occasions change.
 - **E5**: `partner_exists` must be `TRUE`, `FALSE`, or a column with TRUE/FALSE or 1/0 values.
 - **E6**: `partner_role` requires `role`.
 - **E7**: `partner_role` differs within 2 dyads (104, 117). A new partner needs a new dyad ID.
-- **E8**: `partner_role` places 3 people in female_x_female, but no complete female_x_female dyad exists, so its variances cannot be estimated. Leave `partner_role` as NA for them (they become `female_x_unknown`), or remove them.
-- **E9**: `pool_compositions` cannot include singleton_male or male_x_unknown. To let them share parameters with dyad members, add their indicators in the formula, e.g. `I(.is_female_x_male_male + .is_male_x_unknown)`. See `vignette("mixed-apim")`. (Same for `set_exchangeable_compositions`.)
-- **E10**: `partner_exists` cannot be used with DIM or DSM columns yet.
-- **E11**: All dyads contain only one person. At least two complete dyads are needed.
-- **E12**: `role` and `partner_role` must not use the values "unknown" or "NA".
-- **E13** (missing dyad IDs, part A): `dyad` is missing in 70 rows. Give each person observed alone their own dyad ID, then see `partner_exists`.
+- **E8**: `pool_compositions` cannot include singleton_male or male_x_unknown. To let them share parameters with dyad members, add their indicators in the formula, e.g. `I(.is_female_x_male_male + .is_male_x_unknown)`. See `vignette("mixed-apim")`. (Same for `set_exchangeable_compositions`.)
+- **E9**: `partner_exists` cannot be used with DIM or DSM columns yet.
+- **E10**: `role` and `partner_role` must not use the values "unknown" or "NA".
+- **E11** (missing dyad IDs): in A: `dyad` is missing in 70 rows. Give each person observed alone their own dyad ID; see `incomplete_dyads`. B adds: "then see `partner_exists`".
 
 ## Print
 
@@ -164,9 +168,10 @@ their composition; only the no-partner occasions change.
 - Automatic matching also recognizes summed terms such as
   `I(.is_male_x_male + .is_singleton_male)` and
   `I(.member_contrast_male_x_male_arbitrary + .is_singleton_male)`, and their
-  usual slope interactions.
+  ordinary interactions such as `I(a + b):time`.
 - Each whole expression is matched, because shared and contrast terms can
-  contain the same singleton indicator.
+  contain the same singleton indicator. The fitted values of these columns are
+  validated like the existing indicator columns.
 - Added indicators are read as additional groups sharing the variance; the
   covariance calculation is unchanged. `block_pairings` accepts these terms and
   remains the way to resolve ambiguous cases.
@@ -178,35 +183,37 @@ their composition; only the no-partner occasions change.
 - Details section "People observed without their partner": terms, rules,
   table; "a partner seen once is assumed to exist at every observed occasion";
   `filter()` recipe for removing occasions; listwise deletion of rows with
-  missing partner predictors; one person per dyad.
+  missing partner predictors; one dyad per person.
 - Interpretation notes:
   - Singleton indicators are enough only if no-partner occasions occur in
     singletons only. Otherwise include `.partner_exists` (and
     `.partner_exists_lag1` with lags).
-  - The centering reference includes singletons, so 0 means the average person
-    in the data.
-  - After zeroing, cwp no longer averages 0 and cbp is no longer constant
-    within a person.
+  - What 0 means depends on the component, and `.partner_exists` compares
+    against it: cwp 0 is the partner at their own mean; cbp 0 is a partner
+    whose person mean equals the mean of person means; gmc 0 is the grand
+    mean. These references include singletons.
+  - With changing status, zeroing makes partner components status-dependent:
+    cwp no longer averages 0 and cbp is no longer constant within a person.
   - `.partner_exists` mixes change over time and differences between people.
   - The +1 on the contrast column is valid only because shared and contrast
     terms are separate random-effect terms.
 - NEWS: new arguments, print lines, `I()` support, clearer missing-dyad-ID
-  message.
+  message, and `"unknown"`/`"NA"` no longer accepted as role values.
 
 ## Vignette (`vignettes/mixed-apim.Rmd`)
 
 - Definitions: no partner vs. partner not in the data.
 - Replace the manual construction with `prepare_dyad_data(..., partner_exists = ...)`.
-- Fixes from review: another seed for "Separate actor slopes" (current draw is
-  in the 1.3% tail); `| coupleID` instead of `| personID` for singleton terms;
-  note on partners not in the data in the `is_solo * x_actor_c` sentence;
-  consistent wording on the partner correlation under pooling.
+- Fixes from review: keep the seed for "Separate actor slopes", but show SEs or
+  CIs and state that the difference (about 2 SE) is due to chance; recovery
+  claims belong to the simulation study. `| coupleID` instead of `| personID`
+  for singleton terms; note on partners not in the data in the
+  `is_solo * x_actor_c` sentence; consistent wording on the partner
+  correlation under pooling.
 - Sharing parameters by adding indicators, including both exchangeable terms.
 - Small partner-loss example (one person, partnered → no partner), no model.
-- Partners not in the data: listwise deletion, MAR assumption, comparing
-  results with and without them.
-- Optional: sharing SDs across compositions with separate correlations via
-  `glmmTMB` `map` (verified: reproduces the sum-and-difference fit exactly).
+- Partners not in the data: listwise deletion in models with partner
+  predictors; compare results with and without them.
 
 ## Examples
 
@@ -252,8 +259,11 @@ with `NA` partner predictors. Singles get `.is_singleton_female` /
 closeness ~ 0 + .is_female + .is_male + .is_singleton_female + .is_singleton_male +
   .support_cwp_actor + .support_cwp_partner + .support_cbp_actor + .support_cbp_partner +
   us(0 + I(.is_female + .is_singleton_female) + I(.is_male + .is_singleton_male) | coupleID) +
-  us(0 + I(.is_female + .is_singleton_female) + I(.is_male + .is_singleton_male) | coupleID:day)
+  us(0 + I(.is_female + .is_singleton_female) + I(.is_male + .is_singleton_male) | coupleID:day),
+family = gaussian(), dispformula = ~ 0
 ```
+
+`dispformula = ~ 0` lets the occasion-level terms take the residual variance.
 
 Status is fixed at intake, so no-partner occasions only occur in singletons and
 the singleton indicators suffice. People whose partner never took part drop out
@@ -343,9 +353,10 @@ dyads. If people with no partner on every row exist, add their
 - `partner_exists`: `NULL`, `TRUE`, `FALSE`; columns (one-person dyads all
   `TRUE` / all `FALSE` / mixed; occasions inside dyads; both members `FALSE`);
   E3 on disagreement.
-- `partner_role`: given, `NA` → `_x_unknown`, exchangeable target, E8, without
-  `role`, `include_arbitrary_member_contrast`.
-- E1–E13.
+- `partner_role`: given, `NA` → `_x_unknown`, exchangeable target, a
+  composition with only people observed alone, without `role`,
+  `include_arbitrary_member_contrast`.
+- E1–E11.
 - Zeroing after centering for raw, gmc, cwp, cbp, lag1; non-numeric warning;
   `.partner_exists_lag1` incl. death and separation; temporary rows ignored in
   checks; label order independent of locale.
