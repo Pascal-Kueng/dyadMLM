@@ -652,14 +652,14 @@ resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dya
 #' @return `out` with the temporary partner status column added.
 #' @keywords internal
 add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) {
-  values <- rlang::eval_tidy(partner_exists_quo, data = out)
+  status <- rlang::eval_tidy(partner_exists_quo, data = out)
+  is_constant <- length(status) == 1L
 
-  # Accept TRUE/FALSE or 1/0, either once or once per row.
-  is_status <- is.logical(values) ||
-    (is.numeric(values) && all(values %in% c(0, 1, NA)))
-  has_valid_length <- length(values) %in% c(1L, nrow(out))
-  is_missing_constant <- length(values) == 1L && is.na(values)
-  if (!is_status || !has_valid_length || is_missing_constant) {
+  # Allowed: TRUE/FALSE or 1/0, given once (a constant) or once per row.
+  is_valid <- (is.logical(status) || all(status %in% c(0, 1, NA))) &&
+    length(status) %in% c(1L, nrow(out)) &&
+    !(is_constant && is.na(status))
+  if (!is_valid) {
     stop(
       "`partner_exists` must be `TRUE`, `FALSE`, or a column or expression ",
       "with one TRUE/FALSE (or 1/0) value per row. Write column names without ",
@@ -667,12 +667,29 @@ add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) 
       call. = FALSE
     )
   }
-  values <- as.logical(values)
 
-  if (anyNA(values)) {
+  out[[dyad_partner_exists_col]] <- as.logical(status)
+
+  # A constant only describes people observed alone; everyone in a complete
+  # dyad has a partner.
+  if (is_constant) {
+    out <- out |>
+      dplyr::mutate(
+        "{dyad_partner_exists_col}" := if (dplyr::n_distinct(.data[[member_name]]) == 1L) {
+          .data[[dyad_partner_exists_col]]
+        } else {
+          TRUE
+        },
+        .by = dplyr::all_of(dyad_name)
+      )
+  }
+
+  rows_without_status <- out |>
+    dplyr::filter(is.na(.data[[dyad_partner_exists_col]]))
+  if (nrow(rows_without_status) > 0L) {
     stop(
-      "`partner_exists` is missing in ", sum(is.na(values)), " row(s), in ",
-      format_group_count(unique(out[[dyad_name]][is.na(values)])),
+      "`partner_exists` is missing in ", nrow(rows_without_status),
+      " row(s), in ", format_group_count(unique(rows_without_status[[dyad_name]])),
       ". Use TRUE or FALSE in every row; missing values are not read as ",
       "\"no partner\". Placeholder rows without data (e.g., after a death) ",
       "can be removed.",
@@ -680,20 +697,6 @@ add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) 
     )
   }
 
-  # A single value only describes people observed alone.
-  if (length(values) == 1L) {
-    one_person_dyads <- out |>
-      dplyr::summarise(
-        n_members = dplyr::n_distinct(.data[[member_name]]),
-        .by = dplyr::all_of(dyad_name)
-      ) |>
-      dplyr::filter(.data$n_members == 1L) |>
-      dplyr::pull(dplyr::all_of(dyad_name))
-
-    values <- ifelse(out[[dyad_name]] %in% one_person_dyads, values, TRUE)
-  }
-
-  out[[dyad_partner_exists_col]] <- values
   out
 }
 
@@ -711,34 +714,23 @@ add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) 
 #' @return `NULL`, invisibly. Called for its errors.
 #' @keywords internal
 validate_partner_exists <- function(out, dyad_name, time_name, role_name) {
-  occasion_columns <- c(dyad_name, time_name)
+  # One row per occasion at which the two members report different statuses.
   disagreements <- out |>
     dplyr::summarise(
-      n_values = dplyr::n_distinct(.data[[dyad_partner_exists_col]]),
-      .by = dplyr::all_of(occasion_columns)
+      n_statuses = dplyr::n_distinct(.data[[dyad_partner_exists_col]]),
+      .by = dplyr::all_of(c(dyad_name, time_name))
     ) |>
-    dplyr::filter(.data$n_values > 1L)
+    dplyr::filter(.data$n_statuses > 1L)
 
   if (nrow(disagreements) > 0L) {
-    affected <- vapply(
-      seq_len(min(nrow(disagreements), 5L)),
-      function(i) {
-        values <- vapply(
-          disagreements[i, occasion_columns],
-          function(value) as.character(value[1L]),
-          character(1L)
-        )
-        paste0("`", occasion_columns, "` = ", values, collapse = ", ")
-      },
-      character(1L)
-    )
-    if (nrow(disagreements) > 5L) {
-      affected <- c(affected, paste0("... and ", nrow(disagreements) - 5L, " more"))
+    occasions <- disagreements[[dyad_name]]
+    if (!is.null(time_name)) {
+      occasions <- paste0(occasions, " (", time_name, " ", disagreements[[time_name]], ")")
     }
 
     stop(
       "`partner_exists` differs between the two members of a dyad at the same ",
-      "occasion. Affected occasion(s): ", paste(affected, collapse = "; "),
+      "occasion, in dyad(s): ", format_group_list(occasions, max = 5),
       ". Both members must agree on whether they are partners at that ",
       "occasion. If partners report differently, pick one rule, e.g. FALSE ",
       "if either reports a separation.",

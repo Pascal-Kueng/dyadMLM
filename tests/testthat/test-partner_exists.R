@@ -100,7 +100,7 @@ test_that("both members must agree on partner status at the same occasion", {
 
   expect_error(
     validate_partner_exists_data(diary, time = day, partner_exists = together),
-    "Affected occasion(s): `dyad_id` = 1, `day` = 2.",
+    "in dyad(s): 1 (day 2).",
     fixed = TRUE
   )
 
