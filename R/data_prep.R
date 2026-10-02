@@ -148,6 +148,15 @@
 #'   is applied. `"error"` stops with an error and `"drop"` removes the entire
 #'   dyad. Conflicting non-missing roles always cause an error. Ignored when no
 #'   `role` column is supplied.
+#' @param partner_exists Optional partner status. `NULL` (default) keeps the
+#'   current behavior. `TRUE` or `FALSE` describes all people observed alone:
+#'   `TRUE` if their partner exists but did not take part, `FALSE` if they have
+#'   no partner. A column name or an expression evaluated in `data` (for
+#'   example `partnered` or `!widowed`) gives the status per row, for status
+#'   that differs between people or over time. Use recorded status, not the
+#'   number of rows per dyad. Missing values are an error. When both members
+#'   have a row at the same occasion, their values must agree. See the section
+#'   "People observed without their partner".
 #' @param seed Optional seed for random `.member_contrast_*` sign assignment.
 #'   If `NULL`, the current R session's RNG state is used.
 #' @param short_colnames Whether to use shorter composition-dependent generated
@@ -259,6 +268,7 @@ prepare_dyad_data <- function(
     pool_compositions = NULL,
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
+    partner_exists = NULL,
     seed = NULL,
     short_colnames = TRUE,
     include_arbitrary_member_contrast = FALSE,
@@ -300,7 +310,8 @@ prepare_dyad_data <- function(
     dsm_role_order = dsm_role_order,
     temporal_decomposition = temporal_decomposition,
     incomplete_dyads = incomplete_dyads,
-    missing_role = missing_role
+    missing_role = missing_role,
+    partner_exists = {{ partner_exists }}
   )
 
   if (add_apim_gmc_predictors) {
@@ -398,6 +409,9 @@ prepare_dyad_data <- function(
   if (attr(out, "dyadMLM")$longitudinal) {
     out <- restore_observed_dyad_rows(out)
   }
+
+  # The temporary partner status column is only needed during preparation.
+  out[[dyad_partner_exists_col]] <- NULL
 
   return(out)
 }

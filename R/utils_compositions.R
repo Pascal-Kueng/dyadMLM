@@ -28,6 +28,8 @@ dyad_resolved_role_col <- paste0(dyad_reserved_prefix, "resolved_role")
 dyad_diff_col <- paste0(dyad_reserved_prefix, "diff")
 dyad_arbitrary_role_col <- paste0(dyad_reserved_prefix, "arbitrary_role")
 dyad_dsm_role_contrast_col <- paste0(dyad_retained_prefix, "dsm_role_contrast")
+# Whether a partner existed at each row; created from `partner_exists`.
+dyad_partner_exists_col <- paste0(dyad_reserved_prefix, "partner_exists")
 
 ############################################################################
 # HELPER FUNCTIONS

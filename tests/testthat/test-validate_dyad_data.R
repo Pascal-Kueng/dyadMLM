@@ -942,7 +942,7 @@ test_that("validate_dyad_data rejects fewer than two groups", {
 
   expect_error(
     validate_dyad_data(data, dyad = dyad_id, member = person_id),
-    "At least 2 complete dyads are required after validation and any requested dropping.",
+    "At least 2 dyads are required after validation and any requested dropping.",
     fixed = TRUE
   )
 })

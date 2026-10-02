@@ -16,7 +16,8 @@ validate_dyad_data(
   dsm_role_order = NULL,
   temporal_decomposition = c("auto", "2l", "none"),
   incomplete_dyads = c("error", "drop"),
-  missing_role = c("error", "drop")
+  missing_role = c("error", "drop"),
+  partner_exists = NULL
 )
 }
 \arguments{
@@ -71,6 +72,11 @@ for a member is propagated to that member's other rows before this policy
 is applied. \code{"error"} stops with an error and \code{"drop"} removes the entire
 dyad. Conflicting non-missing roles always cause an error. Ignored when no
 \code{role} column is supplied.}
+
+\item{partner_exists}{Optional partner status: \code{TRUE}, \code{FALSE}, a column
+name, or an expression evaluated in \code{data} (such as \code{!widowed}). A single
+value describes people observed alone; a value per row describes each
+occasion. See \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
 }
 \value{
 A tibble with class \code{dyadMLM_data} and metadata about the dyad,

@@ -20,6 +20,7 @@ prepare_dyad_data(
   pool_compositions = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
+  partner_exists = NULL,
   seed = NULL,
   short_colnames = TRUE,
   include_arbitrary_member_contrast = FALSE,
@@ -128,6 +129,16 @@ for a member is propagated to that member's other rows before this policy
 is applied. \code{"error"} stops with an error and \code{"drop"} removes the entire
 dyad. Conflicting non-missing roles always cause an error. Ignored when no
 \code{role} column is supplied.}
+
+\item{partner_exists}{Optional partner status. \code{NULL} (default) keeps the
+current behavior. \code{TRUE} or \code{FALSE} describes all people observed alone:
+\code{TRUE} if their partner exists but did not take part, \code{FALSE} if they have
+no partner. A column name or an expression evaluated in \code{data} (for
+example \code{partnered} or \code{!widowed}) gives the status per row, for status
+that differs between people or over time. Use recorded status, not the
+number of rows per dyad. Missing values are an error. When both members
+have a row at the same occasion, their values must agree. See the section
+"People observed without their partner".}
 
 \item{seed}{Optional seed for random \verb{.member_contrast_*} sign assignment.
 If \code{NULL}, the current R session's RNG state is used.}
