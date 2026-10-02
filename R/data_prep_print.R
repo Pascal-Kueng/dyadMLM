@@ -105,6 +105,7 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
 # an existing partner (no partner row) and rows missing any partner predictor.
 print_partner_data <- function(x, meta) {
   lines <- character()
+  n_one_member <- 0L
   format_count <- function(n) format(n, big.mark = ",")
 
   structural_columns <- c(meta$dyad, meta$member, meta$time)
@@ -157,7 +158,11 @@ print_partner_data <- function(x, meta) {
   check[[1]] <- sub("Check:", pillar::style_neg("Check:"), check[[1]], fixed = TRUE)
 
   cat("# Partner data:\n")
-  cat(unlist(lapply(lines, wrap)), "#", check, "#", "", sep = "\n")
+  cat(unlist(lapply(lines, wrap)), "#", sep = "\n")
+  # The check concerns the assumption that partners without a row exist.
+  if (n_one_member > 0L) {
+    cat(check, "#", sep = "\n")
+  }
   invisible(NULL)
 }
 

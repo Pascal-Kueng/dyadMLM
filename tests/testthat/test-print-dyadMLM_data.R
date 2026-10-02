@@ -415,6 +415,8 @@ test_that("dyadMLM data print reports missing partner data", {
     printed,
     fixed = TRUE
   )))
+  # Partners have rows here, so no existence assumption needs checking.
+  expect_false(any(grepl("Check:", printed, fixed = TRUE)))
 
   expect_false(any(grepl(
     "# Partner data:",
