@@ -317,9 +317,9 @@ Two-part: `.support_gmc_partner` is 0 for singles and pairs with
 people. `.partner_exists` compares partnered people (with partner support at
 the grand mean) and singles; `.partner_exists:.support_gmc_actor` is the
 difference in actor slopes. The single intercept for all couples keeps the
-focus on singles vs. partnered people; a full analysis would usually add
-composition-specific intercepts (then drop the overall `1`, and keep
-`.partner_exists` out of a `0 +` formula only if singleton indicators replace it).
+focus on singles vs. partnered people. A full analysis would usually use
+composition-specific intercepts (`0 + .is_*`); singles then get their own
+intercepts from the singleton indicators instead of `.partner_exists`.
 
 People whose partner did not answer have `NA` partner predictors and drop out
 of this model. To use them, fit an actor-only model and add `.is_*_x_missing`
