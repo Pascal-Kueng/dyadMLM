@@ -36,8 +36,10 @@ Two terms are used in help, messages, and vignette:
 - **Partner not in the data**: a partner exists but has no data, at one
   occasion or never. Partner predictors are `NA` wherever the partner's value is
   unknown. Models with these predictors leave those rows out (listwise
-  deletion). People whose partner never appears therefore only enter
-  intercept-only and actor-only models.
+  deletion). These rows only enter intercept-only and actor-only models. A
+  person whose partner never appears can still contribute rows with
+  partner-predictor models, namely their no-partner rows (partner predictors
+  0).
 
 Labels for one-person dyads (own role first):
 
@@ -74,7 +76,8 @@ help states both naming rules next to the table.
   `incomplete_dyads = "drop"` with `partner_exists` is an error (E4).
 - A one-person dyad with `FALSE` on every row is a singleton. With `TRUE` on
   any row, it is `<role>_x_missing`; its `FALSE` rows get two-part coding.
-- Status returning to `TRUE` after `FALSE` within a dyad is read as the same
+- `FALSE` followed by `TRUE` is a partnership forming and needs no message.
+  `TRUE`, then `FALSE`, then `TRUE` again within a dyad is read as the same
   partner returning (message M1). Re-partnering with a new partner is not
   supported: a new dyad ID would put the person in two dyads.
 - The role value `"missing"` is reserved (E8; a validation change noted in
@@ -108,7 +111,9 @@ their composition; only the no-partner occasions change.
 - `.partner_exists`: created only when it varies (some `TRUE`, some `FALSE`).
 - `.partner_exists_lag1`: created with `lag1_predictors` when `.partner_exists`
   exists. The dyad's status at t-1, from whichever member has a row then; `NA`
-  if neither has a row (to keep it, add rows with only the status filled in).
+  if neither has a row. To keep it, add a row for the person at t-1 with valid
+  IDs, the recorded status, and missing measures (never a row for an invented
+  partner).
 - Short column names: groups of people observed alone do not count toward the
   one-composition rule (e.g., `.is_female`, `.is_male` stay next to
   `.is_singleton_male`).
@@ -145,13 +150,13 @@ their composition; only the no-partner occasions change.
 
 ## Messages
 
-- **M1**: `partner_exists` returns to TRUE after FALSE in 3 dyads (12, 40, 77). This is treated as the same partner returning. A different, new partner is not supported yet; end the person's data before the new partnership.
+- **M1** (TRUE, then FALSE, then TRUE): `partner_exists` returns to TRUE after FALSE in 3 dyads (12, 40, 77). This is treated as the same partner returning. A different, new partner is not supported yet; end the person's data before the new partnership.
 
 ## Print
 
 ```
 # People observed alone: 21 without a partner, 10 with a partner not in the data
-#   The 10 have missing partner predictors; models with partner predictors leave them out (check nobs()).
+# Rows with missing partner predictors: 410 of 4,812 (models with partner predictors leave them out; check nobs())
 # Dyad-occasions with one member observed: 230 of 2,520 (treated as missing partner data)
 ```
 
@@ -173,13 +178,16 @@ their composition; only the no-partner occasions change.
   covariance calculation is unchanged. `block_pairings` accepts these terms
   (and custom summed columns created with `mutate()`) and remains the way to
   resolve ambiguous cases.
-- Warning when an added indicator appears in only one term of a shared/contrast
-  pair, e.g.: "`.is_singleton_male` appears in the shared term but not in the
-  contrast term, so singletons get variance a, not a + b. Add it to both terms
-  to share the dyad members' variance."
+- Version 1 supports full sharing only: an added indicator must appear in both
+  terms of a shared/contrast pair. If it appears in only one, recovery stops
+  with an error (the existing strict validation stays), e.g.:
+  "`.is_singleton_male` appears in the shared term but not in the contrast
+  term, so singletons would get variance a, not a + b. Add it to both terms to
+  share the dyad members' variance." Recovery for partial sharing is deferred.
 - Docs framing: pooling treats a person observed alone like one member of the
-  exchangeable dyad (shared = 1, contrast = +1); the sign does not matter
-  because the two terms are independent.
+  exchangeable dyad (shared = 1, contrast = +1). The sign does not matter
+  because the two terms are independent; with random slopes, the sign must be
+  the same across all coefficients and occasions of that person.
 
 ## Documentation
 
@@ -191,10 +199,11 @@ their composition; only the no-partner occasions change.
   removing occasions; listwise deletion of rows with missing partner
   predictors; one dyad per person; the death example table.
 - Interpretation notes:
-  - Use `.partner_exists` or the singleton indicators to give people without a
-    partner their own mean, not both. `.partner_exists` is needed when
-    no-partner occasions occur inside dyads (plus `.partner_exists_lag1` with
-    lags).
+  - Omit a status term only when the intercept indicators already represent
+    its variation. Example: if status never changes within a person, the
+    singleton indicators already give people without a partner their own
+    mean. If no-partner occasions occur inside dyads, include `.partner_exists`
+    (and `.partner_exists_lag1` with lags), also next to singleton indicators.
   - `.partner_exists` is a contrast at partner predictors = 0, not "the effect
     of having a partner"; it mixes change over time and differences between
     people.
@@ -207,12 +216,18 @@ their composition; only the no-partner occasions change.
     cwp no longer averages 0 and cbp is no longer constant within a person.
   - Sharing parameters: add indicators, in the formula or as summed columns
     with `mutate()`. Fully pooling a `_x_missing` group with a composition gives
-    the same model as adding the partner's rows; pooling only some parameters
-    lets `compare_nested_models()` test whether these people differ.
+    the same model as adding empty partner rows, provided the fitted
+    observations, predictors and model constraints are identical. Pooling only
+    some parameters lets `compare_nested_models()` test whether these people
+    differ.
+  - People observed alone supply no observed partner pairs, but sharing
+    variance parameters with them can still change the estimated partner
+    covariance and correlation.
   - The +1 on the contrast column is valid only because shared and contrast
     terms are separate random-effect terms.
   - Lagged partner columns after a separation hold the former partner's t-1
-    value, by design; multiply by `.partner_exists` to set them to 0.
+    value, by design. To set them to 0 instead, use a condition, because
+    `0 * NA` stays `NA`: `if_else(.partner_exists == 0, 0, .x_partner_lag1)`.
 - NEWS: `partner_exists`, print lines, `I()` support, clearer missing-dyad-ID
   message, the all-missing-lag warning (#83), and `"missing"` no longer
   accepted as a role value.
@@ -233,9 +248,9 @@ their composition; only the no-partner occasions change.
 - Small partner-loss example (one person, partnered → no partner), no model.
 - Partners not in the data: listwise deletion in models with partner
   predictors; check `nobs()`; compare results with and without them; pointer to
-  multiple imputation; reporting sentence ("n people whose partner did not
-  participate were retained for centering and actor-only models and excluded
-  from APIM models with partner predictors").
+  multiple imputation; reporting sentence ("n rows with missing partner
+  predictors, from m people, were retained for centering and actor-only models
+  and excluded from APIM models with partner predictors").
 - Panel and lag material is reference-level (help and a short section), not
   the main thread.
 
@@ -275,8 +290,8 @@ us(0 + I(.is_male_x_male + .is_singleton_male) | coupleID) +
 us(0 + I(.member_contrast_male_x_male_arbitrary + .is_singleton_male) | coupleID)
 ```
 
-The partner covariance is never shared: people observed alone have no observed
-partner and contribute nothing to it.
+People observed alone supply no observed partner pairs. Sharing variance
+parameters with them can still change the estimated partner covariance.
 
 ### 1. Cross-sectional survey: all compositions, singles, partners who did not answer
 
@@ -309,7 +324,7 @@ fit <- glmmTMB(
     us(0 + .is_singleton_female | coupleID) + us(0 + .is_singleton_male | coupleID),
   family = gaussian(), dispformula = ~ 0, data = prep
 )
-nobs(fit)   # people whose partner did not answer are not included
+nobs(fit)   # rows of people whose partner did not answer are not included
 ```
 
 Two-part: `.support_gmc_partner` is 0 for singles and pairs with
@@ -391,7 +406,8 @@ Re-partnering is not supported.
 ### 4. Three waves, several compositions, separations
 
 Waves 1–3; female–male, female–female, male–male; same-sex couples pooled.
-Some couples separate and both may keep taking part; `together` per wave.
+Some couples separate after wave 1, others after wave 2; both may keep taking
+part; `together` per wave.
 Grand-mean centering because of three waves.
 
 ```r
@@ -407,6 +423,9 @@ prep <- prepare_dyad_data(
 - Separation after wave 2: both have `together = FALSE` at wave 3, both rows
   stay; contemporaneous partner predictors 0, `.partner_exists = 0`;
   `.conflict_gmc_partner_lag1` still holds the former partner's wave-2 value.
+- Separation after wave 1: at wave 3 the lag is 0 and `.partner_exists_lag1 = 0`.
+  Without such earlier separations, `.partner_exists_lag1` would be 1 on all
+  retained waves (2–3) and duplicate the intercepts; then leave it out.
 - One `TRUE`, the other `FALSE`: E3.
 
 ```r
@@ -421,14 +440,15 @@ value (`.partner_exists_lag1 = 1`); from the second wave on it is 0
 (`.partner_exists_lag1 = 0`). `.partner_exists` captures the contemporaneous
 status; add `.conflict_gmc_partner` to it for contemporaneous partner effects.
 `.partner_exists` is required because no-partner occasions occur inside dyads.
-People whose partner never took part drop out of this lag model. With lags,
-wave 1 drops out.
+Rows of people whose partner never took part drop out of this lag model,
+except their no-partner rows. With lags, wave 1 drops out.
 
 ## Tests
 
 - `partner_exists`: `NULL`, `TRUE`, `FALSE`; columns (one-person dyads all
   `TRUE` / all `FALSE` / mixed; occasions inside dyads; both members `FALSE`);
-  E3 on disagreement; M1 on returning status.
+  E3 on disagreement; M1 on TRUE → FALSE → TRUE, no message on FALSE → TRUE
+  (partnership forming).
 - Labels: `singleton_*`, `*_x_missing`, no-role labels; own role first
   independent of locale; reserved role value (E8).
 - E1–E9.
@@ -440,11 +460,12 @@ wave 1 drops out.
 - `keep_compositions` with the new labels.
 - Print and summary counts, including the missing-partner-predictors line.
 - `recover_exchangeable_covariance()`: `I()` sums with and without slopes; the
-  same indicator in shared and contrast terms; `block_pairings`; warning when
+  same indicator in shared and contrast terms; `block_pairings`; error when
   an indicator is in only one term of a pair.
 - #83: warning when a lag column is entirely missing.
 - Cross-checks: same fit as the vignette's manual construction; a fully pooled
-  `_x_missing` group gives the same fit as manually added partner rows.
+  `_x_missing` group gives the same fit as manually added empty partner rows
+  (same fitted rows and constraints).
 
 ## Not included (can be added later without breaking changes)
 
