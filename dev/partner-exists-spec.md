@@ -175,6 +175,13 @@ their composition; only the no-partner occasions change.
 - Added indicators are read as additional groups sharing the variance; the
   covariance calculation is unchanged. `block_pairings` accepts these terms and
   remains the way to resolve ambiguous cases.
+- Warning when an added indicator appears in only one term of a shared/contrast
+  pair, e.g.: "`.is_singleton_male` appears in the shared term but not in the
+  contrast term, so singletons get variance a, not a + b. Add it to both terms
+  to share the dyad members' variance."
+- Docs framing: pooling treats a singleton like one member of the exchangeable
+  dyad (shared = 1, contrast = +1); the sign does not matter because the two
+  terms are independent.
 
 ## Documentation
 
@@ -364,7 +371,7 @@ dyads. If people with no partner on every row exist, add their
 - `keep_compositions` with new labels and removed compositions.
 - Print and summary counts.
 - `recover_exchangeable_covariance()`: `I()` sums with and without slopes; the
-  same indicator in shared and contrast terms; `block_pairings`.
+  same indicator in shared and contrast terms; `block_pairings`; warning when an indicator is in only one term of a pair.
 - Cross-checks: same fit as the vignette's manual construction; `partner_role`
   vs. manually added partner rows give identical columns.
 
