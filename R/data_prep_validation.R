@@ -111,8 +111,10 @@ validate_dyad_data <- function(
   has_partner_exists <- !rlang::quo_is_null(partner_exists_quo)
   if (has_partner_exists && incomplete_dyads == "drop") {
     stop(
-      "`incomplete_dyads = \"drop\"` cannot be combined with `partner_exists`. ",
-      "Remove those dyads beforehand, or use `partner_exists` to keep them.",
+      "`partner_exists` keeps everyone observed alone, so it cannot be ",
+      "combined with `incomplete_dyads = \"drop\"`. To remove people observed ",
+      "alone instead, leave out `partner_exists` and use ",
+      "`incomplete_dyads = \"drop\"`, or remove them from the data beforehand.",
       call. = FALSE
     )
   }
@@ -653,6 +655,11 @@ resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dya
 #' @keywords internal
 add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) {
   status <- rlang::eval_tidy(partner_exists_quo, data = out)
+
+  # A quoted column name, as also accepted by `role` or `time`.
+  if (is.character(status) && length(status) == 1L && status %in% names(out)) {
+    status <- out[[status]]
+  }
   is_constant <- length(status) == 1L
 
   # Allowed: TRUE/FALSE or 1/0, given once (a constant) or once per row.
@@ -662,26 +669,28 @@ add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) 
   if (!is_valid) {
     stop(
       "`partner_exists` must be `TRUE`, `FALSE`, or a column or expression ",
-      "with one TRUE/FALSE (or 1/0) value per row. Write column names without ",
-      "quotes, for example `partner_exists = partnered`.",
+      "with one TRUE/FALSE (or 1/0) value per row.",
       call. = FALSE
     )
   }
 
+  # A constant is repeated for every row; a vector is stored row by row.
   out[[dyad_partner_exists_col]] <- as.logical(status)
 
-  # A constant only describes people observed alone; everyone in a complete
-  # dyad has a partner.
+  # A constant only describes people observed alone. Without this step it
+  # would also be applied to complete dyads, e.g. `FALSE` would mark everyone
+  # as having no partner. Complete dyads are therefore set to partnered.
   if (is_constant) {
     out <- out |>
+      dplyr::group_by(.data[[dyad_name]]) |>
       dplyr::mutate(
         "{dyad_partner_exists_col}" := if (dplyr::n_distinct(.data[[member_name]]) == 1L) {
           .data[[dyad_partner_exists_col]]
         } else {
           TRUE
-        },
-        .by = dplyr::all_of(dyad_name)
-      )
+        }
+      ) |>
+      dplyr::ungroup()
   }
 
   rows_without_status <- out |>

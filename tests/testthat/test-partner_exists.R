@@ -39,6 +39,7 @@ test_that("partner_exists accepts a column, an expression, or 1/0 values", {
   expected <- partner_data()$partnered
 
   by_column <- validate_partner_exists_data(partner_data(), partner_exists = partnered)
+  by_quoted_name <- validate_partner_exists_data(partner_data(), partner_exists = "partnered")
   by_expression <- validate_partner_exists_data(partner_data(), partner_exists = !single)
   by_numbers <- validate_partner_exists_data(
     dplyr::mutate(partner_data(), partnered = as.numeric(partnered)),
@@ -46,13 +47,14 @@ test_that("partner_exists accepts a column, an expression, or 1/0 values", {
   )
 
   expect_equal(stored_status(by_column), expected)
+  expect_equal(stored_status(by_quoted_name), expected)
   expect_equal(stored_status(by_expression), expected)
   expect_equal(stored_status(by_numbers), expected)
 })
 
 test_that("partner_exists rejects invalid values", {
   invalid_values <- list(
-    quoted_name = "partnered",
+    unknown_name = "not_a_column",
     missing_constant = NA,
     other_numbers = c(0, 1, 2, 1, 0, 1),
     wrong_length = c(TRUE, FALSE)
@@ -85,7 +87,7 @@ test_that("partner_exists cannot be combined with dropping incomplete dyads", {
       partner_exists = FALSE,
       incomplete_dyads = "drop"
     ),
-    "`incomplete_dyads = \"drop\"` cannot be combined with `partner_exists`.",
+    "`partner_exists` keeps everyone observed alone, so it cannot be combined",
     fixed = TRUE
   )
 })
