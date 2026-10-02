@@ -7,6 +7,18 @@ already refer to `partner_exists`, since nothing is merged before B); (B) versio
 `recover_exchangeable_covariance()`; (D) vignette, rendered; plus a small
 commit for #83 (warning for all-missing lag columns).
 
+Steps of B, each a reviewable commit:
+
+| Step | Content | Status |
+|---|---|---|
+| B1 | `partner_exists` argument, evaluation, checks (E2–E5, E8), keeping one-person dyads | done |
+| B2 | Labels `singleton_<role>` / `<role>_x_missing`, indicators, no member contrasts, stable seeds, short-name rule, `keep_compositions`, pooling rejection (E6) | open |
+| B3 | Two-part coding of partner predictors (after centering), lag rule, non-numeric warning, two-part message M2 | open |
+| B4 | `.partner_exists` and `.partner_exists_lag1`, M1, DIM/DSM rejection (E7); M2 names the status columns that exist | open |
+| B5 | `print()` (people observed alone, two-part reminder), full help section, `@param`, NEWS | open |
+
+No step checks model formulas: data preparation cannot see the eventual model.
+
 ## In short
 
 `prepare_dyad_data()` gets one optional argument, `partner_exists`: whether a
@@ -55,7 +67,11 @@ help states both naming rules next to the table.
 
 ## Argument
 
-`partner_exists = NULL`: `TRUE`, `FALSE`, or a column with TRUE/FALSE or 1/0.
+`partner_exists = NULL`: `TRUE`, `FALSE`, a column name, or an expression
+evaluated in the data (for example `partnered` or `!widowed`), with TRUE/FALSE
+or 1/0 values. It is evaluated with `rlang::eval_tidy()` before any rows are
+removed and stored per row in the temporary column `.dy_partner_exists`.
+Quoted column names are not accepted (E5).
 
 | Value | Meaning |
 |---|---|
@@ -80,8 +96,11 @@ help states both naming rules next to the table.
   `TRUE`, then `FALSE`, then `TRUE` again within a dyad is read as the same
   partner returning (message M1). Re-partnering with a new partner is not
   supported: a new dyad ID would put the person in two dyads.
-- The role value `"missing"` is reserved (E8; a validation change noted in
-  NEWS).
+- The role value `"missing"` is reserved when `partner_exists` is supplied
+  (E8). Without `partner_exists`, no `_x_missing` labels are created, so this
+  is not a breaking change.
+- The existing minimum of two dyads counts one-person dyads; its message now
+  says "At least 2 dyads" instead of "At least 2 complete dyads".
 
 ## What each person gets
 
@@ -142,14 +161,19 @@ their composition; only the no-partner occasions change.
 - **E2**: `partner_exists` is missing in 8 rows (dyads 104, 117, …). Use TRUE or FALSE in every row; missing values are not read as "no partner". Placeholder rows without data (e.g., after a death) can be removed.
 - **E3**: `partner_exists` differs between the two members at the same occasion in 4 rows (dyad 12, times 3–4; …). Both members must agree on whether they are partners at that occasion. If partners report differently, pick one rule, e.g. FALSE if either reports a separation.
 - **E4**: `incomplete_dyads = "drop"` cannot be combined with `partner_exists`. Remove those dyads beforehand, or use `partner_exists` to keep them.
-- **E5**: `partner_exists` must be `TRUE`, `FALSE`, or a column with TRUE/FALSE or 1/0 values.
+- **E5**: `partner_exists` must be `TRUE`, `FALSE`, or a column or expression with one TRUE/FALSE (or 1/0) value per row. Write column names without quotes, for example `partner_exists = partnered`.
 - **E6**: `pool_compositions` cannot include singleton_male or male_x_missing. To let them share parameters with dyad members, add their indicators in the formula, e.g. `I(.is_female_x_male_male + .is_male_x_missing)`. See `vignette("mixed-apim")`. (Same for `set_exchangeable_compositions`.)
 - **E7**: `partner_exists` cannot be used with DIM or DSM columns yet.
-- **E8**: `role` must not be "missing"; this label is reserved for people whose partner is not in the data.
+- **E8**: `role` must not be "missing" when `partner_exists` is supplied; this label is reserved for people whose partner is not in the data.
 - **E9** (missing dyad IDs): in A: `dyad` is missing in 70 rows. Give each person observed alone their own dyad ID; see `incomplete_dyads`. B adds: "then see `partner_exists`".
 
 ## Messages
 
+- **M2** (once per call, only when partner predictors were set to 0):
+  > Partner predictors were set to 0 where no partner existed (two-part coding). Include `.partner_exists` in the model (and `.partner_exists_lag1` for lagged partner predictors), or fixed intercepts that already separate people with and without a partner; random effects alone do not. See `vignette("mixed-apim")`.
+
+  The lag part only appears when lagged partner columns were created; the
+  message names only status columns that exist.
 - **M1** (TRUE, then FALSE, then TRUE): `partner_exists` returns to TRUE after FALSE in 3 dyads (12, 40, 77). This is treated as the same partner returning. A different, new partner is not supported yet; end the person's data before the new partnership.
 
 ## Print
@@ -169,6 +193,14 @@ their composition; only the no-partner occasions change.
   with a `partner_exists` column: "… (180 without a partner; 50 treated as
   missing)". Neutral style.
 - The compositions table lists the new groups with counts; `summary()` follows.
+- Implemented in A (current form): a "Partner data" block with "Dyad-occasions
+  with a row for only one member" (longitudinal), "Rows with at least one
+  missing partner predictor", and a "Check:" pointer to the help section
+  (only when dyad-occasions without a partner row exist; only `Check:` in red).
+- B5 adds, when partner predictors were set to 0, a reminder line:
+  "Partner predictors are 0 where no partner existed; include
+  `.partner_exists` (or intercepts that separate these people) in the model."
+
 
 ## `recover_exchangeable_covariance()`
 
@@ -209,6 +241,10 @@ their composition; only the no-partner occasions change.
     singleton indicators already give people without a partner their own
     mean. If no-partner occasions occur inside dyads, include `.partner_exists`
     (and `.partner_exists_lag1` with lags), also next to singleton indicators.
+    Random effects alone cannot replace the status term, even when status is
+    constant within a person; only fixed intercepts that separate the
+    statuses can. Without a status term, the model treats "no partner" like
+    "a partner whose predictor equals 0", which can distort estimates.
   - `.partner_exists` is a contrast at partner predictors = 0, not "the effect
     of having a partner"; it mixes change over time and differences between
     people.
@@ -235,8 +271,7 @@ their composition; only the no-partner occasions change.
     value, by design. To set them to 0 instead, use a condition, because
     `0 * NA` stays `NA`: `if_else(.partner_exists == 0, 0, .x_partner_lag1)`.
 - NEWS: `partner_exists`, print lines, `I()` support, clearer missing-dyad-ID
-  message, the all-missing-lag warning (#83), and `"missing"` no longer
-  accepted as a role value.
+  message, and the all-missing-lag warning (#83).
 
 ## Vignette (`vignettes/mixed-apim.Rmd`)
 
@@ -461,7 +496,7 @@ With lags, wave 1 drops out.
   E3 on disagreement; M1 on TRUE → FALSE → TRUE, no message on FALSE → TRUE
   (partnership forming).
 - Labels: `singleton_*`, `*_x_missing`, no-role labels; own role first
-  independent of locale; reserved role value (E8).
+  independent of locale; reserved role value (E8, only with `partner_exists`).
 - E1–E9.
 - `.partner_exists` created only when it varies.
 - Zeroing after centering for raw, gmc, cwp, cbp, lag1; non-numeric warning;
