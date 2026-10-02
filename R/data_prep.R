@@ -184,9 +184,8 @@
 #' @param seed Optional seed for random `.member_contrast_*` sign assignment.
 #'   If `NULL`, the current R session's RNG state is used.
 #' @param short_colnames Whether to use shorter composition-dependent generated
-#'   column names when the final data contain one composition of dyads. People
-#'   observed alone do not count; their indicators always keep their full
-#'   labels, such as `.is_singleton_male`. The default `TRUE`
+#'   column names when the final data contain one composition of dyads. The
+#'   default `TRUE`
 #'   omits the redundant composition label from `.is_*` and
 #'   `.member_contrast_*` names. `FALSE` always retains composition-qualified
 #'   names. Other generated column names are unaffected.

@@ -170,9 +170,8 @@ information.}
 If \code{NULL}, the current R session's RNG state is used.}
 
 \item{short_colnames}{Whether to use shorter composition-dependent generated
-column names when the final data contain one composition of dyads. People
-observed alone do not count; their indicators always keep their full
-labels, such as \code{.is_singleton_male}. The default \code{TRUE}
+column names when the final data contain one composition of dyads. The
+default \code{TRUE}
 omits the redundant composition label from \verb{.is_*} and
 \verb{.member_contrast_*} names. \code{FALSE} always retains composition-qualified
 names. Other generated column names are unaffected.}
