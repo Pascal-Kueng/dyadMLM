@@ -133,12 +133,7 @@ print_partner_data <- function(x, meta) {
     if (n_missing > 0L) {
       lines <- c(lines, paste0(
         "Rows with at least one missing partner predictor: ",
-        format_count(n_missing), " of ", format_count(nrow(x)),
-        if (length(lines) > 0L) {
-          " (including rows at the occasions above and empty partner rows)."
-        } else {
-          "."
-        }
+        format_count(n_missing), " of ", format_count(nrow(x)), "."
       ))
     }
   }

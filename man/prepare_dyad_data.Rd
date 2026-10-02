@@ -211,9 +211,8 @@ their dyad was observed. As in the case above, if only one member has a row
 at an occasion, the partner is treated as existing but with missing values
 at that occasion (contemporaneous partner predictors are \code{NA}). The
 partner's \code{cbp} values remain available, because they are computed from the
-partner's observed occasions; lag-1 values do not bridge gaps. As above,
-models including these predictors omit such rows unless the missing values
-are imputed.
+partner's observed occasions; lag-1 values do not bridge gaps. Models omit
+rows when a predictor used in the model is missing.
 
 Using \code{print()} on the prepared data reports how many dyad-occasions have a
 row for only one member (where \code{dyadMLM} assumed the partner exists) and how

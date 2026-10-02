@@ -38,9 +38,8 @@
 #' at an occasion, the partner is treated as existing but with missing values
 #' at that occasion (contemporaneous partner predictors are `NA`). The
 #' partner's `cbp` values remain available, because they are computed from the
-#' partner's observed occasions; lag-1 values do not bridge gaps. As above,
-#' models including these predictors omit such rows unless the missing values
-#' are imputed.
+#' partner's observed occasions; lag-1 values do not bridge gaps. Models omit
+#' rows when a predictor used in the model is missing.
 #'
 #' Using `print()` on the prepared data reports how many dyad-occasions have a
 #' row for only one member (where `dyadMLM` assumed the partner exists) and how
