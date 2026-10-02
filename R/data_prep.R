@@ -142,7 +142,7 @@
 #'   only one person across all rows in `data`) when `partner_exists` is not
 #'   supplied. It is then unclear whether their partner exists but did not take
 #'   part, or whether they have no partner. `"error"` (default) stops and
-#'   explains how to use `partner_exists`; `"drop"` removes these dyads. With
+#'   explains how to use `partner_exists`. `"drop"` removes these dyads. With
 #'   `partner_exists`, everyone observed alone is kept and `"drop"` is not
 #'   allowed. A dyad with more than two unique members always causes an error.
 #' @param missing_role How to handle dyads in which at least one member has no

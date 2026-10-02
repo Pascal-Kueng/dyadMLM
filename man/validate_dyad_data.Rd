@@ -65,7 +65,7 @@ centering raw DIM and DSM dyad means.}
 only one person across all rows in \code{data}) when \code{partner_exists} is not
 supplied. It is then unclear whether their partner exists but did not take
 part, or whether they have no partner. \code{"error"} (default) stops and
-explains how to use \code{partner_exists}; \code{"drop"} removes these dyads. With
+explains how to use \code{partner_exists}. \code{"drop"} removes these dyads. With
 \code{partner_exists}, everyone observed alone is kept and \code{"drop"} is not
 allowed. A dyad with more than two unique members always causes an error.}
 
