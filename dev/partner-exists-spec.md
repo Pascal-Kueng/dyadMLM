@@ -36,10 +36,10 @@ Two terms are used in help, messages, and vignette:
 - **Partner not in the data**: a partner exists but has no data, at one
   occasion or never. Partner predictors are `NA` wherever the partner's value is
   unknown. Models with these predictors leave those rows out (listwise
-  deletion). These rows only enter intercept-only and actor-only models. A
-  person whose partner never appears can still contribute rows with
-  partner-predictor models, namely their no-partner rows (partner predictors
-  0).
+  deletion). These rows can enter models that omit the unavailable
+  predictors. A person whose partner never appears can still contribute rows
+  to partner-predictor models: rows where the needed partner predictors are
+  structural zeros (no partner at t, or for lags no partner at t-1).
 
 Labels for one-person dyads (own role first):
 
@@ -156,11 +156,15 @@ their composition; only the no-partner occasions change.
 
 ```
 # People observed alone: 21 without a partner, 10 with a partner not in the data
-# Rows with missing partner predictors: 410 of 4,812 (models with partner predictors leave them out; check nobs())
+# Rows missing at least one generated partner predictor (incl. lags): 410 of 4,812
+#   Which rows a model uses depends on its formula; check nobs().
 # Dyad-occasions with one member observed: 230 of 2,520 (treated as missing partner data)
 ```
 
-- First block when one-person dyads are kept. Last line in longitudinal data;
+- First line when one-person dyads are kept. The missing-partner-predictor
+  line counts rows missing any generated partner predictor, including lagged
+  ones; it is a description of the data, not of a model. Last line in
+  longitudinal data;
   with a `partner_exists` column: "… (180 without a partner; 50 treated as
   missing)". Neutral style.
 - The compositions table lists the new groups with counts; `summary()` follows.
@@ -210,8 +214,9 @@ their composition; only the no-partner occasions change.
   - What 0 means depends on the component: cwp 0 is the partner at their own
     mean; cbp 0 is a partner whose person mean equals the mean of person
     means; gmc 0 is the grand mean; raw 0 is the scale's 0 (prefer centered
-    components). These references include people observed alone, so adding
-    them shifts the meaning of couple coefficients.
+    components). Adding people observed alone changes the gmc and cbp
+    reference averages and thus the meaning of couple coefficients; it does
+    not change an existing person's cwp reference (their own mean).
   - With changing status, zeroing makes partner components status-dependent:
     cwp no longer averages 0 and cbp is no longer constant within a person.
   - Sharing parameters: add indicators, in the formula or as summed columns
@@ -248,9 +253,10 @@ their composition; only the no-partner occasions change.
 - Small partner-loss example (one person, partnered → no partner), no model.
 - Partners not in the data: listwise deletion in models with partner
   predictors; check `nobs()`; compare results with and without them; pointer to
-  multiple imputation; reporting sentence ("n rows with missing partner
-  predictors, from m people, were retained for centering and actor-only models
-  and excluded from APIM models with partner predictors").
+  multiple imputation; reporting sentence ("n rows from m people had missing
+  partner predictors; they were retained for centering and excluded from
+  models including those predictors"), with n and m taken from the fitted
+  model.
 - Panel and lag material is reference-level (help and a short section), not
   the main thread.
 
@@ -329,8 +335,9 @@ nobs(fit)   # rows of people whose partner did not answer are not included
 
 Two-part: `.support_gmc_partner` is 0 for singles and pairs with
 `.partner_exists`. Its coefficient is the partner effect among partnered
-people. `.partner_exists` compares partnered people (with partner support at
-the grand mean) and singles; `.partner_exists:.support_gmc_actor` is the
+people. `.partner_exists` compares partnered people and singles when both
+actor and partner support are at their grand means; away from the actor mean,
+the contrast also includes `.partner_exists:.support_gmc_actor`, the
 difference in actor slopes. The single intercept for all couples keeps the
 focus on singles vs. partnered people. A full analysis would usually use
 composition-specific intercepts (`0 + .is_*`); singles then get their own
@@ -440,8 +447,11 @@ value (`.partner_exists_lag1 = 1`); from the second wave on it is 0
 (`.partner_exists_lag1 = 0`). `.partner_exists` captures the contemporaneous
 status; add `.conflict_gmc_partner` to it for contemporaneous partner effects.
 `.partner_exists` is required because no-partner occasions occur inside dyads.
-Rows of people whose partner never took part drop out of this lag model,
-except their no-partner rows. With lags, wave 1 drops out.
+Rows of people whose partner never took part enter this lag model only where
+status at t-1 was "no partner" (structural-zero lag). Retention depends on
+status at t-1, not at t: the first no-partner row after a separation can still
+have a missing lag, and a newly partnered row can have a structural-zero lag.
+With lags, wave 1 drops out.
 
 ## Tests
 
@@ -461,7 +471,10 @@ except their no-partner rows. With lags, wave 1 drops out.
 - Print and summary counts, including the missing-partner-predictors line.
 - `recover_exchangeable_covariance()`: `I()` sums with and without slopes; the
   same indicator in shared and contrast terms; `block_pairings`; error when
-  an indicator is in only one term of a pair.
+  an indicator is in only one term of a pair; opposite signs across separate
+  singleton groups cannot substitute for paired information at the requested
+  grouping level; existing mappings with genuinely omitted blocks (`NULL`)
+  still work.
 - #83: warning when a lag column is entirely missing.
 - Cross-checks: same fit as the vignette's manual construction; a fully pooled
   `_x_missing` group gives the same fit as manually added empty partner rows
