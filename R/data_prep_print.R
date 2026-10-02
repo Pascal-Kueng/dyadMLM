@@ -45,6 +45,12 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
   if (!is.null(meta$time)) {
     structure_fields <- c(structure_fields, paste0("time = ", meta$time))
   }
+  if (!is.null(meta$partner_exists)) {
+    structure_fields <- c(
+      structure_fields,
+      paste0("partner_exists = ", meta$partner_exists)
+    )
+  }
 
   print_wrapped_comment_fields(
     label = "Structure",

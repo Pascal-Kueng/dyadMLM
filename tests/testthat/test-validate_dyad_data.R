@@ -942,7 +942,23 @@ test_that("validate_dyad_data rejects fewer than two groups", {
 
   expect_error(
     validate_dyad_data(data, dyad = dyad_id, member = person_id),
-    "At least 2 dyads are required after validation and any requested dropping.",
+    "dyadMLM needs at least 2 dyads, but only 1 remains (ID: 1) after validation.",
+    fixed = TRUE
+  )
+
+  # Dropped dyads are named with the option that dropped them.
+  data <- data.frame(
+    dyad_id = c(1, 1, 2),
+    person_id = c("A", "B", "C")
+  )
+  expect_error(
+    suppressMessages(validate_dyad_data(
+      data,
+      dyad = dyad_id,
+      member = person_id,
+      incomplete_dyads = "drop"
+    )),
+    "Dropped: 1 dyad with only one person (`incomplete_dyads = \"drop\"`).",
     fixed = TRUE
   )
 })

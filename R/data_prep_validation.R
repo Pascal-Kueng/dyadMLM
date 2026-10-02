@@ -46,10 +46,12 @@
 #'   is applied. `"error"` stops with an error and `"drop"` removes the entire
 #'   dyad. Conflicting non-missing roles always cause an error. Ignored when no
 #'   `role` column is supplied.
-#' @param partner_exists Optional partner status: `TRUE`, `FALSE`, a column
-#'   name, or an expression evaluated in `data` (such as `!widowed`). `TRUE` or
-#'   `FALSE` describes everyone observed alone; a column or expression gives
-#'   the status for each row. See [prepare_dyad_data()].
+#' @param partner_exists Optional partner status, evaluated in `data`: `NULL`,
+#'   `TRUE`, `FALSE`, a column name, or an expression (such as `!widowed`).
+#'   `TRUE` or `FALSE` describes everyone observed alone and is ignored for
+#'   complete dyads; a column or expression gives the status for each row.
+#'   Stored per row in a temporary column. See [prepare_dyad_data()] for the
+#'   meaning of each option.
 #'
 #' @return A tibble with class `dyadMLM_data` and metadata about the dyad,
 #'   member, optional role, and optional time columns.
@@ -362,7 +364,38 @@ validate_dyad_data <- function(
   n_groups <- length(unique(out[[dyad_name]]))
 
   if (n_groups < 2) {
-    stop("At least 2 dyads are required after validation and any requested dropping.", call. = FALSE)
+    remaining <- if (n_groups == 0) {
+      "none remains"
+    } else {
+      paste0("only 1 remains (ID: ", unique(out[[dyad_name]]), ")")
+    }
+    dyad_count <- function(dyads) {
+      paste(length(dyads), if (length(dyads) == 1) "dyad" else "dyads")
+    }
+    dropped <- c(
+      if (length(dropped_incomplete_dyads) > 0) {
+        paste0(
+          dyad_count(dropped_incomplete_dyads),
+          " with only one person (`incomplete_dyads = \"drop\"`)"
+        )
+      },
+      if (length(dropped_missing_role_dyads) > 0) {
+        paste0(
+          dyad_count(dropped_missing_role_dyads),
+          " with missing roles (`missing_role = \"drop\"`)"
+        )
+      }
+    )
+
+    stop(
+      "dyadMLM needs at least 2 dyads, but ", remaining, " after validation. ",
+      if (length(dropped) > 0) {
+        paste0("Dropped: ", paste(dropped, collapse = " and "), ". ")
+      },
+      "Check that both members of each dyad share the same `dyad` ID, and ",
+      "that `dyad` identifies dyads rather than people.",
+      call. = FALSE
+    )
   }
 
 
@@ -427,7 +460,10 @@ validate_dyad_data <- function(
     dsm_role_order = dsm_role_order,
     dropped_missing_role_dyads = dropped_missing_role_dyads,
     dropped_incomplete_dyads = dropped_incomplete_dyads,
-    partner_exists = has_partner_exists
+    # What the user supplied, e.g. "partnered" or "!widowed"; NULL if unused.
+    partner_exists = if (has_partner_exists) {
+      rlang::as_label(partner_exists_quo)
+    }
   )
 
   class(out) <- unique(c("dyadMLM_data", class(out)))
@@ -556,8 +592,9 @@ resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dya
   # Groups with fewer than two members are handled by policy.
   incomplete_groups <- group_member_counts[[dyad_name]][group_member_counts$n_members < 2]
 
-  # Return early if all groups are complete, or if `partner_exists` describes
-  # the one-person dyads. Nothing is dropped in either case.
+  # Return early if all dyads are complete, or if `partner_exists` is supplied:
+  # then every one-person dyad is kept, whatever its value. The value only
+  # decides later how the person is labeled.
   if (length(incomplete_groups) == 0 || keep_one_person_dyads) {
     return(list(out = out, dropped_incomplete_dyads = incomplete_groups[0]))
   }

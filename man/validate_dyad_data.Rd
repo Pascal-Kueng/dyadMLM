@@ -73,10 +73,12 @@ is applied. \code{"error"} stops with an error and \code{"drop"} removes the ent
 dyad. Conflicting non-missing roles always cause an error. Ignored when no
 \code{role} column is supplied.}
 
-\item{partner_exists}{Optional partner status: \code{TRUE}, \code{FALSE}, a column
-name, or an expression evaluated in \code{data} (such as \code{!widowed}). \code{TRUE} or
-\code{FALSE} describes everyone observed alone; a column or expression gives
-the status for each row. See \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
+\item{partner_exists}{Optional partner status, evaluated in \code{data}: \code{NULL},
+\code{TRUE}, \code{FALSE}, a column name, or an expression (such as \code{!widowed}).
+\code{TRUE} or \code{FALSE} describes everyone observed alone and is ignored for
+complete dyads; a column or expression gives the status for each row.
+Stored per row in a temporary column. See \code{\link[=prepare_dyad_data]{prepare_dyad_data()}} for the
+meaning of each option.}
 }
 \value{
 A tibble with class \code{dyadMLM_data} and metadata about the dyad,

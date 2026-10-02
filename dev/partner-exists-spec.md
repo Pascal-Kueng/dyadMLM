@@ -71,7 +71,9 @@ help states both naming rules next to the table.
 evaluated in the data (for example `partnered` or `!widowed`), with TRUE/FALSE
 or 1/0 values. It is evaluated with `rlang::eval_tidy()` before any rows are
 removed and stored per row in the temporary column `.dy_partner_exists`.
-Quoted column names are not accepted (E5).
+Quoted column names are not accepted (E5). The metadata stores what the user
+supplied (e.g. `"partnered"` or `"!widowed"`), and the print header shows it in
+the structure line: `partner_exists = !widowed`.
 
 | Value | Meaning |
 |---|---|

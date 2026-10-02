@@ -28,7 +28,7 @@ test_that("a constant partner_exists describes people observed alone", {
 
   expect_equal(nrow(validated), 6L)
   expect_equal(stored_status(validated), c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE))
-  expect_true(attr(validated, "dyadMLM")$partner_exists)
+  expect_equal(attr(validated, "dyadMLM")$partner_exists, "FALSE")
   expect_length(attr(validated, "dyadMLM")$dropped_incomplete_dyads, 0L)
 
   validated <- validate_partner_exists_data(partner_data(), partner_exists = TRUE)
@@ -137,6 +137,11 @@ test_that("prepare_dyad_data passes partner_exists on and removes the status col
   )
 
   expect_false(dyad_partner_exists_col %in% names(prepared))
-  expect_true(attr(prepared, "dyadMLM")$partner_exists)
+  expect_equal(attr(prepared, "dyadMLM")$partner_exists, "partnered")
   expect_s3_class(prepared, "dyadMLM_data")
+  expect_true(any(grepl(
+    "partner_exists = partnered",
+    capture.output(print(prepared)),
+    fixed = TRUE
+  )))
 })
