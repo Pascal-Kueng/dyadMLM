@@ -669,7 +669,7 @@ add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) 
   is_constant <- length(status) == 1L
 
   # Allowed: TRUE/FALSE or 1/0, given once (a constant) or once per row.
-  is_valid <- (is.logical(status) || all(status %in% c(0, 1, NA))) &&
+  is_valid <- (is.logical(status) || (is.numeric(status) && all(status %in% c(0, 1, NA)))) &&
     length(status) %in% c(1L, nrow(out)) &&
     !(is_constant && is.na(status))
   if (!is_valid) {

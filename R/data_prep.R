@@ -168,8 +168,9 @@
 #'     complete dyad has no row are still treated as the partner existing but
 #'     not observed. To mark such occasions as "no partner exists", use a
 #'     column.
-#'   * A column name or an expression evaluated in `data` (for example
-#'     `partnered` or `!widowed`) that is TRUE/FALSE or 1/0 **for each row**.
+#'   * A column name (quoted or not) or an expression evaluated in `data` (for
+#'     example `partnered` or `!widowed`) that is TRUE/FALSE or 1/0 **for each
+#'     row**.
 #'     This can be used if some individuals have an unobserved partner, and
 #'     others have no partner. It can also be used to mark individuals
 #'     changing status over time.
@@ -183,7 +184,9 @@
 #' @param seed Optional seed for random `.member_contrast_*` sign assignment.
 #'   If `NULL`, the current R session's RNG state is used.
 #' @param short_colnames Whether to use shorter composition-dependent generated
-#'   column names when the final data contain one composition. The default `TRUE`
+#'   column names when the final data contain one composition of dyads. People
+#'   observed alone do not count; their indicators always keep their full
+#'   labels, such as `.is_singleton_male`. The default `TRUE`
 #'   omits the redundant composition label from `.is_*` and
 #'   `.member_contrast_*` names. `FALSE` always retains composition-qualified
 #'   names. Other generated column names are unaffected.

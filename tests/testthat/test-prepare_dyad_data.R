@@ -607,7 +607,7 @@ test_that("prepare_dyad_data filters included compositions before finalizing met
       time = time,
       keep_compositions = "female-female"
     ),
-    "`keep_compositions` must leave at least two complete dyads after filtering.",
+    "`keep_compositions` must leave at least two dyads after filtering.",
     fixed = TRUE
   )
 })

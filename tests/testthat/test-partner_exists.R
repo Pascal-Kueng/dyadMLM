@@ -57,6 +57,7 @@ test_that("partner_exists rejects invalid values", {
     unknown_name = "not_a_column",
     missing_constant = NA,
     other_numbers = c(0, 1, 2, 1, 0, 1),
+    text_numbers = c("1", "1", "1", "1", "0", "1"),
     wrong_length = c(TRUE, FALSE)
   )
 

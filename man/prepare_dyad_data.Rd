@@ -151,8 +151,9 @@ as half a dyad is inappropriate. Occasions at which a partner in a
 complete dyad has no row are still treated as the partner existing but
 not observed. To mark such occasions as "no partner exists", use a
 column.
-\item A column name or an expression evaluated in \code{data} (for example
-\code{partnered} or \code{!widowed}) that is TRUE/FALSE or 1/0 \strong{for each row}.
+\item A column name (quoted or not) or an expression evaluated in \code{data} (for
+example \code{partnered} or \code{!widowed}) that is TRUE/FALSE or 1/0 \strong{for each
+row}.
 This can be used if some individuals have an unobserved partner, and
 others have no partner. It can also be used to mark individuals
 changing status over time.
@@ -169,7 +170,9 @@ information.}
 If \code{NULL}, the current R session's RNG state is used.}
 
 \item{short_colnames}{Whether to use shorter composition-dependent generated
-column names when the final data contain one composition. The default \code{TRUE}
+column names when the final data contain one composition of dyads. People
+observed alone do not count; their indicators always keep their full
+labels, such as \code{.is_singleton_male}. The default \code{TRUE}
 omits the redundant composition label from \verb{.is_*} and
 \verb{.member_contrast_*} names. \code{FALSE} always retains composition-qualified
 names. Other generated column names are unaffected.}

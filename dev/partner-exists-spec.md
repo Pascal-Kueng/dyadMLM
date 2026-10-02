@@ -12,7 +12,7 @@ Steps of B, each a reviewable commit:
 | Step | Content | Status |
 |---|---|---|
 | B1 | `partner_exists` argument, evaluation, checks (E2–E5, E8), keeping one-person dyads | done |
-| B2 | Labels `singleton_<role>` / `<role>_x_missing`, indicators, no member contrasts, stable seeds, short-name rule, `keep_compositions`, pooling rejection (E6) | open |
+| B2 | Labels `singleton_<role>` / `<role>_x_missing`, indicators, no member contrasts, stable seeds, short-name rule, `keep_compositions`, pooling rejection (E6) | done |
 | B3 | Two-part coding of partner predictors (after centering), lag rule, non-numeric warning, two-part message M2 | open |
 | B4 | `.partner_exists` and `.partner_exists_lag1`, M1, DIM/DSM rejection (E7); M2 names the status columns that exist | open |
 | B5 | `print()` (people observed alone, two-part reminder), full help section, `@param`, NEWS | open |
@@ -71,7 +71,7 @@ help states both naming rules next to the table.
 evaluated in the data (for example `partnered` or `!widowed`), with TRUE/FALSE
 or 1/0 values. It is evaluated with `rlang::eval_tidy()` before any rows are
 removed and stored per row in the temporary column `.dy_partner_exists`.
-Quoted column names are not accepted (E5). The metadata stores what the user
+Quoted column names are accepted too, like for `role` or `time`. The metadata stores what the user
 supplied (e.g. `"partnered"` or `"!widowed"`), and the print header shows it in
 the structure line: `partner_exists = !widowed`.
 
@@ -163,7 +163,7 @@ their composition; only the no-partner occasions change.
 - **E2**: `partner_exists` is missing in 8 rows (dyads 104, 117, …). Use TRUE or FALSE in every row; missing values are not read as "no partner". Placeholder rows without data (e.g., after a death) can be removed.
 - **E3**: `partner_exists` differs between the two members at the same occasion in 4 rows (dyad 12, times 3–4; …). Both members must agree on whether they are partners at that occasion. If partners report differently, pick one rule, e.g. FALSE if either reports a separation.
 - **E4**: `incomplete_dyads = "drop"` cannot be combined with `partner_exists`. Remove those dyads beforehand, or use `partner_exists` to keep them.
-- **E5**: `partner_exists` must be `TRUE`, `FALSE`, or a column or expression with one TRUE/FALSE (or 1/0) value per row. Write column names without quotes, for example `partner_exists = partnered`.
+- **E5**: `partner_exists` must be `TRUE`, `FALSE`, or a column or expression with one TRUE/FALSE (or 1/0) value per row.
 - **E6**: `pool_compositions` cannot include singleton_male or male_x_missing. To let them share parameters with dyad members, add their indicators in the formula, e.g. `I(.is_female_x_male_male + .is_male_x_missing)`. See `vignette("mixed-apim")`. (Same for `set_exchangeable_compositions`.)
 - **E7**: `partner_exists` cannot be used with DIM or DSM columns yet.
 - **E8**: `role` must not be "missing" when `partner_exists` is supplied; this label is reserved for people whose partner is not in the data.
