@@ -175,7 +175,9 @@ validate_dyad_data <- function(
     stop(
       "`dyad` must not contain missing values. Found ",
       sum(is.na(out[[dyad_name]])),
-      " affected row(s); fill or remove them before preparing the data.",
+      " affected row(s). If these are people observed without their partner, ",
+      "give each person their own `dyad` ID. Dyads with one person are then ",
+      "handled by the `incomplete_dyads` argument. Otherwise, fill or remove these rows.",
       call. = FALSE
     )
   }

@@ -587,6 +587,16 @@ test_that("validate_dyad_data rejects missing grouping values", {
 
   expect_error(
     validate_dyad_data(
+      data.frame(dyad_id = c(1, NA, 2, 2), person_id = c("A", "B", "C", "D")),
+      dyad = dyad_id,
+      member = person_id
+    ),
+    "give each person their own `dyad` ID",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_dyad_data(
       data.frame(dyad_id = c(1, 1, 2, 2), person_id = c("A", NA, "C", "D")),
       dyad = dyad_id,
       member = person_id
