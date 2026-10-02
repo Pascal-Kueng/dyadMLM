@@ -47,9 +47,9 @@
 #'   dyad. Conflicting non-missing roles always cause an error. Ignored when no
 #'   `role` column is supplied.
 #' @param partner_exists Optional partner status: `TRUE`, `FALSE`, a column
-#'   name, or an expression evaluated in `data` (such as `!widowed`). A single
-#'   value describes people observed alone; a value per row describes each
-#'   occasion. See [prepare_dyad_data()].
+#'   name, or an expression evaluated in `data` (such as `!widowed`). `TRUE` or
+#'   `FALSE` describes everyone observed alone; a column or expression gives
+#'   the status for each row. See [prepare_dyad_data()].
 #'
 #' @return A tibble with class `dyadMLM_data` and metadata about the dyad,
 #'   member, optional role, and optional time columns.

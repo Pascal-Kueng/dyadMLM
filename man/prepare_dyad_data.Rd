@@ -130,15 +130,37 @@ is applied. \code{"error"} stops with an error and \code{"drop"} removes the ent
 dyad. Conflicting non-missing roles always cause an error. Ignored when no
 \code{role} column is supplied.}
 
-\item{partner_exists}{Optional partner status. \code{NULL} (default) keeps the
-current behavior. \code{TRUE} or \code{FALSE} describes all people observed alone:
-\code{TRUE} if their partner exists but did not take part, \code{FALSE} if they have
-no partner. A column name or an expression evaluated in \code{data} (for
-example \code{partnered} or \code{!widowed}) gives the status per row, for status
-that differs between people or over time. Use recorded status, not the
-number of rows per dyad. Missing values are an error. When both members
-have a row at the same occasion, their values must agree. See the section
-"People observed without their partner".}
+\item{partner_exists}{Optional. Decides how people (or occasions of
+people) observed without a partner are prepared. The options are:
+\itemize{
+\item \code{NULL} (default): people observed alone (across all occasions) cause an
+error with \code{incomplete_dyads = "error"} (default), or are removed with
+\code{incomplete_dyads = "drop"}. In longitudinal data, a partner who
+appears at least once is assumed to exist at every occasion of the dyad
+and to be just not observed at the others; these occasions are kept.
+\item \code{TRUE} or \code{FALSE}: is ignored for complete dyads and describes
+\strong{everyone} observed alone. \code{TRUE} means that everyone's partner exists
+but did not take part. This is appropriate if the sample includes only
+persistent dyads. \code{FALSE} means that all people observed alone have no
+partner. This is appropriate if everyone observed alone is an individual
+studied alone (not having an unobserved partner), and thus modeling them
+as half a dyad is inappropriate. Occasions at which a partner in a
+complete dyad has no row are still treated as the partner existing but
+not observed. To mark such occasions as "no partner exists", use a
+column.
+\item A column name or an expression evaluated in \code{data} (for example
+\code{partnered} or \code{!widowed}) that is TRUE/FALSE or 1/0 \strong{for each row}.
+This can be used if some individuals have an unobserved partner, and
+others have no partner. It can also be used to mark individuals
+changing status over time.
+}
+
+Missing values in the column are not allowed. When both members have a
+row at the same occasion, their values must agree (e.g., both members
+need to be partnered, or both need to be not partnered, which can cover
+partners splitting up but still taking part in the same study). See the
+section "People observed without their partner" below for more
+information.}
 
 \item{seed}{Optional seed for random \verb{.member_contrast_*} sign assignment.
 If \code{NULL}, the current R session's RNG state is used.}

@@ -74,9 +74,9 @@ dyad. Conflicting non-missing roles always cause an error. Ignored when no
 \code{role} column is supplied.}
 
 \item{partner_exists}{Optional partner status: \code{TRUE}, \code{FALSE}, a column
-name, or an expression evaluated in \code{data} (such as \code{!widowed}). A single
-value describes people observed alone; a value per row describes each
-occasion. See \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
+name, or an expression evaluated in \code{data} (such as \code{!widowed}). \code{TRUE} or
+\code{FALSE} describes everyone observed alone; a column or expression gives
+the status for each row. See \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
 }
 \value{
 A tibble with class \code{dyadMLM_data} and metadata about the dyad,
