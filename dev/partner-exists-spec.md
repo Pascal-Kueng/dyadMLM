@@ -241,6 +241,22 @@ their composition; only the no-partner occasions change.
 
 ## Examples
 
+### Two-part predictors
+
+Wherever partner predictors are 0 for people without a partner, the model
+needs a status term that gives these rows their own mean
+[@dziakTwoPartPredictors2017]:
+
+- contemporaneous partner predictors pair with `.partner_exists` (or, when
+  status never changes within a person, with the singleton indicators);
+- lagged partner predictors pair with `.partner_exists_lag1`.
+
+Interpretation: the partner slope is estimated among partnered people only;
+the status coefficient compares people with and without a partner when the
+partner predictor is at its reference (0 of the centered component). An
+interaction such as `.partner_exists:.support_gmc_actor` lets the actor slope
+differ by status. Every example below states which pairs it uses.
+
 ### Sharing parameters: add indicators
 
 ```r
@@ -296,6 +312,15 @@ fit <- glmmTMB(
 nobs(fit)   # people whose partner did not answer are not included
 ```
 
+Two-part: `.support_gmc_partner` is 0 for singles and pairs with
+`.partner_exists`. Its coefficient is the partner effect among partnered
+people. `.partner_exists` compares partnered people (with partner support at
+the grand mean) and singles; `.partner_exists:.support_gmc_actor` is the
+difference in actor slopes. The single intercept for all couples keeps the
+focus on singles vs. partnered people; a full analysis would usually add
+composition-specific intercepts (then drop the overall `1`, and keep
+`.partner_exists` out of a `0 +` formula only if singleton indicators replace it).
+
 People whose partner did not answer have `NA` partner predictors and drop out
 of this model. To use them, fit an actor-only model and add `.is_*_x_missing`
 to the indicators as needed.
@@ -310,6 +335,9 @@ prep <- prepare_dyad_data(
   predictors = support, partner_exists = TRUE, seed = 1
 )
 ```
+
+Two-part coding is not needed here: everyone has a partner, so no partner
+predictor is set to 0 and `.partner_exists` is not created.
 
 The usual APIM formula stays unchanged. People whose partner never took part
 (`.is_female_x_missing`, `.is_male_x_missing`) drop out of it; `print()` says
@@ -347,8 +375,15 @@ lag models; had he answered, the lag would hold his last value.
 
 ```r
 wellbeing ~ 1 + .partner_exists + .partner_exists_lag1 +
-  .health_cwp_actor + .health_cwp_partner + .health_cwp_partner_lag1 + ...
+  .health_cwp_actor + .health_cbp_actor +
+  .health_cwp_partner + .health_cbp_partner + .health_cwp_partner_lag1 + ...
 ```
+
+Two-part: `.health_cwp_partner` and `.health_cbp_partner` are 0 after the
+death and pair with `.partner_exists`; `.health_cwp_partner_lag1` pairs with
+`.partner_exists_lag1`. `.partner_exists` is the difference between widowed
+and partnered waves with the partner's health at its references; it mixes the
+change at the death with differences between people.
 
 Placeholder rows for the deceased trigger E2 and are removed beforehand.
 Re-partnering is not supported.
@@ -380,6 +415,11 @@ conflict ~ 0 + .is_female_x_male_female + .is_female_x_male_male + .is_same_sex 
   .conflict_gmc_actor_lag1 + .conflict_gmc_partner_lag1 + ...
 ```
 
+Two-part: `.conflict_gmc_partner_lag1` pairs with `.partner_exists_lag1`. At
+the first wave after a separation the lag still holds the former partner's
+value (`.partner_exists_lag1 = 1`); from the second wave on it is 0
+(`.partner_exists_lag1 = 0`). `.partner_exists` captures the contemporaneous
+status; add `.conflict_gmc_partner` to it for contemporaneous partner effects.
 `.partner_exists` is required because no-partner occasions occur inside dyads.
 People whose partner never took part drop out of this lag model. With lags,
 wave 1 drops out.
