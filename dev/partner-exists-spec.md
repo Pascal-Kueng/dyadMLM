@@ -2,8 +2,8 @@
 
 Status: agreed design for version 1, not yet implemented. Work happens on
 `mixed-dyad-vignette` in separate commits, each with its own help and tests:
-(A) print line, error message and help for current behavior, without
-mentioning `partner_exists`; (B) version 1 below; (C) `I()` support in
+(A) print line, error message and help for current behavior (they may
+already refer to `partner_exists`, since nothing is merged before B); (B) version 1 below; (C) `I()` support in
 `recover_exchangeable_covariance()`; (D) vignette, rendered; plus a small
 commit for #83 (warning for all-missing lag columns).
 
@@ -158,7 +158,8 @@ their composition; only the no-partner occasions change.
 # People observed alone: 21 without a partner, 10 with a partner not in the data
 # Rows missing at least one generated partner predictor (incl. lags): 410 of 4,812
 #   Which rows a model uses depends on its formula; check nobs().
-# Dyad-occasions with one member observed: 230 of 2,520 (treated as missing partner data)
+# Dyad-occasions with one member observed: 230 of 2,520 (partners are treated as existing but having missing data at these occasions).
+#   If no partner existed at some of these occasions, a different coding is needed: use `partner_exists`.
 ```
 
 - First line when one-person dyads are kept. The missing-partner-predictor

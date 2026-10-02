@@ -372,7 +372,11 @@ test_that("dyadMLM data print counts dyad-occasions with one member observed", {
     seed = 123
   )
 
-  expected <- paste0(label, ": 2 of 4 (treated as missing partner data)")
+  expected <- paste0(
+    label, ": 2 of 4 (partners are treated as existing but having missing ",
+    "data at these occasions). If no partner existed at some of these ",
+    "occasions, a different coding is needed: use `partner_exists`."
+  )
   expect_true(any(grepl(expected, capture_wide_print(result), fixed = TRUE)))
   summary_printed <- withr::with_options(
     list(width = 1000),

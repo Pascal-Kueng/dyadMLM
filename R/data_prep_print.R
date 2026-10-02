@@ -122,11 +122,19 @@ print_one_member_occasions <- function(x, meta) {
 
   print_wrapped_comment_fields(
     label = "Dyad-occasions with one member observed",
-    fields = paste0(
-      format(n_one_member, big.mark = ","), " of ",
-      format(length(members_per_occasion), big.mark = ","),
-      " (treated as missing partner data)"
+    fields = c(
+      paste0(
+        format(n_one_member, big.mark = ","), " of ",
+        format(length(members_per_occasion), big.mark = ","),
+        " (partners are treated as existing but having missing data at ",
+        "these occasions)."
+      ),
+      paste0(
+        "If no partner existed at some of these occasions, a different ",
+        "coding is needed: use `partner_exists`."
+      )
     ),
+    sep = " ",
     exdent = 2L
   )
   cat("#\n")
