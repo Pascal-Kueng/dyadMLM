@@ -10,10 +10,11 @@
 #' `time`, and selected predictor columns must not contain infinite values.
 #' Structural completeness is assessed across all rows. A dyad with more than
 #' two members always causes an error. A dyad with only one person in the data
-#' (for example, a single person, or someone whose partner did not take part)
-#' causes an error by default. To keep such dyads, supply `partner_exists`,
-#' which records whether the person has a partner (see the section "People
-#' observed without their partner" below). To remove them instead, use
+#' (for example, someone whose partner did not take part, or single persons
+#' studied alongside dyads) causes an error by default. To keep such dyads,
+#' supply `partner_exists`, which records whether the person has a partner who
+#' did not take part or has no partner (see the section "People observed
+#' without their partner" below). To remove them instead, use
 #' `incomplete_dyads = "drop"`.
 #' When `role` is supplied, stable member roles are resolved across repeated
 #' rows before `missing_role` is applied.
