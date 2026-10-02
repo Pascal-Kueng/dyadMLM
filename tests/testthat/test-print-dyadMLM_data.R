@@ -354,6 +354,50 @@ test_that("dyadMLM data print describes longitudinal APIM columns", {
   expect_true(any(grepl(".{pred}_cbp_partner", printed, fixed = TRUE)))
 })
 
+test_that("dyadMLM data print counts dyad-occasions with one member observed", {
+  label <- "Dyad-occasions with one member observed"
+  complete <- tibble::tibble(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2)
+  )
+
+  # Person 2 misses time 2 and person 4 misses time 1.
+  incomplete <- complete[-c(4, 6), ]
+  result <- prepare_dyad_data(
+    incomplete,
+    dyad = dyad_id,
+    member = person_id,
+    time = time,
+    seed = 123
+  )
+
+  expected <- paste0(label, ": 2 of 4 (treated as missing partner data)")
+  expect_true(any(grepl(expected, capture_wide_print(result), fixed = TRUE)))
+  summary_printed <- withr::with_options(
+    list(width = 1000),
+    capture.output(summary(result))
+  )
+  expect_true(any(grepl(expected, summary_printed, fixed = TRUE)))
+
+  complete_result <- prepare_dyad_data(
+    complete,
+    dyad = dyad_id,
+    member = person_id,
+    time = time,
+    seed = 123
+  )
+  expect_false(any(grepl(label, capture_wide_print(complete_result), fixed = TRUE)))
+
+  cross_sectional <- prepare_dyad_data(
+    complete[complete$time == 1, ],
+    dyad = dyad_id,
+    member = person_id,
+    seed = 123
+  )
+  expect_false(any(grepl(label, capture_wide_print(cross_sectional), fixed = TRUE)))
+})
+
 test_that("dyadMLM data print orders generated column descriptions", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),

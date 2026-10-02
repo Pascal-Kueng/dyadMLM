@@ -96,6 +96,40 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
       print_dyad_compositions(current_dyad_compositions)
     }
   }
+
+  print_one_member_occasions(x, meta)
+  invisible(NULL)
+}
+
+# In longitudinal data, an occasion with one member observed is prepared as
+# missing partner data: the partner is assumed to still exist.
+print_one_member_occasions <- function(x, meta) {
+  structural_columns <- c(meta$dyad, meta$member, meta$time)
+  if (!isTRUE(meta$longitudinal) || !all(structural_columns %in% names(x))) {
+    return(invisible(NULL))
+  }
+
+  members_per_occasion <- x |>
+    dplyr::summarise(
+      n_members = dplyr::n_distinct(.data[[meta$member]]),
+      .by = dplyr::all_of(c(meta$dyad, meta$time))
+    ) |>
+    dplyr::pull("n_members")
+  n_one_member <- sum(members_per_occasion == 1L)
+  if (n_one_member == 0L) {
+    return(invisible(NULL))
+  }
+
+  print_wrapped_comment_fields(
+    label = "Dyad-occasions with one member observed",
+    fields = paste0(
+      format(n_one_member, big.mark = ","), " of ",
+      format(length(members_per_occasion), big.mark = ","),
+      " (treated as missing partner data)"
+    ),
+    exdent = 2L
+  )
+  cat("#\n")
   invisible(NULL)
 }
 
