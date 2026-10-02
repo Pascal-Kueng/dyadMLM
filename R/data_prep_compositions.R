@@ -635,6 +635,19 @@ finalize_composition_columns <- function(
   # The arbitrary role is only needed while constructing member contrasts.
   data[[dyad_arbitrary_role_col]] <- NULL
 
+  # Each composition-role label must belong to one composition. Unusual role
+  # values could otherwise give a person observed alone and a dyad member the
+  # same label, and thus the same indicator.
+  shared_role_labels <- tibble::tibble(
+    composition_role = as.character(data[[dyad_composition_role_col]]),
+    composition = as.character(data[[dyad_composition_col]])
+  ) |>
+    dplyr::distinct() |>
+    dplyr::count(.data$composition_role) |>
+    dplyr::filter(.data$n > 1L) |>
+    dplyr::pull("composition_role")
+  stop_if_labels_coincide(shared_role_labels)
+
   # Build the exact output names once and reuse them for validation and writing.
   composition_role_labels <- sort(unique(
     as.character(data[[dyad_composition_role_col]])
@@ -841,7 +854,7 @@ stop_if_labels_coincide <- function(labels) {
   }
 
   stop(
-    "Different groups would get the same composition label: ",
+    "Different groups would get the same label: ",
     paste(unique(labels), collapse = ", "),
     ". This happens when a `role` value looks like part of a label for people ",
     "observed alone (such as `singleton_` or `_x_missing`). Rename these role ",

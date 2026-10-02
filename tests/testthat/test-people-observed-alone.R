@@ -125,7 +125,7 @@ test_that("different groups cannot get the same label", {
 
   expect_error(
     prepare_alone(data, role = gender),
-    "Different groups would get the same composition label: singleton_x_missing.",
+    "Different groups would get the same label: singleton_x_missing.",
     fixed = TRUE
   )
 })
@@ -164,4 +164,36 @@ test_that("a dyad column named like a temporary summary still works", {
     seed = 123
   )
   expect_equal(as.character(prepared$.composition[7]), "singleton")
+})
+
+test_that("exact composition labels win over labels of people observed alone", {
+  # A complete "singleton"-"zebra" dyad has the label "singleton_x_zebra",
+  # which also looks like "singleton_" plus role "x_zebra".
+  data <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2, 3),
+    person_id = 1:5,
+    gender = c("singleton", "zebra", "singleton", "zebra", "zebra"),
+    partnered = c(TRUE, TRUE, TRUE, TRUE, FALSE)
+  )
+
+  prepared <- prepare_alone(data, role = gender, keep_compositions = "singleton_x_zebra")
+  expect_equal(unique(as.character(prepared$.composition)), "singleton_x_zebra")
+})
+
+test_that("a person observed alone and a dyad member cannot share an indicator", {
+  # Dyad member with role "singleton" in a "singleton"-"zebra" dyad gets
+  # "singleton_x_zebra_singleton"; so would a singleton with role
+  # "x_zebra_singleton".
+  data <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2, 3),
+    person_id = 1:5,
+    gender = c("singleton", "zebra", "singleton", "zebra", "x_zebra_singleton"),
+    partnered = c(TRUE, TRUE, TRUE, TRUE, FALSE)
+  )
+
+  expect_error(
+    prepare_alone(data, role = gender),
+    "Different groups would get the same label: singleton_x_zebra_singleton.",
+    fixed = TRUE
+  )
 })

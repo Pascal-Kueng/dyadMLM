@@ -183,8 +183,9 @@ resolve_composition_references <- function(references, observed_compositions, ar
   for (i in seq_along(references)) {
     reference <- trimws(references[[i]])
 
-    # Exact labels first, then the same label with other separators.
-    if (reference %in% alone_compositions) {
+    # Exact observed labels first, then labels of people observed alone with
+    # other separators, then role pairs such as "female-male".
+    if (reference %in% observed_compositions) {
       reference_values[[i]] <- reference
       next
     }
