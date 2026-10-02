@@ -97,47 +97,67 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
     }
   }
 
-  print_one_member_occasions(x, meta)
+  print_partner_data(x, meta)
   invisible(NULL)
 }
 
-# In longitudinal data, an occasion with one member observed is prepared as
-# missing partner data: the partner is assumed to still exist.
-print_one_member_occasions <- function(x, meta) {
+# Reports where partner values are missing: occasions at which dyadMLM assumed
+# an existing partner (no partner row) and rows missing any partner predictor.
+print_partner_data <- function(x, meta) {
+  lines <- character()
+  format_count <- function(n) format(n, big.mark = ",")
+
   structural_columns <- c(meta$dyad, meta$member, meta$time)
-  if (!isTRUE(meta$longitudinal) || !all(structural_columns %in% names(x))) {
-    return(invisible(NULL))
-  }
-
-  members_per_occasion <- x |>
-    dplyr::summarise(
-      n_members = dplyr::n_distinct(.data[[meta$member]]),
-      .by = dplyr::all_of(c(meta$dyad, meta$time))
-    ) |>
-    dplyr::pull("n_members")
-  n_one_member <- sum(members_per_occasion == 1L)
-  if (n_one_member == 0L) {
-    return(invisible(NULL))
-  }
-
-  print_wrapped_comment_fields(
-    label = "Dyad-occasions with one member observed",
-    fields = c(
-      paste0(
-        format(n_one_member, big.mark = ","), " of ",
-        format(length(members_per_occasion), big.mark = ","),
-        " (partners are treated as existing but having missing data at ",
-        "these occasions)."
-      ),
-      paste0(
-        "If no partner existed at some of these occasions, a different ",
-        "coding is needed: use `partner_exists`."
+  if (isTRUE(meta$longitudinal) && all(structural_columns %in% names(x))) {
+    members_per_occasion <- x |>
+      dplyr::summarise(
+        n_members = dplyr::n_distinct(.data[[meta$member]]),
+        .by = dplyr::all_of(c(meta$dyad, meta$time))
+      ) |>
+      dplyr::pull("n_members")
+    n_one_member <- sum(members_per_occasion == 1L)
+    if (n_one_member > 0L) {
+      lines <- paste0(
+        "Dyad-occasions with a row for only one member: ",
+        format_count(n_one_member), " of ",
+        format_count(length(members_per_occasion)),
+        " (the partner is assumed to exist, with missing values)."
       )
-    ),
-    sep = " ",
-    exdent = 2L
-  )
-  cat("#\n")
+    }
+  }
+
+  partner_columns <- intersect(meta$apim_predictors$partner_column, names(x))
+  if (length(partner_columns) > 0L) {
+    n_missing <- sum(rowSums(is.na(x[partner_columns])) > 0L)
+    if (n_missing > 0L) {
+      lines <- c(lines, paste0(
+        "Rows with at least one missing partner predictor: ",
+        format_count(n_missing), " of ", format_count(nrow(x)),
+        if (length(lines) > 0L) {
+          " (including rows at the occasions above and empty partner rows)."
+        } else {
+          "."
+        }
+      ))
+    }
+  }
+
+  if (length(lines) == 0L) {
+    return(invisible(NULL))
+  }
+
+  wrap <- function(text) {
+    strwrap(text, width = max(20L, getOption("width", 80L) - 4L), prefix = "#   ")
+  }
+  check <- wrap(paste(
+    "Check: If no partner existed at some occasions, a different coding is",
+    "needed. Refer to \"Partners missing at some occasions\" in",
+    "?prepare_dyad_data."
+  ))
+  check[[1]] <- sub("Check:", pillar::style_neg("Check:"), check[[1]], fixed = TRUE)
+
+  cat("# Partner data:\n")
+  cat(unlist(lapply(lines, wrap)), "#", check, "#", "", sep = "\n")
   invisible(NULL)
 }
 

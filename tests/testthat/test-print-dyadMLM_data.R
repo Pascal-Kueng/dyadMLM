@@ -354,52 +354,73 @@ test_that("dyadMLM data print describes longitudinal APIM columns", {
   expect_true(any(grepl(".{pred}_cbp_partner", printed, fixed = TRUE)))
 })
 
-test_that("dyadMLM data print counts dyad-occasions with one member observed", {
-  label <- "Dyad-occasions with one member observed"
+test_that("dyadMLM data print reports missing partner data", {
   complete <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
-    time = c(1, 1, 2, 2, 1, 1, 2, 2)
+    time = c(1, 1, 2, 2, 1, 1, 2, 2),
+    x = c(1, 2, 3, 4, 5, 6, 7, 8)
+  )
+  prepare <- function(data, ...) {
+    prepare_dyad_data(
+      data, dyad = dyad_id, member = person_id, predictors = x,
+      temporal_decomposition = "none", seed = 123, ...
+    )
+  }
+  one_member_line <- paste0(
+    "Dyad-occasions with a row for only one member: 2 of 4 ",
+    "(the partner is assumed to exist, with missing values)."
   )
 
-  # Person 2 misses time 2 and person 4 misses time 1.
-  incomplete <- complete[-c(4, 6), ]
-  result <- prepare_dyad_data(
-    incomplete,
-    dyad = dyad_id,
-    member = person_id,
-    time = time,
-    seed = 123
-  )
+  # Person 2 has no row at time 2; person 4 has an empty row at time 1.
+  incomplete <- complete[-4, ]
+  incomplete$x[incomplete$person_id == 4 & incomplete$time == 1] <- NA
+  printed <- capture_wide_print(prepare(incomplete[-5, ], time = time))
+  expect_true(any(grepl("# Partner data:", printed, fixed = TRUE)))
+  expect_true(any(grepl(one_member_line, printed, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Rows with at least one missing partner predictor: 2 of 6",
+    printed,
+    fixed = TRUE
+  )))
+  expect_true(any(grepl("Check: If no partner existed", printed, fixed = TRUE)))
 
-  expected <- paste0(
-    label, ": 2 of 4 (partners are treated as existing but having missing ",
-    "data at these occasions). If no partner existed at some of these ",
-    "occasions, a different coding is needed: use `partner_exists`."
-  )
-  expect_true(any(grepl(expected, capture_wide_print(result), fixed = TRUE)))
   summary_printed <- withr::with_options(
     list(width = 1000),
-    capture.output(summary(result))
+    capture.output(summary(prepare(incomplete[-5, ], time = time)))
   )
-  expect_true(any(grepl(expected, summary_printed, fixed = TRUE)))
+  expect_true(any(grepl(one_member_line, summary_printed, fixed = TRUE)))
 
-  complete_result <- prepare_dyad_data(
-    complete,
-    dyad = dyad_id,
-    member = person_id,
-    time = time,
-    seed = 123
-  )
-  expect_false(any(grepl(label, capture_wide_print(complete_result), fixed = TRUE)))
+  # An empty partner row is counted as missing partner data, not as an
+  # occasion with one member.
+  printed <- capture_wide_print(prepare(incomplete, time = time))
+  expect_true(any(grepl(
+    "Dyad-occasions with a row for only one member: 1 of 4",
+    printed,
+    fixed = TRUE
+  )))
+  expect_true(any(grepl(
+    "Rows with at least one missing partner predictor: 2 of 7",
+    printed,
+    fixed = TRUE
+  )))
 
-  cross_sectional <- prepare_dyad_data(
-    complete[complete$time == 1, ],
-    dyad = dyad_id,
-    member = person_id,
-    seed = 123
-  )
-  expect_false(any(grepl(label, capture_wide_print(cross_sectional), fixed = TRUE)))
+  # Cross-sectional data report missing partner predictors only.
+  cross_sectional <- complete[complete$time == 1, ]
+  cross_sectional$x[1] <- NA
+  printed <- capture_wide_print(prepare(cross_sectional))
+  expect_false(any(grepl("Dyad-occasions", printed, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Rows with at least one missing partner predictor: 1 of 4.",
+    printed,
+    fixed = TRUE
+  )))
+
+  expect_false(any(grepl(
+    "# Partner data:",
+    capture_wide_print(prepare(complete, time = time)),
+    fixed = TRUE
+  )))
 })
 
 test_that("dyadMLM data print orders generated column descriptions", {

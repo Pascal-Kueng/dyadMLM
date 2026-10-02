@@ -13,6 +13,13 @@
   checks list each observed summary with the middle 95% of its simulations, and
   the same comparison is stored in `summary`.
 
+* `print()` and `summary()` of prepared data now report missing partner data:
+  dyad-occasions with a row for only one member, where the partner is assumed
+  to exist, and rows with at least one missing partner predictor. A new help
+  section in `prepare_dyad_data()` explains how these occasions are prepared.
+  The error for missing `dyad` values now explains how to keep people observed
+  without their partner.
+
 # dyadMLM 0.2.0
 
 * This early API-stabilization release intentionally makes a few direct,

@@ -17,6 +17,46 @@
 #' Dyad composition labels are canonical: role labels are sorted alphabetically
 #' before being combined, so labels do not depend on row or member order.
 #'
+#' @section Partners missing at some occasions:
+#' In longitudinal data, both partners may have a row at every occasion, even
+#' if all of one partner's values are missing at some occasions (only the
+#' identifiers, such as `dyad`, `member`, and `time`, can never be missing).
+#' All these rows are retained. Models including the missing partner
+#' predictors drop these rows unless the missing values are imputed first.
+#' Multiple imputation is usually valid if data are missing at random (MAR);
+#' dropping rows can require stronger assumptions.
+#'
+#' If a partner did not complete a measurement occasion and has no row for it,
+#' such rows do not have to be added manually. By default, `dyadMLM` assumes
+#' that a partner who appears at least once exists at every occasion at which
+#' their dyad was observed. As in the case above, if only one member has a row
+#' at an occasion, the partner is treated as existing but with missing values
+#' at that occasion (contemporaneous partner predictors are `NA`). The
+#' partner's `cbp` values remain available, because they are computed from the
+#' partner's observed occasions; lag-1 values do not bridge gaps. As above,
+#' models including these predictors omit such rows unless the missing values
+#' are imputed.
+#'
+#' Using `print()` on the prepared data reports how many dyad-occasions have a
+#' row for only one member (where `dyadMLM` assumed the partner exists) and how
+#' many rows miss at least one partner predictor (both cases above).
+#'
+#' If truly no partner *existed* at some of these occasions (for example,
+#' before a relationship began or after a separation or death), or at all
+#' occasions (e.g., when individuals are studied alongside dyads), treating a
+#' partner's values as missing is not meaningful and can bias the model. This
+#' also applies to empty rows kept for a partner who no longer exists, as in
+#' some balanced panel files. In this case, use `partner_exists` to record
+#' whether a partner existed, which sets up two-part predictors (see
+#' `vignette("mixed-apim")` for examples).
+#'
+#' Alternatively, to analyze only occasions at which both members were
+#' observed, remove the other occasions before preparing the data, for example:
+#'
+#' ```r
+#' data |> dplyr::filter(dplyr::n() == 2, .by = c(dyad_id, time))
+#' ```
+#'
 #' @param data A data frame or tibble. Data must be in long format. For
 #' cross-sectional dyadic data, each observed member of each dyad has one row.
 #' For intensive longitudinal dyadic data, each observed member of each dyad has
