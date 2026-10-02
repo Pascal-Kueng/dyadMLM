@@ -281,7 +281,7 @@ Do singles and partnered people differ in the actor effect? With an intercept,
 `.partner_exists` gives singles their own mean, so no singleton indicators:
 
 ```r
-glmmTMB(
+fit <- glmmTMB(
   satisfaction ~ 1 + .partner_exists * .support_gmc_actor + .support_gmc_partner +
     # residual covariance per composition, as in the mixed-composition APIM
     us(0 + .is_female_x_male_female + .is_female_x_male_male | coupleID) +
