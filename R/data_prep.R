@@ -8,16 +8,20 @@
 #' contain at most one row per member and observed measurement occasion within
 #' dyad. Measured variables may contain missing values. Numeric `dyad`, `member`,
 #' `time`, and selected predictor columns must not contain infinite values.
-#' Structural completeness is assessed across all rows. `incomplete_dyads`
-#' controls dyads with fewer than two members; dyads with more than two members
-#' always cause an error.
+#' Structural completeness is assessed across all rows. A dyad with more than
+#' two members always causes an error. A dyad with only one person in the data
+#' (for example, a single person, or someone whose partner did not take part)
+#' causes an error by default. To keep such dyads, supply `partner_exists`,
+#' which records whether the person has a partner (see the section "People
+#' observed without their partner" below). To remove them instead, use
+#' `incomplete_dyads = "drop"`.
 #' When `role` is supplied, stable member roles are resolved across repeated
 #' rows before `missing_role` is applied.
 #'
 #' Dyad composition labels are canonical: role labels are sorted alphabetically
 #' before being combined, so labels do not depend on row or member order.
 #'
-#' @section Partners missing at some occasions:
+#' @section People observed without their partner:
 #' In longitudinal data, both partners may have a row at every occasion, even
 #' if all of one partner's values are missing at some occasions (only the
 #' identifiers, such as `dyad`, `member`, and `time`, can never be missing).

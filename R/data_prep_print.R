@@ -151,7 +151,7 @@ print_partner_data <- function(x, meta) {
   }
   check <- wrap(paste(
     "Check: If no partner existed at some occasions, a different coding is",
-    "needed. Refer to \"Partners missing at some occasions\" in",
+    "needed. Refer to \"People observed without their partner\" in",
     "?prepare_dyad_data."
   ))
   check[[1]] <- sub("Check:", pillar::style_neg("Check:"), check[[1]], fixed = TRUE)
