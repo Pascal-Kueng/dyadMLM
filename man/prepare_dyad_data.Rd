@@ -118,10 +118,13 @@ exchangeable compositions can be pooled. Each pool must contain at least
 two distinct observed compositions after composition references are
 resolved.}
 
-\item{incomplete_dyads}{How to handle dyads with fewer than two unique
-members across all rows in \code{data}. \code{"error"} stops with an error and
-\code{"drop"} removes the entire dyad. A dyad with more than two unique members
-is invalid and always causes an error, regardless of this setting.}
+\item{incomplete_dyads}{How to handle people observed alone (a \code{dyad} with
+only one person across all rows in \code{data}) when \code{partner_exists} is not
+supplied. It is then unclear whether their partner exists but did not take
+part, or whether they have no partner. \code{"error"} (default) stops and
+explains how to use \code{partner_exists}; \code{"drop"} removes these dyads. With
+\code{partner_exists}, everyone observed alone is kept and \code{"drop"} is not
+allowed. A dyad with more than two unique members always causes an error.}
 
 \item{missing_role}{How to handle dyads in which at least one member has no
 non-missing \code{role} value on any row. A consistent non-missing role observed

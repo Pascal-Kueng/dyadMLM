@@ -36,10 +36,13 @@
 #'   `predictors` are supplied, and to `"none"` otherwise.
 #'   Model-specific helpers may apply additional conventions, such as grand-mean
 #'   centering raw DIM and DSM dyad means.
-#' @param incomplete_dyads How to handle dyads with fewer than two unique
-#'   members across all rows in `data`. `"error"` stops with an error and
-#'   `"drop"` removes the entire dyad. A dyad with more than two unique members
-#'   is invalid and always causes an error, regardless of this setting.
+#' @param incomplete_dyads How to handle people observed alone (a `dyad` with
+#'   only one person across all rows in `data`) when `partner_exists` is not
+#'   supplied. It is then unclear whether their partner exists but did not take
+#'   part, or whether they have no partner. `"error"` (default) stops and
+#'   explains how to use `partner_exists`; `"drop"` removes these dyads. With
+#'   `partner_exists`, everyone observed alone is kept and `"drop"` is not
+#'   allowed. A dyad with more than two unique members always causes an error.
 #' @param missing_role How to handle dyads in which at least one member has no
 #'   non-missing `role` value on any row. A consistent non-missing role observed
 #'   for a member is propagated to that member's other rows before this policy
@@ -603,20 +606,23 @@ resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dya
 
   if (incomplete_dyads == "error") {
     stop(
-      paste0(
-        "Each `dyad` must contain exactly two unique members. ",
-        "Found ",
-        format_group_count(
-          incomplete_groups,
-          singular = "incomplete dyad",
-          plural = "incomplete dyads"
-        ),
-        ". `dyadMLM` cannot create rows for completely unobserved members ",
-        "because their `member` identifiers and, when supplied, `role` values ",
-        "cannot be inferred. Add the missing member rows or use ",
-        "`incomplete_dyads = \"drop\"` ",
-        "to drop these dyads."
+      "Found ",
+      format_group_count(
+        incomplete_groups,
+        singular = "dyad with only one person",
+        plural = "dyads with only one person"
       ),
+      ". It is unclear whether their partner exists but did not take part, ",
+      "or whether they have no partner. Use recorded status, not the number ",
+      "of rows:\n",
+      "- If none of them has a partner, use `partner_exists = FALSE`.\n",
+      "- If all of them have a partner who is not in the data, use ",
+      "`partner_exists = TRUE`.\n",
+      "- If this differs between people or over time, supply `partner_exists` ",
+      "as a TRUE/FALSE column.\n",
+      "- To remove them, use `incomplete_dyads = \"drop\"`.\n",
+      "See the section \"People observed without their partner\" in ",
+      "?prepare_dyad_data.",
       call. = FALSE
     )
   }
@@ -674,12 +680,15 @@ add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) 
     )
   }
 
-  # A constant is repeated for every row; a vector is stored row by row.
+  # A constant is repeated for every row. A vector is stored row by row.
   out[[dyad_partner_exists_col]] <- as.logical(status)
 
   # A constant only describes people observed alone. Without this step it
   # would also be applied to complete dyads, e.g. `FALSE` would mark everyone
   # as having no partner. Complete dyads are therefore set to partnered.
+  # Thus, for constants only, the following keeps the constant for dyads with
+  # one person and sets everyone in a complete dyad to `TRUE`. A column is
+  # used as given, so both members can be `FALSE` (e.g., after a separation).
   if (is_constant) {
     out <- out |>
       dplyr::group_by(.data[[dyad_name]]) |>

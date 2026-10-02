@@ -685,7 +685,7 @@ test_that("validate_dyad_data rejects groups without two unique members", {
 
   expect_error(
     validate_dyad_data(data, dyad = dyad_id, member = person_id),
-    "Each `dyad` must contain exactly two unique members.",
+    "with only one person",
     fixed = TRUE
   )
 })
@@ -700,11 +700,9 @@ test_that("validate_dyad_data handles incomplete dyads by policy", {
   expect_error(
     validate_dyad_data(data, dyad = dyad_id, member = person_id, role = role),
     paste0(
-      "Found 1 incomplete dyad, with ID: 1. `dyadMLM` cannot create rows for ",
-      "completely unobserved members because their `member` identifiers and, ",
-      "when supplied, `role` values cannot be inferred. Add the missing ",
-      "member rows or ",
-      "use `incomplete_dyads = \"drop\"` to drop these dyads."
+      "Found 1 dyad with only one person, with ID: 1. It is unclear whether ",
+      "their partner exists but did not take part, or whether they have no ",
+      "partner."
     ),
     fixed = TRUE
   )

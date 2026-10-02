@@ -19,7 +19,7 @@ stored_status <- function(validated) {
 test_that("partner_exists = NULL keeps the current one-person dyad error", {
   expect_error(
     validate_partner_exists_data(partner_data()),
-    "Each `dyad` must contain exactly two unique members."
+    "dyads with only one person"
   )
 })
 
