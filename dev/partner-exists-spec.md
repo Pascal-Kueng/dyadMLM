@@ -15,7 +15,7 @@ Steps of B, each a reviewable commit:
 | B2 | Labels `singleton_<role>` / `<role>_x_missing`, indicators, no member contrasts, stable seeds, short-name rule, `keep_compositions`, pooling rejection (E6) | done |
 | B3 | Two-part coding of partner predictors (after centering), lag rule, non-numeric warning, two-part message M2 | done |
 | B4 | `.partner_exists` and `.partner_exists_lag1`, M1, DIM/DSM rejection (E7); M2 names the status columns that exist | done |
-| B5 | `print()` (people observed alone, two-part reminder), full help section, `@param`, NEWS | open |
+| B5 | `print()` (people observed alone, two-part reminder), full help section, `@param`, NEWS | done |
 
 No step checks model formulas: data preparation cannot see the eventual model.
 
@@ -221,9 +221,17 @@ their composition; only the no-partner occasions change.
   with a row for only one member" (longitudinal), "Rows with at least one
   missing partner predictor", and a "Check:" pointer to the help section
   (only when dyad-occasions without a partner row exist; only `Check:` in red).
-- B5 adds, when partner predictors were set to 0, a reminder line:
-  "Partner predictors are 0 where no partner existed; include
-  `.partner_exists` (or intercepts that separate these people) in the model."
+- B5 (done):
+  - "People observed alone: 2 without a partner, 1 with a partner not in the
+    data."
+  - With `.partner_exists`, the one-member line splits the occasions: "(3
+    without a partner, 1 with a partner who has missing values)".
+  - The "Check:" pointer is shown only without `partner_exists`.
+  - When partner predictors were set to 0: "Required: Partner predictors are
+    0 where no partner existed. Include `.partner_exists` as a fixed effect
+    in the model (two-part coding)." (with `.partner_exists_lag1` when it
+    exists; only `Required:` in red).
+  - The compositions table counts people observed alone as "person"/"people".
 
 
 ## `recover_exchangeable_covariance()`

@@ -425,6 +425,49 @@ test_that("dyadMLM data print reports missing partner data", {
   )))
 })
 
+test_that("dyadMLM data print reports people observed alone and two-part coding", {
+  # Dyad 1: the wife (person 1) answers waves 1-3, her husband (person 2) only
+  # wave 1. He skips wave 2 and dies before wave 3. Dyad 2 is complete. Dyad 3
+  # is a person without a partner.
+  data <- tibble::tibble(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2, 3, 3),
+    person_id = c(1, 1, 1, 2, 3, 4, 3, 4, 5, 5),
+    wave = c(1, 2, 3, 1, 1, 1, 2, 2, 1, 2),
+    alive = c(TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
+    x = 1:10
+  )
+
+  prepared <- suppressMessages(prepare_dyad_data(
+    data, dyad = dyad_id, member = person_id, time = wave, predictors = x,
+    temporal_decomposition = "none", partner_exists = alive, seed = 123
+  ))
+  printed <- capture_wide_print(prepared)
+
+  expect_true(any(grepl("# singleton +singleton +1 person", printed)))
+  expect_true(any(grepl(
+    "People observed alone: 1 without a partner, 0 with a partner not in the data.",
+    printed,
+    fixed = TRUE
+  )))
+  # Without a partner: dyad 1 at wave 3 and dyad 3 at waves 1-2. With a partner
+  # who has missing values: dyad 1 at wave 2.
+  expect_true(any(grepl(
+    paste0(
+      "Dyad-occasions with a row for only one member: 4 of 7 ",
+      "(3 without a partner, 1 with a partner who has missing values)."
+    ),
+    printed,
+    fixed = TRUE
+  )))
+  expect_true(any(grepl(
+    "Required: Partner predictors are 0 where no partner existed. Include `.partner_exists` as a fixed effect",
+    printed,
+    fixed = TRUE
+  )))
+  # `partner_exists` already says which partners existed.
+  expect_false(any(grepl("Check:", printed, fixed = TRUE)))
+})
+
 test_that("dyadMLM data print orders generated column descriptions", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),

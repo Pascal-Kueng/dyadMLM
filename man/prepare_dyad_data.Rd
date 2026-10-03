@@ -162,7 +162,9 @@ changing status over time.
 Missing values in the column are not allowed. When both members have a
 row at the same occasion, their values must agree (e.g., both members
 need to be partnered, or both need to be not partnered, which can cover
-partners splitting up but still taking part in the same study). See the
+partners splitting up but still taking part in the same study). Where no
+partner existed, partner predictors are set to 0 and \code{.partner_exists} is
+added (two-part coding). See the
 section "People observed without their partner" below for more
 information.}
 
@@ -270,6 +272,57 @@ observed, remove the other occasions before preparing the data, for example:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{data |> dplyr::filter(dplyr::n() == 2, .by = c(dyad_id, time))
 }\if{html}{\out{</div>}}
+
+\strong{Base \code{partner_exists} on recorded status, not on data presence.} Use a
+variable such as relationship status or widowhood. A rule such as
+\code{dplyr::n() == 2} mixes people without a partner with people whose partner
+did not take part.
+
+With \code{partner_exists}, people observed alone (dyads with one person in the
+data) get their own composition and indicator column:\tabular{lll}{
+   Situation \tab With \code{role} \tab Without \code{role} \cr
+   No partner \tab \verb{singleton_<role>} \tab \code{singleton} \cr
+   Partner not in the data \tab \verb{<role>_x_missing} \tab \code{missing_partner} \cr
+}
+
+
+They have no member contrast and cannot be pooled or set exchangeable. To
+let them share parameters with dyad members, add their indicators in the
+model formula, e.g. \code{I(.is_male_x_male + .is_singleton_male)}.
+
+Where no partner existed, numeric partner predictors are set to 0 after
+centering, and \code{.partner_exists} (1 or 0) marks these rows. This is two-part
+coding. \strong{\code{.partner_exists} must be included as a fixed effect.} Otherwise,
+the zeros are treated as real partner values and bias the partner effects.
+Random effects cannot replace it. It can only be left out if fixed
+intercepts already separate all rows without a partner, for example
+singleton indicators when no dyad has occasions without a partner.
+
+Lagged partner predictors follow the status at the previous occasion and
+pair with \code{.partner_exists_lag1}. This column differs from
+\code{.partner_exists} only at the first occasion after a partner is lost or
+gained. If no such occasion remains in the model data, it duplicates
+\code{.partner_exists} and can be left out. Non-numeric partner predictors cannot
+be set to 0. They are set to \code{NA} instead.
+
+When interpreting results:
+\itemize{
+\item \code{.partner_exists} compares rows with and without a partner at partner
+predictors of 0. It is not "the effect of having a partner", and it mixes
+change over time with differences between people.
+\item What 0 means depends on the component: the partner's usual level for
+\code{cwp}, the average person's usual level for \code{cbp}, the grand mean for
+\code{gmc}, and the scale's 0 for raw values. Prefer centered components.
+\item After a separation, lagged partner predictors still hold the former
+partner's value from the previous occasion. To set them to 0 instead,
+use a condition, e.g.
+\code{dplyr::if_else(.partner_exists == 0, 0, .x_partner_lag1)}, because
+\code{0 * NA} stays \code{NA}.
+}
+
+Each person belongs to one dyad. If \code{partner_exists} returns to \code{TRUE} after
+\code{FALSE}, this is treated as the same partner returning. A new partner is not
+supported. \code{partner_exists} cannot yet be combined with DIM or DSM columns.
 }
 
 \examples{

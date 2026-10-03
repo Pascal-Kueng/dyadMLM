@@ -61,6 +61,55 @@
 #' data |> dplyr::filter(dplyr::n() == 2, .by = c(dyad_id, time))
 #' ```
 #'
+#' **Base `partner_exists` on recorded status, not on data presence.** Use a
+#' variable such as relationship status or widowhood. A rule such as
+#' `dplyr::n() == 2` mixes people without a partner with people whose partner
+#' did not take part.
+#'
+#' With `partner_exists`, people observed alone (dyads with one person in the
+#' data) get their own composition and indicator column:
+#'
+#' | Situation | With `role` | Without `role` |
+#' |---|---|---|
+#' | No partner | `singleton_<role>` | `singleton` |
+#' | Partner not in the data | `<role>_x_missing` | `missing_partner` |
+#'
+#' They have no member contrast and cannot be pooled or set exchangeable. To
+#' let them share parameters with dyad members, add their indicators in the
+#' model formula, e.g. `I(.is_male_x_male + .is_singleton_male)`.
+#'
+#' Where no partner existed, numeric partner predictors are set to 0 after
+#' centering, and `.partner_exists` (1 or 0) marks these rows. This is two-part
+#' coding. **`.partner_exists` must be included as a fixed effect.** Otherwise,
+#' the zeros are treated as real partner values and bias the partner effects.
+#' Random effects cannot replace it. It can only be left out if fixed
+#' intercepts already separate all rows without a partner, for example
+#' singleton indicators when no dyad has occasions without a partner.
+#'
+#' Lagged partner predictors follow the status at the previous occasion and
+#' pair with `.partner_exists_lag1`. This column differs from
+#' `.partner_exists` only at the first occasion after a partner is lost or
+#' gained. If no such occasion remains in the model data, it duplicates
+#' `.partner_exists` and can be left out. Non-numeric partner predictors cannot
+#' be set to 0. They are set to `NA` instead.
+#'
+#' When interpreting results:
+#' * `.partner_exists` compares rows with and without a partner at partner
+#'   predictors of 0. It is not "the effect of having a partner", and it mixes
+#'   change over time with differences between people.
+#' * What 0 means depends on the component: the partner's usual level for
+#'   `cwp`, the average person's usual level for `cbp`, the grand mean for
+#'   `gmc`, and the scale's 0 for raw values. Prefer centered components.
+#' * After a separation, lagged partner predictors still hold the former
+#'   partner's value from the previous occasion. To set them to 0 instead,
+#'   use a condition, e.g.
+#'   `dplyr::if_else(.partner_exists == 0, 0, .x_partner_lag1)`, because
+#'   `0 * NA` stays `NA`.
+#'
+#' Each person belongs to one dyad. If `partner_exists` returns to `TRUE` after
+#' `FALSE`, this is treated as the same partner returning. A new partner is not
+#' supported. `partner_exists` cannot yet be combined with DIM or DSM columns.
+#'
 #' @param data A data frame or tibble. Data must be in long format. For
 #' cross-sectional dyadic data, each observed member of each dyad has one row.
 #' For intensive longitudinal dyadic data, each observed member of each dyad has
@@ -178,7 +227,9 @@
 #'   Missing values in the column are not allowed. When both members have a
 #'   row at the same occasion, their values must agree (e.g., both members
 #'   need to be partnered, or both need to be not partnered, which can cover
-#'   partners splitting up but still taking part in the same study). See the
+#'   partners splitting up but still taking part in the same study). Where no
+#'   partner existed, partner predictors are set to 0 and `.partner_exists` is
+#'   added (two-part coding). See the
 #'   section "People observed without their partner" below for more
 #'   information.
 #' @param seed Optional seed for random `.member_contrast_*` sign assignment.

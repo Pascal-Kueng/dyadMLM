@@ -17,6 +17,12 @@
   A new help section in `prepare_dyad_data()` explains how these occasions are
   prepared.
 
+* `prepare_dyad_data()` gains `partner_exists`, which records whether a
+  partner existed. It keeps people observed alone (singletons and people whose
+  partner did not take part) with their own compositions, and sets partner
+  predictors to 0 where no partner existed (two-part coding, with
+  `.partner_exists` and `.partner_exists_lag1` columns).
+
 # dyadMLM 0.2.0
 
 * This early API-stabilization release intentionally makes a few direct,
