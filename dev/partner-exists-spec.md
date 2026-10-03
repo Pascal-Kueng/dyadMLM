@@ -196,7 +196,7 @@ their composition; only the no-partner occasions change.
 ## Messages
 
 - **M2** (once per call, only when partner predictors were set to 0):
-  > Partner predictors were set to 0 where no partner existed. You must include `.partner_exists` as a fixed effect in the model (and `.partner_exists_lag1` for lagged partner predictors). Together with the zeros, this is two-part coding (see `vignette("mixed-apim")`). Without it, the zeros are treated as real partner values and bias the partner effects. Random effects cannot replace `.partner_exists`.
+  > Partner predictors were set to 0 where no partner existed. You must include `.partner_exists` as a fixed effect in the model (and `.partner_exists_lag1` for lagged partner predictors), unless fixed intercepts already separate rows with and without a partner. Together with the zeros, this is two-part coding (see `vignette("mixed-apim")`). Without it, the zeros are treated as real partner values, which can bias the partner effects. Random effects cannot replace `.partner_exists`.
 
   The lag part only appears when lagged partner columns were created; the
   message names only status columns that exist.
@@ -231,7 +231,8 @@ their composition; only the no-partner occasions change.
   - The "Check:" pointer is shown only without `partner_exists`.
   - When partner predictors were set to 0: "Required: Partner predictors are
     0 where no partner existed. Include `.partner_exists` as a fixed effect
-    in the model (two-part coding)." (with `.partner_exists_lag1` when it
+    in the model (two-part coding), unless fixed intercepts already separate
+    rows with and without a partner." (with `.partner_exists_lag1` when it
     exists; only `Required:` in red).
   - The compositions table counts people observed alone as "person"/"people".
 

@@ -184,10 +184,11 @@ report_two_part_coding <- function(data, partner_columns) {
         )
       }
       status_terms <- paste0(
-        status_terms, ". Together with the zeros, this is two-part coding ",
-        "(see `vignette(\"mixed-apim\")`). Without it, the zeros are treated as ",
-        "real partner values and bias the partner effects. Random effects ",
-        "cannot replace `.partner_exists`."
+        status_terms, ", unless fixed intercepts already separate rows with ",
+        "and without a partner. Together with the zeros, this is two-part ",
+        "coding (see `vignette(\"mixed-apim\")`). Without it, the zeros are ",
+        "treated as real partner values, which can bias the partner effects. ",
+        "Random effects cannot replace `.partner_exists`."
       )
     }
 

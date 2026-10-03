@@ -206,7 +206,8 @@ print_partner_data <- function(x, meta) {
     }
     cat(wrap_note("Required:", paste0(
       "Partner predictors are 0 where no partner existed. Include ",
-      status_terms, " in the model (two-part coding)."
+      status_terms, " in the model (two-part coding), unless fixed intercepts ",
+      "already separate rows with and without a partner."
     )), "#", sep = "\n")
   }
 

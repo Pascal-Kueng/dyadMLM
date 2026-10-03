@@ -293,8 +293,8 @@ model formula, e.g. \code{I(.is_male_x_male + .is_singleton_male)}.
 Where no partner existed, numeric partner predictors are set to 0 after
 centering, and \code{.partner_exists} (1 or 0) marks these rows. This is two-part
 coding. \strong{\code{.partner_exists} must be included as a fixed effect.} Otherwise,
-the zeros are treated as real partner values and bias the partner effects.
-Random effects cannot replace it. It can only be left out if fixed
+the zeros are treated as real partner values, which can bias the partner
+effects. Random effects cannot replace it. It can only be left out if fixed
 intercepts already separate all rows without a partner, for example
 singleton indicators when no dyad has occasions without a partner.
 
