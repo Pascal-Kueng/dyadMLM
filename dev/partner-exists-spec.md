@@ -154,9 +154,11 @@ their composition; only the no-partner occasions change.
   IDs, the recorded status, and missing measures (never a row for an invented
   partner).
   It differs from `.partner_exists` only at the first occasion after a partner
-  is lost or gained, so it is nearly collinear with it. If no such occasion
-  remains in the model data, it is fully collinear and can be left out (the
-  model reports it as rank-deficient). Help (B5) says this.
+  is lost or gained. Depending on the status pattern and the fitted rows, the
+  two can be highly correlated or not at all (e.g., `FALSE, FALSE, TRUE, TRUE,
+  FALSE` gives a correlation of 0 across rows with a lag). If no such occasion
+  remains in the model data, it duplicates `.partner_exists` and can be left
+  out (the model reports it as rank-deficient). Help (B5) says this.
 - Short column names: groups of people observed alone do not count toward the
   one-composition rule (e.g., `.is_female`, `.is_male` stay next to
   `.is_singleton_male`).

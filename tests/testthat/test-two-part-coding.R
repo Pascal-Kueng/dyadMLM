@@ -221,6 +221,22 @@ test_that("non-numeric partner predictors are missing where no partner existed",
   expect_equal(prepared$.x_partner, c("b", "a", "d", "c", NA, NA))
 })
 
+test_that("partner predictors keep their class", {
+  data <- cross_sectional_data()
+  data$x <- structure(data$x, class = "measured")
+
+  prepared <- suppressMessages(prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    predictors = x,
+    partner_exists = partnered,
+    seed = 123
+  ))
+  expect_s3_class(prepared$.x_partner, "measured")
+  expect_equal(unclass(prepared$.x_partner), c(2, 1, 4, 3, 0, NA))
+})
+
 test_that("nothing is reported when every row has a partner", {
   data <- cross_sectional_data()
 

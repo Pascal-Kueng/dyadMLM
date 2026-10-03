@@ -62,7 +62,8 @@ apply_two_part_coding <- function(data) {
     no_partner <- data[[partner_columns$status_column[[i]]]] %in% FALSE
     no_partner_value <- if (partner_columns$is_numeric[[i]]) 0 else NA
 
-    data[[column]] <- dplyr::if_else(no_partner, no_partner_value, data[[column]])
+    # Replacing only these values keeps the column's class (e.g., integer64).
+    data[[column]][no_partner] <- no_partner_value
   }
 
   report_two_part_coding(data, partner_columns)
