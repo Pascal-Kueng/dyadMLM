@@ -60,7 +60,8 @@ apply_two_part_coding <- function(data) {
     # `%in% FALSE` skips unknown statuses (NA), e.g., on temporary rows added
     # for missed occasions.
     no_partner <- data[[partner_columns$status_column[[i]]]] %in% FALSE
-    no_partner_value <- if (partner_columns$is_numeric[[i]]) 0 else NA
+    # An integer 0 keeps integer columns integer.
+    no_partner_value <- if (partner_columns$is_numeric[[i]]) 0L else NA
 
     # Replacing only these values keeps the column's class (e.g., integer64).
     data[[column]][no_partner] <- no_partner_value

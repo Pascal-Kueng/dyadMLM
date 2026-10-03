@@ -237,6 +237,22 @@ test_that("partner predictors keep their class", {
   expect_equal(unclass(prepared$.x_partner), c(2, 1, 4, 3, 0, NA))
 })
 
+test_that("integer partner predictors stay integer", {
+  data <- cross_sectional_data()
+  data$x <- as.integer(data$x)
+
+  prepared <- suppressMessages(prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    predictors = x,
+    partner_exists = partnered,
+    seed = 123
+  ))
+  expect_type(prepared$.x_partner, "integer")
+  expect_equal(prepared$.x_partner, c(2L, 1L, 4L, 3L, 0L, NA))
+})
+
 test_that("nothing is reported when every row has a partner", {
   data <- cross_sectional_data()
 
