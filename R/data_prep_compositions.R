@@ -617,7 +617,7 @@ finalize_composition_columns <- function(
 
   meta_data <- attr(data, "dyadMLM")
   # Short names omit the composition label. They are unambiguous only when
-  # filtering and pooling leave one final composition of dyads; with more than
+  # filtering and pooling leave one final composition of dyads. With more than
   # one, short names would be ambiguous and therefore are not allowed. People
   # observed alone do not count: they always keep their full labels.
   is_alone_composition <- meta_data$dyad_compositions$dyad_type %in% dyad_alone_types
@@ -662,7 +662,7 @@ finalize_composition_columns <- function(
   )
   names(composition_indicator_columns) <- composition_role_labels
 
-  # Short names only replace the names of dyads' indicators; people observed
+  # Short names only replace the names of dyads' indicators. People observed
   # alone keep their full labels.
   dyad_role_labels <- setdiff(composition_role_labels, alone_labels)
   if (use_short_composition_colnames &&
@@ -792,7 +792,7 @@ finalize_composition_columns <- function(
 #' Such dyads are only kept when `partner_exists` is supplied.
 #'
 #' @param data Validated data with the temporary partner status column.
-#' @param group_name,member_name,role_name Names of the structural columns;
+#' @param group_name,member_name,role_name Names of the structural columns.
 #'   `role_name` may be `NULL`.
 #'
 #' @return One row per person observed alone: the dyad ID, the label, and the
@@ -842,12 +842,12 @@ label_people_observed_alone <- function(data, group_name, member_name, role_name
     dplyr::pull(dplyr::all_of(dyad_composition_col))
   stop_if_labels_coincide(coinciding_labels)
 
-  dplyr::select(alone_people, dplyr::all_of(names(alone)))
+  return(dplyr::select(alone_people, dplyr::all_of(names(alone))))
 }
 
 
 # Labels of people observed alone must differ from each other and from the
-# compositions of complete dyads; otherwise they would share one indicator.
+# compositions of complete dyads. Otherwise they would share one indicator.
 stop_if_labels_coincide <- function(labels) {
   if (length(labels) == 0L) {
     return(invisible(NULL))
@@ -867,11 +867,11 @@ stop_if_labels_coincide <- function(labels) {
 # Labels of people observed alone in the dyad-level summary.
 labels_of_people_observed_alone <- function(dyad_roles) {
   is_alone <- dyad_roles[[dyad_type_col]] %in% dyad_alone_types
-  unique(dyad_roles[[dyad_composition_col]][is_alone])
+  return(unique(dyad_roles[[dyad_composition_col]][is_alone]))
 }
 
 
-# People observed alone cannot be pooled or set exchangeable; parameters are
+# People observed alone cannot be pooled or set exchangeable. Parameters are
 # shared by adding indicators in the model formula instead.
 reject_people_observed_alone <- function(compositions, alone_compositions, arg_name) {
   referenced <- intersect(compositions, alone_compositions)

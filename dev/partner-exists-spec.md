@@ -13,11 +13,29 @@ Steps of B, each a reviewable commit:
 |---|---|---|
 | B1 | `partner_exists` argument, evaluation, checks (E2–E5, E8), keeping one-person dyads | done |
 | B2 | Labels `singleton_<role>` / `<role>_x_missing`, indicators, no member contrasts, stable seeds, short-name rule, `keep_compositions`, pooling rejection (E6) | done |
-| B3 | Two-part coding of partner predictors (after centering), lag rule, non-numeric warning, two-part message M2 | open |
-| B4 | `.partner_exists` and `.partner_exists_lag1`, M1, DIM/DSM rejection (E7); M2 names the status columns that exist | open |
+| B3 | Two-part coding of partner predictors (after centering), lag rule, non-numeric warning, two-part message M2 | done |
+| B4 | `.partner_exists` and `.partner_exists_lag1`, M1, DIM/DSM rejection (E7); M2 names the status columns that exist | done |
 | B5 | `print()` (people observed alone, two-part reminder), full help section, `@param`, NEWS | open |
 
 No step checks model formulas: data preparation cannot see the eventual model.
+
+### Two-part coding: opt-in and reminders
+
+- There is no separate switch. Marking rows `FALSE` in `partner_exists` is the
+  opt-in: it states that no partner existed, so there is no partner value, and
+  two-part coding is the only way to keep these rows in models with partner
+  predictors. Without `partner_exists`, or with `partner_exists = TRUE`, no
+  value is ever set to 0.
+- Users are told in four places that the status term must enter the model as
+  a fixed effect:
+  1. message M2 once at preparation (a message, not a warning, because the
+     package did what was asked);
+  2. the `.partner_exists` column itself, listed under "Added columns";
+  3. a reminder in `print()`'s "Partner data" block, shown every time the data
+     are printed (B5);
+  4. the help section and the vignette, with complete formulas (B5, D).
+- Random effects alone do not replace the status term; only fixed intercepts
+  that separate the statuses do. All four places say so.
 
 ## In short
 
@@ -135,6 +153,10 @@ their composition; only the no-partner occasions change.
   if neither has a row. To keep it, add a row for the person at t-1 with valid
   IDs, the recorded status, and missing measures (never a row for an invented
   partner).
+  It differs from `.partner_exists` only at the first occasion after a partner
+  is lost or gained, so it is nearly collinear with it. If no such occasion
+  remains in the model data, it is fully collinear and can be left out (the
+  model reports it as rank-deficient). Help (B5) says this.
 - Short column names: groups of people observed alone do not count toward the
   one-composition rule (e.g., `.is_female`, `.is_male` stay next to
   `.is_singleton_male`).
@@ -160,23 +182,23 @@ their composition; only the no-partner occasions change.
   > • If this differs between people or over time, supply `partner_exists` as a TRUE/FALSE column.
   > • To remove them, use `incomplete_dyads = "drop"`.
   > `TRUE` and `FALSE` only describe people observed alone. See `vignette("mixed-apim")`.
-- **E2**: `partner_exists` is missing in 8 rows (dyads 104, 117, …). Use TRUE or FALSE in every row; missing values are not read as "no partner". Placeholder rows without data (e.g., after a death) can be removed.
+- **E2**: `partner_exists` is missing in 8 rows (dyads 104, 117, …). Use TRUE or FALSE in every row. Missing values are not read as "no partner". Placeholder rows without data (e.g., after a death) can be removed.
 - **E3**: `partner_exists` differs between the two members at the same occasion in 4 rows (dyad 12, times 3–4; …). Both members must agree on whether they are partners at that occasion. If partners report differently, pick one rule, e.g. FALSE if either reports a separation.
 - **E4**: `incomplete_dyads = "drop"` cannot be combined with `partner_exists`. Remove those dyads beforehand, or use `partner_exists` to keep them.
 - **E5**: `partner_exists` must be `TRUE`, `FALSE`, or a column or expression with one TRUE/FALSE (or 1/0) value per row.
 - **E6**: `pool_compositions` cannot include singleton_male or male_x_missing. To let them share parameters with dyad members, add their indicators in the formula, e.g. `I(.is_female_x_male_male + .is_male_x_missing)`. See `vignette("mixed-apim")`. (Same for `set_exchangeable_compositions`.)
-- **E7**: `partner_exists` cannot be used with DIM or DSM columns yet.
-- **E8**: `role` must not be "missing" when `partner_exists` is supplied; this label is reserved for people whose partner is not in the data.
+- **E7**: `partner_exists` cannot be used with DIM or DSM columns yet. Use `model_types = "apim"`, or leave out `partner_exists`.
+- **E8**: `role` must not be "missing" when `partner_exists` is supplied. This label is reserved for people whose partner is not in the data.
 - **E9** (missing dyad IDs): in A: `dyad` is missing in 70 rows. Give each person observed alone their own dyad ID; see `incomplete_dyads`. B adds: "then see `partner_exists`".
 
 ## Messages
 
 - **M2** (once per call, only when partner predictors were set to 0):
-  > Partner predictors were set to 0 where no partner existed (two-part coding). Include `.partner_exists` in the model (and `.partner_exists_lag1` for lagged partner predictors), or fixed intercepts that already separate people with and without a partner; random effects alone do not. See `vignette("mixed-apim")`.
+  > Partner predictors were set to 0 where no partner existed. You must include `.partner_exists` as a fixed effect in the model (and `.partner_exists_lag1` for lagged partner predictors). Together with the zeros, this is two-part coding (see `vignette("mixed-apim")`). Without it, the zeros are treated as real partner values and bias the partner effects. Random effects cannot replace `.partner_exists`.
 
   The lag part only appears when lagged partner columns were created; the
   message names only status columns that exist.
-- **M1** (TRUE, then FALSE, then TRUE): `partner_exists` returns to TRUE after FALSE in 3 dyads (12, 40, 77). This is treated as the same partner returning. A different, new partner is not supported yet; end the person's data before the new partnership.
+- **M1** (TRUE, then FALSE, then TRUE): `partner_exists` returns to TRUE after FALSE in 3 dyads (12, 40, 77). This is treated as the same partner returning. A new partner would place the person in two dyads. Standard dyadic multilevel models assume each person belongs to one dyad (people nested in dyads), so this would need a cross-classified model, which dyadMLM does not support. End the person's data before the new partnership.
 
 ## Print
 

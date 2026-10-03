@@ -421,6 +421,8 @@ prepare_dyad_data <- function(
   # Add model cols
   if ("apim" %in% model_types) {
     out <- add_actor_partner_columns(out)
+    # Partner predictors are 0 where no partner existed (after centering).
+    out <- apply_two_part_coding(out)
   }
 
   if ("dim" %in% model_types) {
@@ -435,8 +437,9 @@ prepare_dyad_data <- function(
     out <- restore_observed_dyad_rows(out)
   }
 
-  # The temporary partner status column is only needed during preparation.
+  # The temporary partner status columns are only needed during preparation.
   out[[dyad_partner_exists_col]] <- NULL
+  out[[dyad_partner_exists_lag1_col]] <- NULL
 
   return(out)
 }

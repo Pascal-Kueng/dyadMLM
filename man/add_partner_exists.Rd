@@ -19,7 +19,7 @@ add_partner_exists(out, partner_exists_quo, dyad_name, member_name)
 \description{
 Evaluates \code{partner_exists} in the data and stores the result in a temporary
 logical column. A single \code{TRUE} or \code{FALSE} describes people observed alone
-(dyads with one person in the data); everyone else is partnered. Otherwise,
+(dyads with one person in the data). Everyone else is partnered. Otherwise,
 one value per row is expected.
 }
 \keyword{internal}

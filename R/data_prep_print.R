@@ -164,7 +164,7 @@ print_partner_data <- function(x, meta) {
   if (n_one_member > 0L) {
     cat(check, "#", sep = "\n")
   }
-  invisible(NULL)
+  return(invisible(NULL))
 }
 
 print_dyad_compositions <- function(dyad_compositions) {

@@ -9,7 +9,7 @@ label_people_observed_alone(data, group_name, member_name, role_name)
 \arguments{
 \item{data}{Validated data with the temporary partner status column.}
 
-\item{group_name, member_name, role_name}{Names of the structural columns;
+\item{group_name, member_name, role_name}{Names of the structural columns.
 \code{role_name} may be \code{NULL}.}
 }
 \value{

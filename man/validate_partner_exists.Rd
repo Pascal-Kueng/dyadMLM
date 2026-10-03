@@ -9,15 +9,16 @@ validate_partner_exists(out, dyad_name, time_name, role_name)
 \arguments{
 \item{out}{The validated data with the temporary partner status column.}
 
-\item{dyad_name, time_name, role_name}{Names of the structural columns;
+\item{dyad_name, time_name, role_name}{Names of the structural columns.
 \code{time_name} and \code{role_name} may be \code{NULL}.}
 }
 \value{
-\code{NULL}, invisibly. Called for its errors.
+\code{NULL}, invisibly. Called for its errors and message.
 }
 \description{
 Both members must agree on whether they are partners when both have a row at
 the same occasion. The role value \code{"missing"} is reserved for labels of
-people whose partner is not in the data.
+people whose partner is not in the data. Partners who return after a period
+without a partner are reported with a message.
 }
 \keyword{internal}
