@@ -587,6 +587,16 @@ test_that("validate_dyad_data rejects missing grouping values", {
 
   expect_error(
     validate_dyad_data(
+      data.frame(dyad_id = c(1, NA, 2, 2), person_id = c("A", "B", "C", "D")),
+      dyad = dyad_id,
+      member = person_id
+    ),
+    "give each person their own `dyad` ID",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_dyad_data(
       data.frame(dyad_id = c(1, 1, 2, 2), person_id = c("A", NA, "C", "D")),
       dyad = dyad_id,
       member = person_id
@@ -675,7 +685,7 @@ test_that("validate_dyad_data rejects groups without two unique members", {
 
   expect_error(
     validate_dyad_data(data, dyad = dyad_id, member = person_id),
-    "Each `dyad` must contain exactly two unique members.",
+    "with only one person",
     fixed = TRUE
   )
 })
@@ -690,11 +700,9 @@ test_that("validate_dyad_data handles incomplete dyads by policy", {
   expect_error(
     validate_dyad_data(data, dyad = dyad_id, member = person_id, role = role),
     paste0(
-      "Found 1 incomplete dyad, with ID: 1. `dyadMLM` cannot create rows for ",
-      "completely unobserved members because their `member` identifiers and, ",
-      "when supplied, `role` values cannot be inferred. Add the missing ",
-      "member rows or ",
-      "use `incomplete_dyads = \"drop\"` to drop these dyads."
+      "Found 1 dyad with only one person, with ID: 1. It is unclear whether ",
+      "their partner exists but did not take part, or whether they have no ",
+      "partner."
     ),
     fixed = TRUE
   )
@@ -932,7 +940,17 @@ test_that("validate_dyad_data rejects fewer than two groups", {
 
   expect_error(
     validate_dyad_data(data, dyad = dyad_id, member = person_id),
-    "At least 2 complete dyads are required after validation and any requested dropping.",
+    "dyadMLM needs at least 2 dyads, but only 1 remains (ID: 1) after validation.",
+    fixed = TRUE
+  )
+
+  # Dropped dyads are named with the option that dropped them.
+  data <- data.frame(dyad_id = c(1, 1, 2), person_id = c("A", "B", "C"))
+  expect_error(
+    suppressMessages(validate_dyad_data(
+      data, dyad = dyad_id, member = person_id, incomplete_dyads = "drop"
+    )),
+    "Dropped: 1 dyad with only one person (`incomplete_dyads = \"drop\"`).",
     fixed = TRUE
   )
 })

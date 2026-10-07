@@ -36,16 +36,25 @@
 #'   `predictors` are supplied, and to `"none"` otherwise.
 #'   Model-specific helpers may apply additional conventions, such as grand-mean
 #'   centering raw DIM and DSM dyad means.
-#' @param incomplete_dyads How to handle dyads with fewer than two unique
-#'   members across all rows in `data`. `"error"` stops with an error and
-#'   `"drop"` removes the entire dyad. A dyad with more than two unique members
-#'   is invalid and always causes an error, regardless of this setting.
+#' @param incomplete_dyads How to handle people observed alone (a `dyad` with
+#'   only one person across all rows in `data`) when `partner_exists` is not
+#'   supplied. It is then unclear whether their partner exists but did not take
+#'   part, or whether they have no partner. `"error"` (default) stops and
+#'   explains how to use `partner_exists`. `"drop"` removes these dyads. With
+#'   `partner_exists`, everyone observed alone is kept and `"drop"` is not
+#'   allowed. A dyad with more than two unique members always causes an error.
 #' @param missing_role How to handle dyads in which at least one member has no
 #'   non-missing `role` value on any row. A consistent non-missing role observed
 #'   for a member is propagated to that member's other rows before this policy
 #'   is applied. `"error"` stops with an error and `"drop"` removes the entire
 #'   dyad. Conflicting non-missing roles always cause an error. Ignored when no
 #'   `role` column is supplied.
+#' @param partner_exists Optional partner status, evaluated in `data`: `NULL`,
+#'   `TRUE`, `FALSE`, a column name, or an expression (such as `!widowed`).
+#'   `TRUE` or `FALSE` describes everyone observed alone and is ignored for
+#'   complete dyads; a column or expression gives the status for each row.
+#'   Stored per row in a temporary column. See [prepare_dyad_data()] for the
+#'   meaning of each option.
 #'
 #' @return A tibble with class `dyadMLM_data` and metadata about the dyad,
 #'   member, optional role, and optional time columns.
@@ -64,7 +73,8 @@ validate_dyad_data <- function(
     dsm_role_order = NULL,
     temporal_decomposition = c("auto", "2l", "none"),
     incomplete_dyads = c("error", "drop"),
-    missing_role = c("error", "drop")
+    missing_role = c("error", "drop"),
+    partner_exists = NULL
   ) {
 
   # Validate data frame input.
@@ -99,7 +109,27 @@ validate_dyad_data <- function(
   incomplete_dyads <- rlang::arg_match(incomplete_dyads)
   missing_role <- rlang::arg_match(missing_role)
 
+  # `partner_exists` is captured here and evaluated in the data further below.
+  partner_exists_quo <- rlang::enquo(partner_exists)
+  has_partner_exists <- !rlang::quo_is_null(partner_exists_quo)
+  if (has_partner_exists && incomplete_dyads == "drop") {
+    stop(
+      "`partner_exists` keeps everyone observed alone, so it cannot be ",
+      "combined with `incomplete_dyads = \"drop\"`. To remove people observed ",
+      "alone instead, leave out `partner_exists` and use ",
+      "`incomplete_dyads = \"drop\"`, or remove them from the data beforehand.",
+      call. = FALSE
+    )
+  }
+
   model_types <- normalize_model_types(model_types)
+  if (has_partner_exists && any(model_types %in% c("dim", "dsm"))) {
+    stop(
+      "`partner_exists` cannot be used with DIM or DSM columns yet. Use ",
+      "`model_types = \"apim\"`, or leave out `partner_exists`.",
+      call. = FALSE
+    )
+  }
   temporal_decomposition <- rlang::arg_match(temporal_decomposition)
 
   # Extract structural column names.
@@ -179,7 +209,9 @@ validate_dyad_data <- function(
     stop(
       "`dyad` must not contain missing values. Found ",
       sum(is.na(out[[dyad_name]])),
-      " affected row(s); fill or remove them before preparing the data.",
+      " affected row(s). If these are people observed without their partner, ",
+      "give each person their own `dyad` ID. Dyads with one person are then ",
+      "handled by the `incomplete_dyads` argument. Otherwise, fill or remove these rows.",
       call. = FALSE
     )
   }
@@ -284,12 +316,19 @@ validate_dyad_data <- function(
     }
   }
 
+  # Store partner status per row before any rows are removed, so the values
+  # stay aligned with their rows.
+  if (has_partner_exists) {
+    out <- add_partner_exists(out, partner_exists_quo, dyad_name, member_name)
+  }
+
   # Resolve dyads with fewer than two observed members.
   out_list <- resolve_incomplete_dyads(
     out = out,
     dyad_name = dyad_name,
     member_name = member_name,
-    incomplete_dyads = incomplete_dyads
+    incomplete_dyads = incomplete_dyads,
+    keep_one_person_dyads = has_partner_exists
   )
   out <- out_list$out
   dropped_incomplete_dyads <- out_list$dropped_incomplete_dyads
@@ -334,10 +373,38 @@ validate_dyad_data <- function(
     }
   }
 
+  if (has_partner_exists) {
+    validate_partner_exists(out, dyad_name, time_name, role_name)
+  }
+
   n_groups <- length(unique(out[[dyad_name]]))
 
   if (n_groups < 2) {
-    stop("At least 2 complete dyads are required after validation and any requested dropping.", call. = FALSE)
+    remaining <- if (n_groups == 0) {
+      "none remains"
+    } else {
+      paste0("only 1 remains (ID: ", unique(out[[dyad_name]]), ")")
+    }
+    # E.g., "2 dyads with missing roles", for each policy that dropped dyads.
+    n_dropped <- c(length(dropped_incomplete_dyads), length(dropped_missing_role_dyads))
+    dropped <- paste(
+      n_dropped,
+      ifelse(n_dropped == 1, "dyad", "dyads"),
+      c(
+        "with only one person (`incomplete_dyads = \"drop\"`)",
+        "with missing roles (`missing_role = \"drop\"`)"
+      )
+    )[n_dropped > 0]
+
+    stop(
+      "dyadMLM needs at least 2 dyads, but ", remaining, " after validation. ",
+      if (length(dropped) > 0) {
+        paste0("Dropped: ", paste(dropped, collapse = " and "), ". ")
+      },
+      "Check that both members of each dyad share the same `dyad` ID, and ",
+      "that `dyad` identifies dyads rather than people.",
+      call. = FALSE
+    )
   }
 
 
@@ -401,7 +468,13 @@ validate_dyad_data <- function(
     model_types = model_types,
     dsm_role_order = dsm_role_order,
     dropped_missing_role_dyads = dropped_missing_role_dyads,
-    dropped_incomplete_dyads = dropped_incomplete_dyads
+    dropped_incomplete_dyads = dropped_incomplete_dyads,
+    # What the user supplied, e.g. "partnered" or "!widowed". NULL if unused.
+    partner_exists = if (has_partner_exists) {
+      # A quoted column name is stored without its quotes.
+      supplied <- rlang::quo_get_expr(partner_exists_quo)
+      if (is.character(supplied)) supplied else rlang::as_label(partner_exists_quo)
+    }
   )
 
   class(out) <- unique(c("dyadMLM_data", class(out)))
@@ -499,7 +572,8 @@ format_duplicate_combinations <- function(data, columns, max_combinations = 5L) 
   return(paste(labels, collapse = "; "))
 }
 
-resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dyads) {
+resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dyads,
+                                     keep_one_person_dyads = FALSE) {
 
   group_member_counts <- out |>
     dplyr::group_by(.data[[dyad_name]]) |>
@@ -529,27 +603,32 @@ resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dya
   # Groups with fewer than two members are handled by policy.
   incomplete_groups <- group_member_counts[[dyad_name]][group_member_counts$n_members < 2]
 
-  # Return early if all groups are complete.
-  if (length(incomplete_groups) == 0) {
-    return(list(out = out, dropped_incomplete_dyads = incomplete_groups))
+  # Return early if all dyads are complete, or if `partner_exists` is supplied:
+  # then every one-person dyad is kept, whatever its value. The value only
+  # decides later how the person is labeled.
+  if (length(incomplete_groups) == 0 || keep_one_person_dyads) {
+    return(list(out = out, dropped_incomplete_dyads = incomplete_groups[0]))
   }
 
   if (incomplete_dyads == "error") {
     stop(
-      paste0(
-        "Each `dyad` must contain exactly two unique members. ",
-        "Found ",
-        format_group_count(
-          incomplete_groups,
-          singular = "incomplete dyad",
-          plural = "incomplete dyads"
-        ),
-        ". `dyadMLM` cannot create rows for completely unobserved members ",
-        "because their `member` identifiers and, when supplied, `role` values ",
-        "cannot be inferred. Add the missing member rows or use ",
-        "`incomplete_dyads = \"drop\"` ",
-        "to drop these dyads."
+      "Found ",
+      format_group_count(
+        incomplete_groups,
+        singular = "dyad with only one person",
+        plural = "dyads with only one person"
       ),
+      ". It is unclear whether their partner exists but did not take part, ",
+      "or whether they have no partner. Use recorded status, not the number ",
+      "of rows:\n",
+      "- If none of them has a partner, use `partner_exists = FALSE`.\n",
+      "- If all of them have a partner who is not in the data, use ",
+      "`partner_exists = TRUE`.\n",
+      "- If this differs between people or over time, supply `partner_exists` ",
+      "as a TRUE/FALSE column.\n",
+      "- To remove them, use `incomplete_dyads = \"drop\"`.\n",
+      "See the section \"People observed without their partner\" in ",
+      "?prepare_dyad_data.",
       call. = FALSE
     )
   }
@@ -570,7 +649,160 @@ resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dya
     return(list(out = out, dropped_incomplete_dyads = incomplete_groups))
   }
 
-  out
+  return(out)
+}
+
+#' Record whether a partner existed at each row
+#'
+#' Evaluates `partner_exists` in the data and stores the result in a temporary
+#' logical column. A single `TRUE` or `FALSE` describes people observed alone
+#' (dyads with one person in the data). Everyone else is partnered. Otherwise,
+#' one value per row is expected.
+#'
+#' @param out The data being validated.
+#' @param partner_exists_quo The captured `partner_exists` argument.
+#' @param dyad_name,member_name Names of the dyad and member columns.
+#'
+#' @return `out` with the temporary partner status column added.
+#' @keywords internal
+add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) {
+  status <- rlang::eval_tidy(partner_exists_quo, data = out)
+
+  # A quoted column name, as also accepted by `role` or `time`.
+  if (is.character(status) && length(status) == 1L && status %in% names(out)) {
+    status <- out[[status]]
+  }
+  is_constant <- length(status) == 1L
+
+  # Allowed: TRUE/FALSE or 1/0, given once (a constant) or once per row.
+  is_valid <- (is.logical(status) || (is.numeric(status) && all(status %in% c(0, 1, NA)))) &&
+    length(status) %in% c(1L, nrow(out)) &&
+    !(is_constant && is.na(status))
+  if (!is_valid) {
+    stop(
+      "`partner_exists` must be `TRUE`, `FALSE`, or a column or expression ",
+      "with one TRUE/FALSE (or 1/0) value per row.",
+      call. = FALSE
+    )
+  }
+
+  # A constant is repeated for every row. A vector is stored row by row.
+  out[[dyad_partner_exists_col]] <- as.logical(status)
+
+  # A constant only describes people observed alone. Otherwise, `FALSE` would
+  # also mark complete dyads as having no partner, so they are set to `TRUE`.
+  # A column is used as given, so both members can be `FALSE` (e.g., after a
+  # separation).
+  if (is_constant) {
+    out <- out |>
+      dplyr::group_by(.data[[dyad_name]]) |>
+      dplyr::mutate(
+        "{dyad_partner_exists_col}" := .data[[dyad_partner_exists_col]] |
+          dplyr::n_distinct(.data[[member_name]]) > 1L
+      ) |>
+      dplyr::ungroup()
+  }
+
+  is_missing <- is.na(out[[dyad_partner_exists_col]])
+  if (any(is_missing)) {
+    stop(
+      "`partner_exists` is missing in ", sum(is_missing),
+      " row(s), in ", format_group_count(unique(out[[dyad_name]][is_missing])),
+      ". Use TRUE or FALSE in every row. Missing values are not read as ",
+      "\"no partner\". Placeholder rows without data (e.g., after a death) ",
+      "can be removed.",
+      call. = FALSE
+    )
+  }
+
+  return(out)
+}
+
+
+#' Check partner status for consistency
+#'
+#' Both members must agree on whether they are partners when both have a row at
+#' the same occasion. The role value `"missing"` is reserved for labels of
+#' people whose partner is not in the data. Partners who return after a period
+#' without a partner are reported with a message.
+#'
+#' @param out The validated data with the temporary partner status column.
+#' @param dyad_name,time_name,role_name Names of the structural columns.
+#'   `time_name` and `role_name` may be `NULL`.
+#'
+#' @return `NULL`, invisibly. Called for its errors and message.
+#' @keywords internal
+validate_partner_exists <- function(out, dyad_name, time_name, role_name) {
+  # One row per occasion at which the two members report different statuses.
+  disagreements <- out |>
+    dplyr::summarise(
+      n_statuses = dplyr::n_distinct(.data[[dyad_partner_exists_col]]),
+      .by = dplyr::all_of(c(dyad_name, time_name))
+    ) |>
+    dplyr::filter(.data$n_statuses > 1L)
+
+  if (nrow(disagreements) > 0L) {
+    occasions <- disagreements[[dyad_name]]
+    if (!is.null(time_name)) {
+      occasions <- paste0(occasions, " (", time_name, " ", disagreements[[time_name]], ")")
+    }
+
+    stop(
+      "`partner_exists` differs between the two members of a dyad at the same ",
+      "occasion, in dyad(s): ", format_group_list(occasions, max = 5),
+      ". Both members must agree on whether they are partners at that ",
+      "occasion. If partners report differently, pick one rule, e.g. FALSE ",
+      "if either reports a separation.",
+      call. = FALSE
+    )
+  }
+
+  # Tell users once about dyads in which the partner returns after a period
+  # without one (TRUE, then FALSE, then TRUE). A dyad that starts without a
+  # partner and then has one (FALSE, then TRUE) is not reported. Only numeric
+  # time has a reliable order (character labels sort alphabetically, e.g.,
+  # "w10" before "w2").
+  if (!is.null(time_name) && is.numeric(out[[time_name]])) {
+    returning_dyads <- out |>
+      dplyr::distinct(
+        .data[[dyad_name]],
+        .data[[time_name]],
+        .dy_status = .data[[dyad_partner_exists_col]]
+      ) |>
+      dplyr::arrange(.data[[time_name]]) |>
+      # Count how often a period with a partner starts in each dyad. The `.dy_`
+      # names cannot clash with input columns.
+      dplyr::summarise(
+        .dy_n_partner_periods = sum(.data$.dy_status & !dplyr::lag(.data$.dy_status, default = FALSE)),
+        .by = dplyr::all_of(dyad_name)
+      ) |>
+      dplyr::filter(.data$.dy_n_partner_periods > 1L) |>
+      dplyr::pull(dplyr::all_of(dyad_name))
+
+    if (length(returning_dyads) > 0L) {
+      message(
+        "`partner_exists` returns to TRUE after FALSE in ",
+        length(returning_dyads), if (length(returning_dyads) == 1L) " dyad" else " dyads",
+        " (", format_group_list(returning_dyads, max = 5), "). This is treated ",
+        "as the same partner returning. A new partner would place the person in ",
+        "two dyads. Standard dyadic multilevel models assume each person belongs ",
+        "to one dyad (people nested in dyads), so this would need a ",
+        "cross-classified model, which dyadMLM does not support. End the ",
+        "person's data before the new partnership."
+      )
+    }
+  }
+
+  if (!is.null(role_name) && any(out[[role_name]] %in% "missing")) {
+    stop(
+      "`role` must not be \"missing\" when `partner_exists` is supplied. This ",
+      "label is reserved for people whose partner is not in the data. ",
+      "Rename this role value.",
+      call. = FALSE
+    )
+  }
+
+  return(invisible(NULL))
 }
 
 resolve_dyad_roles <- function(out, dyad_name, member_name, role_name, missing_role) {

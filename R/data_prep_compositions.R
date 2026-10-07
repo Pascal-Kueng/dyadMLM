@@ -95,25 +95,50 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
       )
     }
 
-    data[[dyad_composition_col]] <- dyad_assumed_exchangeable_label
-    data[[dyad_composition_role_col]] <- dyad_assumed_exchangeable_label
+    # One row per dyad: complete dyads form one exchangeable composition, and
+    # people observed alone get their own labels.
+    dyads <- tibble::tibble(
+      "{group_name}" := unique(data[[group_name]]),
+      "{dyad_composition_col}" := dyad_assumed_exchangeable_label,
+      "{dyad_type_col}" := "exchangeable"
+    ) |>
+      dplyr::rows_update(
+        label_people_observed_alone(data, group_name, member_name, role_name = NULL),
+        by = group_name
+      )
 
-    data <- add_arbitrary_member_roles(
-      data,
+    attr(data, "dyadMLM")$dyad_compositions <- dyads |>
+      dplyr::count(
+        composition = .data[[dyad_composition_col]],
+        dyad_type = .data[[dyad_type_col]],
+        name = "n_dyads"
+      ) |>
+      dplyr::mutate(
+        dyad_type_source = dplyr::if_else(
+          .data$dyad_type == "exchangeable", "assumed_no_role", "inferred"
+        ),
+        pooled_from = NA_character_,
+        .before = "n_dyads"
+      )
+
+    data <- dplyr::left_join(data, dyads, by = group_name)
+    data[[dyad_composition_role_col]] <- data[[dyad_composition_col]]
+
+    # Member contrasts only exist within complete dyads.
+    arbitrary_roles <- assign_arbitrary_member_roles(
+      dplyr::filter(data, .data[[dyad_type_col]] == "exchangeable"),
       group_name = group_name,
       member_name = member_name,
       seed = seed
     )
+    data <- dplyr::left_join(data, arbitrary_roles, by = c(group_name, member_name))
 
-    attr(data, "dyadMLM")$dyad_compositions <- tibble::tibble(
-      composition = dyad_assumed_exchangeable_label,
-      dyad_type = "exchangeable",
-      dyad_type_source = "assumed_no_role",
-      pooled_from = NA_character_,
-      n_dyads = meta_data$n_dyads
+    data[[dyad_diff_col]] <- dplyr::case_when(
+      is.na(data[[dyad_arbitrary_role_col]]) ~ 0,
+      data[[dyad_arbitrary_role_col]] == "arbitrary_1" ~ -1,
+      TRUE ~ 1
     )
-
-    data[[dyad_diff_col]] <- ifelse(data[[dyad_arbitrary_role_col]] == "arbitrary_1", -1, 1)
+    data[[dyad_type_col]] <- NULL
 
     # Finalize factors and construct the generated composition columns.
     data <- finalize_composition_columns(
@@ -157,6 +182,18 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
       "{dyad_composition_col}" := .data[[dyad_raw_composition_col]],
       .dy_pool_member = NA_character_
     )
+
+  # People observed alone get their own labels instead of a dyad composition.
+  alone <- label_people_observed_alone(data, group_name, member_name, role_name)
+  complete_dyad_labels <- dyad_roles[[dyad_composition_col]][
+    !dyad_roles[[group_name]] %in% alone[[group_name]]
+  ]
+  stop_if_labels_coincide(intersect(alone[[dyad_composition_col]], complete_dyad_labels))
+  dyad_roles <- dplyr::rows_update(
+    dyad_roles,
+    dplyr::mutate(alone, "{dyad_raw_composition_col}" := .data[[dyad_composition_col]]),
+    by = group_name
+  )
 
   # Apply composition filtering before exchangeability overrides and pooling.
   include_result <- apply_keep_compositions(
@@ -297,11 +334,14 @@ apply_keep_compositions <- function(data, dyad_roles, keep_compositions,
     )
   }
 
+  alone_compositions <- labels_of_people_observed_alone(dyad_roles)
+
   # Get canonical composition labels for the filter.
   keep_compositions_resolved <- resolve_composition_references(
     references = keep_compositions,
     observed_compositions = dyad_roles[[dyad_composition_col]],
-    arg_name = "keep_compositions"
+    arg_name = "keep_compositions",
+    alone_compositions = alone_compositions
   )
 
   # Resolve later composition references so we can catch references removed by
@@ -309,7 +349,8 @@ apply_keep_compositions <- function(data, dyad_roles, keep_compositions,
   set_exchangeable_compositions_resolved <- resolve_composition_references(
     references = set_exchangeable_compositions,
     observed_compositions = dyad_roles[[dyad_composition_col]],
-    arg_name = "set_exchangeable_compositions"
+    arg_name = "set_exchangeable_compositions",
+    alone_compositions = alone_compositions
   )
 
   pool_composition_references <- NULL
@@ -319,8 +360,16 @@ apply_keep_compositions <- function(data, dyad_roles, keep_compositions,
   pool_compositions_resolved <- resolve_composition_references(
     references = pool_composition_references,
     observed_compositions = dyad_roles[[dyad_composition_col]],
-    arg_name = "pool_compositions"
+    arg_name = "pool_compositions",
+    alone_compositions = alone_compositions
   )
+
+  # People observed alone are rejected first, so the advice below cannot lead
+  # to that error.
+  reject_people_observed_alone(
+    set_exchangeable_compositions_resolved, alone_compositions, "set_exchangeable_compositions"
+  )
+  reject_people_observed_alone(pool_compositions_resolved, alone_compositions, "pool_compositions")
 
   # Check if later arguments refer to compositions removed by the filter.
   referenced_later <- c(set_exchangeable_compositions_resolved, pool_compositions_resolved)
@@ -344,7 +393,7 @@ apply_keep_compositions <- function(data, dyad_roles, keep_compositions,
 
   if (length(keep_dyads) < 2) {
     stop(
-      "`keep_compositions` must leave at least two complete dyads after filtering.",
+      "`keep_compositions` must leave at least two dyads after filtering.",
       call. = FALSE
     )
   }
@@ -363,10 +412,15 @@ apply_keep_compositions <- function(data, dyad_roles, keep_compositions,
 
 
 apply_exchangeable_composition_overrides <- function(dyad_roles, set_exchangeable_compositions) {
+  alone_compositions <- labels_of_people_observed_alone(dyad_roles)
   set_exchangeable_compositions_resolved <- resolve_composition_references(
     references = set_exchangeable_compositions,
     observed_compositions = dyad_roles[[dyad_composition_col]],
-    arg_name = "set_exchangeable_compositions"
+    arg_name = "set_exchangeable_compositions",
+    alone_compositions = alone_compositions
+  )
+  reject_people_observed_alone(
+    set_exchangeable_compositions_resolved, alone_compositions, "set_exchangeable_compositions"
   )
 
   # Checks if argument is needed and allowed
@@ -450,6 +504,7 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
   }
 
   observed_compositions <- dyad_roles[[dyad_composition_col]]
+  alone_compositions <- labels_of_people_observed_alone(dyad_roles)
   already_pooled_compositions <- character()
 
   for (i in seq_along(pool_compositions)) { # for each requested pool
@@ -468,8 +523,10 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
     resolved_compositions_to_pool <- resolve_composition_references(
       references = references_to_pool,
       observed_compositions = observed_compositions,
-      arg_name = "pool_compositions"
+      arg_name = "pool_compositions",
+      alone_compositions = alone_compositions
     )
+    reject_people_observed_alone(resolved_compositions_to_pool, alone_compositions, "pool_compositions")
 
     if (length(resolved_compositions_to_pool) < 2) {
       stop(
@@ -556,9 +613,13 @@ finalize_composition_columns <- function(
 
   meta_data <- attr(data, "dyadMLM")
   # Short names omit the composition label. They are unambiguous only when
-  # filtering and pooling leave one final composition; with more than one,
-  # short names would be ambiguous and therefore are not allowed.
-  has_single_composition <- nrow(meta_data$dyad_compositions) == 1L
+  # filtering and pooling leave one final composition of dyads. With more than
+  # one, short names would be ambiguous and therefore are not allowed. People
+  # observed alone do not count: they always keep their full labels.
+  is_alone_composition <- meta_data$dyad_compositions$dyad_type %in% dyad_alone_types
+  dyad_compositions <- meta_data$dyad_compositions[!is_alone_composition, ]
+  alone_labels <- meta_data$dyad_compositions$composition[is_alone_composition]
+  has_single_composition <- nrow(dyad_compositions) == 1L
   use_short_composition_colnames <-
     short_colnames && has_single_composition
 
@@ -570,13 +631,38 @@ finalize_composition_columns <- function(
   # The arbitrary role is only needed while constructing member contrasts.
   data[[dyad_arbitrary_role_col]] <- NULL
 
+  # Each composition-role label must belong to one composition. Unusual role
+  # values could otherwise give a person observed alone and a dyad member the
+  # same label, and thus the same indicator.
+  shared_role_labels <- tibble::tibble(
+    composition_role = as.character(data[[dyad_composition_role_col]]),
+    composition = as.character(data[[dyad_composition_col]])
+  ) |>
+    dplyr::distinct() |>
+    dplyr::count(.data$composition_role) |>
+    dplyr::filter(.data$n > 1L) |>
+    dplyr::pull("composition_role")
+  stop_if_labels_coincide(shared_role_labels)
+
   # Build the exact output names once and reuse them for validation and writing.
   composition_role_labels <- sort(unique(
     as.character(data[[dyad_composition_role_col]])
   ))
+
+  # Full names by default: `.is_<composition-role>`.
+  composition_role_suffixes <- make_dyad_suffixes(composition_role_labels)
+  composition_indicator_columns <- paste0(
+    dyad_retained_prefix,
+    "is_",
+    unname(composition_role_suffixes[composition_role_labels])
+  )
+  names(composition_indicator_columns) <- composition_role_labels
+
+  # Short names only replace the names of dyads' indicators.
+  dyad_role_labels <- setdiff(composition_role_labels, alone_labels)
   if (use_short_composition_colnames &&
-      meta_data$dyad_compositions$dyad_type[[1L]] == "exchangeable") {
-    composition_indicator_columns <- paste0(
+      dyad_compositions$dyad_type[[1L]] == "exchangeable") {
+    composition_indicator_columns[dyad_role_labels] <- paste0(
       dyad_retained_prefix,
       "is_exchangeable"
     )
@@ -585,7 +671,7 @@ finalize_composition_columns <- function(
     # each indicator; the composition portion of the label is redundant.
     observed_role_labels <- as.character(data[[meta_data$role]])[
       match(
-        composition_role_labels,
+        dyad_role_labels,
         as.character(data[[dyad_composition_role_col]])
       )
     ]
@@ -594,22 +680,12 @@ finalize_composition_columns <- function(
       label_type = "role labels",
       rename_hint = "role labels"
     )
-    composition_indicator_columns <- paste0(
+    composition_indicator_columns[dyad_role_labels] <- paste0(
       dyad_retained_prefix,
       "is_",
       unname(observed_role_suffixes[observed_role_labels])
     )
-  } else {
-    composition_role_suffixes <- make_dyad_suffixes(
-      composition_role_labels
-    )
-    composition_indicator_columns <- paste0(
-      dyad_retained_prefix,
-      "is_",
-      unname(composition_role_suffixes[composition_role_labels])
-    )
   }
-  names(composition_indicator_columns) <- composition_role_labels
 
   # Only compositions with non-zero member contrasts need a contrast column.
   contrast_composition_labels <- sort(unique(as.character(
@@ -699,4 +775,108 @@ finalize_composition_columns <- function(
   )
 
   data
+}
+
+
+#' Label people observed alone
+#'
+#' People observed alone (a dyad with only one person in the data) get their
+#' own label instead of a dyad composition: `singleton_<role>` if they never
+#' have a partner, and `<role>_x_missing` if their partner exists but is not in
+#' the data. Without `role`, the labels are `singleton` and `missing_partner`.
+#' Such dyads are only kept when `partner_exists` is supplied.
+#'
+#' @param data Validated data with the temporary partner status column.
+#' @param group_name,member_name,role_name Names of the structural columns.
+#'   `role_name` may be `NULL`.
+#'
+#' @return One row per person observed alone: the dyad ID, the label, and the
+#'   dyad type (`"singleton"` or `"partner_missing"`).
+#' @keywords internal
+label_people_observed_alone <- function(data, group_name, member_name, role_name) {
+  alone <- tibble::tibble(
+    "{group_name}" := data[[group_name]][0],
+    "{dyad_composition_col}" := character(),
+    "{dyad_type_col}" := character()
+  )
+  if (!dyad_partner_exists_col %in% names(data)) {
+    return(alone)
+  }
+
+  # Temporary columns use the reserved `.dy_` prefix, so they cannot collide
+  # with the dyad column.
+  alone_people <- data |>
+    dplyr::group_by(.data[[group_name]]) |>
+    dplyr::filter(dplyr::n_distinct(.data[[member_name]]) == 1L) |>
+    dplyr::summarise(
+      .dy_has_partner = any(.data[[dyad_partner_exists_col]]),
+      .dy_role = if (is.null(role_name)) NA_character_ else as.character(dplyr::first(.data[[role_name]])),
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      "{dyad_composition_col}" := dplyr::case_when(
+        is.na(.data$.dy_role) & .data$.dy_has_partner ~ "missing_partner",
+        is.na(.data$.dy_role) ~ "singleton",
+        .data$.dy_has_partner ~ paste0(.data$.dy_role, dyad_composition_sep, "missing"),
+        TRUE ~ paste0("singleton_", .data$.dy_role)
+      ),
+      "{dyad_type_col}" := dplyr::if_else(.data$.dy_has_partner, "partner_missing", "singleton")
+    )
+
+  # Different groups must not end up with the same label. For example, role
+  # "singleton" with a missing partner and role "x_missing" without a partner
+  # would both become "singleton_x_missing".
+  coinciding_labels <- alone_people |>
+    dplyr::distinct(.data[[dyad_composition_col]], .data$.dy_role, .data$.dy_has_partner) |>
+    dplyr::count(.data[[dyad_composition_col]]) |>
+    dplyr::filter(.data$n > 1L) |>
+    dplyr::pull(dplyr::all_of(dyad_composition_col))
+  stop_if_labels_coincide(coinciding_labels)
+
+  return(dplyr::select(alone_people, dplyr::all_of(names(alone))))
+}
+
+
+# Labels of people observed alone must differ from each other and from the
+# compositions of complete dyads. Otherwise they would share one indicator.
+stop_if_labels_coincide <- function(labels) {
+  if (length(labels) == 0L) {
+    return(invisible(NULL))
+  }
+
+  stop(
+    "Different groups would get the same label: ",
+    paste(unique(labels), collapse = ", "),
+    ". This happens when a `role` value or a `pool_compositions` name looks ",
+    "like part of another label (such as `singleton_`, `_x_missing`, or a ",
+    "composition and role). Rename these role values or pool names.",
+    call. = FALSE
+  )
+}
+
+
+# Labels of people observed alone in the dyad-level summary.
+labels_of_people_observed_alone <- function(dyad_roles) {
+  is_alone <- dyad_roles[[dyad_type_col]] %in% dyad_alone_types
+  return(unique(dyad_roles[[dyad_composition_col]][is_alone]))
+}
+
+
+# People observed alone cannot be pooled or set exchangeable. Parameters are
+# shared by adding indicators in the model formula instead.
+reject_people_observed_alone <- function(compositions, alone_compositions, arg_name) {
+  referenced <- intersect(compositions, alone_compositions)
+  if (length(referenced) == 0L) {
+    return(invisible(NULL))
+  }
+
+  stop(
+    "`", arg_name, "` cannot include people observed alone (",
+    paste(referenced, collapse = ", "), "). To let them share parameters with ",
+    "dyad members, add their indicators in the model formula, as a sum inside ",
+    "`I()`. Use the indicator names listed under \"Added columns\" when you ",
+    "print the prepared data. See ",
+    "`?recover_exchangeable_covariance` for random effects.",
+    call. = FALSE
+  )
 }

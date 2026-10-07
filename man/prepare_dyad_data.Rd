@@ -20,6 +20,7 @@ prepare_dyad_data(
   pool_compositions = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
+  partner_exists = NULL,
   seed = NULL,
   short_colnames = TRUE,
   include_arbitrary_member_contrast = FALSE,
@@ -117,10 +118,13 @@ exchangeable compositions can be pooled. Each pool must contain at least
 two distinct observed compositions after composition references are
 resolved.}
 
-\item{incomplete_dyads}{How to handle dyads with fewer than two unique
-members across all rows in \code{data}. \code{"error"} stops with an error and
-\code{"drop"} removes the entire dyad. A dyad with more than two unique members
-is invalid and always causes an error, regardless of this setting.}
+\item{incomplete_dyads}{How to handle people observed alone (a \code{dyad} with
+only one person across all rows in \code{data}) when \code{partner_exists} is not
+supplied. It is then unclear whether their partner exists but did not take
+part, or whether they have no partner. \code{"error"} (default) stops and
+explains how to use \code{partner_exists}. \code{"drop"} removes these dyads. With
+\code{partner_exists}, everyone observed alone is kept and \code{"drop"} is not
+allowed. A dyad with more than two unique members always causes an error.}
 
 \item{missing_role}{How to handle dyads in which at least one member has no
 non-missing \code{role} value on any row. A consistent non-missing role observed
@@ -129,11 +133,47 @@ is applied. \code{"error"} stops with an error and \code{"drop"} removes the ent
 dyad. Conflicting non-missing roles always cause an error. Ignored when no
 \code{role} column is supplied.}
 
+\item{partner_exists}{Optional. Decides how people (or occasions of
+people) observed without a partner are prepared. The options are:
+\itemize{
+\item \code{NULL} (default): people observed alone (across all occasions) cause an
+error with \code{incomplete_dyads = "error"} (default), or are removed with
+\code{incomplete_dyads = "drop"}. In longitudinal data, a partner who
+appears at least once is assumed to exist at every occasion of the dyad
+and to be just not observed at the others. These occasions are kept.
+\item \code{TRUE} or \code{FALSE}: is ignored for complete dyads and describes
+\strong{everyone} observed alone. \code{TRUE} means that everyone's partner exists
+but did not take part. This is appropriate if the sample includes only
+persistent dyads. \code{FALSE} means that all people observed alone have no
+partner. This is appropriate if everyone observed alone is an individual
+studied alone (not having an unobserved partner), and thus modeling them
+as half a dyad is inappropriate. Occasions at which a partner in a
+complete dyad has no row are still treated as the partner existing but
+not observed. To mark such occasions as "no partner exists", use a
+column.
+\item A column name (quoted or not) or an expression evaluated in \code{data} (for
+example \code{partnered} or \code{!widowed}) that is TRUE/FALSE or 1/0 \strong{for each
+row}.
+This can be used if some individuals have an unobserved partner, and
+others have no partner. It can also be used to mark individuals
+changing status over time.
+}
+
+Missing values in the column are not allowed. When both members have a
+row at the same occasion, their values must agree (e.g., both members
+need to be partnered, or both need to be not partnered, which can cover
+partners splitting up but still taking part in the same study). Where no
+partner existed, numeric partner predictors are set to 0, and
+\code{.partner_exists} is added when the status varies (two-part coding). See
+the section "People observed without their partner" below for more
+information.}
+
 \item{seed}{Optional seed for random \verb{.member_contrast_*} sign assignment.
 If \code{NULL}, the current R session's RNG state is used.}
 
 \item{short_colnames}{Whether to use shorter composition-dependent generated
-column names when the final data contain one composition. The default \code{TRUE}
+column names when the final data contain one composition of dyads. The
+default \code{TRUE}
 omits the redundant composition label from \verb{.is_*} and
 \verb{.member_contrast_*} names. \code{FALSE} always retains composition-qualified
 names. Other generated column names are unaffected.}
@@ -180,15 +220,180 @@ one row per member within dyad. Intensive longitudinal dyadic data may
 contain at most one row per member and observed measurement occasion within
 dyad. Measured variables may contain missing values. Numeric \code{dyad}, \code{member},
 \code{time}, and selected predictor columns must not contain infinite values.
-Structural completeness is assessed across all rows. \code{incomplete_dyads}
-controls dyads with fewer than two members; dyads with more than two members
-always cause an error.
+Structural completeness is assessed across all rows. A dyad with more than
+two members always causes an error. A dyad with only one person in the data
+(for example, someone whose partner did not take part, or single persons
+studied alongside dyads) causes an error by default. To keep such dyads,
+supply \code{partner_exists}, which records whether the person has a partner who
+did not take part or has no partner (see the section "People observed
+without their partner" below). To remove them instead, use
+\code{incomplete_dyads = "drop"}.
 When \code{role} is supplied, stable member roles are resolved across repeated
 rows before \code{missing_role} is applied.
 
 Dyad composition labels are canonical: role labels are sorted alphabetically
 before being combined, so labels do not depend on row or member order.
 }
+\section{People observed without their partner}{
+
+In longitudinal data, both partners may have a row at every occasion, even
+if all of one partner's values are missing at some occasions (only the
+identifiers, such as \code{dyad}, \code{member}, and \code{time}, can never be missing).
+All these rows are retained. Models including the missing partner
+predictors drop these rows unless the missing values are imputed first.
+Multiple imputation is usually valid if data are missing at random (MAR).
+Dropping rows can require stronger assumptions.
+
+If a partner did not complete a measurement occasion and has no row for it,
+such rows do not have to be added manually. By default, \code{dyadMLM} assumes
+that a partner who appears at least once exists at every occasion at which
+their dyad was observed. As in the case above, if only one member has a row
+at an occasion, the partner is treated as existing but with missing values
+at that occasion (contemporaneous partner predictors are \code{NA}). The
+partner's \code{cbp} values remain available, because they are computed from the
+partner's observed occasions. Lag-1 values do not bridge gaps. Models omit
+rows when a predictor used in the model is missing.
+
+Using \code{print()} on the prepared data reports how many dyad-occasions have a
+row for only one member (where \code{dyadMLM} assumed the partner exists) and how
+many rows miss at least one partner predictor (both cases above).
+
+If truly no partner \emph{existed} at some of these occasions (for example,
+before a relationship began or after a separation or death), or at all
+occasions (e.g., when individuals are studied alongside dyads), treating a
+partner's values as missing is not meaningful and can bias the model. This
+also applies to empty rows kept for a partner who no longer exists, as in
+some balanced panel files. In this case, use \code{partner_exists} to record
+whether a partner existed, which sets up two-part predictors (see
+\code{vignette("partner-exists")} for examples).
+
+Alternatively, to analyze only occasions at which both members were
+observed, remove the other occasions before preparing the data, for example:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{data |> dplyr::filter(dplyr::n() == 2, .by = c(dyad_id, time))
+}\if{html}{\out{</div>}}
+
+\strong{Base \code{partner_exists} on recorded status, not on data presence.} Use a
+variable such as relationship status or widowhood. A rule such as
+\code{dplyr::n() == 2} mixes people without a partner with people whose partner
+did not take part.
+
+With \code{partner_exists}, people observed alone (dyads with one person in the
+data) get their own composition and indicator column:\tabular{lll}{
+   Situation \tab With \code{role} \tab Without \code{role} \cr
+   No partner \tab \verb{singleton_<role>} \tab \code{singleton} \cr
+   Partner not in the data \tab \verb{<role>_x_missing} \tab \code{missing_partner} \cr
+}
+
+
+The label stays the same across occasions. \code{singleton} means no partner at
+any observed occasion. A person observed alone who had a partner at some
+occasions is labeled as having a partner not in the data. They have no
+member contrast and cannot be listed in \code{pool_compositions} or
+\code{set_exchangeable_compositions}. To
+let them share parameters with dyad members, add their indicators in the
+model formula, e.g. \code{I(.is_male_x_male + .is_singleton_male)} for a
+variance (in both exchangeable terms, see \code{\link[=recover_exchangeable_covariance]{recover_exchangeable_covariance()}})
+or a slope. People without a partner keep their own mean (see
+two-part coding below).
+
+Where no partner existed, numeric partner predictors are set to 0 after
+centering, and \code{.partner_exists} (1 or 0) marks these rows. The status
+columns are only added when the status varies (\code{.partner_exists_lag1} only
+with lagged predictors and where the previous status differs from the
+current one somewhere). This is two-part coding. \strong{\code{.partner_exists} (or its two parts, see below) must be included
+as a fixed effect.} Otherwise,
+the zeros are treated as real partner values, which can bias the partner
+effects. Random effects cannot replace it. It can only be left out if fixed
+intercepts already separate all rows without a partner, for example
+singleton indicators when no dyad has occasions without a partner.
+
+Lagged partner predictors follow the status at the previous occasion and
+pair with \code{.partner_exists_lag1}. Where known, this column differs from
+\code{.partner_exists} only at the first occasion after a partner is lost or
+gained. If no such occasion remains in the model data, it duplicates
+\code{.partner_exists} and can be left out. It stays one column, so its
+within-person and between-person associations are combined. Non-numeric
+partner predictors cannot be set to 0, so they stop with an error.
+
+When the status changes over time within a dyad in longitudinal data, the
+following columns are added:
+\itemize{
+\item With \code{temporal_decomposition = "2l"}, \code{.partner_exists_cwp} and
+\code{.partner_exists_cbp} split the status into a within-person part (losing
+or gaining a partner) and a between-person part (the person's share of
+occasions with a partner, centered). Include both instead of
+\code{.partner_exists}. Do not include only the within part (Yaremych,
+Preacher & Hedeker, 2023), unless fixed intercepts already separate the
+statuses.
+\item \code{.partner_before_exists} (1 where no partner exists yet, but one does
+later), when both occasions before a relationship and after a loss occur
+(needs a numeric \code{time}). It lets their means differ (e.g., being single
+versus being widowed).
+\item With \code{temporal_decomposition = "2l"}, the partner's usual level is split.
+It still exists after a loss. Setting it to 0
+there would assume that it no longer relates to the outcome. If that is
+wrong, its slope while a partner exists can be biased too. So each
+\verb{.\{pred\}_cbp_partner} is replaced by one column per partner status, each
+0 outside its status (columns for statuses that do not occur are not
+created):
+}\tabular{ll}{
+   Partner status at the occasion \tab Column \cr
+   A partner exists \tab \verb{.\{pred\}_cbp_partner_when_exists} \cr
+   No partner yet, but one later \tab \verb{.\{pred\}_cbp_partner_before_exists} \cr
+   No partner, but one earlier \tab \verb{.\{pred\}_cbp_partner_after_exists} \cr
+}
+
+
+Include all of them. The new names show that these columns are not
+constant within a person. A usual level that applies but is unknown is
+\code{NA}. People without a partner at any observed occasion have 0 in all of
+them and need their own fixed intercepts (e.g., singleton indicators).
+Complete dyads without a partner at any occasion (e.g., separated before the
+first occasion) need one too, which you create yourself. To
+assume one slope for all statuses, use \code{I()} around their sum. To assume no
+association without a partner, use \verb{_when_exists} alone. "Before" and
+"after" need a numeric \code{time}. Otherwise, the usual level is not split, with
+a warning.
+
+Variables that only exist when a partner exists (e.g., ratings of the
+partner or the relationship) are usually missing where no partner exists.
+Rows without a partner then drop out of models that use them. dyadMLM does
+not yet apply two-part coding to such actor variables (#86), but you can do
+it yourself after preparing the data. Set their actor columns to 0 where
+\code{.partner_exists} is 0 with \code{dplyr::if_else()} (multiplying keeps \code{NA},
+since \code{0 * NA} is \code{NA}), and include the status terms as for partner
+predictors. Where \code{.partner_exists} or \code{.partner_exists_lag1} was not
+created (the status did not vary), use the recorded status at the same or
+previous occasion (see \code{vignette("partner-exists")}). In
+longitudinal data with status changes, also split their usual level
+(\code{cbp}) by partner status (see \code{vignette("partner-exists")}).
+
+When interpreting results:
+\itemize{
+\item \code{.partner_exists} compares rows with and without a partner at partner
+predictors of 0. It is not "the effect of having a partner", and it mixes
+change over time with differences between people.
+\item What 0 means depends on the component: the partner's usual level for
+\code{cwp}, the average person's usual level for \code{cbp}, the grand mean for
+\code{gmc}, and the scale's 0 for raw values. Prefer centered components.
+\item Raw and \code{gmc} partner values contain the partner's usual level too.
+Setting them to 0 makes the same assumption for that part, and they
+cannot be split. In longitudinal data, prefer the \code{cwp} and split \code{cbp}
+columns.
+\item When the status changes within a person, partner \code{cwp} values no longer
+average 0 within that person.
+\item After a separation in which the former partner keeps taking part, their
+usual level includes their occasions after the separation.
+\item At the first occasion after a separation, lagged partner predictors still
+hold the former partner's value from the previous occasion, by design.
+}
+
+Each person belongs to one dyad. If \code{partner_exists} returns to \code{TRUE} after
+\code{FALSE}, this is treated as the same partner returning. A new partner is not
+supported. \code{partner_exists} cannot yet be combined with DIM or DSM columns.
+}
+
 \examples{
 data <- data.frame(
   dyad_id = c(1, 1, 2, 2, 3, 3),
@@ -243,4 +448,8 @@ ild_prepared <- prepare_dyad_data(
 
 print(ild_prepared)
 
+}
+\seealso{
+The vignette \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-exists.html}{People Observed Without Their Partner}
+shows models combining dyads and people observed alone.
 }

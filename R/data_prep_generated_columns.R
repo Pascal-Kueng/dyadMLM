@@ -21,12 +21,19 @@ dyad_generated_columns <- function(meta) {
   # composition filtering, not merely the value requested by the user.
   if (isTRUE(meta$short_colnames)) {
     columns$column_pattern <- columns$short_column_pattern
-    is_exchangeable_indicator <-
+    # `.is_exchangeable` and the indicators of people observed alone keep their
+    # full names, e.g., `.is_singleton_Partner_A` for "singleton_Partner A".
+    alone_compositions <- meta$dyad_compositions$composition[
+      meta$dyad_compositions$dyad_type %in% dyad_alone_types
+    ]
+    full_names <- paste0(
+      dyad_retained_prefix, "is_", make_dyad_suffixes(c("exchangeable", alone_compositions))
+    )
+    keeps_full_name <-
       columns$model_family == "composition" &
       columns$column_role == "composition_indicator" &
-      columns$column == paste0(dyad_retained_prefix, "is_exchangeable")
-    columns$column_pattern[is_exchangeable_indicator] <-
-      columns$column[is_exchangeable_indicator]
+      columns$column %in% full_names
+    columns$column_pattern[keeps_full_name] <- columns$column[keeps_full_name]
   }
   columns
 }
@@ -286,6 +293,10 @@ generated_column_spec_lookup <- function() {
     "composition",    "composition_role", "none", "composition_role",        "none",                       "none",                     "none",            2L,           ".composition_role",                         NA_character_,                                               "composition-specific member role",
     "composition",    "composition_role", "none", "composition_indicator",   "none",                       "none",                     "none",            3L,           ".is_{comp-role}",                           ".is_{role}",                                                 "composition-role indicator columns",
     "composition",    "composition",  "none",     "member_contrast",         "none",                       "none",                     "none",            4L,           ".member_contrast_{comp}_arbitrary",         ".member_contrast_arbitrary",                                 "composition-specific member contrasts coded -1/+1 in arbitrary direction for exchangeability-constrained random effects. Values are 0 for other compositions",
+    "apim",           "partner_status", "none",   "partner_status",          "none",                       "none",                     "none",            5L,           ".partner_exists",                           NA_character_,                                               "partner status for two-part coding: 1 if a partner existed, 0 if not",
+    "apim",           "partner_status", "cwp",    "partner_status",          "within_person",              "none",                     "none",            5L,           ".partner_exists_cwp",                       NA_character_,                                               "within-person part of partner status: status minus the person's share of occasions with a partner",
+    "apim",           "partner_status", "cbp",    "partner_status",          "between_person_grand_mean",  "none",                     "none",            5L,           ".partner_exists_cbp",                       NA_character_,                                               "between-person part of partner status: the person's share of occasions with a partner, centered on the mean share",
+    "apim",           "partner_status", "none",   "partner_before_status",   "none",                       "none",                     "none",            5L,           ".partner_before_exists",                    NA_character_,                                               "1 where no partner exists yet, but one does later (before a relationship), 0 otherwise",
     "temporal",       "predictor",    "raw",      "temporal_component",      "none",                       "none",                     "none",            7L,           ".{pred}",                                   NA_character_,                                               "raw predictor values",
     "temporal",       "predictor",    "cwp",      "temporal_component",      "within_person",              "none",                     "none",            8L,           ".{pred}_cwp",                               NA_character_,                                               "within-person predictor: momentary deviations from each person's usual level",
     "temporal",       "predictor",    "cbp",      "temporal_component",      "between_person_grand_mean",  "none",                     "none",            9L,           ".{pred}_cbp",                               NA_character_,                                               "between-person predictor: stable differences from the average person's usual level",
@@ -296,6 +307,9 @@ generated_column_spec_lookup <- function() {
     "apim",           "predictor",    "cwp",      "partner",                "within_person",              "none",                     "none",            13L,          ".{pred}_cwp_partner",                       NA_character_,                                               "APIM within-person partner predictor: partner's momentary deviations from their usual level",
     "apim",           "predictor",    "cbp",      "actor",                  "between_person_grand_mean",  "none",                     "none",            14L,          ".{pred}_cbp_actor",                         NA_character_,                                               "APIM between-person actor predictor: actor's stable difference from the average person's usual level",
     "apim",           "predictor",    "cbp",      "partner",                "between_person_grand_mean",  "none",                     "none",            15L,          ".{pred}_cbp_partner",                       NA_character_,                                               "APIM between-person partner predictor: partner's stable difference from the average person's usual level",
+    "apim",           "predictor",    "cbp",      "partner_when_exists",    "between_person_grand_mean",  "none",                     "none",            15L,          ".{pred}_cbp_partner_when_exists",           NA_character_,                                               "APIM between-person partner predictor while a partner exists, 0 otherwise. Split by partner status, so not constant within a person (see ?prepare_dyad_data)",
+    "apim",           "predictor",    "cbp",      "partner_before_exists",  "between_person_grand_mean",  "none",                     "none",            15L,          ".{pred}_cbp_partner_before_exists",         NA_character_,                                               "APIM between-person partner predictor of the future partner where no partner exists yet, 0 otherwise",
+    "apim",           "predictor",    "cbp",      "partner_after_exists",   "between_person_grand_mean",  "none",                     "none",            15L,          ".{pred}_cbp_partner_after_exists",          NA_character_,                                               "APIM between-person partner predictor of the former partner where no partner exists any more, 0 otherwise",
     "apim",           "predictor",    "gmc",      "actor",                  "none",                       "none",                     "grand_mean",      17L,          ".{pred}_gmc_actor",                         NA_character_,                                               "APIM grand-mean-centered actor predictor: actor's value relative to the mean across all retained non-missing observations",
     "apim",           "predictor",    "gmc",      "partner",                "none",                       "none",                     "grand_mean",      18L,          ".{pred}_gmc_partner",                       NA_character_,                                               "APIM grand-mean-centered partner predictor: partner's value relative to the mean across all retained non-missing observations",
     "dsm",            "role",         "raw",      "role_contrast",          "none",                       "role_contrast",            "none",            19L,          ".dsm_role_contrast",                        NA_character_,                                               "DSM role contrast: +0.5 for the first declared role and -0.5 for the second declared role",

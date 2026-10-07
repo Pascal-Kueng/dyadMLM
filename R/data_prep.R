@@ -8,14 +8,174 @@
 #' contain at most one row per member and observed measurement occasion within
 #' dyad. Measured variables may contain missing values. Numeric `dyad`, `member`,
 #' `time`, and selected predictor columns must not contain infinite values.
-#' Structural completeness is assessed across all rows. `incomplete_dyads`
-#' controls dyads with fewer than two members; dyads with more than two members
-#' always cause an error.
+#' Structural completeness is assessed across all rows. A dyad with more than
+#' two members always causes an error. A dyad with only one person in the data
+#' (for example, someone whose partner did not take part, or single persons
+#' studied alongside dyads) causes an error by default. To keep such dyads,
+#' supply `partner_exists`, which records whether the person has a partner who
+#' did not take part or has no partner (see the section "People observed
+#' without their partner" below). To remove them instead, use
+#' `incomplete_dyads = "drop"`.
 #' When `role` is supplied, stable member roles are resolved across repeated
 #' rows before `missing_role` is applied.
 #'
 #' Dyad composition labels are canonical: role labels are sorted alphabetically
 #' before being combined, so labels do not depend on row or member order.
+#'
+#' @section People observed without their partner:
+#' In longitudinal data, both partners may have a row at every occasion, even
+#' if all of one partner's values are missing at some occasions (only the
+#' identifiers, such as `dyad`, `member`, and `time`, can never be missing).
+#' All these rows are retained. Models including the missing partner
+#' predictors drop these rows unless the missing values are imputed first.
+#' Multiple imputation is usually valid if data are missing at random (MAR).
+#' Dropping rows can require stronger assumptions.
+#'
+#' If a partner did not complete a measurement occasion and has no row for it,
+#' such rows do not have to be added manually. By default, `dyadMLM` assumes
+#' that a partner who appears at least once exists at every occasion at which
+#' their dyad was observed. As in the case above, if only one member has a row
+#' at an occasion, the partner is treated as existing but with missing values
+#' at that occasion (contemporaneous partner predictors are `NA`). The
+#' partner's `cbp` values remain available, because they are computed from the
+#' partner's observed occasions. Lag-1 values do not bridge gaps. Models omit
+#' rows when a predictor used in the model is missing.
+#'
+#' Using `print()` on the prepared data reports how many dyad-occasions have a
+#' row for only one member (where `dyadMLM` assumed the partner exists) and how
+#' many rows miss at least one partner predictor (both cases above).
+#'
+#' If truly no partner *existed* at some of these occasions (for example,
+#' before a relationship began or after a separation or death), or at all
+#' occasions (e.g., when individuals are studied alongside dyads), treating a
+#' partner's values as missing is not meaningful and can bias the model. This
+#' also applies to empty rows kept for a partner who no longer exists, as in
+#' some balanced panel files. In this case, use `partner_exists` to record
+#' whether a partner existed, which sets up two-part predictors (see
+#' `vignette("partner-exists")` for examples).
+#'
+#' Alternatively, to analyze only occasions at which both members were
+#' observed, remove the other occasions before preparing the data, for example:
+#'
+#' ```r
+#' data |> dplyr::filter(dplyr::n() == 2, .by = c(dyad_id, time))
+#' ```
+#'
+#' **Base `partner_exists` on recorded status, not on data presence.** Use a
+#' variable such as relationship status or widowhood. A rule such as
+#' `dplyr::n() == 2` mixes people without a partner with people whose partner
+#' did not take part.
+#'
+#' With `partner_exists`, people observed alone (dyads with one person in the
+#' data) get their own composition and indicator column:
+#'
+#' | Situation | With `role` | Without `role` |
+#' |---|---|---|
+#' | No partner | `singleton_<role>` | `singleton` |
+#' | Partner not in the data | `<role>_x_missing` | `missing_partner` |
+#'
+#' The label stays the same across occasions. `singleton` means no partner at
+#' any observed occasion. A person observed alone who had a partner at some
+#' occasions is labeled as having a partner not in the data. They have no
+#' member contrast and cannot be listed in `pool_compositions` or
+#' `set_exchangeable_compositions`. To
+#' let them share parameters with dyad members, add their indicators in the
+#' model formula, e.g. `I(.is_male_x_male + .is_singleton_male)` for a
+#' variance (in both exchangeable terms, see [recover_exchangeable_covariance()])
+#' or a slope. People without a partner keep their own mean (see
+#' two-part coding below).
+#'
+#' Where no partner existed, numeric partner predictors are set to 0 after
+#' centering, and `.partner_exists` (1 or 0) marks these rows. The status
+#' columns are only added when the status varies (`.partner_exists_lag1` only
+#' with lagged predictors and where the previous status differs from the
+#' current one somewhere). This is two-part coding. **`.partner_exists` (or its two parts, see below) must be included
+#' as a fixed effect.** Otherwise,
+#' the zeros are treated as real partner values, which can bias the partner
+#' effects. Random effects cannot replace it. It can only be left out if fixed
+#' intercepts already separate all rows without a partner, for example
+#' singleton indicators when no dyad has occasions without a partner.
+#'
+#' Lagged partner predictors follow the status at the previous occasion and
+#' pair with `.partner_exists_lag1`. Where known, this column differs from
+#' `.partner_exists` only at the first occasion after a partner is lost or
+#' gained. If no such occasion remains in the model data, it duplicates
+#' `.partner_exists` and can be left out. It stays one column, so its
+#' within-person and between-person associations are combined. Non-numeric
+#' partner predictors cannot be set to 0, so they stop with an error.
+#'
+#' When the status changes over time within a dyad in longitudinal data, the
+#' following columns are added:
+#' * With `temporal_decomposition = "2l"`, `.partner_exists_cwp` and
+#'   `.partner_exists_cbp` split the status into a within-person part (losing
+#'   or gaining a partner) and a between-person part (the person's share of
+#'   occasions with a partner, centered). Include both instead of
+#'   `.partner_exists`. Do not include only the within part (Yaremych,
+#'   Preacher & Hedeker, 2023), unless fixed intercepts already separate the
+#'   statuses.
+#' * `.partner_before_exists` (1 where no partner exists yet, but one does
+#'   later), when both occasions before a relationship and after a loss occur
+#'   (needs a numeric `time`). It lets their means differ (e.g., being single
+#'   versus being widowed).
+#' * With `temporal_decomposition = "2l"`, the partner's usual level is split.
+#'   It still exists after a loss. Setting it to 0
+#'   there would assume that it no longer relates to the outcome. If that is
+#'   wrong, its slope while a partner exists can be biased too. So each
+#'   `.{pred}_cbp_partner` is replaced by one column per partner status, each
+#'   0 outside its status (columns for statuses that do not occur are not
+#'   created):
+#'
+#' | Partner status at the occasion | Column |
+#' |---|---|
+#' | A partner exists | `.{pred}_cbp_partner_when_exists` |
+#' | No partner yet, but one later | `.{pred}_cbp_partner_before_exists` |
+#' | No partner, but one earlier | `.{pred}_cbp_partner_after_exists` |
+#'
+#' Include all of them. The new names show that these columns are not
+#' constant within a person. A usual level that applies but is unknown is
+#' `NA`. People without a partner at any observed occasion have 0 in all of
+#' them and need their own fixed intercepts (e.g., singleton indicators).
+#' Complete dyads without a partner at any occasion (e.g., separated before the
+#' first occasion) need one too, which you create yourself. To
+#' assume one slope for all statuses, use `I()` around their sum. To assume no
+#' association without a partner, use `_when_exists` alone. "Before" and
+#' "after" need a numeric `time`. Otherwise, the usual level is not split, with
+#' a warning.
+#'
+#' Variables that only exist when a partner exists (e.g., ratings of the
+#' partner or the relationship) are usually missing where no partner exists.
+#' Rows without a partner then drop out of models that use them. dyadMLM does
+#' not yet apply two-part coding to such actor variables (#86), but you can do
+#' it yourself after preparing the data. Set their actor columns to 0 where
+#' `.partner_exists` is 0 with `dplyr::if_else()` (multiplying keeps `NA`,
+#' since `0 * NA` is `NA`), and include the status terms as for partner
+#' predictors. Where `.partner_exists` or `.partner_exists_lag1` was not
+#' created (the status did not vary), use the recorded status at the same or
+#' previous occasion (see `vignette("partner-exists")`). In
+#' longitudinal data with status changes, also split their usual level
+#' (`cbp`) by partner status (see `vignette("partner-exists")`).
+#'
+#' When interpreting results:
+#' * `.partner_exists` compares rows with and without a partner at partner
+#'   predictors of 0. It is not "the effect of having a partner", and it mixes
+#'   change over time with differences between people.
+#' * What 0 means depends on the component: the partner's usual level for
+#'   `cwp`, the average person's usual level for `cbp`, the grand mean for
+#'   `gmc`, and the scale's 0 for raw values. Prefer centered components.
+#' * Raw and `gmc` partner values contain the partner's usual level too.
+#'   Setting them to 0 makes the same assumption for that part, and they
+#'   cannot be split. In longitudinal data, prefer the `cwp` and split `cbp`
+#'   columns.
+#' * When the status changes within a person, partner `cwp` values no longer
+#'   average 0 within that person.
+#' * After a separation in which the former partner keeps taking part, their
+#'   usual level includes their occasions after the separation.
+#' * At the first occasion after a separation, lagged partner predictors still
+#'   hold the former partner's value from the previous occasion, by design.
+#'
+#' Each person belongs to one dyad. If `partner_exists` returns to `TRUE` after
+#' `FALSE`, this is treated as the same partner returning. A new partner is not
+#' supported. `partner_exists` cannot yet be combined with DIM or DSM columns.
 #'
 #' @param data A data frame or tibble. Data must be in long format. For
 #' cross-sectional dyadic data, each observed member of each dyad has one row.
@@ -94,20 +254,56 @@
 #'   exchangeable compositions can be pooled. Each pool must contain at least
 #'   two distinct observed compositions after composition references are
 #'   resolved.
-#' @param incomplete_dyads How to handle dyads with fewer than two unique
-#'   members across all rows in `data`. `"error"` stops with an error and
-#'   `"drop"` removes the entire dyad. A dyad with more than two unique members
-#'   is invalid and always causes an error, regardless of this setting.
+#' @param incomplete_dyads How to handle people observed alone (a `dyad` with
+#'   only one person across all rows in `data`) when `partner_exists` is not
+#'   supplied. It is then unclear whether their partner exists but did not take
+#'   part, or whether they have no partner. `"error"` (default) stops and
+#'   explains how to use `partner_exists`. `"drop"` removes these dyads. With
+#'   `partner_exists`, everyone observed alone is kept and `"drop"` is not
+#'   allowed. A dyad with more than two unique members always causes an error.
 #' @param missing_role How to handle dyads in which at least one member has no
 #'   non-missing `role` value on any row. A consistent non-missing role observed
 #'   for a member is propagated to that member's other rows before this policy
 #'   is applied. `"error"` stops with an error and `"drop"` removes the entire
 #'   dyad. Conflicting non-missing roles always cause an error. Ignored when no
 #'   `role` column is supplied.
+#' @param partner_exists Optional. Decides how people (or occasions of
+#'   people) observed without a partner are prepared. The options are:
+#'   * `NULL` (default): people observed alone (across all occasions) cause an
+#'     error with `incomplete_dyads = "error"` (default), or are removed with
+#'     `incomplete_dyads = "drop"`. In longitudinal data, a partner who
+#'     appears at least once is assumed to exist at every occasion of the dyad
+#'     and to be just not observed at the others. These occasions are kept.
+#'   * `TRUE` or `FALSE`: is ignored for complete dyads and describes
+#'     **everyone** observed alone. `TRUE` means that everyone's partner exists
+#'     but did not take part. This is appropriate if the sample includes only
+#'     persistent dyads. `FALSE` means that all people observed alone have no
+#'     partner. This is appropriate if everyone observed alone is an individual
+#'     studied alone (not having an unobserved partner), and thus modeling them
+#'     as half a dyad is inappropriate. Occasions at which a partner in a
+#'     complete dyad has no row are still treated as the partner existing but
+#'     not observed. To mark such occasions as "no partner exists", use a
+#'     column.
+#'   * A column name (quoted or not) or an expression evaluated in `data` (for
+#'     example `partnered` or `!widowed`) that is TRUE/FALSE or 1/0 **for each
+#'     row**.
+#'     This can be used if some individuals have an unobserved partner, and
+#'     others have no partner. It can also be used to mark individuals
+#'     changing status over time.
+#'
+#'   Missing values in the column are not allowed. When both members have a
+#'   row at the same occasion, their values must agree (e.g., both members
+#'   need to be partnered, or both need to be not partnered, which can cover
+#'   partners splitting up but still taking part in the same study). Where no
+#'   partner existed, numeric partner predictors are set to 0, and
+#'   `.partner_exists` is added when the status varies (two-part coding). See
+#'   the section "People observed without their partner" below for more
+#'   information.
 #' @param seed Optional seed for random `.member_contrast_*` sign assignment.
 #'   If `NULL`, the current R session's RNG state is used.
 #' @param short_colnames Whether to use shorter composition-dependent generated
-#'   column names when the final data contain one composition. The default `TRUE`
+#'   column names when the final data contain one composition of dyads. The
+#'   default `TRUE`
 #'   omits the redundant composition label from `.is_*` and
 #'   `.member_contrast_*` names. `FALSE` always retains composition-qualified
 #'   names. Other generated column names are unaffected.
@@ -140,6 +336,9 @@
 #'   `dsm_role_order` when applicable. The `generated_columns` table records each
 #'   package-generated column retained in the returned data. Modifying prepared
 #'   data does not automatically regenerate package-generated columns.
+#'
+#' @seealso The vignette [People Observed Without Their Partner](https://pascal-kueng.github.io/dyadMLM/articles/partner-exists.html)
+#'   shows models combining dyads and people observed alone.
 #'
 #' @examples
 #' data <- data.frame(
@@ -212,6 +411,7 @@ prepare_dyad_data <- function(
     pool_compositions = NULL,
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
+    partner_exists = NULL,
     seed = NULL,
     short_colnames = TRUE,
     include_arbitrary_member_contrast = FALSE,
@@ -253,7 +453,8 @@ prepare_dyad_data <- function(
     dsm_role_order = dsm_role_order,
     temporal_decomposition = temporal_decomposition,
     incomplete_dyads = incomplete_dyads,
-    missing_role = missing_role
+    missing_role = missing_role,
+    partner_exists = {{ partner_exists }}
   )
 
   if (add_apim_gmc_predictors) {
@@ -338,6 +539,8 @@ prepare_dyad_data <- function(
   # Add model cols
   if ("apim" %in% model_types) {
     out <- add_actor_partner_columns(out)
+    # Partner predictors are 0 where no partner existed (after centering).
+    out <- apply_two_part_coding(out)
   }
 
   if ("dim" %in% model_types) {
@@ -351,6 +554,10 @@ prepare_dyad_data <- function(
   if (attr(out, "dyadMLM")$longitudinal) {
     out <- restore_observed_dyad_rows(out)
   }
+
+  # The temporary partner status columns are only needed during preparation.
+  out[[dyad_partner_exists_col]] <- NULL
+  out[[dyad_partner_exists_lag1_col]] <- NULL
 
   return(out)
 }
