@@ -168,7 +168,7 @@ The within check is related to repeated-measures correlation
 (Bakdash & Marusich, 2017).
 
 The \href{https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html}{longitudinal study}
-examines detection and false alarms.
+examines detection, false alarms, and consequences for inference.
 
 Known limitations and caveats:
 \itemize{

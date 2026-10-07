@@ -65,6 +65,7 @@ articles:
   - articles/partner-dependence-simulation
   - articles/covariance-pooling
   - articles/ild-partner-dependence
+  - articles/model-simplification
 
 reference:
 - title: Main functions

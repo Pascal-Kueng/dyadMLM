@@ -10,6 +10,8 @@ output:
 params:
   gaussian_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/covariance-pooling"
   generalized_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/generalized-covariance-pooling"
+  fallback_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/model-simplification-fallback"
+  nb2_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/model-simplification-nb2"
 ---
 
 ```{r setup, include=FALSE}
@@ -40,6 +42,8 @@ fits <- bind_rows(read_results(params$gaussian_directory, "fits.csv") |> mutate(
   read_results(params$generalized_directory, "fits.csv"))
 response_settings <- read_results(params$generalized_directory, "settings.csv")
 screening <- read_results(params$generalized_directory, "screening.csv")
+nb2_available <- all(file.exists(file.path(params$nb2_directory,
+  paste0(c("conditions", "fits", "inference", "selection", "flags"), ".csv"))))
 
 families <- tibble::tribble(
   ~family, ~label,
@@ -92,8 +96,10 @@ of correctly pooled datasets, and no more than
 `r percent_range(summarise(filter(small_sample, scenario != "Correct pooling"), rate = max(rate), .by = family)$rate)`
 of wrongly pooled ones, depending on the family. So a flag or its absence says little.
 
-Use model comparison when both models can be fitted. The checks show where a
-simpler model misfits and still work when the full model cannot be fitted.
+Use model comparison when both models fit reliably and the comparison is valid.
+The checks can reveal mismatches in a simpler model even when the full model
+cannot be fitted. Neither a nonsignificant comparison nor an absent flag shows
+that the simpler model gives adequate coefficient inference.
 Checking all dyads together (`role = NULL`) rarely flagged anything: at most
 `r scales::percent(max(summary$rate[summary$method == "overall"], na.rm = TRUE), accuracy = 1)`
 in any condition.
@@ -129,6 +135,246 @@ the [plot code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic
 and the [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md).
 
 </details>
+
+## When the full model is unavailable
+
+The method-comparison plots below use the same datasets for each method. That
+paired subset leaves out many failed full fits. This separate reaggregation
+retains **all usable simpler-model checks**, including those datasets.
+
+```{r fallback-availability}
+fallback_rates <- read_results(params$fallback_directory, "rates.csv")
+fallback_totals <- read_results(params$fallback_directory, "totals.csv")
+fallback_totals |>
+  summarise(Attempted = sum(attempted), Checked = sum(checks_defined),
+    `Simpler fit only` = sum(pooled_only), .by = family) |>
+  left_join(fallback_rates |> filter(full_fit == "all", scenario == "null") |>
+    summarise(`Flags under correct pooling` = percent_range(rate), .by = family),
+    by = "family") |>
+  mutate(Family = families$label[match(family, families$family)], .before = 1) |>
+  select(-family) |> knitr::kable()
+```
+
+The last column gives the range across 40, 100 and 400 dyads; it counts any of
+14 summaries. These are the original saved quantile flags, not a new validation
+of the later rank limits. Full-fit availability here uses the original saved fitting criteria. Failed
+simpler fits and unavailable checks remain in the attempted counts, but do not
+contribute to flag-rate denominators.
+
+```{r fallback-selection, results='asis'}
+example <- fallback_rates |>
+  filter(family == "poisson", n_dyads == 100, scenario == "null")
+show_rate <- function(group) {
+  row <- filter(example, full_fit == group)
+  sprintf("%s/%s (%.1f%%; 95%% interval %.1f–%.1f%%)", row$flagged, row$checked,
+    100 * row$rate, 100 * row$lower, 100 * row$upper)
+}
+cat(sprintf("For example, with 100 Poisson dyads and correct pooling, the simpler model flagged in **%s** of datasets where the full fit was unusable, versus **%s** where it was usable. Across both groups the rate was **%s**.\n\n",
+  show_rate("unusable"), show_rate("usable"), show_rate("all")))
+```
+
+Full-fit failure selects a subset of datasets. Differences between these groups
+are therefore descriptive, not effects caused by convergence failure. The saved
+records contain no scientific coefficient estimates, so this reaggregation
+does not establish whether simplification preserves significance or coverage.
+
+Covariance pooling also does not establish full exchangeability: both fitted
+models retain role- and composition-specific means and slopes. An unrestricted
+cross-sectional ordinal latent covariance with freely estimated thresholds has a scale
+identification problem; these results do not justify fitting that model or
+interpreting its failure as evidence for pooling.
+
+```{asis, echo=nb2_available}
+## A difficult NB2 fallback case
+
+A separate study uses negative-binomial outcomes with size 3, 100 or 400 dyads,
+and correct pooling, a latent SD ratio of 1.5, or correlations of -0.1, 0.3 and
+0.7 across compositions. Both fitted models retain the correct role-specific
+means and slopes. The female actor effect in female-male dyads is truly zero;
+the other three prespecified scientific effects are nonzero.
+These are conditional log-link coefficients. With unequal latent variances,
+the role-intercept contrast is not the marginal difference in mean outcomes.
+
+We compare always using the pooled model, always using the full model, using the
+full model when available with a pooled fallback, and likelihood-ratio selection
+at .05. Selection uses the sole usable model if the other fit fails. If neither
+fit is usable, or both fit but their comparison is undefined, LRT selection
+returns no inference. The known generating effects determine coverage; a usable
+full fit is not treated as the truth.
+A full fit whose log-likelihood is more than 0.000001 below its usable nested
+pooled fit is also excluded: reported convergence alone is insufficient.
+Its original numerical status and estimates remain saved.
+```
+
+```{r nb2-data, eval=nb2_available, results='asis'}
+nb2_conditions <- read_results(params$nb2_directory, "conditions.csv")
+nb2_fits <- read_results(params$nb2_directory, "fits.csv") |>
+  left_join(nb2_conditions, by = "condition")
+nb2_inference <- read_results(params$nb2_directory, "inference.csv") |>
+  left_join(nb2_conditions, by = "condition")
+nb2_flags <- read_results(params$nb2_directory, "flags.csv") |>
+  left_join(nb2_conditions, by = "condition")
+nb2_selection <- read_results(params$nb2_directory, "selection.csv") |>
+  left_join(nb2_conditions, by = "condition")
+nb2_pilot <- any(nb2_conditions$repetitions < 500)
+cat(sprintf("The output contains %s fit attempts across six conditions, with %s datasets per condition and %s reference simulations per usable pooled fit.\n\n",
+  sum(nb2_fits$attempted), unique(nb2_conditions$repetitions),
+  unique(nb2_conditions$reference_draws)))
+if (nb2_pilot) cat("**These are pilot results for checking the workflow; they do not establish error rates or justify a fallback recommendation.**\n\n")
+nb2_fits |> mutate(Setting = unname(scenario_labels[scenario]),
+    Result = paste0(eligible_n, "/", attempted)) |>
+  select(Dyads = n_dyads, Setting, model, Result) |>
+  tidyr::pivot_wider(names_from = model, values_from = Result) |>
+  knitr::kable(caption = "Eligible fits / attempted fits (including the likelihood check)") |> print()
+```
+
+```{asis, echo=nb2_available && !nb2_pilot}
+- **Pooling recovered many analyses, but did not ensure accurate inference.**
+  The full model was eligible in 1,793/3,000 datasets, the pooled model in
+  2,921/3,000, and full-then-pooled fallback returned 2,978/3,000. There were
+  1,081 full-model optimizer or Hessian failures and 126 further exclusions for
+  worse nested likelihoods. These numerical problems do not alone establish
+  structural nonidentifiability.
+- **Unequal latent SDs could bias the role contrast.** At 400 dyads and an SD
+  ratio of 1.5, pooled-model bias was +0.092 for the true conditional contrast
+  of 0.6. Its 95% intervals covered the truth in 89.3% of usable fits (95%
+  Monte Carlo interval 86.3–91.8%). Full-then-pooled and LRT selection gave
+  94.2% and 92.2% coverage. These use each procedure's available datasets;
+  among the same 290 datasets with both models eligible, pooling reduced
+  coverage by 8.3 percentage points (95% Monte Carlo interval 4.6–12.0).
+- **Quiet diagnostics did not certify a safe fallback.** In that same condition,
+  the 207 datasets needing a pooled fallback had 90.3% coverage (85.5–93.7%).
+  Dependence, residual and outcome checks flagged only 34.3%, 33.8% and 26.6%
+  of this group, respectively. This grouping describes numerical availability;
+  it is not a causal comparison or an analysis restricted to unflagged datasets.
+- **LRT selection also needs caution.** With correct pooling at 400 dyads,
+  the nominal .05 LRT rejected in 50/306 datasets with both fits eligible:
+  16.3% (12.6–20.9%). This is conditional on numerical eligibility, not an
+  unconditional test-size estimate. The nominal .05 threshold did not yield
+  5% rejection in this selected subset.
+```
+
+```{asis, echo=nb2_available}
+<details>
+<summary>Returned inferences and selected models</summary>
+```
+
+```{r nb2-selection, eval=nb2_available}
+nb2_selection |>
+  summarise(Attempted = sum(datasets), Returned = sum(datasets[available]),
+    Full = sum(datasets[selected_model == "full"], na.rm = TRUE),
+    Pooled = sum(datasets[selected_model == "pooled"], na.rm = TRUE),
+    .by = c(n_dyads, scenario, policy)) |>
+  mutate(Setting = unname(scenario_labels[scenario])) |>
+  select(Dyads = n_dyads, Setting, Rule = policy, Attempted, Returned, Full, Pooled) |>
+  knitr::kable()
+```
+
+```{asis, echo=nb2_available}
+</details>
+```
+
+```{asis, echo=nb2_available}
+The figure shows false positives for the true-zero female actor effect, using
+all returned usable estimates. Error bars are 95% Wilson intervals. Returned
+denominators and failure counts must be read with the rates: unavailable
+inference is not counted as a correct decision.
+```
+
+```{r nb2-null, eval=nb2_available, fig.height=5.5, fig.alt="False positives for a true-zero female actor effect under four model-choice procedures, by sample size and covariance restriction."}
+nb2_methods <- c(policy_pooled = "Pooled", policy_full = "Full",
+  policy_full_then_pooled = "Full, then pooled", policy_lrt_05 = "LRT .05")
+nb2_inference |>
+  filter(parameter == "female_actor_null", method %in% names(nb2_methods)) |>
+  mutate(Rule = factor(method, names(nb2_methods), nb2_methods),
+    Setting = factor(scenario, c("null", "variance_large", "correlation_large"),
+      c("Correct pooling", "SD ratio 1.5", "Correlations -0.1 / 0.3 / 0.7")),
+    Dyads = paste(n_dyads, "dyads")) |>
+  ggplot2::ggplot(ggplot2::aes(rejection, Rule, colour = Rule)) +
+  ggplot2::geom_vline(xintercept = .05, linetype = 2, colour = "grey55") +
+  ggplot2::geom_errorbar(ggplot2::aes(xmin = rejection_lower, xmax = rejection_upper),
+    orientation = "y", width = .15) + ggplot2::geom_point(size = 2) +
+  ggplot2::facet_grid(Dyads ~ Setting) +
+  ggplot2::scale_x_continuous(labels = scales::label_percent(), limits = c(0, NA)) +
+  ggplot2::scale_colour_manual(values = c("#D55E00", "#333333", "#009E73", "#0072B2")) +
+  ggplot2::labs(x = "Null effects declared significant", y = NULL,
+    caption = if (nb2_pilot) "Pilot only: these rates do not establish calibration." else NULL) +
+  ggplot2::theme_bw(base_size = 11) + ggplot2::theme(legend.position = "none")
+```
+
+```{asis, echo=nb2_available}
+Pooled-model diagnostics below use the same reference bank for dependence,
+residual and outcome checks. Each rate counts any panel within that check;
+these unions do not have a joint 5% error rate. The saved tables also separate
+individual panels and datasets with eligible or ineligible full fits.
+```
+
+```{r nb2-diagnostics, eval=nb2_available}
+nb2_flags |> filter(scope == "union", full_fit == "all") |>
+  mutate(Setting = unname(scenario_labels[scenario]),
+    Result = sprintf("%s/%s (%.1f%%)", flagged_n, checked, 100 * rate)) |>
+  select(Dyads = n_dyads, Setting, check, Result) |>
+  tidyr::pivot_wider(names_from = check, values_from = Result) |> knitr::kable()
+```
+
+```{asis, echo=nb2_available}
+<details>
+<summary>Inference for all four scientific targets</summary>
+
+These summaries use every returned usable estimate from each procedure, without conditioning on
+the presence or absence of a flag. Coverage and rejection percentages use the
+returned estimates as their denominator. The saved policy tables retain every
+attempt and its selected model, including cases with no inference.
+```
+
+```{r nb2-inference, eval=nb2_available}
+nb2_inference |> filter(primary, grepl("^policy_", method)) |>
+  mutate(Setting = unname(scenario_labels[scenario])) |>
+  arrange(n_dyads, scenario, parameter, method) |>
+  transmute(Dyads = n_dyads, Setting, Target = parameter,
+    Rule = sub("policy_", "", method), Available = paste(available_n, attempted, sep = "/"),
+    Bias = round(bias, 3), `SE ratio` = round(se_ratio, 2),
+    `Coverage (%)` = round(100 * coverage, 1), `Rejection (%)` = round(100 * rejection, 1)) |>
+  knitr::kable()
+```
+
+```{asis, echo=nb2_available}
+</details>
+
+```
+
+```{asis, echo=nb2_available && file.exists(file.path(params$nb2_directory, "paired-inference.csv"))}
+<details>
+<summary>Paired sensitivity: coverage changes relative to the full model</summary>
+
+These secondary comparisons use only datasets where both models were eligible.
+They describe a selected subset, not the datasets requiring fallback. Changes
+are percentage points; brackets show approximate 95% Monte Carlo intervals
+using paired per-dataset differences. Full-then-pooled equals full in this subset.
+```
+
+```{r nb2-paired, eval=nb2_available && file.exists(file.path(params$nb2_directory, "paired-inference.csv"))}
+read_results(params$nb2_directory, "paired-inference.csv") |>
+  left_join(nb2_conditions, by = "condition") |>
+  filter(method %in% c("policy_pooled", "policy_lrt_05")) |>
+  mutate(Setting = unname(scenario_labels[scenario]),
+    Change = sprintf("%+.1f [%+.1f, %+.1f]", 100 * paired_coverage_difference,
+      100 * paired_coverage_lower, 100 * paired_coverage_upper)) |>
+  select(Dyads = n_dyads, Setting, Target = parameter, Rule = method,
+    n = paired_n, `Coverage change` = Change) |>
+  knitr::kable()
+```
+
+```{asis, echo=nb2_available && file.exists(file.path(params$nb2_directory, "paired-inference.csv"))}
+</details>
+```
+
+```{asis, echo=nb2_available}
+This is a bounded check of one difficult count family. It does not validate
+unidentified ordinal structures, full exchangeability of means and slopes, or
+selection over many alternative role definitions. An absent flag still does not
+establish that the simpler model gives adequate inference.
+```
 
 ```{r family-results, results='asis', fig.alt=figure_descriptions}
 for (family_index in seq_len(nrow(families))) {

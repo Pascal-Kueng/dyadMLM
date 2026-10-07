@@ -1,7 +1,7 @@
 # ILD partner-dependence check: plan
 
-Status: implemented as planned in §4, 2026-09-29, plus a role check; validation
-(§7) completed on 2026-09-30.
+Status: implemented as planned in §4, 2026-09-29, plus a role check; validation and
+the consequences supplement (§7) completed on 2026-09-30.
 **(decided)** marks the author's decisions. Lag and AR checks are a separate
 later PR.
 
@@ -178,6 +178,21 @@ calibration. A short pilot checks the workflow before the full run. Run from a
 fixed checkout, save source/version information, and resume only matching
 checkpoints. See the [run instructions](simulation-studies/README.md#longitudinal-partner-dependence-checks)
 and [report](../../vignettes/articles/ild-partner-dependence.Rmd).
+
+A separate [supplement](simulation-studies/ild-partner-dependence/consequences.R)
+relates detection to inference in 24 Gaussian settings: 50/200 dyads and 14
+complete occasions, separately varying stable correlation (0, .1, .2, .4),
+occasion correlation (0, .1, .2, .3), or occasion SD ratio (1, 1.1, 1.25, 1.5).
+Other parameters keep the Gaussian baseline; average occasion variance stays
+1.04. With fresh seeds, 500 datasets and 1,000 reference simulations, each dataset
+fits the full model and matching restriction; only the restricted model is
+simulated. Record bias, empirical SD, mean SE, their ratio and 95% Wald coverage
+with Monte Carlo SEs for actor/partner slopes, the average role intercept and
+their difference. Use the coefficient covariance matrix for the intercept
+contrasts. Put these results beside flag rates and retain fitting failures.
+The common slopes combine between- and within-member associations; the intercept
+contrasts also assess consequences of stable covariance. These limited Gaussian
+comparisons do not make an absent flag evidence of adequate inference.
 
 ## 8. Evidence and review log
 

@@ -9,6 +9,7 @@ output:
     self_contained: true
 params:
   output_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/ild-partner-dependence"
+  consequences_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/ild-partner-dependence-consequences"
 ---
 
 ```{r setup, include=FALSE}
@@ -35,6 +36,8 @@ rate_interval <- function(rate, lower, upper) {
 }
 study_theme <- theme_bw(base_size = 12) + theme(legend.position = "bottom")
 is_pilot <- any(cells$repetitions < 500 | cells$reference_draws < 1000)
+consequences_available <- all(file.exists(file.path(params$consequences_directory,
+  c("conditions.csv", "inference.csv", "flags.csv", "figures.csv", "fits.csv"))))
 ```
 
 ## What the study checks
@@ -193,6 +196,207 @@ if (!is_pilot) {
     100 * min(sd_rows$rate), 100 * max(sd_rows$rate)))
 }
 ```
+
+```{asis, echo=consequences_available}
+## Detection and consequences for inference
+
+This separate Gaussian supplement varies one feature at a time: stable partner
+correlation, occasion partner correlation, or the ratio of occasion SDs. It uses
+50/200 dyads and 14 complete occasions, keeps average occasion variance at 1.04,
+and fits both the full model and the matching restriction. Other parameters keep
+the main Gaussian values. Fresh datasets are independent of the main study.
+
+The curves show the restricted model's flag rate for the statistic targeted by
+each restriction: between partner correlation, within partner correlation, or
+within correlation between the partner average and half-difference. Brackets
+are 95% Wilson intervals.
+```
+
+```{r consequence-results, eval=consequences_available, results='asis'}
+read_consequences <- function(filename) read.csv(file.path(params$consequences_directory, filename))
+consequence_conditions <- read_consequences("conditions.csv")
+consequence_inference <- read_consequences("inference.csv") |>
+  left_join(consequence_conditions, by = "condition")
+consequence_flags <- read_consequences("flags.csv") |>
+  left_join(consequence_conditions, by = "condition")
+consequence_fits <- read_consequences("fits.csv")
+paired_available <- file.exists(file.path(params$consequences_directory, "paired-inference.csv"))
+if (paired_available) consequence_pairs <- read_consequences("paired-inference.csv") |>
+  left_join(consequence_conditions, by = "condition")
+axis_labels <- c(stable_cor = "Stable correlation", occasion_cor = "Occasion correlation",
+  occasion_sd_ratio = "Occasion SD ratio")
+cat(sprintf("The supplement targets %s datasets per condition and %s reference simulations per restricted fit.\n\n",
+  unique(consequence_conditions$repetitions), unique(consequence_conditions$reference_draws)))
+if (any(consequence_conditions$repetitions < 500 | consequence_conditions$reference_draws < 1000))
+  cat("**These supplement results are a pilot; they do not establish detection or coverage rates.**\n\n")
+```
+
+```{r consequence-detection, eval=consequences_available, fig.height=3.5, fig.alt="Restricted-model flag rates as stable correlation, occasion correlation or occasion SD ratio increases, at 50 and 200 dyads."}
+targeted_consequence_flags <- consequence_flags |>
+  filter(fits == "usable", rule == "rank",
+    (axis == "stable_cor" & level == "between" & statistic == "partner_cor") |
+    (axis == "occasion_cor" & level == "within" & statistic == "partner_cor") |
+    (axis == "occasion_sd_ratio" & level == "within" & statistic == "average_difference_cor")) |>
+  mutate(Axis = factor(axis, names(axis_labels), axis_labels), Dyads = factor(n_dyads))
+targeted_consequence_flags |>
+  ggplot(aes(strength, rate, colour = Dyads, group = Dyads)) +
+  geom_hline(yintercept = 0.05, linetype = 2, colour = "grey55") +
+  geom_line() + geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.02) +
+  geom_point(size = 2) + facet_wrap(~ Axis, scales = "free_x") +
+  scale_y_continuous(labels = scales::label_percent(), limits = c(0, 1)) +
+  scale_colour_manual(values = c("#0072B2", "#D55E00")) +
+  labs(x = "True value", y = "Datasets with a row flag") + study_theme
+```
+
+```{asis, echo=consequences_available}
+The table shows the largest mismatch on each axis at 200 dyads. Each entry gives
+the **full / restricted** result over each model's usable estimates. **SE ratio**
+is the mean model SE divided by the SD of estimates across
+datasets; **coverage** is the percentage of 95% Wald intervals containing the
+true value. Bias, SE accuracy and coverage measure different consequences of a
+restriction. The role difference is female minus male; its SE and the average
+intercept's SE use the coefficient covariance matrix. The three endpoint
+conditions have the same generating values and full model, with independent
+simulation seeds. Differences between their full-model results therefore reflect
+Monte Carlo variation.
+```
+
+```{r consequence-inference, eval=consequences_available}
+consequence_parameters <- c(x_actor = "Actor slope", x_partner = "Partner slope",
+  role_average_intercept = "Average intercept", role_difference = "Role difference")
+endpoint_inference <- consequence_inference |>
+  filter(sample == "usable", n_dyads == 200) |>
+  filter(strength == max(strength), .by = axis)
+endpoint_inference |>
+  select(axis, parameter, fit, n, bias, se_ratio, coverage) |>
+  tidyr::pivot_wider(names_from = fit, values_from = c(n, bias, se_ratio, coverage)) |>
+  arrange(match(axis, names(axis_labels)), match(parameter, names(consequence_parameters))) |>
+  transmute(Setting = axis_labels[axis], Parameter = consequence_parameters[parameter],
+    Estimates = paste(n_full, n_restricted, sep = " / "),
+    Bias = sprintf("%.3f / %.3f", bias_full, bias_restricted),
+    `SE ratio` = sprintf("%.2f / %.2f", se_ratio_full, se_ratio_restricted),
+    `Coverage (%)` = sprintf("%.1f / %.1f", 100 * coverage_full, 100 * coverage_restricted)) |>
+  knitr::kable()
+```
+
+```{r consequence-precision, eval=consequences_available, results='asis'}
+cat(sprintf("Coverage Monte Carlo SEs in this table range from %.1f to %.1f percentage points. The saved tables retain all strengths, sample sizes, denominators, fitting failures and Monte Carlo SEs.\n\n",
+  100 * min(endpoint_inference$coverage_mcse), 100 * max(endpoint_inference$coverage_mcse)))
+consequence_availability <- consequence_fits |>
+  summarise(usable = sum(usable), attempted = sum(attempted), .by = fit)
+cat(paste0("Across all supplement settings, usable fits were ", paste0(
+  consequence_availability$usable, "/", consequence_availability$attempted, " (",
+  consequence_availability$fit, ")", collapse = " and "),
+  ". Flag rates use restricted usable fits. A saved sensitivity comparison uses only datasets where both models supplied usable estimates.\n\n"))
+```
+
+```{r consequence-paired, eval=consequences_available && paired_available, results='asis'}
+cat("Paired changes below compare restricted minus full coverage on the same datasets, using pairs where both fits and all four estimates are usable. Monte Carlo SEs use the variation of each dataset's coverage difference, so they account for pairing. Negative values mean lower coverage under the restriction.\n\n")
+consequence_pairs |>
+  filter(n_dyads == 200) |> filter(strength == max(strength), .by = axis) |>
+  arrange(match(axis, names(axis_labels)), match(parameter, names(consequence_parameters))) |>
+  transmute(Setting = axis_labels[axis], Parameter = consequence_parameters[parameter],
+    Pairs = n, `Coverage change (percentage points)` = round(100 * coverage_change, 1),
+    `Monte Carlo SE` = round(100 * coverage_change_mcse, 2)) |>
+  knitr::kable() |> print()
+```
+
+```{asis, echo=consequences_available}
+Smaller omitted stable correlations show why detection and inferential
+consequences should be read together. This table follows the average role
+intercept across the whole correlation grid; SE ratios and coverage again give
+**full / restricted** values.
+```
+
+```{r stable-correlation-gradient, eval=consequences_available}
+stable_gradient <- consequence_inference |>
+  filter(sample == "usable", axis == "stable_cor", parameter == "role_average_intercept") |>
+  select(condition, strength, n_dyads, fit, se_ratio, coverage) |>
+  tidyr::pivot_wider(names_from = fit, values_from = c(se_ratio, coverage)) |>
+  left_join(select(filter(targeted_consequence_flags, axis == "stable_cor"),
+    condition, rate, checked), by = "condition") |>
+  arrange(n_dyads, strength)
+stable_gradient |>
+  transmute(Dyads = n_dyads, `Stable correlation` = strength,
+    `Flagged (%)` = round(100 * rate, 1),
+    `SE ratio` = sprintf("%.2f / %.2f", se_ratio_full, se_ratio_restricted),
+    `Coverage (%)` = sprintf("%.1f / %.1f", 100 * coverage_full, 100 * coverage_restricted)) |>
+  knitr::kable()
+```
+
+```{r consequence-findings, eval=consequences_available, results='asis'}
+if (all(consequence_conditions$repetitions >= 500 & consequence_conditions$reference_draws >= 1000)) {
+  modest_stable <- stable_gradient |> filter(n_dyads == 50, strength == 0.2)
+  strongest_stable <- stable_gradient |> filter(n_dyads == 200, strength == 0.4)
+  small_sd_flags <- targeted_consequence_flags |>
+    filter(axis == "occasion_sd_ratio", n_dyads == 200, strength == 1.1)
+  small_sd_inference <- consequence_inference |>
+    filter(sample == "usable", fit == "restricted", axis == "occasion_sd_ratio",
+      n_dyads == 200, strength == 1.1)
+  cat(sprintf("With 50 dyads and stable correlation 0.2, only **%.1f%%** of datasets flagged, while coverage for the average intercept was **%.1f%%** under the restriction and **%.1f%%** under the full model. Larger stable correlations increasingly affected SEs for this intercept; the common actor/partner slopes were much less affected.\n\n",
+    100 * modest_stable$rate, 100 * modest_stable$coverage_restricted,
+    100 * modest_stable$coverage_full))
+  if (paired_available) {
+    modest_pair <- consequence_pairs |> filter(condition == modest_stable$condition,
+      parameter == "role_average_intercept")
+    strongest_pair <- consequence_pairs |> filter(condition == strongest_stable$condition,
+      parameter == "role_average_intercept")
+    cat(sprintf("The paired coverage loss at stable correlation 0.2 was **%.1f percentage points** (Monte Carlo SE **%.2f**). At 200 dyads and correlation 0.4, coverage was **%.1f%% / %.1f%%**, a paired loss of **%.1f points** (Monte Carlo SE **%.2f**).\n\n",
+      -100 * modest_pair$coverage_change, 100 * modest_pair$coverage_change_mcse,
+      100 * strongest_stable$coverage_full, 100 * strongest_stable$coverage_restricted,
+      -100 * strongest_pair$coverage_change, 100 * strongest_pair$coverage_change_mcse))
+  }
+  endpoint_coverage <- endpoint_inference |>
+    filter(fit == "full", parameter == "role_average_intercept")
+  cat(sprintf("Across the three independently simulated endpoint conditions with the same full model, average-intercept coverage ranged from **%.1f%% to %.1f%%**. These estimates have Monte Carlo uncertainty; they neither prove systematic undercoverage nor rule out a small shortfall.\n\n",
+    100 * min(endpoint_coverage$coverage), 100 * max(endpoint_coverage$coverage)))
+  cat(sprintf("An occasion SD ratio of 1.1 flagged in **%.1f%%** of datasets at 200 dyads, while restricted-model coverage across the four estimates remained **%.1f–%.1f%%**, with SE ratios **%.2f–%.2f**. Interpret the flags alongside these inference summaries; the results do not establish that this restriction is harmless for other analyses.\n\n",
+    100 * small_sd_flags$rate, 100 * min(small_sd_inference$coverage),
+    100 * max(small_sd_inference$coverage), min(small_sd_inference$se_ratio),
+    max(small_sd_inference$se_ratio)))
+  slope_widths <- consequence_inference |>
+    filter(sample == "paired", axis == "occasion_sd_ratio", strength == 1.5,
+      parameter %in% c("x_actor", "x_partner")) |>
+    select(condition, parameter, fit, mean_se) |>
+    tidyr::pivot_wider(names_from = fit, values_from = mean_se) |>
+    mutate(increase = 100 * (restricted / full - 1))
+  cat(sprintf("At an occasion SD ratio of 1.5, pooling SDs made common-slope intervals **%.1f–%.1f%% wider on average** across the two sample sizes. This is a loss of precision for these targets, not a general consequence for every estimate.\n\n",
+    min(slope_widths$increase), max(slope_widths$increase)))
+}
+```
+
+```{asis, echo=consequences_available}
+The common slopes combine between- and within-member associations; they are not
+separate effects at those levels. Intercept contrasts also show consequences of
+stable covariance. These results concern the selected Gaussian estimates and
+intervals, with predictors independent between partners. A flag alone does not establish a practically important error, and an
+absent flag does not establish adequate inference.
+```
+
+## Using the checks when simplifying a model
+
+First check that the candidate model is identifiable and has fitted reliably.
+Then inspect the response distributions, partner dependence and, for repeated
+data, serial dependence. When both candidate models fit reliably, compare the
+scientific estimates, SEs and intervals you intend to report. A valid nested-model
+comparison can add evidence about the restriction; a nonsignificant result does
+not show that its consequences are negligible.
+
+These response summaries remain available when a more flexible latent covariance
+model cannot be estimated. They can reveal a mismatch in a simpler model, but
+cannot establish that its latent structure or coefficient inference is adequate.
+The studies above compare fixed model choices, not a procedure that selects a
+model after inspecting its checks.
+A separate [Gaussian selection study](model-simplification.html) evaluates
+such procedures. The dependence checks missed omitted random slopes that
+substantially increased false positives, so a quiet check does not justify
+removing arbitrary random effects.
+
+Roles can describe any meaningful, stable categories, such as caregiver and
+patient. Each member must retain the same role within their dyad. Choosing many
+role definitions after seeing the results creates additional comparisons.
+Pooling covariance is also narrower than full exchangeability: equal role means
+and equal actor and partner slopes across roles need separate justification.
 
 ## Serial dependence and lagged outcomes
 

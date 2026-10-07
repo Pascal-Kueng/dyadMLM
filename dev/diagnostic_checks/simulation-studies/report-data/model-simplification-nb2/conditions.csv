@@ -1,0 +1,7 @@
+"n_dyads","scenario","sd_ratio","correlation_difference","allocation","condition","female_female_dyads","male_male_dyads","female_male_dyads","original_condition","repetitions","reference_draws"
+100,"correlation_large",1,0.4,"balanced",1,33,33,34,11,500,1000
+100,"null",1,0,"balanced",2,33,33,34,13,500,1000
+100,"variance_large",1.5,0,"balanced",3,33,33,34,14,500,1000
+400,"correlation_large",1,0.4,"balanced",4,133,133,134,21,500,1000
+400,"null",1,0,"balanced",5,133,133,134,23,500,1000
+400,"variance_large",1.5,0,"balanced",6,133,133,134,24,500,1000

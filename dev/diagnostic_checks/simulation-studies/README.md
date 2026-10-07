@@ -10,6 +10,7 @@ Public report sources stay in `vignettes/articles/`.
 | [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [ild-partner-dependence](ild-partner-dependence/run.R) | Member-mean and same-occasion checks under correct and restricted longitudinal models | [Full report](../../../vignettes/articles/ild-partner-dependence.Rmd) |
+| [model-simplification](model-simplification/README.md) | Inference after Gaussian model selection; generalized checks when the full fit fails | [Selection report](../../../vignettes/articles/model-simplification.Rmd) |
 | [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
 [Shared family generators](shared/family-margins.R) are used by both family studies.
@@ -143,6 +144,66 @@ rmarkdown::render("vignettes/articles/ild-partner-dependence.Rmd")
 # For a pilot, pass its absolute results directory:
 # params = list(output_directory = "/absolute/path/to/pilot/results")
 ```
+
+### Detection and consequences for inference
+
+[consequences.R](ild-partner-dependence/consequences.R) adds 24 Gaussian settings
+with 50/200 dyads and 14 complete occasions. It separately varies stable
+correlation (0, .1, .2, .4), occasion correlation (0, .1, .2, .3), and occasion
+SD ratio (1, 1.1, 1.25, 1.5), keeping average occasion variance at 1.04. Other
+parameters retain the main Gaussian values. Each dataset fits the full model and
+the matching restriction; only the restricted fit supplies reference simulations.
+Fresh seeds and separate checkpoints leave the main study unchanged.
+
+```sh
+Rscript -e 'source("dev/diagnostic_checks/simulation-studies/ild-partner-dependence/consequences.R"); run_consequences(500L, 1000L, 10L, "run")'
+Rscript -e 'source("dev/diagnostic_checks/simulation-studies/ild-partner-dependence/consequences.R"); run_consequences(500L, 1000L, 10L, "summarise")'
+```
+
+Outputs stay in `results/ild-partner-dependence-consequences/<settings>/`.
+A complete default run exports five tables to
+`report-data/ild-partner-dependence-consequences/`. For a pilot report, also set
+the report's `consequences_directory` parameter to its absolute results path.
+[paired-inference.R](ild-partner-dependence/paired-inference.R) rereads the saved
+checkpoints and writes `paired-inference.csv`, the coverage change of the
+restricted model on datasets where both fits are usable:
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/ild-partner-dependence/paired-inference.R dev/diagnostic_checks/simulation-studies/results/ild-partner-dependence-consequences/500-datasets-1000-draws
+```
+
+The supplement compares bias, model SEs, empirical SDs and 95% Wald coverage for
+actor/partner slopes, the average role intercept and their difference, alongside
+restricted-model flag rates. This shows whether detectable mismatches matter for
+these estimates; a missing flag does not establish adequate inference. The slopes
+combine between- and within-member associations. Results are limited to these
+Gaussian settings, and the report adds them only when the tables are available.
+
+## Model simplification
+
+The [follow-up design](model-simplification/README.md) evaluates fixed model
+choices, likelihood-ratio selection and check-guided selection. It reuses the
+completed Gaussian supplement's references after verified refits, and adds six
+random-slope conditions. The true-zero Gaussian effects use a location shift
+verified by actual null-response refits in the pilot.
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/model-simplification/check-gaussian.R
+Rscript -e 'source("dev/diagnostic_checks/simulation-studies/model-simplification/gaussian.R"); run_gaussian_selection(500L, 1000L, 10L, "run")'
+Rscript dev/diagnostic_checks/simulation-studies/model-simplification/fallback-review.R
+```
+
+The Gaussian runner saves separate source/software-checked blocks under
+`results/model-simplification-gaussian/`. Use `2L` datasets for the complete-grid
+pilot. Only a complete 500-dataset run exports the report tables. Check returned
+inference and fallback counts as well as coverage and rejection rates.
+
+The read-only fallback review reconstructs the completed generalized pooling
+summaries, then splits all usable simpler-model checks by full-fit availability.
+Its separate outputs are under `results/model-simplification/fallback-review/`.
+Copy `rates.csv` and `totals.csv` to `report-data/model-simplification-fallback/`
+to update the covariance-pooling report. These retain the original quantile
+flags; the old checkpoints cannot reconstruct the newer rank limits.
 
 ## Raw versus model-centred checks
 

@@ -1,0 +1,290 @@
+---
+title: "Consequences of Gaussian model simplification"
+description: "Inference after covariance and random-slope selection, including failed fits."
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    self_contained: true
+params:
+  gaussian_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/model-simplification-gaussian"
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+  fig.width = 11, fig.height = 6.5, dpi = 180, fig.retina = 1, out.width = "100%")
+read_results <- function(name) read.csv(file.path(params$gaussian_directory, paste0(name, ".csv")))
+conditions <- read_results("conditions")
+fits <- read_results("fits") |> left_join(conditions, by = "condition")
+selection <- read_results("selection") |> left_join(conditions, by = "condition")
+inference <- read_results("inference") |> left_join(conditions, by = "condition")
+comparisons <- read_results("comparisons") |> left_join(conditions, by = "condition")
+is_pilot <- any(conditions$repetitions < 500L)
+complete <- nrow(conditions) == 30L && nrow(fits) == 60L &&
+  all(fits$attempted == fits$repetitions)
+baseline_methods <- c("always_full", "always_restricted", "lrt_05", "lrt_20")
+primary_rows <- function(data) data |>
+  filter(method %in% baseline_methods |
+    (scenario == "covariance" & method == "check_rank_target") |
+    (scenario == "random_slope" & method == "check_rank_any")) |>
+  mutate(policy = factor(ifelse(startsWith(method, "check_"), "Check-guided",
+    recode(method, always_full = "Full", always_restricted = "Restricted",
+      lrt_05 = "LRT .05", lrt_20 = "LRT .20")),
+    levels = c("Full", "Restricted", "LRT .05", "LRT .20", "Check-guided")))
+axis_labels <- c(stable_cor = "Stable correlation", occasion_cor = "Occasion correlation",
+  occasion_sd_ratio = "Occasion SD ratio", random_slope = "Random-slope SD")
+parameter_labels <- c(x_actor = "Actor slope", x_partner = "Partner slope",
+  x_actor_between = "Actor between", x_actor_within = "Actor within",
+  x_partner_between = "Partner between", x_partner_within = "Partner within",
+  role_average_intercept = "Average intercept", role_difference = "Role difference")
+interval <- function(rate, lower, upper) sprintf("%.1f%% [%.1f, %.1f]", 100 * rate, 100 * lower, 100 * upper)
+primary <- primary_rows(inference)
+primary_selection <- primary_rows(selection)
+primary_comparisons <- primary_rows(comparisons)
+```
+
+## Question and design
+
+When a covariance restriction is wrong, can a fixed model-selection rule protect
+inference for the effects we care about? This study compares **always using the
+full model**, **always using the restricted model**, likelihood-ratio selection
+at **.05 or .20**, and **selection using the dependence check**. A significant
+comparison or a diagnostic flag retains the full model.
+
+The output contains `r sum(fits$attempted)` fit attempts across
+`r nrow(conditions)` conditions, targeting `r unique(conditions$repetitions)`
+datasets per condition.
+`r if (!complete) "**These results are incomplete. Missing attempts must be resolved before drawing conclusions.**" else if (is_pilot) "**These are pilot results for checking the workflow. They do not establish error rates or support a model-selection recommendation.**" else "The results apply to the simulated settings, not every model supported by the package."`
+
+The 24 covariance conditions reuse the completed
+[longitudinal consequences study](ild-partner-dependence.html): 50 or 200 dyads,
+14 complete occasions, stable correlations 0/.1/.2/.4, occasion correlations
+0/.1/.2/.3, or occasion SD ratios 1/1.1/1.25/1.5. Each condition changes one
+feature. Full and restricted models are refitted from the same saved seeds to
+obtain their likelihoods. Saved diagnostic references are reused only after
+checking source and software provenance and reproducing estimates and SEs.
+Predictors are generated independently between partners at both levels.
+
+Six new conditions use the same sample sizes and occasions, with independent
+member-specific actor-within random-slope SDs of 0/.2/.5. The fixed effects
+separate actor and partner predictors into member means and within-member
+deviations. The restricted model omits the random slope.
+
+<details>
+<summary>Selection rules, null effects and limitations</summary>
+
+For covariance restrictions, check-guided selection uses the corresponding
+partner-correlation row (between or within), or the within average/difference
+correlation for equal occasion SDs. Rank limits are primary. Selecting on any
+row and the older quantile limits are saved sensitivity analyses. There is no
+random-slope-specific row: its conditions use any of the 12 rows to test the
+limits of the existing check.
+
+All models use maximum likelihood and the same fixed-effect terms within each
+comparison. Covariance restrictions remove one interior parameter. Removing
+the independent random-slope variance uses the asymptotic equal mixture of a
+point mass at zero and chi-square with one degree of freedom; other covariance
+parameters remain interior in the generating model. The zero-slope conditions
+assess its small-sample behavior. This is not a general rule for deleting
+correlated random-effect blocks. See [Self and Liang (1987)](https://doi.org/10.1080/01621459.1987.10478472).
+Comparing .05 with .20 follows the selection question in
+[Matuschek et al. (2017)](https://doi.org/10.1016/j.jml.2017.01.001), without
+assuming that either threshold transfers safely to these models.
+
+True-zero scientific effects are obtained by subtracting the true fixed-effect
+mean, *Xβ*, from each Gaussian response. Both candidates retain the same fixed
+design matrix. This shifts coefficient estimates by their true values, while
+leaving covariance likelihoods, SEs and model-centred checks unchanged. The
+pilot verifies this within numerical tolerance with actual shifted-response
+refits and new simulations, and checks that inference and selection decisions
+are unchanged.
+The null and nonzero cases are therefore **matched transformations of the same
+datasets**, not additional independent datasets. This argument does not apply
+to generalized models.
+
+Coverage describes whether a 95% Wald interval contains the known true effect.
+Null rejection is the false-positive rate; rejection under the nonzero effects
+is power. Under the exact Gaussian translation used here, null rejection equals
+one minus nonzero coverage. A high power near 100% provides little information
+about differences between methods; this study does not vary scientific effect
+sizes to compare their whole power curves.
+
+</details>
+
+## Fit availability and fallback
+
+A candidate must have optimizer convergence, a positive-definite Hessian, a finite
+likelihood and defined estimates and SEs. A full model whose log-likelihood is
+more than 0.000001 below that of its usable nested restriction is excluded from
+every selection rule, even if its optimizer and Hessian checks passed. Original fit status and
+estimates are preserved. If only one candidate is eligible,
+selection methods use it and count a **fallback**. If neither is eligible they
+return no inference. If both are eligible but a comparison or check is undefined,
+that rule also returns no inference.
+
+The always-full and always-restricted baselines return no inference when their
+specified model is unavailable. Thus availability and fallback must be read
+alongside interval performance. Rates below use all returned usable estimates;
+the saved tables also give results restricted to datasets with both models
+usable. No results are conditioned on a missing flag.
+
+```{r availability}
+availability <- fits |>
+  summarise(Attempted = sum(attempted), Usable = sum(inference_defined),
+    .by = c(axis, n_dyads, fit)) |>
+  mutate(Result = paste0(Usable, "/", Attempted)) |>
+  select(axis, n_dyads, fit, Result) |>
+  tidyr::pivot_wider(names_from = fit, values_from = Result) |>
+  mutate(Restriction = unname(axis_labels[axis])) |>
+  select(Restriction, Dyads = n_dyads, Full = full, Restricted = restricted)
+knitr::kable(availability, caption = "Eligible fits with defined inference across strengths within each design; counts retain all attempted datasets.")
+```
+
+```{asis, echo=!is_pilot && complete}
+Of 30,000 fits, 29,999 passed the optimizer and Hessian checks, and 29,532
+were eligible after excluding 467 full fits with lower nested likelihoods.
+At true-zero slope variance, only 317/500 full fits were eligible at 50 dyads
+and 230/500 at 200 dyads. Their always-full rates describe selected subsets;
+the selection rules returned all 500 datasets using their stated fallback.
+A bounded review reproduced three near-zero-slope likelihood reversals and a
+nonreversed control. Full and restricted estimates differed by less than 0.002
+SE, and their SEs by less than 0.06%. One alternative optimizer did not resolve
+the reversals. It did resolve the separate Hessian failure. These checks do not
+establish global maxima; all original exclusions remain in the results.
+```
+
+<details>
+<summary>Returned inferences and fallback counts by rule</summary>
+
+```{r policy-availability}
+primary_selection |>
+  summarise(Attempted = sum(attempted), Returned = sum(returned),
+    Fallback = sum(fallback), `Full selected` = sum(full_selected),
+    .by = c(axis, policy)) |>
+  mutate(Restriction = unname(axis_labels[axis])) |>
+  select(Restriction, Rule = policy, everything(), -axis) |>
+  knitr::kable(caption = "Counts pooled over sample sizes and strengths for availability only; they are not pooled error-rate estimates.")
+```
+
+</details>
+
+## False positives after selection
+
+The plot uses prespecified example targets: the average intercept for the two
+correlation restrictions, the actor slope for SD pooling, and the actor-within
+slope for random-slope removal. The table below includes every target. Dashed
+lines mark 5%; error bars are 95% Wilson intervals across simulated datasets.
+These intervals measure Monte Carlo uncertainty, not uncertainty about a
+particular observed dataset.
+
+```{r null-rejection, fig.alt="Null rejection rates for five model selection rules, across restriction strengths and 50 or 200 dyads."}
+focus <- primary |>
+  filter(sample == "all", effect_case == "null",
+    (axis %in% c("stable_cor", "occasion_cor") & parameter == "role_average_intercept") |
+    (axis == "occasion_sd_ratio" & parameter == "x_actor") |
+    (axis == "random_slope" & parameter == "x_actor_within")) |>
+  mutate(Design = factor(axis, names(axis_labels),
+    paste0(axis_labels, "\n", c("Average intercept", "Average intercept", "Actor slope", "Actor within"))),
+    Dyads = factor(paste(n_dyads, "dyads"), levels = c("50 dyads", "200 dyads")))
+ggplot(focus, aes(strength, rejection, colour = policy, group = policy)) +
+  geom_hline(yintercept = 0.05, linetype = 2, colour = "grey55") +
+  geom_line(alpha = 0.7) +
+  geom_errorbar(aes(ymin = rejection_lower, ymax = rejection_upper), width = 0,
+    position = position_dodge(width = 0.025), alpha = 0.7) +
+  geom_point(position = position_dodge(width = 0.025), size = 1.8) +
+  facet_grid(Dyads ~ Design, scales = "free_x") +
+  scale_y_continuous(labels = scales::label_percent(), limits = c(0, NA)) +
+  scale_colour_manual(values = c("#333333", "#D55E00", "#0072B2", "#009E73", "#CC79A7")) +
+  labs(x = "True correlation, SD ratio or random-slope SD", y = "Null effects declared significant",
+    colour = NULL, caption = if (is_pilot) "Pilot only: these rates do not establish calibration." else NULL) +
+  theme_bw(base_size = 11) + theme(legend.position = "bottom")
+```
+
+<details>
+<summary>Coverage and power for all targets at the largest restriction</summary>
+
+This table uses the largest simulated correlation, SD ratio or slope SD within
+each design. Full tables also retain every smaller strength. Brackets are 95%
+Monte Carlo intervals. The scientific effects are nonzero here.
+
+```{r coverage-power}
+primary |>
+  filter(sample == "all", effect_case == "nonzero") |>
+  filter(strength == max(strength), .by = axis) |>
+  mutate(Design = unname(axis_labels[axis]), Target = unname(parameter_labels[parameter]),
+    Coverage = interval(coverage, coverage_lower, coverage_upper),
+    Power = interval(rejection, rejection_lower, rejection_upper)) |>
+  arrange(axis, n_dyads, parameter, policy) |>
+  select(Design, Dyads = n_dyads, Target, Rule = policy, n, Coverage, Power) |>
+  knitr::kable()
+```
+
+</details>
+
+<details>
+<summary>Paired coverage changes relative to the full model</summary>
+
+These secondary comparisons use datasets where both candidates were usable.
+They isolate the change in coverage within the same datasets. Intervals are
+the change plus or minus 1.96 Monte Carlo SEs, in percentage points.
+
+```{r paired-changes}
+primary_comparisons |>
+  filter(effect_case == "nonzero", method != "always_full") |>
+  filter(strength == max(strength), .by = axis) |>
+  filter((axis %in% c("stable_cor", "occasion_cor") & parameter == "role_average_intercept") |
+    (axis == "occasion_sd_ratio" & parameter == "x_actor") |
+    (axis == "random_slope" & parameter == "x_actor_within")) |>
+  mutate(Design = unname(axis_labels[axis]),
+    Change = sprintf("%+.1f [%+.1f, %+.1f]", 100 * coverage_change,
+      100 * (coverage_change - 1.96 * coverage_change_mcse),
+      100 * (coverage_change + 1.96 * coverage_change_mcse))) |>
+  select(Design, Dyads = n_dyads, Rule = policy, n, Change) |>
+  knitr::kable()
+```
+
+</details>
+
+## What this can support
+
+```{asis, echo=!is_pilot && complete}
+- **The dependence checks missed consequential random slopes.** At slope SD
+  0.5, omitting the slope gave actor-within false-positive rates of 22.2% and
+  25.0% at 50 and 200 dyads. Check-guided selection always chose that restricted
+  model. Full models and both LRT rules gave 6.0% and 5.0%. At 200 dyads, the
+  respective 95% Monte Carlo intervals were 21.4–29.0% and 3.4–7.3%.
+- **A detectable covariance difference need not greatly affect these targets.**
+  At 200 dyads, an occasion correlation of 0.1 and an SD ratio of 1.1 were flagged
+  in 99.6% and 99.8% of datasets. Yet paired full-versus-restricted coverage
+  differences across the occasion covariance and SD conditions were at most
+  1.4 percentage points.
+- **Model comparison helped, within these designs.** LRT selection limited
+  false positives from omitted slopes and recovered much of the power lost by
+  omitting stable correlation. Coverage estimates have Monte Carlo uncertainty;
+  the paired comparisons above quantify uncertainty in their differences.
+  These results do not establish nominal coverage in general, a universally
+  preferable LRT threshold, or a general power advantage from simplification.
+
+The random-slope result concerns the partner-dependence check. It does not
+establish whether predictor-specific residual checks would detect that omission.
+```
+
+This study evaluates the **whole prespecified procedure**, including numerical
+failures and fallback, rather than treating a nonsignificant comparison or an
+unflagged check as proof that simplification is harmless. Its results can support
+bounded advice about the tested Gaussian models. They cannot establish an
+automatic simplification rule for arbitrary random-effect structures,
+generalized models, or searches over different role definitions.
+
+Covariance pooling also does not establish equality of role-specific means or
+slopes. No flag, or a nonsignificant model comparison, is not evidence of
+equivalence. Inspect the estimates, SEs and intervals for the scientific effects
+across feasible models, and report unresolved sensitivity.
+
+The saved CSV tables contain all strengths and targets, bias, empirical SD,
+model SE accuracy, Wilson intervals, Monte Carlo SEs, availability, and the
+paired and flag-rule sensitivities. The runner and validation checks are in
+`dev/diagnostic_checks/simulation-studies/model-simplification/`.
