@@ -352,5 +352,7 @@ prepare_dyad_data <- function(
     out <- restore_observed_dyad_rows(out)
   }
 
+  warn_if_lags_missing(out)
+
   return(out)
 }
