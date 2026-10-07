@@ -45,8 +45,8 @@
 #' compositions are omitted with a warning.
 #'
 #' The first page shows uniform QQ and mean PIT distance. The second shows PIT
-#' quartiles and distance against predicted outcomes. Each supplied predictor
-#' gets another page like the second.
+#' quartiles against predicted outcomes. Each supplied predictor gets another
+#' page like the second.
 #'
 #' PIT (probability integral transform) residuals rank each outcome from 0 (low)
 #' to 1 (high) relative to its own simulated values. A suitable model should
@@ -66,11 +66,12 @@
 #' @section Reading flags:
 #' A flag is a red value or curve outside its blue range or limits. Each panel
 #' alone rarely flags a correct model, but flags add up across panels. In our
-#' [simulations](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html),
-#' at least one panel of the residual and outcome checks (ECDFs and category
-#' bars not counted) flagged about 7--14% of correct Gaussian and count models
-#' when pooled, 21--28% in either role, and 32--45% in either role with actor
-#' and partner predictor pages; ordinal models were flagged less often. So look
+#' [simulations](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
+#' (also used to choose these panels), at least one panel of the residual and
+#' outcome checks (ECDFs and category bars not counted) flagged about 6--11% of
+#' correct Gaussian and count models when pooled, 16--23% in either role, and
+#' 24--31% in either role with actor and partner predictor pages; ordinal models
+#' were flagged less often. So look
 #' for a consistent pattern, not any single flag. With about 40 dyads, most
 #' mismatches studied were hard to detect; no flag does not show a good fit.
 #' Panels suggest possible problems, not their cause. Neither a flag nor its
@@ -81,7 +82,7 @@
 #' - Extra zeros: QQ and PIT quartiles; the number of zeros less often.
 #' - Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
 #' - Different role SDs: response SD and mean PIT distance, by role.
-#' - Spread rising with a predictor: PIT distance panels, largest absolute deviation.
+#' - Spread rising with a predictor: largest absolute deviation, mean PIT distance, QQ.
 #' - Omitted partner effect: PIT quartiles across the partner's predictor
 #'   (supply it in `predictors` of [check_dyad_residuals()]).
 #'
@@ -262,27 +263,24 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows) {
     weights <- exp(log_weights - apply(log_weights, 1, max))
     weights <- weights / rowSums(weights)
   }
-  curves <- lapply(list(quantiles = pit, distance = 2 * abs(pit - .5)), function(values) {
-    quartiles <- lapply(rows_by_group, function(group_rows) {
-      apply(values[intersect(rows, group_rows), , drop = FALSE], 2,
-            stats::quantile, probs = c(.25, .5, .75), names = FALSE)
-    })
-    quartile_curves <- lapply(1:3, function(i) {
-      values <- do.call(rbind, lapply(quartiles, function(group) group[i, ]))
-      if (smooth) weights %*% values else values
-    })
-    # One envelope covers all three quartiles and positions in this panel.
-    joint <- residual_curve_summary(do.call(rbind, quartile_curves))
-    positions_per_curve <- nrow(quartile_curves[[1]])
-    lapply(1:3, function(i) {
-      indices <- seq_len(positions_per_curve) + (i - 1L) * positions_per_curve
-      lapply(joint, `[`, indices)
-    })
+  quartiles <- lapply(rows_by_group, function(group_rows) {
+    apply(pit[intersect(rows, group_rows), , drop = FALSE], 2,
+          stats::quantile, probs = c(.25, .5, .75), names = FALSE)
+  })
+  quartile_curves <- lapply(1:3, function(i) {
+    values <- do.call(rbind, lapply(quartiles, function(group) group[i, ]))
+    if (smooth) weights %*% values else values
+  })
+  # One envelope covers all three quartiles and positions in this panel.
+  joint <- residual_curve_summary(do.call(rbind, quartile_curves))
+  positions_per_curve <- nrow(quartile_curves[[1]])
+  quantiles <- lapply(1:3, function(i) {
+    indices <- seq_len(positions_per_curve) + (i - 1L) * positions_per_curve
+    lapply(joint, `[`, indices)
   })
   list(positions = if (smooth) grid else positions, labels = labels,
        limits = limits + c(-padding, padding), binned = binned, smooth = smooth,
-       numeric = is.numeric(predictor),
-       quantiles = curves$quantiles, distance = curves$distance)
+       numeric = is.numeric(predictor), quantiles = quantiles)
 }
 
 #' @export
@@ -295,7 +293,7 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
   local_check_paging(ask, panels, if (panels)
     length(x$compositions) * (2L + length(x$predictors)) else
     sum(vapply(x$compositions, function(composition) length(composition$rows), integer(1))) *
-      (4L + 2L * length(x$predictors)))
+      (3L + length(x$predictors)))
   # Blue ranges for the three quartiles, then the red observed quartiles on top.
   draw_quartiles <- function(x, curves, smooth, type) {
     offsets <- if (smooth) rep(0, 3) else
@@ -313,28 +311,22 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
       type = if (smooth) "l" else type, pch = 16, cex = .65, lty = if (smooth) c(2, 1, 3)[i] else 1,
       lwd = if (i == 2) 2 else 1, col = check_colours$observed)
   }
-  draw_pattern <- function(pattern, name = NULL, distance = FALSE) {
-    title <- paste("PIT", if (distance) "distance" else "quartiles")
-    title <- if (is.null(name)) paste0(title, "\n(",
-      if (distance) "residual extremes" else "fit", " across predicted outcomes)")
-      else paste0(title, " by ", name, "\n(",
-        if (distance) "residual extremes" else "fit", " across predictor values)")
+  draw_pattern <- function(pattern, name = NULL) {
+    title <- if (is.null(name)) "PIT quartiles\n(fit across predicted outcomes)"
+      else paste0("PIT quartiles by ", name, "\n(fit across predictor values)")
     if (is.null(pattern)) return(plot_check_empty(title, "No available predictor values"))
-    curves <- if (distance) pattern$distance else pattern$quantiles
     graphics::plot(pattern$positions, rep(.5, length(pattern$positions)), type = "n", ylim = c(0, 1),
       xlim = pattern$limits, xaxt = if (pattern$binned) "s" else "n", yaxt = "n", main = title,
-      xlab = if (is.null(name)) "Predicted outcome" else name,
-      ylab = if (distance) "PIT distance" else "PIT quartiles")
+      xlab = if (is.null(name)) "Predicted outcome" else name, ylab = "PIT quartiles")
     if (!pattern$binned) graphics::axis(1, pattern$positions, pattern$labels, cex.axis = .8)
     graphics::axis(2, c(0, .25, .5, .75, 1))
     graphics::abline(h = c(.25, .5, .75), lty = 2, col = check_colours$reference)
-    draw_quartiles(pattern$positions, curves, pattern$smooth, if (pattern$numeric) "b" else "p")
-    guide <- if (distance)
-      "Blue ranges form one global envelope for this panel.\nAbove a range: more extreme residuals; below: more central residuals."
-      else "Blue ranges form one global envelope for this panel.\nAbove a range: outcomes higher than simulated; below: lower."
+    draw_quartiles(pattern$positions, pattern$quantiles, pattern$smooth,
+                   if (pattern$numeric) "b" else "p")
     key <- if (pattern$smooth) "25th: dashed; median: bold; 75th: dotted."
       else "Quartiles: 25th, median, 75th, left to right."
-    plot_check_caption(paste(guide, key, sep = "\n"))
+    plot_check_caption(paste("Blue ranges form one global envelope for this panel.",
+      "Above a range: outcomes higher than simulated; below: lower.", key, sep = "\n"))
   }
   for (composition in x$compositions) {
     draw_check <- function(check, role) {
@@ -360,10 +352,9 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
       "Residual distribution", draw_check, panels)
     for (i in seq_along(composition$patterns)) {
       name <- if (i == 1L) NULL else x$predictors[i - 1L]
-      plot_check_role_panels(composition, c(FALSE, TRUE),
+      plot_check_role_panels(composition, "quartiles",
         paste("Residual patterns:", if (is.null(name)) "predicted outcome" else name),
-        function(distance, role) draw_pattern(composition$patterns[[i]][[role]],
-                                             name, distance), panels)
+        function(check, role) draw_pattern(composition$patterns[[i]][[role]], name), panels)
     }
   }
   invisible(x)

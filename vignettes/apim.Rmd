@@ -445,7 +445,7 @@ exchangeable, because opposite role differences can cancel when all
 observations are pooled (here, the pooled QQ plot shows no flag). We also add a
 page for the partner's provided support.
 
-```{r check-residuals-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution for women and men: uniform QQ plots with blue envelopes in the top row and mean PIT distance histograms in the bottom row. Red marks observed values.", "Residual patterns for women and men: PIT quartiles in the top row and PIT distance in the bottom row, each across predicted outcomes with blue envelopes. Red curves show observed values.", "Residual patterns for women and men: PIT quartiles in the top row and PIT distance in the bottom row, each across the partner's provided support with blue envelopes. Red curves show observed values.")}
+```{r check-residuals-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution for women and men: uniform QQ plots with blue envelopes in the top row and mean PIT distance histograms in the bottom row. Red marks observed values.", "Residual patterns for women and men: PIT quartiles across predicted outcomes with blue envelopes. Red curves show observed values.", "Residual patterns for women and men: PIT quartiles across the partner's provided support with blue envelopes. Red curves show observed values.")}
 dyadMLM::check_dyad_residuals(
   apim_simulations,
   dyad = coupleID,
@@ -467,8 +467,7 @@ dyadMLM::check_dyad_outcomes(
 Look for red curves or values outside their blue ranges that form one
 consistent pattern. Here, women's closeness is higher than simulated and men's
 is lower, in the QQ plots, the PIT quartiles, and the outcome ECDFs. For men,
-the gap grows at high predicted outcomes and high partner support, where their
-PIT distance also rises.
+the gap grows at high predicted outcomes and high partner support.
 Mean PIT distance, response SDs, and largest deviations stay within their limits.
 The pattern suggests omitted gender differences, at least in mean closeness,
 so we add gender-specific intercepts and compare the actor and partner
@@ -487,7 +486,7 @@ With gender-specific intercepts, the actor estimate is smaller, the partner
 estimate larger, and both standard errors smaller. Women provide slightly more
 support than men here, so omitting their difference in mean closeness shifted
 both effects. Checking this model again (not shown) still flags men's PIT
-quartiles and distance across predicted outcomes, which suggests further
+quartiles across predicted outcomes, which suggests further
 gender differences; the distinguishable APIM shows no flags. The
 [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
 shows how often these panels flag correct and mismatched models.

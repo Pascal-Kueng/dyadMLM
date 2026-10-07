@@ -68,6 +68,7 @@ test_that("missing predictor values affect only their own panels", {
                                                 plot = FALSE), "Incomplete.*3")
   expect_identical(result$pit, expected)
   pattern <- result$compositions[[1]]$patterns[[2]][[1]]
+  expect_named(pattern, c("positions", "labels", "limits", "binned", "smooth", "numeric", "quantiles"))
   expect_equal(unname(pattern$positions), c(0, 1))
   summaries <- lapply(c(.25, .5, .75), function(probability) {
     t(vapply(c(0, 1), function(group) {
@@ -237,11 +238,13 @@ test_that("residual plots draw each role's saved curves and scalar summaries", {
   grDevices::pdf(NULL, width = 12, height = 10)
   on.exit(grDevices::dev.off(), add = TRUE)
   observed <- bounds <- scalars <- list()
+  titles <- character()
   recording <- FALSE
   original_title <- graphics::title
   original_lines <- graphics::lines
   original_polygon <- graphics::polygon
   local_mocked_bindings(title = function(main = NULL, ...) {
+    titles <<- c(titles, main)
     recording <<- isTRUE(grepl("Uniform QQ", main))
     original_title(main = main, ...)
   }, lines = function(x, y, ...) {
@@ -260,6 +263,8 @@ test_that("residual plots draw each role's saved curves and scalar summaries", {
   expect_equal(observed, unname(lapply(statistics, function(x) x$qq$observed)))
   expect_equal(bounds, unname(lapply(statistics, function(x) c(x$qq$lower, rev(x$qq$upper)))))
   expect_equal(scalars, unname(lapply(statistics, `[[`, "mean_distance")))
+  # Pattern pages have one row of PIT quartiles.
+  expect_identical(sub("\n.*", "", titles), rep(c("Uniform QQ", "PIT quartiles"), each = 2))
 })
 
 
@@ -281,12 +286,12 @@ test_that("each page repeats its composition heading", {
     expect_equal(count_pdf_pages(code, width = 12, height = 10), sum(each))
     expect_identical(headings, rep(compositions, each))
   }
-  # Residuals: two pages plus one per predictor, or four figures plus two per predictor and role.
+  # Residuals: two pages plus one per predictor, or three figures plus one per predictor and role.
   expect_pages(check_dyad_residuals(simulations, "dyad", "role", predictors = "X", ask = FALSE),
                c(3, 3, 3))
   role_headings <- integer()
   expect_pages(check_dyad_residuals(simulations, "dyad", "role", panels = FALSE, ask = FALSE),
-               c(4, 8, 4))
+               c(3, 6, 3))
   expect_true(all(role_headings == 1))  # each separate figure names its one role
   # Outcomes: one page, or one figure per check and role.
   expect_pages(check_dyad_outcomes(simulations, "dyad", "role", ask = FALSE), c(1, 1, 1))

@@ -63,7 +63,7 @@ comparison. The continuous ECDF display has no numerical flag rule.
 Some of these panels have since been removed; see
 [Confirmation run](#confirmation-run). The scripts below reproduce the saved
 tables only at commit `0ceacd4c` (PR #77); later package versions no longer
-return the histogram or outlier count.
+return the histogram, outlier count, or PIT distance patterns.
 
 ```sh
 Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/check.R
@@ -118,12 +118,18 @@ all for the severe conditions, or about three hours with six workers.
 
 The main study and its add-on reproduce at commit `0ceacd4c`. They record
 panels that the package has since removed: the PIT histogram, the outlier
-count, and count category bars. [dropped-panels.R](distribution-checks/dropped-panels.R)
-recomputes their default flag unions with and without the histogram and
-outlier count and writes `report-data/distribution-checks/dropped-panels.csv`.
-The add-on's unions include its predictor pages. Its optional argument is the
-`results/` directory of both runs. With all panels, it must reproduce the
-reported rates.
+count, count category bars, and the PIT distance patterns across predicted
+outcomes and predictors. [dropped-panels.R](distribution-checks/dropped-panels.R)
+recomputes their default flag unions with all panels, without the histogram and
+outlier count, and also without the distance patterns (`current`), and writes
+`report-data/distribution-checks/dropped-panels.csv`. It does the same for the
+confirmation run below, with and without its predictor pages; that run never
+recorded the histogram or outlier count, so its first two sets are equal. The add-on's
+unions include its predictor pages. Its optional arguments are the `results/`
+directories of the main study with its add-on and of the confirmation run (by
+default the same). With all panels, it must reproduce the reported rates. The
+`current` set was chosen after both runs, so its rates are recomputed on their
+datasets, not confirmed on fresh seeds.
 
 [confirmation.R](distribution-checks/confirmation.R) confirms, on fresh seeds,
 how often the remaining panels flag correct and mismatched models. Its design
@@ -153,12 +159,14 @@ was fixed before the run:
   so help text can change during the run.
 
 ```sh
-Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/dropped-panels.R
 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
   Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/confirmation.R 500 1000 6
+Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/dropped-panels.R
 ```
 
-Arguments and modes match `run.R`. Checkpoints are saved under
+Arguments and modes match `run.R`. `confirmation.R` reproduces its saved results
+only at commit `fc2276ff`: it records the PIT distance patterns, which later
+package versions no longer return. Checkpoints are saved under
 `results/distribution-checks/confirmation-<settings>/`. A complete 500-by-1,000
 run copies its summary, fits, largest-deviation ties, and session information
 to `report-data/distribution-checks/` with the prefix `confirmation-`. The run

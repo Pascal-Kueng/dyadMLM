@@ -77,8 +77,8 @@ roles. Supplying roles does not change the model's assumptions. Unknown
 compositions are omitted with a warning.
 
 The first page shows uniform QQ and mean PIT distance. The second shows PIT
-quartiles and distance against predicted outcomes. Each supplied predictor
-gets another page like the second.
+quartiles against predicted outcomes. Each supplied predictor gets another
+page like the second.
 
 PIT (probability integral transform) residuals rank each outcome from 0 (low)
 to 1 (high) relative to its own simulated values. A suitable model should
@@ -100,11 +100,12 @@ and separate predictors can hide local patterns and interactions.
 
 A flag is a red value or curve outside its blue range or limits. Each panel
 alone rarely flags a correct model, but flags add up across panels. In our
-\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulations},
-at least one panel of the residual and outcome checks (ECDFs and category
-bars not counted) flagged about 7--14\% of correct Gaussian and count models
-when pooled, 21--28\% in either role, and 32--45\% in either role with actor
-and partner predictor pages; ordinal models were flagged less often. So look
+\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulations}
+(also used to choose these panels), at least one panel of the residual and
+outcome checks (ECDFs and category bars not counted) flagged about 6--11\% of
+correct Gaussian and count models when pooled, 16--23\% in either role, and
+24--31\% in either role with actor and partner predictor pages; ordinal models
+were flagged less often. So look
 for a consistent pattern, not any single flag. With about 40 dyads, most
 mismatches studied were hard to detect; no flag does not show a good fit.
 Panels suggest possible problems, not their cause. Neither a flag nor its
@@ -116,7 +117,7 @@ report. Mismatches showed mainly in these panels:
 \item Extra zeros: QQ and PIT quartiles; the number of zeros less often.
 \item Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
 \item Different role SDs: response SD and mean PIT distance, by role.
-\item Spread rising with a predictor: PIT distance panels, largest absolute deviation.
+\item Spread rising with a predictor: largest absolute deviation, mean PIT distance, QQ.
 \item Omitted partner effect: PIT quartiles across the partner's predictor
 (supply it in \code{predictors} of \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}).
 }
