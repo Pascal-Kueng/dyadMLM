@@ -1,0 +1,844 @@
+---
+title: "APIM exploration: lavaan and glmmTMB"
+author: "Pascal Küng"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    math_method: mathml
+    df_print: kable
+    css: explore-sem-mlm.css
+---
+
+This notebook fits the same cross-sectional Gaussian APIM in lavaan and
+glmmTMB. We first compare and plot the point estimates, then add confidence
+intervals for glmmTMB and plot them. Each dyad has one parent and one
+teen, with complete data.
+
+```{r table-style, include=FALSE}
+# Each table includes its CSS when chunks are run separately.
+table_css <- paste(readLines("explore-sem-mlm.css"), collapse = "\n")
+
+print_table <- function(data) {
+  htmltools::browsable(htmltools::tagList(
+    htmltools::tags$style(htmltools::HTML(table_css)),
+    htmltools::HTML(knitr::kable(
+      data, format = "html", table.attr = 'class="apim-table"'
+    ))
+  ))
+}
+```
+
+## Load and rename the data
+
+```{r load-flashe}
+library(lavaan)
+flashe_data <- read.csv(
+  file.path(
+    "../references/explaining-interdependence-apim",
+    "jp-materials-2026-09-13",
+    "J-P&Niall-FLASHE-example",
+    "flashe-lavaan.csv"
+  ),
+  header = TRUE
+)
+
+# Produce intake and efficacy refer to fruit and vegetable consumption.
+# Keep the supplied scores centered at 7.6.
+flashe_data <- dplyr::rename(
+  flashe_data,
+  produce_intake_parent = pftveg,
+  produce_intake_teen = tftveg,
+  efficacy_parent = peffv,
+  efficacy_teen = teffv,
+  efficacy_centered_parent = cpeffv,
+  efficacy_centered_teen = cteffv,
+  is_female_parent = pfem,
+  is_female_teen = tfem
+)
+```
+
+## 1. Lavaan: J-P and Niall's example
+
+### Fit the model
+
+```{r jp-niall-lavaan}
+apim_model <- '
+  # Intake intercepts: both centered efficacy predictors are zero.
+  produce_intake_teen ~ intercept_teen * 1
+  produce_intake_parent ~ intercept_parent * 1
+  
+  # Actor effects: own centered efficacy predicts own F&V intake.
+  produce_intake_teen ~ actor_teen * efficacy_centered_teen
+  produce_intake_parent ~ actor_parent * efficacy_centered_parent
+
+  # Partner effects: parent efficacy -> teen intake, and vice versa.
+  produce_intake_teen ~ partner_parent_to_teen * efficacy_centered_parent
+  produce_intake_parent ~ partner_teen_to_parent * efficacy_centered_teen
+
+  # Means of the centered efficacy predictors.
+  efficacy_centered_teen ~ mean_efficacy_teen * 1
+  efficacy_centered_parent ~ mean_efficacy_parent * 1
+
+  # Predictor variances.
+  efficacy_centered_teen ~~ var_efficacy_teen * efficacy_centered_teen
+  efficacy_centered_parent ~~ var_efficacy_parent * efficacy_centered_parent
+
+  # Residual variances of intake.
+  produce_intake_teen ~~ residual_var_teen * produce_intake_teen
+  produce_intake_parent ~~ residual_var_parent * produce_intake_parent
+
+  # Covariance between parent and teen efficacy.
+  efficacy_centered_parent ~~ cov_efficacy * efficacy_centered_teen
+
+  # Residual covariance between parent and teen intake.
+  produce_intake_parent ~~ residual_cov * produce_intake_teen
+
+  # Path-traced contributions to the outcome covariance.
+  actor_driven := actor_teen * cov_efficacy * actor_parent
+  partner_driven := partner_parent_to_teen * cov_efficacy * partner_teen_to_parent
+  teen_driven := actor_teen * var_efficacy_teen * partner_teen_to_parent
+  parent_driven := actor_parent * var_efficacy_parent * partner_parent_to_teen
+  residual := residual_cov
+  explained := actor_driven + partner_driven + teen_driven + parent_driven
+  total_covariance := explained + residual
+
+  # Percentages of the total outcome covariance.
+  percent_actor_driven := 100 * (actor_driven / total_covariance)
+  percent_partner_driven := 100 * (partner_driven / total_covariance)
+  percent_teen_driven := 100 * (teen_driven / total_covariance)
+  percent_parent_driven := 100 * (parent_driven / total_covariance)
+  percent_residual := 100 * (residual / total_covariance)
+  percent_explained := 100 * (explained / total_covariance)
+'
+
+# Predictor means, variances and covariance are free parameters above.
+apim_fit <- sem(
+  apim_model, fixed.x = FALSE, data = flashe_data, missing = "fiml"
+)
+
+# Examine the model.
+# summary(apim_fit, fit.measures = TRUE)
+```
+
+### Extract the model parameters
+
+Lavaan provides both the fitted parameters and the quantities defined with
+`:=`. We extract them once, then display the model parameters and decomposition
+separately. The model parameters include the predictor means, variances and
+covariance as well as the outcome coefficients and residual structure.
+
+```{r extract-lavaan}
+# Extract once, using our model labels and including 95% CIs.
+lavaan_estimates <- broom::tidy(apim_fit, conf.int = TRUE) |>
+  dplyr::select(
+    parameter = label,
+    op,
+    estimate,
+    ci_low = conf.low,
+    ci_high = conf.high
+  )
+
+# Model parameters: exclude the quantities defined with :=.
+lavaan_params <- lavaan_estimates |>
+  dplyr::filter(op != ":=") |>
+  dplyr::select(-op)
+
+print_table(lavaan_params)
+```
+
+### Extract the covariance decomposition
+
+The `:=` definitions above apply the Day 2 handout formulas. They calculate
+contributions and percentages from the estimates without changing the fitted
+model. Lavaan uses the delta method to calculate their standard errors (SEs)
+and 95% confidence intervals (CIs). It accounts for uncertainty in all the
+estimates used in each formula, including how those estimates vary together.
+Because we estimate the predictor variances and covariance in the model,
+their uncertainty is included too. 
+
+We select these estimates and CIs from the table above:
+
+```{r lavaan-covariance-decomposition}
+# Decomposition: keep only the quantities defined with :=.
+lavaan_decomposition <- lavaan_estimates |>
+  dplyr::filter(op == ":=") |>
+  dplyr::select(-op)
+
+# Display the five contributions and the explained subtotal, with CI and percent.
+format_decomposition <- function(decomposition) {
+  # Match each percentage row to its contribution by removing "percent_".
+  percentages <- decomposition |>
+    dplyr::filter(startsWith(parameter, "percent_")) |>
+    dplyr::mutate(parameter = sub("^percent_", "", parameter)) |>
+    dplyr::select(parameter, percent = estimate)
+
+  # Format only the displayed CI; estimates keep their full precision.
+  decomposition |>
+    dplyr::filter(!startsWith(parameter, "percent_"),
+                  parameter != "total_covariance") |>
+    dplyr::mutate(
+      `95% CI` = sprintf("[%.3f, %.3f]", ci_low, ci_high)
+    ) |>
+    dplyr::select(parameter, estimate, `95% CI`) |>
+    dplyr::left_join(percentages, by = "parameter")
+}
+
+lavaan_decomposition_table <- format_decomposition(lavaan_decomposition)
+print_table(lavaan_decomposition_table)
+```
+
+
+## 2. glmmTMB: reproduce the point estimates
+
+`dyadMLM` prepares the actor and partner predictors; `glmmTMB` fits the model.
+We retain the supplied centering and use maximum likelihood, as in lavaan.
+
+### Reshape and prepare the data
+
+Reshape to one row per person, then construct the actor/partner predictors.
+
+```{r prepare-dyadmlm}
+# Use dyadMLM from this checkout.
+library(dyadMLM)
+
+# Each original row is one dyad. Long format has one row per person.
+flashe_long <- flashe_data |>
+  dplyr::mutate(dyad_id = dplyr::row_number()) |>
+  tidyr::pivot_longer(
+    cols = -dyad_id,
+    names_to = c(".value", "role"),
+    names_pattern = "(.+)_(parent|teen)$"
+  ) |>
+  dplyr::mutate(person_id = dplyr::row_number())
+
+# Construct actor/partner columns without centering the scores again.
+flashe_apim <- dyadMLM::prepare_dyad_data(
+  flashe_long,
+  dyad = dyad_id,
+  member = person_id,
+  role = role,
+  predictors = efficacy_centered,
+  model_types = "apim"
+)
+
+print(flashe_apim, n = 4)
+```
+
+### Fit the model
+
+```{r fit-dyadmlm}
+apim_mlm_fit <- glmmTMB::glmmTMB(
+  produce_intake ~
+    # Separate parent and teen intercepts.
+    0 + .is_parent + .is_teen +
+
+    # Actor effects: own efficacy predicts own intake.
+    .is_parent:.efficacy_centered_actor +
+    .is_teen:.efficacy_centered_actor +
+
+    # Partner effects: partner efficacy predicts own intake.
+    .is_parent:.efficacy_centered_partner +
+    .is_teen:.efficacy_centered_partner +
+
+    # Two residual variances and their covariance within each dyad.
+    us(0 + .is_parent + .is_teen | dyad_id),
+
+  # Represent the paired residual variation in the unstructured block.
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = flashe_apim,
+
+  # Match lavaan's maximum-likelihood estimation.
+  REML = FALSE
+)
+
+# summary(apim_mlm_fit)
+```
+
+### Extract the standard point estimates
+
+We extract the needed coefficients, then add labels matching lavaan. 
+
+```{r extract-glmmtmb-points}
+# Extract all nine estimates with their original model names.
+glmmtmb_points <- broom.mixed::tidy(
+  apim_mlm_fit,
+  effects = c("fixed", "ran_pars"),
+  scales = c(NA, "vcov") # leaves fixed effects unchanged and requests variances/covariances for REs
+) |>
+  dplyr::select(effect, term, estimate)
+
+# Rename the rows to match lavaan. Keep term for later model lookups.
+glmmtmb_points <- glmmtmb_points |>
+  dplyr::mutate(
+    parameter = dplyr::recode(
+      term,
+      ".is_parent" = "intercept_parent",
+      ".is_teen" = "intercept_teen",
+      ".is_parent:.efficacy_centered_actor" = "actor_parent",
+      ".is_teen:.efficacy_centered_actor" = "actor_teen",
+      ".is_parent:.efficacy_centered_partner" = "partner_teen_to_parent",
+      ".is_teen:.efficacy_centered_partner" = "partner_parent_to_teen",
+      "var__.is_parent" = "residual_var_parent",
+      "var__.is_teen" = "residual_var_teen",
+      "cov__.is_parent..is_teen" = "residual_cov"
+    ),
+    # Include the tiny fixed dispersion in the two residual variances.
+    estimate = estimate + dplyr::if_else(
+      parameter %in% c("residual_var_parent", "residual_var_teen"),
+      sigma(apim_mlm_fit)^2, 0 # Sigma returns an SD, so square it. 
+    )
+  )
+
+glmmtmb_params_point <- dplyr::select(glmmtmb_points, parameter, estimate)
+print_table(glmmtmb_params_point)
+```
+
+### Calculate the contributions with simple products
+
+We also need the two efficacy variances and their covariance. We calculate
+these from one row per dyad, dividing by $n$ as in lavaan's ML estimation.
+
+We then collect all estimates we need for the computation
+in a one-row table, `mlm_inputs`.
+
+```{r}
+
+n_dyads <- nrow(flashe_data)
+
+predictor_covariance_matrix <- cov.wt(
+  flashe_data[c("efficacy_centered_parent", "efficacy_centered_teen")],
+  method = "ML"
+)$cov
+
+
+# Put each fitted estimate in its own column.
+model_estimates <- glmmtmb_params_point |>
+  tidyr::pivot_wider(names_from = parameter, values_from = estimate)
+
+# Keep the four slopes and residual covariance; add the predictor moments.
+mlm_inputs <- model_estimates |>
+  dplyr::select(
+    actor_parent,
+    actor_teen,
+    partner_parent_to_teen,
+    partner_teen_to_parent,
+    residual_cov
+  ) |>
+  dplyr::mutate(
+    var_efficacy_parent = predictor_covariance_matrix[1, 1],
+    var_efficacy_teen = predictor_covariance_matrix[2, 2],
+    cov_efficacy = predictor_covariance_matrix[1, 2],
+    .before = residual_cov
+  )
+
+print_table(mlm_inputs)
+```
+
+
+Computing the contributions with the columns directly: 
+
+```{r glmmtmb-point-decomposition}
+glmmtmb_decomposition_point <- mlm_inputs |>
+  dplyr::mutate(
+    actor_driven = actor_teen * cov_efficacy * actor_parent,
+    partner_driven = partner_parent_to_teen * cov_efficacy * partner_teen_to_parent,
+    teen_driven = actor_teen * var_efficacy_teen * partner_teen_to_parent,
+    parent_driven = actor_parent * var_efficacy_parent * partner_parent_to_teen,
+    residual = residual_cov,
+    
+    explained = sum(
+      actor_driven, partner_driven, teen_driven, parent_driven
+    ),
+    
+    total_covariance = explained + residual,
+    
+    .keep = "none"
+  ) |>
+  # Return to one row per contribution for the display table.
+  tidyr::pivot_longer(
+    dplyr::everything(), names_to = "parameter", values_to = "estimate"
+  ) |>
+  # Divide each estimate by the total covariance row, then multiply by 100.
+  dplyr::mutate(
+    percent = 100 * (estimate / estimate[parameter == "total_covariance"])
+  )
+print_table(glmmtmb_decomposition_point)
+```
+
+### Compare the point estimates with lavaan
+
+We compare the nine parameters estimated by both models, then the covariance
+contributions. The predictor means, variances and covariance are fitted
+parameters in lavaan. glmmTMB treats the predictors as observed values.
+
+```{r compare-parameter-points}
+parameter_point_comparison <- dplyr::inner_join(
+  dplyr::select(lavaan_params, parameter, estimate),
+  glmmtmb_params_point,
+  by = "parameter",
+  suffix = c("_lavaan", "_glmmtmb")
+)
+print_table(parameter_point_comparison)
+```
+
+```{r compare-decomposition-points}
+decomposition_point_comparison <- dplyr::inner_join(
+  dplyr::select(lavaan_decomposition_table, parameter, estimate, percent),
+  glmmtmb_decomposition_point,
+  by = "parameter",
+  suffix = c("_lavaan", "_glmmtmb")
+)
+print_table(decomposition_point_comparison)
+```
+
+### Plot the point estimates
+
+Visualize the contribution to the total covariance.
+
+```{r prepare-decomposition-plots}
+library(ggplot2)
+
+route_labels <- c(
+  actor_driven = "Actor-driven", partner_driven = "Partner-driven",
+  teen_driven = "Teen-driven", parent_driven = "Parent-driven",
+  residual = "Residual"
+)
+# Muted teal, ochre, blue, mauve and slate, in the same order as the routes.
+route_colours <- c("#468C83", "#D3A064", "#6F91B7", "#AD8CA7", "#7B8794")
+plot_data <- dplyr::bind_rows(
+  lavaan = dplyr::select(lavaan_decomposition, parameter, estimate),
+  glmmTMB = dplyr::select(glmmtmb_decomposition_point, parameter, estimate),
+  .id = "model"
+) |>
+  dplyr::filter(parameter %in% names(route_labels)) |>
+  dplyr::mutate(
+    model = factor(model, levels = c("lavaan", "glmmTMB")),
+    route = factor(parameter, levels = names(route_labels),
+                   labels = unname(route_labels))
+  ) |>
+  dplyr::arrange(model, route) |>
+  dplyr::group_by(model) |>
+  dplyr::mutate(
+    end = cumsum(estimate), start = end - estimate,
+    percent = 100 * estimate / sum(estimate)
+  )
+
+plot_totals <- dplyr::summarise(plot_data, total = sum(estimate))
+```
+
+#### Waterfall: how the contributions add up
+
+```{r decomposition-waterfall, dev="svg", fig.width=10, fig.height=4}
+ggplot(plot_data, aes(fill = route)) +
+  geom_rect(aes(
+    xmin = as.numeric(route) - 0.4, xmax = as.numeric(route) + 0.4,
+    ymin = pmin(start, end), ymax = pmax(start, end)
+  )) +
+  geom_text(
+    aes(x = as.numeric(route), y = pmax(start, end),
+        label = sprintf("%.1f%%", percent)),
+    vjust = -0.6, colour = "#475569", size = 3.5
+  ) +
+  geom_hline(
+    data = plot_totals, aes(yintercept = total),
+    linetype = "dotted", colour = "#475569"
+  ) +
+  geom_text(
+    data = plot_totals,
+    aes(x = 0.6, y = total, label = sprintf("Total = %.3f", total)),
+    inherit.aes = FALSE, hjust = 0, vjust = -0.6, colour = "#475569"
+  ) +
+  facet_wrap(~ model, nrow = 1) +
+  scale_x_continuous(
+    breaks = seq_along(route_labels), labels = gsub("-", "\n", route_labels)
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0.02, 0.12))) +
+  scale_fill_manual(values = route_colours) +
+  labs(x = NULL, y = "Outcome covariance") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+#### Stacked bars: compare the two fits
+
+Here all five contributions are positive, so each bar's length is the total
+covariance. The two bars should look almost identical because the fits describe
+the same model. With negative contributions, ggplot places positive and
+negative pieces on opposite sides of zero; the waterfall makes their net
+total easier to see.
+
+```{r decomposition-stacked-bars, dev="svg", fig.width=10, fig.height=3}
+ggplot(plot_data, aes(x = estimate, y = model, fill = route)) +
+  geom_col(width = 0.5, position = position_stack(reverse = TRUE)) +
+  # Put labels for tiny segments below the bar to avoid overlap.
+  geom_text(
+    aes(x = (start + end) / 2,
+        y = as.numeric(model) + ifelse(abs(percent) < 1, -0.35, 0.35),
+        label = sprintf("%.1f%%", percent)),
+    colour = "#475569", size = 3.5
+  ) +
+  scale_fill_manual(values = route_colours) +
+  labs(x = "Outcome covariance", y = NULL, fill = "Contribution") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+## 3. Add confidence intervals for glmmTMB
+
+### Add CIs for the standard parameters
+
+We now add CIs to the point estimates above. `broom.mixed::tidy()` provides
+the coefficient Wald CIs directly, in the same table format as before.
+For the residual structure, `confint()` returns SDs and a correlation. We want
+variances and a covariance, with symmetric Wald CIs like lavaan's. We use
+`car::deltaMethod()` to transform glmmTMB's parameters and their joint
+uncertainty; we do not need to derive the standard errors ourselves.
+
+The helper `delta_table()` repeats this call for each formula and collects
+the estimates, SEs and CIs into one table. We retain the SEs for the later
+decomposition, but display only the estimates and CIs.
+
+```{r glmmtmb-delta-helper}
+# formulas is a named vector of expressions written as text.
+# uncertainty is the matrix describing uncertainty in the input estimates.
+# car differentiates each expression and calculates its SE and Wald CI.
+delta_table <- function(estimates, uncertainty, formulas) {
+  lapply(formulas, function(formula) {
+    car::deltaMethod(estimates, formula, vcov. = uncertainty) |>
+      tibble::as_tibble()
+  }) |>
+    dplyr::bind_rows(.id = "parameter") |>
+    dplyr::select(
+      parameter,
+      estimate = Estimate,
+      standard_error = SE,
+      ci_low = `2.5 %`,
+      ci_high = `97.5 %`
+    )
+}
+```
+
+We extract the CIs, then join the readable labels using the original term
+names. Selecting the columns below keeps only the estimate and CI limits.
+
+```{r extract-glmmtmb}
+fixed_parameters <- broom.mixed::tidy(
+  apim_mlm_fit,
+  effects = "fixed",
+  conf.int = TRUE,
+  conf.method = "Wald"
+) |>
+  dplyr::inner_join(
+    dplyr::select(glmmtmb_points, term, parameter),
+    by = "term"
+  ) |>
+  dplyr::select(
+    parameter, estimate,
+    ci_low = conf.low,
+    ci_high = conf.high
+  )
+```
+
+For this two-member `us()` block, glmmTMB stores three internal parameters,
+called `theta`: the log of each SD and a transformed correlation. We give them
+readable names below. `cor_theta` is not the correlation itself; the formula
+`cor_theta / sqrt(1 + cor_theta^2)` converts it to a correlation.
+
+`vcov(..., full = TRUE)` provides the estimation uncertainty for all fitted
+parameters. We select the three `theta` rows and columns to obtain their
+joint uncertainty. This matrix describes how the parameter estimates vary
+across samples, rather than how the parent and teen residuals vary.
+
+The formulas then convert log-SDs to variances and multiply both SDs by the
+correlation to obtain the covariance. `delta_table()` passes these formulas
+and the uncertainty matrix to `car::deltaMethod()`.
+
+```{r extract-glmmtmb-residuals}
+# Internal parameters, in parent/teen order for the us() block above.
+theta <- glmmTMB::getME(apim_mlm_fit, "theta")
+names(theta) <- c("log_sd_parent", "log_sd_teen", "cor_theta")
+
+# Keep their joint estimation uncertainty from the fitted model.
+theta_vcov <- vcov(apim_mlm_fit, full = TRUE, include_nonest = FALSE)
+theta_rows <- grep("^theta_", rownames(theta_vcov))
+theta_vcov <- theta_vcov[theta_rows, theta_rows]
+dimnames(theta_vcov) <- list(names(theta), names(theta))
+
+residual_formulas <- c(
+  residual_var_parent = "exp(2 * log_sd_parent)",
+  residual_var_teen = "exp(2 * log_sd_teen)",
+  residual_cov = paste(
+    "exp(log_sd_parent + log_sd_teen) *",
+    "cor_theta / sqrt(1 + cor_theta^2)"
+  )
+)
+residual_parameters <- delta_table(
+  theta, theta_vcov, residual_formulas
+)
+
+# ~0 fixes an additional, almost-zero dispersion variance.
+# Add that constant to both variance estimates and their CI limits.
+# across() applies the same adjustment to each of these three columns.
+residual_parameters <- residual_parameters |>
+  dplyr::mutate(dplyr::across(
+    c(estimate, ci_low, ci_high),
+    ~ .x + dplyr::if_else(
+      parameter != "residual_cov", sigma(apim_mlm_fit)^2, 0
+    )
+  ))
+
+glmmtmb_params <- dplyr::bind_rows(fixed_parameters, residual_parameters) |>
+  dplyr::select(-standard_error)
+print_table(glmmtmb_params)
+```
+
+### Add CIs for the covariance contributions
+
+We keep the eight point estimates already collected in `mlm_inputs`.
+`car::deltaMethod()` needs a named numeric vector, so `unlist()` converts the
+one-row table while retaining the column names. We then add their joint
+uncertainty.
+
+```{r glmmtmb-ci-inputs}
+mlm_estimates <- unlist(mlm_inputs)
+```
+
+Lavaan does this automatically for `:=` formulas because our model estimates
+the predictor variances and covariance as well as the outcome parameters.
+GlmmTMB fits the outcomes given the observed predictors. It provides uncertainty
+for its fitted parameters, but does not estimate the predictor distribution
+or automatically calculate CIs for our decomposition. We add the predictor
+variances and covariance and their uncertainty to match the lavaan calculation.
+
+### Prepare the uncertainty matrix
+
+A contribution combines several estimates, so its CI needs uncertainty in
+every input. `vcov(apim_mlm_fit)$cond` gives the uncertainty matrix for the
+fixed-effect estimates: its diagonal contains squared SEs, and its other
+entries describe how the coefficient estimates vary together across samples.
+We obtain the decomposition's inputs from these sources:
+
+| Inputs | Where the estimates come from | Where their uncertainty comes from |
+| --- | --- | --- |
+| Actor/partner slopes | `broom.mixed::tidy()` | `vcov(apim_mlm_fit)$cond` |
+| Residual covariance | `broom.mixed::tidy()` | Its SE from the model's `theta_vcov` and the delta method |
+| Predictor variances and covariance | `cov.wt(..., method = "ML")` | `covariance_uncertainty()` |
+
+`VarCorr()` describes variation in parent and teen residuals. `vcov()`
+describes uncertainty in the estimated model parameters. These are different
+quantities, even though both are covariance matrices.
+
+`mlm_vcov` combines the uncertainty in those eight estimates. It must use
+the same order as `mlm_estimates`, so each estimate is paired with its own
+uncertainty.
+
+We still need a separate calculation for the predictor variances and
+covariance, because glmmTMB does not estimate them. `covariance_uncertainty()`
+takes their covariance matrix and the number of dyads, then returns the
+uncertainty matrix for the two variances and covariance using Gaussian ML
+formulas.
+This helper assumes complete, independent Gaussian dyads; it cannot be used
+unchanged for missing data or repeated observations within dyads.
+
+```{r glmmtmb-predictor-uncertainty}
+# S is in parent/teen order; n is the number of complete dyads.
+# Rows and columns: parent variance, teen variance, predictor covariance.
+covariance_uncertainty <- function(S, n) {
+  v_parent <- S[1, 1]
+  v_teen <- S[2, 2]
+  c_parent_teen <- S[1, 2]
+  rbind(
+    c(2 * v_parent^2, 2 * c_parent_teen^2, 2 * v_parent * c_parent_teen),
+    c(2 * c_parent_teen^2, 2 * v_teen^2, 2 * v_teen * c_parent_teen),
+    c(2 * v_parent * c_parent_teen, 2 * v_teen * c_parent_teen,
+      v_parent * v_teen + c_parent_teen^2)
+  ) / n
+}
+```
+
+The three uncertainty blocks are asymptotically uncorrelated under this
+complete Gaussian ML model. `bdiag()` therefore fills the gaps between them
+with zeros, while keeping the covariances within each block.
+
+```{r glmmtmb-decomposition-inputs}
+# Join the first four input labels to the original model names, in that order.
+slope_names <- tibble::tibble(parameter = names(mlm_inputs)[1:4]) |>
+  dplyr::left_join(
+    dplyr::select(glmmtmb_points, parameter, term),
+    by = "parameter"
+  ) |>
+  dplyr::pull(term)
+slope_vcov <- vcov(apim_mlm_fit)$cond[slope_names, slope_names]
+
+# Uncertainty in the predictor variances and covariance calculated in part 2.
+predictor_vcov <- covariance_uncertainty(predictor_covariance_matrix, n_dyads)
+residual_cov_parameter <- dplyr::filter(
+  residual_parameters, parameter == "residual_cov"
+)
+
+# Join the three uncertainty blocks; the last is the residual covariance's SE^2.
+mlm_vcov <- as.matrix(Matrix::bdiag(
+  slope_vcov, predictor_vcov, residual_cov_parameter$standard_error^2
+))
+dimnames(mlm_vcov) <- list(names(mlm_estimates), names(mlm_estimates))
+```
+
+The table below shows the eight inputs and their SEs. The full matrix also
+contains the covariances between estimates; these enter the delta calculation.
+
+```{r show-decomposition-inputs}
+decomposition_inputs <- tibble::tibble(
+  parameter = names(mlm_estimates),
+  estimate = unname(mlm_estimates),
+  standard_error = sqrt(diag(mlm_vcov))
+)
+print_table(decomposition_inputs)
+```
+
+### Calculate the CI for one contribution
+
+Take `actor_driven`. It multiplies the teen actor effect, the predictor
+covariance, and the parent actor effect. Once the inputs above are ready,
+this single call gives its estimate, SE and 95% Wald CI:
+
+```{r actor-contribution-ci}
+actor_driven_ci <- car::deltaMethod(
+  mlm_estimates,
+  "actor_teen * cov_efficacy * actor_parent",
+  vcov. = mlm_vcov
+)
+print_table(actor_driven_ci)
+```
+
+The three arguments supply the **values**, the **formula**, and the
+**uncertainty matrix**. Inside this call, the delta method:
+
+1. Calculates how much the product changes when each input changes. These
+   sensitivities provide the weights for the uncertainty calculation.
+2. Combines those weights with the uncertainty matrix to calculate the
+   product's SE, including how its input estimates vary together.
+3. Forms the interval: estimate $\pm 1.96\times\mathrm{SE}$.
+
+The matrix multiplication is handled by the package. We need to supply the
+formula too, because different products have different sensitivities to the
+same inputs. For a percentage, the formula also contains the total covariance
+in the denominator; the same calculation accounts for its uncertainty.
+
+### Calculate all contributions
+
+We write the same formulas from part 2 as text for `car::deltaMethod()`.
+`delta_table()` repeats the call for each contribution and percentage.
+
+```{r glmmtmb-covariance-decomposition}
+# The same five path products as in lavaan, written as text for car.
+path_formulas <- c(
+  actor_driven = "actor_teen * cov_efficacy * actor_parent",
+  partner_driven = paste(
+    "partner_parent_to_teen * cov_efficacy *", "partner_teen_to_parent"
+  ),
+  teen_driven = "actor_teen * var_efficacy_teen * partner_teen_to_parent",
+  parent_driven = "actor_parent * var_efficacy_parent * partner_parent_to_teen",
+  residual = "residual_cov"
+)
+# Join the five expressions with +; the first four give the explained subtotal.
+total_formula <- paste(path_formulas, collapse = " + ")
+path_formulas <- c(
+  path_formulas, explained = paste(path_formulas[1:4], collapse = " + ")
+)
+
+# Each percentage is 100 * (contribution formula) / (total formula).
+# sprintf() inserts both formulas; setNames() labels the resulting quantities.
+decomposition_formulas <- c(
+  path_formulas,
+  total_covariance = total_formula,
+  setNames(
+    sprintf("100 * (%s) / (%s)", path_formulas, total_formula),
+    paste0("percent_", names(path_formulas))
+  )
+)
+
+glmmtmb_decomposition <- delta_table(
+  mlm_estimates, mlm_vcov, decomposition_formulas
+)
+glmmtmb_decomposition_table <- format_decomposition(glmmtmb_decomposition)
+print_table(glmmtmb_decomposition_table)
+```
+
+### Compare the model parameter CIs
+
+```{r compare-parameters}
+parameter_comparison <- dplyr::inner_join(
+  lavaan_params,
+  glmmtmb_params,
+  by = "parameter",
+  suffix = c("_lavaan", "_glmmtmb")
+) |>
+  dplyr::mutate(
+    ci_lavaan = sprintf("[%.3f, %.3f]", ci_low_lavaan, ci_high_lavaan),
+    ci_glmmtmb = sprintf("[%.3f, %.3f]", ci_low_glmmtmb, ci_high_glmmtmb)
+  ) |>
+  dplyr::select(
+    parameter, estimate_lavaan, ci_lavaan, estimate_glmmtmb, ci_glmmtmb
+  )
+
+# Fixed effects: intercepts and actor/partner slopes.
+fixed_effects_comparison <- parameter_comparison |>
+  dplyr::filter(!startsWith(parameter, "residual_"))
+print_table(fixed_effects_comparison)
+
+# Residual structure: two variances and their covariance.
+residual_structure_comparison <- parameter_comparison |>
+  dplyr::filter(startsWith(parameter, "residual_"))
+print_table(residual_structure_comparison)
+```
+
+Both tables use unstandardized estimates and 95% Wald confidence intervals.
+The glmmTMB variance/covariance intervals transform the fitted model's joint
+parameter uncertainty with the delta method. They use the same symmetric
+Wald form as lavaan: estimate $\pm 1.96\times\mathrm{SE}$.
+
+### Compare the contribution CIs
+
+Both methods use full-precision estimates and 95% delta-method Wald intervals.
+Formatting the intervals below only rounds their displayed values.
+The CI refers to the covariance estimate; percent gives its share of the total.
+
+```{r compare-decompositions}
+decomposition_comparison <- dplyr::left_join(
+  lavaan_decomposition_table,
+  glmmtmb_decomposition_table,
+  by = "parameter",
+  suffix = c("_lavaan", "_glmmtmb")
+)
+
+print_table(decomposition_comparison)
+```
+
+## 4. Plot the confidence intervals
+
+Each point is a contribution estimate; its horizontal line is the 95% CI.
+The panels show lavaan and glmmTMB using the same scale.
+
+```{r decomposition-intervals, dev="svg", fig.width=10, fig.height=4}
+# Add the CI limits now that both decompositions include them.
+ci_plot_data <- dplyr::bind_rows(
+  lavaan = lavaan_decomposition, glmmTMB = glmmtmb_decomposition,
+  .id = "model"
+) |>
+  dplyr::filter(parameter %in% names(route_labels)) |>
+  dplyr::mutate(
+    model = factor(model, levels = c("lavaan", "glmmTMB")),
+    route = factor(parameter, levels = names(route_labels),
+                   labels = unname(route_labels))
+  )
+
+ggplot(ci_plot_data, aes(estimate, route, colour = route)) +
+  geom_pointrange(aes(xmin = ci_low, xmax = ci_high),
+                 show.legend = FALSE) +
+  geom_vline(xintercept = 0, linetype = "dotted") +
+  facet_wrap(~ model) +
+  scale_colour_manual(values = route_colours) +
+  labs(x = "Covariance contribution", y = NULL) +
+  theme_minimal()
+```
