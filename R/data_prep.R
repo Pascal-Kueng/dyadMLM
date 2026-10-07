@@ -554,6 +554,7 @@ prepare_dyad_data <- function(
   if (attr(out, "dyadMLM")$longitudinal) {
     out <- restore_observed_dyad_rows(out)
   }
+  warn_if_lags_missing(out)
 
   # The temporary partner status columns are only needed during preparation.
   out[[dyad_partner_exists_col]] <- NULL

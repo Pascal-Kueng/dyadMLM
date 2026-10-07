@@ -31,6 +31,10 @@
   split by partner status (with numeric `time`). See
   `vignette("partner-exists")`.
 
+* `prepare_dyad_data()` warns when all lag-1 values of a predictor are
+  missing, for example when `time` counts years with two-year waves
+  ([#83](https://github.com/Pascal-Kueng/dyadMLM/issues/83)).
+
 * `recover_exchangeable_covariance()` recognizes summed indicators such as
   `I(.is_male_x_male + .is_singleton_male)`, which let people observed alone
   share the variance of an exchangeable composition.
