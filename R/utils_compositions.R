@@ -28,6 +28,12 @@ dyad_resolved_role_col <- paste0(dyad_reserved_prefix, "resolved_role")
 dyad_diff_col <- paste0(dyad_reserved_prefix, "diff")
 dyad_arbitrary_role_col <- paste0(dyad_reserved_prefix, "arbitrary_role")
 dyad_dsm_role_contrast_col <- paste0(dyad_retained_prefix, "dsm_role_contrast")
+# Partner status per row (from `partner_exists`) and at the previous occasion.
+dyad_partner_exists_col <- paste0(dyad_reserved_prefix, "partner_exists")
+dyad_partner_exists_lag1_col <- paste0(dyad_partner_exists_col, "_lag1")
+
+# Dyad types of people observed alone: no partner, or a partner not in the data.
+dyad_alone_types <- c("singleton", "partner_missing")
 
 ############################################################################
 # HELPER FUNCTIONS
@@ -136,10 +142,14 @@ make_dyad_suffixes <- function(labels, label_type = "labels",
 #' @param observed_compositions Canonical composition labels observed in the
 #'   data.
 #' @param arg_name Name of the user-facing argument for error messages.
+#' @param alone_compositions Labels of people observed alone, such as
+#'   `"singleton_male"` or `"male_x_missing"`. They are matched as a whole, so
+#'   `"singleton male"` or `"male-missing"` also work.
 #'
 #' @return Canonical observed composition labels.
 #' @keywords internal
-resolve_composition_references <- function(references, observed_compositions, arg_name) {
+resolve_composition_references <- function(references, observed_compositions, arg_name,
+                                           alone_compositions = character()) {
   if (is.null(references)) {
     return(character())
   }
@@ -163,11 +173,21 @@ resolve_composition_references <- function(references, observed_compositions, ar
     )
   }
 
+  # Labels of people observed alone are matched as a whole, with any separator.
+  unify_separators <- function(x) gsub("_x_|[-_[:space:]]+", "_", x)
+
   # initiate empty character vector of same length as references
   reference_values <- character(length(references))
   # try to split correctly!
   for (i in seq_along(references)) {
     reference <- trimws(references[[i]])
+
+    # Exact observed labels first, then role pairs such as "female-male" or
+    # labels of people observed alone with other separators.
+    if (reference %in% observed_compositions) {
+      reference_values[[i]] <- reference
+      next
+    }
 
     if (grepl(dyad_composition_sep, reference, fixed = TRUE)) {
       roles <- strsplit(reference, dyad_composition_sep, fixed = TRUE)[[1]]
@@ -180,9 +200,48 @@ resolve_composition_references <- function(references, observed_compositions, ar
     } else {
       roles <- reference
     }
+    role_pair <- canonical_composition(trimws(roles))
+    is_dyad_pair <- role_pair %in% setdiff(observed_compositions, alone_compositions)
 
-    # build cannonical string
-    reference_values[[i]] <- canonical_composition(trimws(roles))
+    alone_match <- alone_compositions[unify_separators(alone_compositions) == unify_separators(reference)]
+    # E.g., with roles "singleton" and "twin", "singleton-twin" can mean the
+    # dyads or the twins without a partner.
+    if (length(alone_match) > 0L && is_dyad_pair) {
+      stop(
+        "`", arg_name, "` reference \"", reference, "\" matches both ",
+        role_pair, " and ", paste(alone_match, collapse = ", "),
+        ". Use the exact label.",
+        call. = FALSE
+      )
+    }
+    if (length(alone_match) > 1L) {
+      stop(
+        "`", arg_name, "` reference \"", reference, "\" matches several ",
+        "labels of people observed alone: ", paste(alone_match, collapse = ", "),
+        ". Use the exact label.",
+        call. = FALSE
+      )
+    }
+    if (length(alone_match) == 1L) {
+      reference_values[[i]] <- alone_match
+      next
+    }
+
+    # A reference that looks like a label of people observed alone would
+    # otherwise be reported as a misleading role pair.
+    looks_alone <- grepl("(^|_)(singleton|missing)(_|$)", unify_separators(reference))
+    if (looks_alone && !role_pair %in% observed_compositions) {
+      stop(
+        "`", arg_name, "` reference \"", reference, "\" is not in the data. ",
+        "Observed compositions: ",
+        paste(setdiff(observed_compositions, alone_compositions), collapse = ", "),
+        ". Labels of people observed alone: ",
+        if (length(alone_compositions) > 0L) paste(alone_compositions, collapse = ", ") else "none",
+        ".",
+        call. = FALSE
+      )
+    }
+    reference_values[[i]] <- role_pair
   }
 
   reference_values <- unique(reference_values)
@@ -203,7 +262,7 @@ resolve_composition_references <- function(references, observed_compositions, ar
     )
   }
 
-  reference_values
+  return(reference_values)
 }
 
 

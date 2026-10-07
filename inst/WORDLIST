@@ -18,6 +18,7 @@ Fi
 GMC
 Gelman
 Hartig
+Hedeker
 ILD
 Iida
 LD
@@ -39,6 +40,7 @@ STS
 Sinica
 Statistica
 TMB
+Yaremych
 Zenodo
 al
 bmatrix
@@ -65,6 +67,7 @@ frac
 glmmTMB
 ij
 labelled
+listwise
 mathrm
 operatorname
 personID

@@ -4,7 +4,12 @@
 \alias{resolve_composition_references}
 \title{Resolve user-supplied composition references}
 \usage{
-resolve_composition_references(references, observed_compositions, arg_name)
+resolve_composition_references(
+  references,
+  observed_compositions,
+  arg_name,
+  alone_compositions = character()
+)
 }
 \arguments{
 \item{references}{A character vector of composition references.}
@@ -13,6 +18,10 @@ resolve_composition_references(references, observed_compositions, arg_name)
 data.}
 
 \item{arg_name}{Name of the user-facing argument for error messages.}
+
+\item{alone_compositions}{Labels of people observed alone, such as
+\code{"singleton_male"} or \code{"male_x_missing"}. They are matched as a whole, so
+\code{"singleton male"} or \code{"male-missing"} also work.}
 }
 \value{
 Canonical observed composition labels.
