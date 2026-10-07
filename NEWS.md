@@ -31,6 +31,10 @@
   split by partner status (with numeric `time`). See
   `vignette("partner-exists")`.
 
+* `recover_exchangeable_covariance()` recognizes summed indicators such as
+  `I(.is_male_x_male + .is_singleton_male)`, which let people observed alone
+  share the variance of an exchangeable composition.
+
 * Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.
 
