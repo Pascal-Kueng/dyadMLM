@@ -282,6 +282,7 @@ reference](https://pascal-kueng.github.io/dyadMLM/reference/index.html).
 |----|----|
 | [Getting Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
 | [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.html) | Cross-sectional and longitudinal APIMs, distinguishability checks, covariance recovery, random slopes, and AR(1) |
+| [People Observed Without Their Partner](https://pascal-kueng.github.io/dyadMLM/articles/partner-exists.html) | Singletons, partners who did not take part, partners lost or gained during a study, and two-part partner predictors |
 | [Dyad-Individual Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.html) | DIM predictor construction, longitudinal models, and an interactive demonstration of equivalence to the exchangeable APIM |
 | [Dyadic Score Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html) | DSM predictor-score and contrast construction, longitudinal models, and the relationship to the distinguishable APIM |
 

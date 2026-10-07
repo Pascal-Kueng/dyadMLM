@@ -36,6 +36,8 @@ navbar:
         href: articles/getting-started.html
       - text: Actor-Partner Interdependence Model
         href: articles/apim.html
+      - text: People Observed Without Their Partner
+        href: articles/partner-exists.html
       - text: Dyad-Individual Model
         href: articles/dim.html
       - text: Dyadic Score Model
@@ -57,6 +59,7 @@ articles:
   desc: Details for specific dyadic model parameterizations.
   contents:
   - apim
+  - partner-exists
   - dim
   - dsm
 - title: Simulation studies
