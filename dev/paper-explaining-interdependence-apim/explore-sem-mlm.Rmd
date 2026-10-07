@@ -114,7 +114,7 @@ apim_model <- '
 '
 
 # Predictor means, variances and covariance are free parameters above.
-# Bootstrap CIs: refit to 1999 resamples of the dyads (15 to 30 s on 4 cores).
+# Bootstrap CIs: refit to 1999 samples of the dyads (15 to 30 s on 4 cores).
 apim_fit <- sem(
   apim_model, fixed.x = FALSE, data = flashe_data, missing = "fiml",
   se = "bootstrap", bootstrap = 1999, iseed = 2026,
@@ -155,8 +155,8 @@ print_table(lavaan_params)
 
 The `:=` definitions above apply the Day 2 handout formulas. They calculate
 contributions and percentages from the estimates without changing the fitted
-model. With `se = "bootstrap"`, lavaan recalculates them in each of the 1999
-resamples. The middle 95% of these values gives each 95% confidence interval
+model. With `se = "bootstrap"`, lavaan recalculates them in each of 1999
+bootstrap samples. The middle 95% of these values gives each 95% confidence interval
 (CI). Each resample re-estimates all parameters, including the predictor
 variances and covariance, so the CIs include all their uncertainty.
 
@@ -363,8 +363,7 @@ print_table(glmmtmb_decomposition_point)
 
 ### Compare the point estimates with lavaan
 
-We compare the nine parameters estimated by both models, then the covariance
-contributions. The predictor means, variances and covariance are fitted
+We compare the nine parameters estimated by both models. The predictor means, variances and covariance are fitted
 parameters in lavaan. glmmTMB treats the predictors as observed values.
 The differences are below 1e-4 and come from the optimizers' stopping rules.
 
@@ -472,65 +471,36 @@ ggplot(plot_data, aes(x = estimate, y = model, fill = route)) +
 
 ## 3. Add confidence intervals for glmmTMB
 
-### Coefficients
-
-`broom.mixed::tidy()` gives Wald CIs for the intercepts and slopes. We join
-the readable labels using the original term names, then compare with
-lavaan's bootstrap CIs from part 1.
-
-```{r extract-glmmtmb}
-fixed_parameters <- broom.mixed::tidy(
-  apim_mlm_fit,
-  effects = "fixed",
-  conf.int = TRUE,
-  conf.method = "Wald"
-) |>
-  dplyr::inner_join(
-    dplyr::select(glmmtmb_points, term, parameter),
-    by = "term"
-  ) |>
-  dplyr::select(
-    parameter, estimate,
-    ci_low = conf.low,
-    ci_high = conf.high
-  )
-```
-
-```{r compare-parameters}
-parameter_comparison <- dplyr::inner_join(
-  lavaan_params,
-  fixed_parameters,
-  by = "parameter",
-  suffix = c("_lavaan", "_glmmtmb")
-) |>
-  dplyr::mutate(
-    ci_lavaan = sprintf("[%.3f, %.3f]", ci_low_lavaan, ci_high_lavaan),
-    ci_glmmtmb = sprintf("[%.3f, %.3f]", ci_low_glmmtmb, ci_high_glmmtmb)
-  ) |>
-  dplyr::select(
-    parameter, estimate_lavaan, ci_lavaan, estimate_glmmtmb, ci_glmmtmb
-  )
-print_table(parameter_comparison)
-```
-
-glmmTMB's Wald CIs are estimate $\pm 1.96\times\mathrm{SE}$. They are close
-to lavaan's bootstrap CIs.
-
-### Covariance contributions: bootstrap whole dyads
-
 We bootstrap as lavaan did in part 1: draw 1486 dyads with replacement,
 repeat part 2 on this sample, and do this 1999 times. The middle 95% of the
-1999 results gives the 95% CI. It does not assume normal data, and it can be
+1999 results gives each 95% CI. It does not assume normal data, and it can be
 asymmetric, which suits products of estimates.
 
-`boot()` needs part 2 as a function of the data. `decompose_covariance()`
-repeats its steps for any data with one row per dyad. It returns the five
-contributions, the explained subtotal and the total.
+### Repeat part 2 for any data
 
-```{r glmmtmb-bootstrap-function}
-decompose_covariance <- function(data) {
-  # Reshape and prepare as in part 2. Numbering the dyads anew makes a dyad
-  # drawn twice count as two dyads.
+`add_contributions()` holds the decomposition formulas from parts 1 and 2.
+`estimate_apim()` repeats part 2 for any data with one row per dyad. It
+returns all estimates, including the contributions, as a one-row tibble
+named as in lavaan.
+
+```{r bootstrap-functions}
+# The decomposition formulas from parts 1 and 2, for a table of estimates.
+add_contributions <- function(estimates) {
+  estimates |>
+    dplyr::mutate(
+      actor_driven = actor_teen * cov_efficacy * actor_parent,
+      partner_driven = partner_parent_to_teen * cov_efficacy * partner_teen_to_parent,
+      teen_driven = actor_teen * var_efficacy_teen * partner_teen_to_parent,
+      parent_driven = actor_parent * var_efficacy_parent * partner_parent_to_teen,
+      residual = residual_cov,
+      explained = actor_driven + partner_driven + teen_driven + parent_driven,
+      total_covariance = explained + residual
+    )
+}
+
+estimate_apim <- function(data) {
+  # Reshape, prepare and refit as in part 2. Numbering the dyads anew makes
+  # a dyad drawn twice count as two dyads.
   long <- data |>
     dplyr::mutate(dyad_id = dplyr::row_number()) |>
     tidyr::pivot_longer(
@@ -543,84 +513,111 @@ decompose_covariance <- function(data) {
     long, dyad = dyad_id, member = person_id, role = role,
     predictors = efficacy_centered, model_types = "apim"
   )
-
-  # Refit the part 2 model and take the same estimates.
   fit <- update(apim_mlm_fit, data = prepared)
-  slopes <- glmmTMB::fixef(fit)$cond
-  actor_parent <- slopes[[".is_parent:.efficacy_centered_actor"]]
-  actor_teen <- slopes[[".is_teen:.efficacy_centered_actor"]]
-  partner_teen_to_parent <- slopes[[".is_parent:.efficacy_centered_partner"]]
-  partner_parent_to_teen <- slopes[[".is_teen:.efficacy_centered_partner"]]
-  residual_cov <- glmmTMB::VarCorr(fit)$cond$dyad_id[".is_parent", ".is_teen"]
 
-  # Predictor variances and covariance, dividing by n.
-  S <- cov.wt(
+  # Model estimates and, as in part 2, the predictor variances and covariance
+  # (dividing by n). Both matrices are ordered parent, teen.
+  fixed_effects <- glmmTMB::fixef(fit)$cond
+  residual_covariance_matrix <- glmmTMB::VarCorr(fit)$cond$dyad_id
+  predictor_covariance_matrix <- cov.wt(
     data[c("efficacy_centered_parent", "efficacy_centered_teen")],
     method = "ML"
   )$cov
-  var_efficacy_parent <- S[1, 1]
-  var_efficacy_teen <- S[2, 2]
-  cov_efficacy <- S[1, 2]
 
-  # The same formulas as in parts 1 and 2.
-  contributions <- c(
-    actor_driven = actor_teen * cov_efficacy * actor_parent,
-    partner_driven = partner_parent_to_teen * cov_efficacy * partner_teen_to_parent,
-    teen_driven = actor_teen * var_efficacy_teen * partner_teen_to_parent,
-    parent_driven = actor_parent * var_efficacy_parent * partner_parent_to_teen,
-    residual = residual_cov
-  )
-  c(
-    contributions,
-    explained = sum(contributions[1:4]),
-    total_covariance = sum(contributions)
-  )
+  tibble::tibble(
+    intercept_parent = fixed_effects[[".is_parent"]],
+    intercept_teen = fixed_effects[[".is_teen"]],
+    actor_parent = fixed_effects[[".is_parent:.efficacy_centered_actor"]],
+    actor_teen = fixed_effects[[".is_teen:.efficacy_centered_actor"]],
+    partner_teen_to_parent = fixed_effects[[".is_parent:.efficacy_centered_partner"]],
+    partner_parent_to_teen = fixed_effects[[".is_teen:.efficacy_centered_partner"]],
+    residual_var_parent = residual_covariance_matrix[1, 1],
+    residual_var_teen = residual_covariance_matrix[2, 2],
+    residual_cov = residual_covariance_matrix[1, 2],
+    var_efficacy_parent = predictor_covariance_matrix[1, 1],
+    var_efficacy_teen = predictor_covariance_matrix[2, 2],
+    cov_efficacy = predictor_covariance_matrix[1, 2]
+  ) |>
+    add_contributions()
 }
 ```
 
-```{r glmmtmb-bootstrap, cache = TRUE, cache.extra = digest::digest(list(logLik(apim_mlm_fit), model.frame(apim_mlm_fit), body(decompose_covariance)))}
-# About 5 to 15 minutes on 4 cores. boot() draws all samples before fitting,
-# so the seed fixes them, also when fitting in parallel.
-# Cached until this chunk, the model fit or decompose_covariance() change.
+### Bootstrap
+
+```{r bootstrap-cache-key}
+# knitr caches the bootstrap below. It reruns it when that chunk changes or
+# when this key changes: when the data, the model fit, estimate_apim() or
+# add_contributions() change.
+bootstrap_key <- digest::digest(list(
+  flashe_data, logLik(apim_mlm_fit),
+  deparse(estimate_apim), deparse(add_contributions)
+))
+```
+
+```{r glmmtmb-bootstrap, cache = TRUE, cache.extra = bootstrap_key}
+# 1999 samples, each holding 1486 dyads (rows of flashe_data) drawn with
+# replacement.
 set.seed(2026)
-boot_decomposition <- boot::boot(
-  flashe_data,
-  function(data, rows) decompose_covariance(data[rows, ]),
-  R = 1999, parallel = "multicore", ncpus = 4
+bootstrap <- tibble::tibble(
+  dyads = replicate(
+    1999, sample(nrow(flashe_data), replace = TRUE), simplify = FALSE
+  )
 )
 
-# The 2.5% and 97.5% quantiles of the 1999 estimates give each 95% CI.
-glmmtmb_decomposition <- tibble::tibble(
-  parameter = names(boot_decomposition$t0),
-  estimate = boot_decomposition$t0,
-  ci_low = apply(boot_decomposition$t, 2, quantile, 0.025),
-  ci_high = apply(boot_decomposition$t, 2, quantile, 0.975)
-)
+# Estimate everything in each sample (about 5 to 15 minutes on 4 cores).
+bootstrap <- bootstrap |>
+  dplyr::mutate(estimates = parallel::mclapply(
+    dyads, \(rows) estimate_apim(flashe_data[rows, ]), mc.cores = 4
+  ))
+```
+
+```{r glmmtmb-cis}
+# 95% percentile CIs: the 2.5% and 97.5% quantiles of each column of draws.
+percentile_cis <- function(draws) {
+  draws |>
+    tidyr::pivot_longer(
+      dplyr::everything(), names_to = "parameter", values_to = "draw"
+    ) |>
+    dplyr::summarise(
+      ci_low = quantile(draw, 0.025),
+      ci_high = quantile(draw, 0.975),
+      .by = parameter
+    )
+}
+
+# One row per sample, one column per estimate.
+glmmtmb_draws <- dplyr::bind_rows(bootstrap$estimates)
+
+# Estimates from the full data, with their 95% percentile CIs.
+glmmtmb_cis <- estimate_apim(flashe_data) |>
+  tidyr::pivot_longer(
+    dplyr::everything(), names_to = "parameter", values_to = "estimate"
+  ) |>
+  dplyr::left_join(percentile_cis(glmmtmb_draws), by = "parameter")
 ```
 
 ### Compare the CIs with lavaan
 
-```{r compare-decompositions}
-# Both bootstraps, one row per model and quantity.
-decomposition_cis <- dplyr::bind_rows(
-  lavaan = lavaan_decomposition, glmmTMB = glmmtmb_decomposition,
-  .id = "model"
+```{r compare-cis}
+# inner_join keeps the estimates that both models have.
+ci_comparison <- dplyr::inner_join(
+  lavaan_estimates,
+  glmmtmb_cis,
+  by = "parameter",
+  suffix = c("_lavaan", "_glmmtmb")
 ) |>
-  dplyr::mutate(model = factor(model, levels = c("lavaan", "glmmTMB")))
-
-decomposition_comparison <- decomposition_cis |>
-  dplyr::filter(parameter %in% c(names(route_labels), "explained")) |>
-  dplyr::mutate(ci = sprintf("[%.3f, %.3f]", ci_low, ci_high)) |>
-  tidyr::pivot_wider(
-    id_cols = parameter, names_from = model, values_from = ci
-  )
-print_table(decomposition_comparison)
+  dplyr::mutate(
+    ci_lavaan = sprintf("[%.3f, %.3f]", ci_low_lavaan, ci_high_lavaan),
+    ci_glmmtmb = sprintf("[%.3f, %.3f]", ci_low_glmmtmb, ci_high_glmmtmb)
+  ) |>
+  dplyr::select(parameter, ci_lavaan, ci_glmmtmb)
+print_table(ci_comparison)
 ```
 
-The two bootstraps draw different resamples, so their CI limits differ
+The two bootstraps draw different samples, so their CI limits differ
 slightly by chance. Within this resampling noise, they agree.
-`explore-sem-mlm-details.Rmd` refits lavaan to the same resamples, where the
-contributions agree in every resample. It also compares other CI methods,
+`explore-sem-mlm-details.Rmd` refits lavaan to the same samples, where all
+estimates agree in every sample. It also compares other CI methods,
 including a faster alternative for glmmTMB: a Monte Carlo CI with
 `vcov(apim_mlm_fit, full = TRUE, sandwich = TRUE)`.
 
@@ -630,16 +627,20 @@ Each panel shows one contribution on its own scale, with the 95% CIs from
 both bootstraps.
 
 ```{r decomposition-intervals, dev="svg", fig.width=8, fig.height=5}
-ci_plot_data <- decomposition_cis |>
+ci_plot_data <- dplyr::bind_rows(
+  lavaan = lavaan_decomposition, glmmTMB = glmmtmb_cis,
+  .id = "model"
+) |>
   dplyr::filter(parameter %in% names(route_labels)) |>
   dplyr::mutate(
+    model = factor(model, levels = c("lavaan", "glmmTMB")),
     route = factor(parameter, levels = names(route_labels),
                    labels = unname(route_labels))
   )
 
-ggplot(ci_plot_data, aes(estimate, model, colour = route)) +
+ggplot(ci_plot_data, aes(x = estimate, y = model, colour = route)) +
   geom_pointrange(aes(xmin = ci_low, xmax = ci_high),
-                 show.legend = FALSE) +
+                  show.legend = FALSE) +
   facet_wrap(~ route, ncol = 1, scales = "free_x") +
   scale_colour_manual(values = route_colours) +
   labs(x = "Covariance contribution", y = NULL) +

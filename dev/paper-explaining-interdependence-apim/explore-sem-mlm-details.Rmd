@@ -18,33 +18,33 @@ available here.
 source(knitr::purl("explore-sem-mlm.Rmd", output = tempfile(), quiet = TRUE))
 ```
 
-## 1. glmmTMB and lavaan on the same resamples
+## 1. glmmTMB and lavaan on the same samples
 
-In the main notebook, the two bootstraps draw different resamples, so they
+In the main notebook, the two bootstraps draw different samples, so they
 agree only within resampling noise. Here we refit lavaan to the same 1999
-samples that glmmTMB used. `boot.array()` returns the rows of `flashe_data`
-that each sample drew. If the glmmTMB bootstrap is correct, both models give
-the same contributions in every sample, up to the precision of the
-optimizers.
+samples that glmmTMB used (`bootstrap$dyads`). If the glmmTMB bootstrap is
+correct, both models give the same estimates in every sample, up to the
+precision of the optimizers.
 
-```{r same-resamples}
-# One row per sample, holding the rows of flashe_data that it drew.
-resampled_rows <- boot::boot.array(boot_decomposition, indices = TRUE)
+```{r same-samples}
+# Refit lavaan to any data; return all estimates as a one-row tibble.
+# as.list() drops lavaan's own vector class.
+estimate_lavaan <- function(data) {
+  fit <- update(apim_fit, data = data, se = "none")
+  tibble::as_tibble_row(as.list(coef(fit, type = "user")))
+}
 
-# Refit lavaan to each sample and keep the same seven quantities.
+# One row per sample, one column per estimate, in the same order as
+# glmmtmb_draws.
 lavaan_draws <- parallel::mclapply(
-  seq_len(nrow(resampled_rows)),
-  function(b) {
-    fit <- update(apim_fit, data = flashe_data[resampled_rows[b, ], ],
-                  se = "none")
-    coef(fit, type = "user")[names(boot_decomposition$t0)]
-  },
-  mc.cores = 4
-)
-lavaan_draws <- do.call(rbind, lavaan_draws)
+  bootstrap$dyads, \(rows) estimate_lavaan(flashe_data[rows, ]), mc.cores = 4
+) |>
+  dplyr::bind_rows() |>
+  dplyr::select(dplyr::all_of(names(glmmtmb_draws)))
 
-# Largest difference between glmmTMB and lavaan, over all samples.
-max(abs(boot_decomposition$t - lavaan_draws))
+# Largest difference between glmmTMB and lavaan, over all samples and
+# estimates.
+max(abs(glmmtmb_draws - lavaan_draws))
 ```
 
 ## 2. Other CI methods for the contributions
@@ -76,50 +76,43 @@ mlr_fit <- sem(
 # About 3 minutes, mostly for the sandwich uncertainty matrix.
 set.seed(2026)
 n_draws <- 20000
+n_dyads <- nrow(flashe_data)
 
 # Draw the coefficients and glmmTMB's internal variance parameters (theta)
-# together: log SD parent, log SD teen, and a transformed correlation.
-draws <- MASS::mvrnorm(
+# together: two log SDs and a transformed correlation.
+theta <- glmmTMB::getME(apim_mlm_fit, "theta")
+model_draws <- MASS::mvrnorm(
   n_draws,
   mu = c(
     glmmTMB::fixef(apim_mlm_fit)$cond,
-    glmmTMB::getME(apim_mlm_fit, "theta")
+    log_sd_parent = theta[1], log_sd_teen = theta[2], cor_theta = theta[3]
   ),
   Sigma = vcov(apim_mlm_fit, full = TRUE, sandwich = TRUE)
 )
-theta <- draws[, 7:9]
 
-# Draw the predictor variances and covariance (normal theory).
-n_dyads <- nrow(flashe_data)
+# Draw the predictor variances and covariance (normal theory). rWishart()
+# returns a 2 x 2 x n_draws array: one covariance matrix per draw.
 predictor_draws <- rWishart(
   n_draws, df = n_dyads, Sigma = predictor_covariance_matrix / n_dyads
 )
 
-# The same formulas as in the main notebook, once per draw.
-actor_parent <- draws[, ".is_parent:.efficacy_centered_actor"]
-actor_teen <- draws[, ".is_teen:.efficacy_centered_actor"]
-partner_teen_to_parent <- draws[, ".is_parent:.efficacy_centered_partner"]
-partner_parent_to_teen <- draws[, ".is_teen:.efficacy_centered_partner"]
-var_efficacy_parent <- predictor_draws[1, 1, ]
-var_efficacy_teen <- predictor_draws[2, 2, ]
-cov_efficacy <- predictor_draws[1, 2, ]
-residual_cov <- exp(theta[, 1] + theta[, 2]) * theta[, 3] /
-  sqrt(1 + theta[, 3]^2)
+# One row per draw, named as in estimate_apim(), then the same formulas.
+monte_carlo_draws <- tibble::as_tibble(model_draws) |>
+  dplyr::transmute(
+    actor_parent = `.is_parent:.efficacy_centered_actor`,
+    actor_teen = `.is_teen:.efficacy_centered_actor`,
+    partner_teen_to_parent = `.is_parent:.efficacy_centered_partner`,
+    partner_parent_to_teen = `.is_teen:.efficacy_centered_partner`,
+    # Back-transform theta: SD parent * SD teen * correlation.
+    residual_cov = exp(log_sd_parent) * exp(log_sd_teen) *
+      cor_theta / sqrt(1 + cor_theta^2),
+    var_efficacy_parent = predictor_draws[1, 1, ],
+    var_efficacy_teen = predictor_draws[2, 2, ],
+    cov_efficacy = predictor_draws[1, 2, ]
+  ) |>
+  add_contributions()
 
-mc_draws <- cbind(
-  actor_driven = actor_teen * cov_efficacy * actor_parent,
-  partner_driven = partner_parent_to_teen * cov_efficacy * partner_teen_to_parent,
-  teen_driven = actor_teen * var_efficacy_teen * partner_teen_to_parent,
-  parent_driven = actor_parent * var_efficacy_parent * partner_parent_to_teen,
-  residual = residual_cov
-)
-mc_draws <- cbind(mc_draws, explained = rowSums(mc_draws[, 1:4]))
-
-monte_carlo <- tibble::tibble(
-  parameter = colnames(mc_draws),
-  ci_low = apply(mc_draws, 2, quantile, 0.025),
-  ci_high = apply(mc_draws, 2, quantile, 0.975)
-)
+monte_carlo_cis <- percentile_cis(monte_carlo_draws)
 ```
 
 ```{r compare-ci-methods}
@@ -129,10 +122,10 @@ lavaan_cis <- function(fit) {
 }
 
 ci_methods <- dplyr::bind_rows(
-  `glmmTMB bootstrap` = glmmtmb_decomposition,
+  `glmmTMB bootstrap` = glmmtmb_cis,
   `lavaan delta` = lavaan_cis(delta_fit),
   `lavaan delta, MLR` = lavaan_cis(mlr_fit),
-  `glmmTMB Monte Carlo` = monte_carlo,
+  `glmmTMB Monte Carlo` = monte_carlo_cis,
   .id = "method"
 ) |>
   dplyr::filter(parameter %in% c(names(route_labels), "explained")) |>
