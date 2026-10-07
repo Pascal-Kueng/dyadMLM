@@ -379,17 +379,6 @@ parameter_point_comparison <- dplyr::inner_join(
 print_table(parameter_point_comparison)
 ```
 
-```{r compare-decomposition-points}
-decomposition_point_comparison <- dplyr::inner_join(
-  dplyr::select(lavaan_decomposition_table, parameter, estimate, percent),
-  glmmtmb_decomposition_point,
-  by = "parameter",
-  suffix = c("_lavaan", "_glmmtmb")
-) |>
-  dplyr::mutate(difference = estimate_glmmtmb - estimate_lavaan)
-print_table(decomposition_point_comparison)
-```
-
 ### Plot the point estimates
 
 Visualize the contribution to the total covariance.
@@ -461,10 +450,9 @@ ggplot(plot_data, aes(fill = route)) +
 #### Stacked bars: compare the two fits
 
 Here all five contributions are positive, so each bar's length is the total
-covariance. The two bars should look almost identical because the fits describe
-the same model. With negative contributions, ggplot places positive and
-negative pieces on opposite sides of zero; the waterfall makes their net
-total easier to see.
+covariance. With negative contributions, ggplot would place positive and
+negative pieces on opposite sides of zero. The waterfall above might make
+their net total easier to see.
 
 ```{r decomposition-stacked-bars, dev="svg", fig.width=10, fig.height=3}
 ggplot(plot_data, aes(x = estimate, y = model, fill = route)) +
