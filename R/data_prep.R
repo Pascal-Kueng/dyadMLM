@@ -558,6 +558,7 @@ prepare_dyad_data <- function(
   # Which partner predictors were set to 0 and which terms belong in the
   # model, judged on the returned rows.
   report_two_part_coding(out)
+  warn_if_lags_missing(out)
 
   # The temporary partner status columns are only needed during preparation.
   out[[dyad_partner_exists_col]] <- NULL
