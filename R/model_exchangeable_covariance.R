@@ -93,6 +93,29 @@
 #' Covariances involving the diary-day slope are therefore supplied entirely by
 #' the shared block.
 #'
+#' People observed alone (see `partner_exists` in [prepare_dyad_data()]) can
+#' share the variance of an exchangeable composition. Add their indicator to
+#' both blocks, as a sum inside `I()`:
+#'
+#' ```r
+#' (0 + I(.is_male_x_male + .is_singleton_male) | coupleID) +
+#'   (0 + I(.member_contrast_male_x_male_arbitrary + .is_singleton_male) | coupleID)
+#' ```
+#'
+#' Automatic matching reads such a sum as the composition's indicator, also in
+#' interactions such as `I(.is_male_x_male + .is_singleton_male):time`. A
+#' person observed alone is then treated like one member of the dyad (shared
+#' part 1, difference part +1), so the recovered variances and covariances
+#' within a member also describe them, as long as their indicator is added to
+#' this composition's blocks only. Covariances between partners describe dyad
+#' members only. Added to several compositions, their variance combines them. Recovery
+#' requires the same added indicators on all terms of a block, and in both
+#' blocks. Otherwise, recovery stops with an error, because these
+#' people would get only part of the dyad members' variance. The fitted summed
+#' columns are checked like the indicator columns. In `block_pairings`, give
+#' the plain indicator names as `difference_indicator` and `shared_indicator`
+#' (e.g., `.member_contrast_male_x_male_arbitrary`), not the sum.
+#'
 #' The random-effect terms may be copied exactly from the model formula.
 #' Equivalent backend syntax is also recognized, such as
 #' `(1 + time | group)` and `us(1 + time | group)`, or
@@ -562,6 +585,59 @@ split_exchangeable_interaction <- function(coefficient) {
   return(flatten_interaction_parts(parsed_expression))
 }
 
+# A sum such as I(.is_male_x_male + .is_singleton_male) extends an indicator to
+# the rows of people observed alone, so they share the composition's variance.
+# Returns the added indicators (sorted) when `part` is I(indicator + ...) with
+# plain column names, and NULL otherwise.
+summed_indicator_additions <- function(part, indicator) {
+  parsed_expression <- tryCatch(str2lang(part), error = function(e) NULL)
+  if (!is.call(parsed_expression) || length(parsed_expression) != 2L ||
+      !identical(parsed_expression[[1L]], as.name("I"))) {
+    return(NULL)
+  }
+
+  flatten_sum <- function(x) {
+    if (is.call(x) && length(x) == 3L && identical(x[[1L]], as.name("+"))) {
+      return(c(flatten_sum(x[[2L]]), flatten_sum(x[[3L]])))
+    }
+    if (is.symbol(x)) {
+      return(as.character(x))
+    }
+    return(NA_character_)
+  }
+  summands <- flatten_sum(parsed_expression[[2L]])
+  if (anyNA(summands) || length(summands) < 2L || sum(summands == indicator) != 1L) {
+    return(NULL)
+  }
+  return(sort(summands[summands != indicator]))
+}
+
+# The indicators a block adds to `indicator`, and its summed column as named in
+# the fitted model frame (otherwise the indicator itself). All terms must add
+# the same indicators, so that people observed alone share the whole covariance.
+exchangeable_summed_indicators <- function(coefficients, indicator, block_label) {
+  no_sum <- list(added = character(), column = indicator)
+  sums <- lapply(coefficients, function(coefficient) {
+    for (part in split_exchangeable_interaction(coefficient)) {
+      added <- summed_indicator_additions(part, indicator)
+      if (!is.null(added)) {
+        return(list(added = added, column = part))
+      }
+    }
+    return(no_sum)
+  })
+  if (length(unique(lapply(sums, `[[`, "added"))) > 1L) {
+    stop(
+      "All terms of the selected ", block_label, " block must add the same ",
+      "indicators to `", indicator, "`, for example `I(", indicator,
+      " + .is_singleton_male)` and `I(", indicator,
+      " + .is_singleton_male):time`.",
+      call. = FALSE
+    )
+  }
+  return(if (length(sums) > 0L) sums[[1L]] else no_sum)
+}
+
 # Remove the shared/difference indicator so both blocks use common term names.
 exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
   # Keep one normalized term per coefficient, preserving the covariance-matrix
@@ -595,6 +671,12 @@ exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
         # support:idiff:time becomes c("support", "idiff", "time"). Uses of
         # the indicator inside any other expression are not interpreted.
         term_parts <- split_exchangeable_interaction(coefficient)
+        # A sum such as I(idiff + .is_singleton_male) counts as the indicator.
+        for (j in seq_along(term_parts)) {
+          if (!is.null(summed_indicator_additions(term_parts[[j]], indicator))) {
+            term_parts[[j]] <- indicator
+          }
+        }
         if (
           is.null(term_parts) ||
             !indicator %in% parsed_coefficient$variables ||
@@ -699,6 +781,20 @@ find_exchangeable_difference_indicator <- function(coefficients) {
   return(generated_indicators[[1L]])
 }
 
+# The fitted values of a coding column. glmmTMB keeps summed columns such as
+# `I(a + b)` in its model frame, brms keeps only the raw columns, so a sum is
+# computed from them when needed. Returns NULL if the values are unavailable.
+exchangeable_coding_values <- function(model_frame, column) {
+  if (column %in% names(model_frame)) {
+    return(model_frame[[column]])
+  }
+  expression <- tryCatch(str2lang(column), error = function(e) NULL)
+  if (is.null(expression) || !all(all.vars(expression) %in% names(model_frame))) {
+    return(NULL)
+  }
+  return(tryCatch(eval(expression, model_frame, baseenv()), error = function(e) NULL))
+}
+
 # Validate -1/+1 difference coding on rows designated by `shared_indicator`.
 validate_exchangeable_coding <- function(
   model_frame,
@@ -706,7 +802,8 @@ validate_exchangeable_coding <- function(
   shared_indicator,
   pair_label = NULL,
   group_ids = NULL,
-  group_name = NULL
+  group_name = NULL,
+  added_indicators = character()
 ) {
   pair_context <- if (is.null(pair_label)) "" else paste0(pair_label, ": ")
 
@@ -719,7 +816,8 @@ validate_exchangeable_coding <- function(
   # 2. Obtain the difference values. The fitted frame may not retain the source
   # column, so warn when validation is impossible. Wholly omitted difference
   # blocks never call this validator.
-  if (!idiff %in% names(model_frame)) {
+  difference_values <- exchangeable_coding_values(model_frame, idiff)
+  if (is.null(difference_values)) {
     warning(
       pair_context, "`", idiff,
       "` was not retained in the fitted model frame, so its coding could not ",
@@ -731,15 +829,21 @@ validate_exchangeable_coding <- function(
     return(invisible(NULL))
   }
 
-  difference_values <- model_frame[[idiff]]
   all_rows_supported <- identical(shared_indicator, "1")
+  shared_values <- if (!all_rows_supported && !is.na(shared_indicator)) {
+    exchangeable_coding_values(model_frame, shared_indicator)
+  }
 
   # 3. Obtain the support values. `shared_indicator = "1"` supports every row;
   # a named indicator marks one composition in a mixed-dyad model.
   if (all_rows_supported) {
     support_values <- rep(1, nrow(model_frame))
-  } else if (shared_indicator %in% names(model_frame)) {
-    support_values <- model_frame[[shared_indicator]]
+  } else if (is.na(shared_indicator)) {
+    # No shared block: the summed difference column marks the supported rows.
+    support_values <- if (is.numeric(difference_values)) abs(difference_values) else difference_values
+    shared_indicator <- paste0("abs(", idiff, ")")
+  } else if (!is.null(shared_values)) {
+    support_values <- shared_values
   } else {
     # Infer support from idiff if the fitted frame omitted the named indicator,
     # but warn because the two columns can no longer be checked independently.
@@ -868,12 +972,23 @@ validate_exchangeable_coding <- function(
     )
   }
   if (any(!has_both_positions)) {
+    # Groups of people observed alone have one position by design.
+    reason <- if (length(added_indicators) > 0L) {
+      paste0(
+        "This is expected for people observed alone (`",
+        paste(added_indicators, collapse = "`, `"), "`). Check the coding of ",
+        "the other groups before interpreting the result."
+      )
+    } else {
+      paste0(
+        "This can result from fitted-row filtering; verify the coding before ",
+        "interpreting the result."
+      )
+    }
     warning(
       pair_context, sum(!has_both_positions), " of ",
       length(has_both_positions), " supported fitted `", group_name,
-      "` groups do not contain both -1 and +1 for `", idiff,
-      "`. This can result from fitted-row filtering; verify the coding before ",
-      "interpreting the result.",
+      "` groups do not contain both -1 and +1 for `", idiff, "`. ", reason,
       call. = FALSE
     )
   }
@@ -986,7 +1101,53 @@ build_exchangeable_pair <- function(
     }
   }
 
-  # 4. Form the common coefficient space. `NA` indices mark rows and columns
+  # 4. People observed alone need the same added indicators in both blocks.
+  # With `shared_indicator = "1"`, the shared block covers every row already.
+  shared_block_has_indicator <- has_shared_block && !identical(shared_indicator, "1")
+  shared_sum <- exchangeable_summed_indicators(
+    if (shared_block_has_indicator) shared_block$coefficients,
+    shared_indicator,
+    "shared"
+  )
+  difference_sum <- exchangeable_summed_indicators(
+    if (has_difference_block) difference_block$coefficients,
+    idiff,
+    "difference"
+  )
+  shared_added <- shared_sum$added
+  difference_added <- difference_sum$added
+  if (shared_block_has_indicator && has_difference_block &&
+      !identical(shared_added, difference_added)) {
+    describe <- function(added, present_in, missing_in) {
+      if (length(added) == 0L) {
+        return(NULL)
+      }
+      return(paste0(
+        paste0("`", added, "`", collapse = ", "), " appear",
+        if (length(added) == 1L) "s" else "", " in the ", present_in,
+        " block but not in the ", missing_in, " block"
+      ))
+    }
+    stop(
+      paste(c(
+        describe(setdiff(shared_added, difference_added), "shared", "difference"),
+        describe(setdiff(difference_added, shared_added), "difference", "shared")
+      ), collapse = ", and "),
+      ", so these rows would get only part of the dyad members' variance. ",
+      "Add the same indicators to both blocks to share the dyad members' variance.",
+      call. = FALSE
+    )
+  }
+
+  # The coding check reads the summed columns. Without a shared block, NA
+  # takes the supported rows from the summed difference column instead.
+  shared_coding_column <- shared_sum$column
+  if (!has_shared_block && length(difference_added) > 0L &&
+      !identical(shared_indicator, "1")) {
+    shared_coding_column <- NA_character_
+  }
+
+  # 5. Form the common coefficient space. `NA` indices mark rows and columns
   # that must later be supplied as structural zeros for one component.
   underlying_terms <- unique(c(shared_terms, difference_terms))
 
@@ -995,6 +1156,9 @@ build_exchangeable_pair <- function(
     difference_block_index = difference_block_index,
     difference_indicator = idiff,
     shared_indicator = shared_indicator,
+    shared_coding_column = shared_coding_column,
+    difference_coding_column = difference_sum$column,
+    added_indicators = union(shared_added, difference_added),
     underlying_terms = underlying_terms,
     shared_term_indices = match(underlying_terms, shared_terms),
     difference_term_indices = match(underlying_terms, difference_terms)
@@ -1132,8 +1296,8 @@ match_blocks_for_exchangeable_indicator <- function(
     )
     validate_exchangeable_coding(
       model_frame,
-      idiff,
-      selected_shared_indicator
+      pair$difference_coding_column,
+      pair$shared_coding_column
     )
     matched_pairs[[length(matched_pairs) + 1L]] <- pair
   }
@@ -1770,14 +1934,29 @@ match_one_supplied_exchangeable_pair <- function(
     } else {
       group_ids[[pair_group]]
     }
+    # Generated indicators are stable by construction, also inside a sum.
+    check_groups <- !is.null(group_ids) &&
+      !is_generated_exchangeable_difference_indicator(pair$difference_indicator)
     validate_exchangeable_coding(
       model_frame,
-      pair$difference_indicator,
-      pair$shared_indicator,
+      matched_pair$difference_coding_column,
+      matched_pair$shared_coding_column,
       pair_label,
       group_ids = selected_group_ids,
-      group_name = if (is.null(group_ids)) NULL else pair_group
+      group_name = if (check_groups) pair_group else NULL,
+      added_indicators = matched_pair$added_indicators
     )
+  } else if (length(matched_pair$added_indicators) > 0L) {
+    # Without a difference block, overlapping added indicators would sum to 2.
+    shared_values <- exchangeable_coding_values(model_frame, matched_pair$shared_coding_column)
+    if (!is.null(shared_values) && !all(shared_values %in% c(0, 1))) {
+      stop(
+        pair_label, ": `", matched_pair$shared_coding_column,
+        "` must be 0 or 1 on every row. Indicators added to the shared block ",
+        "must not overlap.",
+        call. = FALSE
+      )
+    }
   }
   return(matched_pair)
 }
