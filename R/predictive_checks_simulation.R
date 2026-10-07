@@ -155,8 +155,10 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   }
 
   zero_inflation_model_matrix <- stats::model.matrix(model, component = "zi")
-  # glmmTMB ignores a zero component without fixed-effect coefficients.
-  has_zero_inflation <- ncol(zero_inflation_model_matrix) > 0L
+  # Since glmmTMB 1.1.15.1, zero-inflation random effects can activate the mixture.
+  has_zero_inflation <- ncol(zero_inflation_model_matrix) > 0L ||
+    (utils::packageVersion("glmmTMB") >= "1.1.15.1" &&
+       ncol(glmmTMB::getME(model, "Zzi")) > 0L)
 
   conditional_design <- as.matrix(stats::model.matrix(model, component = "cond"))
   coefficient_map <- model$obj$env$map[["beta"]]
