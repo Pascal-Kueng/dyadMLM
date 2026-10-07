@@ -16,6 +16,9 @@
   middle 95% of its simulations, and the same comparison is stored in
   `summary`.
 
+- Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
+  zero-inflation component has random effects but no fixed effects.
+
 ## dyadMLM 0.2.0
 
 CRAN release: 2026-08-21

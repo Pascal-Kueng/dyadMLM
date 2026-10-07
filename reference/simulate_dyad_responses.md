@@ -85,8 +85,8 @@ Supports unweighted `glmmTMB` models with the following families:
 - [`glmmTMB::t_family()`](https://rdrr.io/pkg/glmmTMB/man/nbinom2.html)
   with more than two degrees of freedom
 
-- `glmmTMB::ordinal()` (currently only available in the development
-  version of `glmmTMB`)
+- [`glmmTMB::ordinal()`](https://rdrr.io/pkg/glmmTMB/man/nbinom2.html)
+  (currently only available in the development version of `glmmTMB`)
 
 Smooth terms (`s()`) are not supported: simulations would draw new
 curves. Fixed-effect splines such as
