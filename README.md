@@ -108,7 +108,7 @@ for data requirements and examples.
 | [Model diagnostics: Check partner dependence<sup>\*</sup>](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
 <sup>\*</sup>Predictive checks assess whether a model reproduces the
-datas’ response variances and partner correlations.
+observed response variances and partner correlations.
 
 ## Quick example
 

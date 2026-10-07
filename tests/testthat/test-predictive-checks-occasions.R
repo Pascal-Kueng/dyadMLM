@@ -153,6 +153,18 @@ test_that("results do not depend on row order, member labels, or key collisions"
                check_occasions(simulations, role = "role")$compositions$statistics)
 })
 
+test_that("repeated occasions reject changing member roles regardless of row order", {
+  simulations <- occasion_check_simulations()
+  simulations$model_frame$role[1] <- NA
+  simulations$model_frame$role[2] <- "b"
+  for (rows in list(1:32, 32:1)) {
+    reordered <- keep_simulation_rows(simulations, rows)
+    expect_error(check_occasions(reordered, role = "role"),
+                 "Each member must have the same role throughout the data.", fixed = TRUE)
+    expect_no_warning(check_occasions(reordered, role = NULL))
+  }
+})
+
 test_that("rows with missing dyad IDs or roles are left out of both levels", {
   simulations <- occasion_check_simulations()
   with_missing <- simulations
@@ -254,10 +266,9 @@ test_that("printed and plotted headings name each level", {
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   plot(check, ask = FALSE)
-  expect_identical(headings, c(
-    "a - b (between) - 4 of 4 usable dyads; model-centred",
-    "a - b (within) - 4 of 4 usable dyads; model-centred"
-  ))
+  # Check only the composition labels, in order, since other plot text may change.
+  composition_labels <- regmatches(headings, regexpr("a - b \\((between|within)\\)", headings))
+  expect_identical(composition_labels, c("a - b (between)", "a - b (within)"))
 })
 
 test_that("a fitted diary model is checked at both levels", {

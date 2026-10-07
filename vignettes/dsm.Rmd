@@ -651,7 +651,7 @@ for details and interpretation. Simulation studies show how often the check
 detects [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
 and how often it raises false alarms. For intensive longitudinal data, also supply
-`member` and `time`.
+`member` and `time`; a [separate study](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html) covers this case.
 
 ## Intensive longitudinal DSM
 

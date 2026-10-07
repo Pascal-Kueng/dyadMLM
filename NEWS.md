@@ -10,8 +10,8 @@
   correlations in `glmmTMB` models with Gaussian or selected non-Gaussian
   responses, including ordinal, zero-inflated, and hurdle models. Checks can be
   performed separately for each dyad composition. For repeated occasions,
-  `member` and `time` separately check member means and same-occasion
-  deviations.
+  supply `member` and `time` to check member means and same-occasion
+  deviations separately.
 
 * Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.

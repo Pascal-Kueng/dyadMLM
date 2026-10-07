@@ -13,6 +13,7 @@ parameters fixed; close agreement alone does not establish good fit.
 | [Reference validation](partner-dependence-reference-validation.Rmd) | Independent Woody–Sadler calculations and Dingy cross-check |
 | [Partner-dependence report](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html) | Detection and false alarms across families and sample sizes |
 | [Covariance-pooling report](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html) | Composition checks and model comparison across families |
+| [Longitudinal report](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html) | Member-mean and same-occasion checks for repeated occasions |
 | [Simulation studies](simulation-studies/README.md) | Sensitivity across families, raw versus centred checks, and validation |
 
 The function help is the reference for arguments, output fields, supported
@@ -36,7 +37,7 @@ counted, with references conditional on defined values.
 With `member` and `time`, each dataset is split into member means (paired by
 dyad) and deviations from them (paired by dyad and occasion), and both levels
 reuse the same statistics. The [ILD plan](ild-partner-dependence-plan.md)
-records the design, its documented limits, and the pending validation. Lagged
+records the design, its documented limits, and its validation study. Lagged
 statistics follow separately. Lagged outcomes used as fixed predictors are not
 recursively simulated.
 
@@ -52,6 +53,7 @@ rmarkdown::render("dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-reference-validation.Rmd")
 pkgdown::build_article("articles/partner-dependence-simulation")
 pkgdown::build_article("articles/covariance-pooling")
+pkgdown::build_article("articles/ild-partner-dependence")
 ```
 
 The website report uses saved summary tables and does not rerun the simulations.

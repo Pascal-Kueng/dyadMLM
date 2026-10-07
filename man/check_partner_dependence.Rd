@@ -30,14 +30,16 @@ even for an exchangeable model to reveal variance or partner-correlation
 mismatches that pooling may hide. Each dyad composition (role pair, such as
 female-male) is checked separately,
 using exchangeable summaries for same-role pairs and role-specific
-summaries otherwise.}
+summaries otherwise. For repeated occasions, each member must keep the
+same role within their dyad; rows with missing roles are omitted.}
 
 \item{member}{The column name identifying each member.
 Only needed for repeated occasions, ignored without a \code{time} argument.
 Looked up first in the fitted model frame, then in \code{data} if supplied.}
 
 \item{time}{For repeated observation, \code{time} identifies the column name
-identifying each occasion. Requires \code{member} to be supplied.
+identifying each occasion. Requires \code{member} to be supplied. Every fitted
+row needs a known \code{member} and \code{time}.
 \code{time} must identify occasions that partners exactly share, such as the diary day.
 Looked up first in the fitted model frame, then in \code{data} if supplied.}
 
@@ -165,6 +167,9 @@ An occasion without the partner still counts in the member's mean.
 The within check is related to repeated-measures correlation
 (Bakdash & Marusich, 2017).
 
+The \href{https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html}{longitudinal study}
+examines detection and false alarms.
+
 Known limitations and caveats:
 \itemize{
 \item A misfit at one level can also impact the other level's summaries,
@@ -172,11 +177,12 @@ especially with few occasions (due to member means including occasion-level
 variance) or nonlinear links. Thus, both levels should be interpreted
 together.
 \item Check dependence across occasions (e.g., autocorrelation) separately.
-If the model omits a temporal dependence, within-person summaries may be incorrect.
-\item If the model includes lagged values of the outcome as predictors, these
-checks may not be valid.
-\item For ordinal and beta responses, same-occasion effects are often poorly
-estimated. Within rows may flag even though the model is correctly specified.
+If the model omits a temporal dependence, within-person summaries may be
+incorrect, and these checks may not reveal it.
+\item These checks can be misleading when the model includes lagged outcomes
+as predictors.
+\item Poorly estimated same-occasion effects can affect the within checks.
+Check the fitted model's convergence and covariance estimates.
 }
 }
 

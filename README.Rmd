@@ -113,7 +113,7 @@ for data requirements and examples.
 | [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
 | [Model diagnostics: Check partner dependence<sup>*</sup>](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
-<sup>*</sup>Predictive checks assess whether a model reproduces the datas' response variances and
+<sup>*</sup>Predictive checks assess whether a model reproduces the observed response variances and
 partner correlations.
 
 ## Quick example

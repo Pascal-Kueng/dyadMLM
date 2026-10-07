@@ -20,12 +20,14 @@
 #'   mismatches that pooling may hide. Each dyad composition (role pair, such as
 #'   female-male) is checked separately,
 #'   using exchangeable summaries for same-role pairs and role-specific
-#'   summaries otherwise.
+#'   summaries otherwise. For repeated occasions, each member must keep the
+#'   same role within their dyad; rows with missing roles are omitted.
 #' @param member The column name identifying each member.
 #'   Only needed for repeated occasions, ignored without a `time` argument.
 #'   Looked up first in the fitted model frame, then in `data` if supplied.
 #' @param time For repeated observation, `time` identifies the column name
-#'   identifying each occasion. Requires `member` to be supplied.
+#'   identifying each occasion. Requires `member` to be supplied. Every fitted
+#'   row needs a known `member` and `time`.
 #'   `time` must identify occasions that partners exactly share, such as the diary day.
 #'   Looked up first in the fitted model frame, then in `data` if supplied.
 #' @param plot If `TRUE` (default), draw the comparison plots for visual checks.
@@ -129,18 +131,22 @@
 #' The within check is related to repeated-measures correlation
 #' (Bakdash & Marusich, 2017).
 #'
-#'Known limitations and caveats:
+#' The [longitudinal study](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html)
+#' examines detection and false alarms.
+#'
+#' Known limitations and caveats:
 #'
 #' - A misfit at one level can also impact the other level's summaries,
 #'   especially with few occasions (due to member means including occasion-level
 #'   variance) or nonlinear links. Thus, both levels should be interpreted
 #'   together.
 #' - Check dependence across occasions (e.g., autocorrelation) separately.
-#'   If the model omits a temporal dependence, within-person summaries may be incorrect.
-#' - If the model includes lagged values of the outcome as predictors, these
-#'   checks may not be valid.
-#' - For ordinal and beta responses, same-occasion effects are often poorly
-#'   estimated. Within rows may flag even though the model is correctly specified.
+#'   If the model omits a temporal dependence, within-person summaries may be
+#'   incorrect, and these checks may not reveal it.
+#' - These checks can be misleading when the model includes lagged outcomes
+#'   as predictors.
+#' - Poorly estimated same-occasion effects can affect the within checks.
+#'   Check the fitted model's convergence and covariance estimates.
 #'
 #' @section Technical details:
 #' After any centring, paired responses `a` and `b` are used to compute
@@ -579,10 +585,15 @@ prepare_occasion_pairs <- function(dyad_ids, member_ids, occasion_ids, role_valu
   member_occasions <- occasion_rows |>
     dplyr::filter(!.data$is_role_missing) |>
     dplyr::mutate(member_number = dplyr::cur_group_id(), .by = c("dyad", "member"))
+  member_roles <- member_occasions |>
+    dplyr::summarise(n_roles = dplyr::n_distinct(.data$role), .by = "member_number")
+  if (any(member_roles$n_roles > 1L)) {
+    stop("Each member must have the same role throughout the data.", call. = FALSE)
+  }
 
-  # The between level pairs one row per member, like cross-sectional data. Each
-  # member keeps the role of their first row. Sorted by member number, row i of
-  # `members` is member i. So the between pairs' partner rows are member numbers,
+  # The between level pairs one row per member, like cross-sectional data.
+  # Sorted by member number, row i of `members` is member i.
+  # So the between pairs' partner rows are member numbers,
   # which are also the positions of the member means.
   members <- member_occasions |>
     dplyr::slice_head(n = 1, by = "member_number") |>

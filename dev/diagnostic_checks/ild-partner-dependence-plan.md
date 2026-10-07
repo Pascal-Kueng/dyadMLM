@@ -1,6 +1,7 @@
 # ILD partner-dependence check: plan
 
-Status: implemented as planned in §4, 2026-09-29; validation (§7) is pending.
+Status: implemented as planned in §4, 2026-09-29, plus a role check; validation
+(§7) completed on 2026-09-30.
 **(decided)** marks the author's decisions. Lag and AR checks are a separate
 later PR.
 
@@ -46,21 +47,24 @@ effects `e` (`sig_m^2`, `sig_12`), independent over occasions. Member `m` of dya
 ## 3. Limits to document (text only, no code)
 
 1. **Misfits cross levels,** especially with few occasions or nonlinear links, so
-   both levels must be read together. Examples:
+   both levels must be read together. Exploratory examples:
    - Unequal occasion variances under an equal-variance model flagged the
      between role-difference correlation in 81% of datasets at T = 3 and 21% at
      T = 14.
    - Omitting only the stable covariance of a Poisson model flagged the within
      partner correlation in 79% of datasets.
+
+   The study (§7) did not reproduce these: no row at the other level flagged in
+   more than 3.4% of datasets, because free covariance parameters absorbed the
+   misfits.
 2. **Serial dependence (AR) is not checked.** A model without AR still matches
-   the rows its free parameters pin (demo, §8). But the simulations then vary too
-   little, so within rows tied to restrictions flag too often (11–13% at
-   `phi = 0.5`). Lags come in the next PR.
-3. If the model includes lagged values of the outcome as predictors, these
-   checks may not be valid.
-4. **Ordinal and beta responses:** with two observations per dyad and occasion,
-   same-occasion effects are poorly estimated. Within rows can then flag even when
-   the model form is right.
+   the rows its free parameters pin (demo, §8). Reference ranges for restricted
+   summaries may then be too narrow. Check temporal dependence separately.
+   Lags come in the next PR.
+3. These checks can be misleading when the model includes lagged outcomes as
+   predictors.
+4. Poorly estimated same-occasion effects can affect the within checks.
+   Check the fitted model's convergence and covariance estimates.
 5. `time` must identify occasions shared by both partners, such as the diary day,
    not timestamps. Rows without their partner on that occasion still count in the
    member mean.
@@ -77,6 +81,7 @@ the messages, and the print and plot methods are unchanged:
 2. If `time` is supplied:
    - Stop if a member or time is missing. Rows with a missing dyad or (supplied)
      role are dropped and counted in the existing omission warning.
+   - Stop if a member's role changes across occasions.
    - Stop if a member has two rows at one occasion; otherwise such rows would be
      paired as partners.
    - Compute member means and deviations for all datasets at once and place them
@@ -100,7 +105,6 @@ See `prepare_occasion_pairs()` and the member-mean split in
 `plot` and `response` by position and need names. The function is unreleased.
 
 Left out on purpose; suggest separately only if wanted:
-- a check that each member keeps one role;
 - unpaired-occasion counts;
 - an extra error when no occasion is shared (the skip warning covers it);
 - a warning for lag columns;
@@ -129,24 +133,56 @@ Left out on purpose; suggest separately only if wanted:
 
 ## 7. Validation (after implementation, once)
 
-One script, lean grid, 200 datasets and 500 reference simulations per condition:
+The [study script](simulation-studies/ild-partner-dependence/run.R) uses 500
+datasets per cell and 1,000 reference simulations per fit. It checks female-male
+dyads with `role = gender`, model-centred unless stated. All models include role
+intercepts and actor/partner predictors that vary between and within members.
 
-- **Gaussian:** fit the correct model, and models omitting the same-occasion
-  covariance, the stable covariance, or AR. Add an equal-variance model when
-  occasion variances differ. Use 50 and 200 dyads, and 3, 5 and 14 occasions,
-  with and without 20% missing occasions. Include AR in the data but not in the
-  model under a true restriction, to confirm limit 2.
-- **Poisson or NB2, and ordinal:** fit the correct model, and models omitting the
-  same-occasion covariance or the stable covariance. Set effect sizes on the
-  response scale.
-- **Lagged outcome** (Gaussian and NB2, raw and model-centred): confirm limit 3.
-- **Report:**
-  - flag rates per row at both levels for every misfit, and how often any figure
-    flags;
-  - all fits, with converged fits shown separately;
-  - latent-parameter recovery, kept apart from check calibration.
+| Part | Data and fitted models | Cells |
+|---|---|---|
+| Gaussian | Stable SDs 1, 1, correlation 0.4; occasion SDs 1.2, 0.8, correlation 0.3. Fit the correct model, omit either covariance, or impose equal occasion variances. | 50/200 dyads × 3/5/14 occasions × 0/20% missing |
+| Serial dependence | Equal occasion variances from a dyad-day block plus independent member AR(1) components, with φ = 0 or 0.7. Fit without AR, without AR plus equal occasion variances, and with AR at φ = 0.7. | 50/200 dyads × 14 occasions × φ = 0/0.7 |
+| Poisson | Log link with stable and occasion covariance blocks. Fit the correct model and omit either covariance. | 50/200 dyads × 5/14 occasions |
+| Ordinal | Four categories, probit link, stable covariance and a shared dyad-day intercept. Fit the correct model, omit the day intercept, or omit stable covariance. | As Poisson |
+| Zero covariance | Gaussian, Poisson and ordinal settings with either stable or occasion covariance truly zero. Fit the full model and the matching restriction. | Gaussian/Poisson: 50/200 dyads × 5/14 occasions; ordinal: 50/200 dyads × 14 occasions; two zero-covariance settings |
+| Lagged outcomes | Gaussian and NB2 models with own/partner lags, checked raw and model-centred. These are practical sensitivity analyses, not clean calibration controls. | 50/200 dyads × 14 occasions |
+
+Missing occasions are removed independently per member, so some retained
+occasions have no partner. Between means still use every retained occasion.
+Response-scale partner correlations are estimated from large generated samples;
+latent correlations alone do not describe the size of generalized-response misfit.
+
+Omitted occasion covariance should affect within partner correlation; omitted
+stable covariance should affect between partner correlation. Check both levels
+for each restriction, since misfits can affect the other level too. The
+equal-variance rows assess variance restrictions, and the φ = 0 control separates
+their ordinary false alarms from the effect of omitted serial dependence.
+Zero-covariance cells assess false alarms where the tested restriction is true.
+Freely estimated summaries may flag much less than 5%.
+
+There are 48 cells and 126 fitted models per repetition (63,000 fits in the full
+run). The report separates per-statistic flags from flags anywhere in a between figure,
+within figure, or either figure. The report uses rank limits based on ordered simulated
+values, retaining the earlier quantile rule as a sensitivity comparison, and gives 95% Wilson
+intervals, Monte Carlo SEs and denominators. It compares all available checks with
+usable fits, which require optimizer convergence, a positive-definite Hessian and
+a finite log-likelihood. Gaussian models use BFGS; other families use `nlminb`.
+Fits are not retried, and optimizer warnings and failures stay recorded. The full
+ordinal model can reach a boundary when the true day-intercept variance is zero.
+Parameter recovery is reported only for correctly specified models,
+apart from flag rates; lagged-outcome models are excluded from recovery claims.
+
+Reference simulations keep fitted parameters and predictor values fixed and do
+not refit models. The study estimates flag rates in these settings, not universal
+calibration. A short pilot checks the workflow before the full run. Run from a
+fixed checkout, save source/version information, and resume only matching
+checkpoints. See the [run instructions](simulation-studies/README.md#longitudinal-partner-dependence-checks)
+and [report](../../vignettes/articles/ild-partner-dependence.Rmd).
 
 ## 8. Evidence and review log
+
+These entries record early exploratory checks. The completed study is described
+in §7 and the linked report.
 
 Demo on the female-male dyads of `dyads_ild` (120 dyads, 14 days, Gaussian, 500
 simulations, model-centred). "ok" means inside the middle 95%:
