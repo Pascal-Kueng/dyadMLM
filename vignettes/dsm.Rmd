@@ -101,7 +101,7 @@ constants may differ with one-sided missingness.
 
 For a cross-sectional Gaussian DSM, a correlated dyad random intercept and
 role-contrast slope represent unexplained outcome-level and outcome-difference
-variation. 
+variance. 
 
 ```{r conceptual-dsm-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional DSM. Predictor mean and predictor difference each predict both outcome scores.", fig.alt="Path diagram for a cross-sectional dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. Paths are labelled a11, a12, a21, and a22, and outcome intercepts are labelled a10 and a20."}
 draw_dsm_diagram()
@@ -243,8 +243,8 @@ one-unit larger support difference, holding support level
 constant. The $a_{12}$ and $a_{21}$ coefficients are the DSM cross-paths. They
 are omitted from the reduced DSM but are needed for the full model.
 
-The random intercept variance is unexplained variation in outcome level, and
-the random role-contrast slope variance is unexplained variation in the full
+The random intercept variance is unexplained variance in outcome level, and
+the random role-contrast slope variance is unexplained variance in the full
 directional outcome difference. Their covariance indicates whether unexplained
 outcome level and unexplained outcome difference are associated.
 
@@ -650,8 +650,8 @@ and correlations estimated from the same data. See the
 for details and interpretation. Simulation studies show how often the check
 detects [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often it raises false alarms. These checks currently support cross-sectional
-dyads only.
+and how often it raises false alarms. For intensive longitudinal data, also supply
+`member` and `time`; a [separate study](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html) covers this case.
 
 ## Intensive longitudinal DSM
 

@@ -431,8 +431,8 @@ and correlations estimated from the same data. See the
 for details and interpretation. Simulation studies show how often the check
 detects [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often it raises false alarms. These checks currently support cross-sectional
-dyads only.
+and how often it raises false alarms. For intensive longitudinal data, also supply
+`member` and `time`; a [separate study](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html) covers this case.
 
 
 ## Intensive longitudinal APIMs
@@ -583,7 +583,7 @@ glmmTMB::VarCorr(ild_distinguishable_ar_model)
 The two AR standard deviations and correlations describe each role's persistent
 component. They are not correlations of the complete residual and do not
 represent partner influence. The dyad-day block continues to describe the
-remaining same-day variation and partner covariance.
+remaining same-day variances and partner covariance.
 
 #### Random slopes
 
@@ -708,7 +708,7 @@ ild_exchangeable_ar_model <- glmmTMB::glmmTMB(
 glmmTMB::VarCorr(ild_exchangeable_ar_model)
 ```
 
-The pooled AR parameters describe persistent within-member variation; the
+The pooled AR parameters describe the persistent within-member component; the
 dyad-day blocks continue to describe same-day partner covariance.
 
 For the fitted AR model, we can recover the member-level covariance matrices for

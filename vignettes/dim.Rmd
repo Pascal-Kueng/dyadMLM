@@ -458,8 +458,8 @@ and correlations estimated from the same data. See the
 for details and interpretation. Simulation studies show how often the check
 detects [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often it raises false alarms. These checks currently support cross-sectional
-dyads only.
+and how often it raises false alarms. For intensive longitudinal data, also supply
+`member` and `time`; a [separate study](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html) covers this case.
 
 ## Intensive Longitudinal DIM
 
@@ -472,7 +472,7 @@ retains raw dyad-occasion means and within-dyad member deviations. The decompose
 columns used below are:
 
 1. The `cwp` dyad mean captures a shared occasion-specific shift from the two
-   members' usual levels (shared occasion-level variation).
+   members' usual levels (shared occasion-level variance).
 2. The `cwp` within-dyad member deviation captures which member is further above or
    below their own usual level on that occasion.
 3. The `cbp` dyad mean captures the dyad's shared usual level relative to the
@@ -543,7 +543,7 @@ summary(dim_ILD)
 ```
 
 This concurrent model includes stable dyad-level and same-day partner
-covariance. To add persistent within-member variation while pooling the AR
+covariance. To add a persistent within-member component while pooling the AR
 parameters across exchangeable members, we fit the complete model with one
 member-series term:
 
@@ -583,7 +583,7 @@ glmmTMB::VarCorr(dim_ILD_ar_model)
 ```
 
 See the [exchangeable APIM AR(1) section](apim.html#exchangeable-residual-ar1)
-for the distinction between persistent within-member variation and same-day
+for the distinction between the persistent within-member component and same-day
 partner covariance. To keep this example focused, both models omit the actor
 random slopes that are also present in the simulation.
 

@@ -13,6 +13,7 @@ parameters fixed; close agreement alone does not establish good fit.
 | [Reference validation](partner-dependence-reference-validation.Rmd) | Independent Woody–Sadler calculations and Dingy cross-check |
 | [Partner-dependence report](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html) | Detection and false alarms across families and sample sizes |
 | [Covariance-pooling report](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html) | Composition checks and model comparison across families |
+| [Longitudinal report](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html) | Member-mean and same-occasion checks for repeated occasions |
 | [Simulation studies](simulation-studies/README.md) | Sensitivity across families, raw versus centred checks, and validation |
 
 The function help is the reference for arguments, output fields, supported
@@ -21,8 +22,8 @@ them in each development document.
 
 ## Scope and extension
 
-Current checks cover unweighted cross-sectional `glmmTMB` models, including
-zero-inflated and hurdle models. See `?simulate_dyad_responses` for supported
+Current checks cover unweighted cross-sectional and repeated-occasion `glmmTMB`
+models, including zero-inflated and hurdle models. See `?simulate_dyad_responses` for supported
 families. The model's fitted link is used for prediction and simulation.
 Nonlinear-link centring is not a residual covariance decomposition.
 
@@ -33,11 +34,12 @@ to observed and simulated responses. Undefined observed statistics or entirely
 undefined references cause errors; partial undefined draws are reported and
 counted, with references conditional on defined values.
 
-Future ILD work can reuse simulation and paired statistics, with exact
-scheduled-time pair maps. Recompute member demeaning for
-every dataset. Lagged outcomes used as fixed predictors are not recursively
-simulated. Preserve the prototype branches as references; weighting and
-minimum-reference rules need separate decisions.
+With `member` and `time`, each dataset is split into member means (paired by
+dyad) and deviations from them (paired by dyad and occasion), and both levels
+reuse the same statistics. The [ILD plan](ild-partner-dependence-plan.md)
+records the design, its documented limits, and its validation study. Lagged
+statistics follow separately. Lagged outcomes used as fixed predictors are not
+recursively simulated.
 
 ## Validation
 
@@ -51,6 +53,7 @@ rmarkdown::render("dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-reference-validation.Rmd")
 pkgdown::build_article("articles/partner-dependence-simulation")
 pkgdown::build_article("articles/covariance-pooling")
+pkgdown::build_article("articles/ild-partner-dependence")
 ```
 
 The website report uses saved summary tables and does not rerun the simulations.

@@ -9,6 +9,7 @@ Public report sources stay in `vignettes/articles/`.
 | [family-comparison](family-comparison/run.R) | Raw versus model-centred correlation checks across response families | [Full report](../../../vignettes/articles/partner-dependence-simulation.Rmd) |
 | [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
+| [ild-partner-dependence](ild-partner-dependence/run.R) | Member-mean and same-occasion checks under correct and restricted longitudinal models | [Full report](../../../vignettes/articles/ild-partner-dependence.Rmd) |
 | [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
 [Shared family generators](shared/family-margins.R) are used by both family studies.
@@ -101,6 +102,48 @@ which also renders the local report. The [helpers](generalized-covariance-poolin
 and the shared family generators. Bell requires `gsl`. Tweedie results
 used the isolated sampler repair described below.
 
+## Longitudinal partner-dependence checks
+
+This study checks member means and same-occasion deviations separately. Gaussian,
+Poisson and ordinal settings cover correct models and omitted partner covariance;
+Gaussian settings also impose equal occasion variances or omit serial dependence.
+Zero-covariance Gaussian, Poisson and ordinal settings check false alarms under a true
+restriction. Lagged-outcome Gaussian and NB2 models are practical sensitivity
+analyses, not clean calibration controls. See the [design](../ild-partner-dependence-plan.md#7-validation-after-implementation-once).
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/ild-partner-dependence/check.R
+Rscript -e 'source("dev/diagnostic_checks/simulation-studies/ild-partner-dependence/run.R"); run_occasion_study(500L, 1000L, 10L, "run")'
+Rscript -e 'source("dev/diagnostic_checks/simulation-studies/ild-partner-dependence/run.R"); run_occasion_study(500L, 1000L, 10L, "summarise")'
+```
+
+`check.R` checks the generator and study bookkeeping. The runner's arguments are
+datasets per cell, reference simulations per fit, workers, and
+`run` or `summarise`. The defaults are shown. Use `2L, 200L, 10L, "run"` for a short
+pilot. Run from a fixed checkout; rerun the same command to resume saved blocks.
+Changed simulation code or settings require a new output directory.
+
+Results go to `results/ild-partner-dependence/<datasets>-datasets-<draws>-draws/`.
+Only a complete default run exports the six tables to
+`report-data/ild-partner-dependence/`: cells, statistic flags, figure flags, fit
+diagnostics, parameter recovery and response-scale effect sizes. Flags under both
+the rank limits and the earlier quantile limits are computed from saved counts.
+[serial-recovery.R](ild-partner-dependence/serial-recovery.R) rereads the saved
+checkpoints and writes `serial-recovery.csv`, the stable-correlation estimates of
+the model without AR at φ = 0.7:
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/ild-partner-dependence/serial-recovery.R dev/diagnostic_checks/simulation-studies/results/ild-partner-dependence/500-datasets-1000-draws
+```
+
+Render the saved results without rerunning simulations:
+
+```r
+rmarkdown::render("vignettes/articles/ild-partner-dependence.Rmd")
+# For a pilot, pass its absolute results directory:
+# params = list(output_directory = "/absolute/path/to/pilot/results")
+```
+
 ## Raw versus model-centred checks
 
 This completed study covers 20 supported families, zero-inflated Poisson, and
@@ -144,6 +187,7 @@ After changing text or plots, rebuild from the compact tables without simulation
 ```r
 pkgdown::build_article("articles/partner-dependence-simulation")
 pkgdown::build_article("articles/covariance-pooling")
+pkgdown::build_article("articles/ild-partner-dependence")
 ```
 
 After updating saved family-comparison results, first refresh its exported tables:
