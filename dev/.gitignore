@@ -1,6 +1,8 @@
 *.pdf
 *.html
 !workshop/branding.html
+*_cache/
+*_files/
 References
 
 # Third-party papers, chapters, slides, and supplements stay local.

@@ -578,9 +578,10 @@ decompose_covariance <- function(data) {
 }
 ```
 
-```{r glmmtmb-bootstrap}
+```{r glmmtmb-bootstrap, cache = TRUE, cache.extra = digest::digest(list(logLik(apim_mlm_fit), model.frame(apim_mlm_fit), body(decompose_covariance)))}
 # About 5 to 15 minutes on 4 cores. boot() draws all samples before fitting,
 # so the seed fixes them, also when fitting in parallel.
+# Cached until this chunk, the model fit or decompose_covariance() change.
 set.seed(2026)
 boot_decomposition <- boot::boot(
   flashe_data,
