@@ -84,7 +84,7 @@ claimed for covariance parameters. At 500 usable estimates, 95% coverage has a
 Monte Carlo SE of about one percentage point.
 
 ```r
-rmarkdown::render("vignettes/articles/mixed-apim-recovery.Rmd")
+rmarkdown::render("dev/vignettes/articles/mixed-apim-recovery.Rmd")
 # For a pilot, set params = list(output_directory = "/absolute/path/to/results").
 ```
 

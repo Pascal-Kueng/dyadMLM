@@ -45,7 +45,7 @@ changing partners and latent centering are outside the initial scope.
 - [Draft vignette](../../vignettes/mixed-apim.Rmd): model specifications and
   singleton examples.
 - [Recovery study](../../diagnostic_checks/simulation-studies/mixed-apim-recovery/README.md)
-  and [report](../../../vignettes/articles/mixed-apim-recovery.Rmd): 12 correctly
+  and [report](../../vignettes/articles/mixed-apim-recovery.Rmd): 12 correctly
   specified Gaussian conditions, 500 datasets each, 120 or 360 dyads.
 - The saved full run contains 6,000 attempts. Cross-sectional and
   random-intercept models returned 4,000/4,000 usable fits; fixed-effect 95% Wald
