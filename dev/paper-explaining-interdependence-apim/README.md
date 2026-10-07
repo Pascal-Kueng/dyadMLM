@@ -4,10 +4,12 @@ Working materials for the covariance/path-tracing methods programme.
 
 ## Start here
 
+- [Focused reading list](focused-reading-list.md): 15 core sources, presence in
+  J-P's folder, method summaries, and ILD/temporal-level distinctions.
 - [Current plan](plan.md): Paper 1's scope, argument, inference/validation,
   software, open decisions, and the two possible follow-up papers.
-- [Literature review](literature-review.md): annotated references, direct
-  applications, writing examples, verification gaps, and the local-file inventory.
+- [SEM and MLM practice](practice-sem-mlm.R): reproduce the supplied
+  cross-sectional example and compare the two fitted partitions.
 - [Figures and short outline](paper-outline.Rmd): the complete APIM, highlighted
   routes, waterfall, equal-total comparison, and the argument in section bullets.
 - [Technical notes](paper-idea.Rmd): equations, worked examples, covariate and
@@ -19,6 +21,22 @@ precedents. Paper 1 now includes covariates/multiple predictors, exchangeability
 and evaluation of contribution-specific inference; the interval method and study
 protocol remain to be selected. Keep planning decisions in `plan.md`, source
 evidence in the review, and derivations in the technical notes.
+
+## Literature and source evidence
+
+The focused list is the main reading list. The full review and dated audits
+retain related background and the search history.
+
+- [Methods and citation map](method-scope-and-citation-map.md): methods versus
+  applications, citation priorities, designs, covariates, and extension context.
+- [Full annotated review](literature-review.md): all 51 references, verification
+  limits, and the local-file inventory.
+- [J-P's supplied materials](jp-materials-review-2026-09-13.md): bundle inventory,
+  worked example, chapter/OSF assessment, and numerical checks.
+- [October full-text audit](full-text-verification-2026-10-07.md): verified methods,
+  excluded applications, and remaining access gaps.
+- [September citation audit](citation-audit-2026-09-13.md) and
+  [inventory](citation-audit-2026-09-13.json): citation-search coverage and decisions.
 
 ## Public material and local reference copies
 

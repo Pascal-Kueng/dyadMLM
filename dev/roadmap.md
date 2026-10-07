@@ -871,8 +871,9 @@ diagnostic branches, but integration should use the current accepted mainline.
 
 - Use the [current manuscript plan](paper-explaining-interdependence-apim/plan.md)
   for scope and study decisions, and the
-  [literature review](paper-explaining-interdependence-apim/literature-review.md)
-  for prior art. The review establishes direct APIM precedents; the proposed
+  [focused reading list](paper-explaining-interdependence-apim/focused-reading-list.md)
+  for core prior art. The [full review](paper-explaining-interdependence-apim/literature-review.md)
+  retains background and source checks. These establish direct APIM precedents; the proposed
   contribution is clarification, validation, and implementation.
 - Develop `decompose_apim_covariance()` within `dyadMLM`; it is proposed, not a
   shipped function. Paper 1 covers cross-sectional, fixed-slope linear APIMs,

@@ -1,6 +1,8 @@
 # APIM decomposition: methods, applications, and citation priorities
 
-Checked **13 September 2026**. Companion to the [51-entry annotated review](literature-review.md)
+Updated **7 October 2026** after the [full-text audit](full-text-verification-2026-10-07.md).
+Start with the [focused 15-source reading list](focused-reading-list.md).
+Companion to the [51-entry annotated review](literature-review.md)
 and [forward-citation audit](citation-audit-2026-09-13.md). This classifies the
 earlier 46 references and adds four adjacent methods sources identified during
 the design/model check: Gistelinck and Loeys (2019), Savord et al. (2023), Loeys
@@ -11,6 +13,24 @@ increase the count of independent direct application studies.
 Citation priorities below are recommendations for the current cross-sectional
 linear-APIM manuscript in [plan.md](plan.md), not statements about the overall
 importance of the papers.
+
+**6 October update:** the reference inventory adds Koch et al. (2025, online)
+on idiographic rater consistency in ILD. This is adjacent methodology, not a
+new direct APIM covariance-partition application. The annotated review also
+marks presence in J-P's supplied folder, checked against all 13 files.
+
+**7 October scope recheck:** Perry et al. (2017) adds longitudinal-APIM
+visualization methods, using the manuscript already saved in the repository.
+Its vector fields concern predicted change, not covariance-route attribution.
+The Gistelinck-Loeys annotation now records its explicit residual/stable level
+allocation. Neither increases the direct route-decomposition application count.
+Both 2024 chapter-linked OSF projects are now checked. Koch's complete June
+preprint and later author supplements establish adjacent variance-ratio methods
+and posterior-draw uncertainty; the final journal version remains unchecked.
+The relevant 1998 Kenny-Kashy-Bolger sections were also checked, with a missing
+page in the author scan. Laws's complete publisher PDF and supplement are now
+checked: random residual interdependence, not actor/partner route attribution.
+None adds a focal route-decomposition application.
 
 ## What is methodological, and what should we cite?
 
@@ -28,11 +48,11 @@ substantial methods article can address a different statistical quantity.
 | Applied grouped or total attribution | De Padova et al. (2021); Velten and Margraf (2017); Jang (2016 dissertation) | De Padova deserves specific citation when discussing negative and cross-predictor components. Velten and Jang concern broader total explanation; do not equate them with four separately reported routes. |
 | Close applied preprint with an explicit analytic treatment | Cavalcanti et al. (2026), v1 | Cite as a preprint when positioning signed/multiple-predictor decomposition. Its repeated-encounter mixed model and fixed-prediction covariance target require explicit distinctions from our target. |
 | Substantial adjacent dyadic methods | Griffin and Gonzalez (1995); Gonzalez and Griffin (1999); Kenny and Ledermann (2010); Ledermann et al. (2011); Gistelinck et al. (2018); Ledermann and Kenny (2017); Stas et al. (2018) | Different targets: individual/dyad correlations, dyadic-pattern ratios, mediation, distinguishability, estimation, and software. Cite where used, rather than treating them as focal route-decomposition articles. Some full-text coverage remains incomplete in the review. |
-| Longitudinal/heterogeneity methods and exposition | Laurenceau and Bolger (2005); Bolger and Shrout (2007); Bolger and Laurenceau (2013); Gistelinck and Loeys (2019); Savord et al. (2023); Laws et al. (2026) | Important for ILD context and a subsequent ILD paper. Bolger-Shrout actually partitions dependence across temporal levels; Gistelinck-Loeys and Savord model longitudinal actor/partner effects. None establishes the focal route partition at both levels. Laws concerns heterogeneity of physiological covariation. |
+| Longitudinal/heterogeneity methods and exposition | Laurenceau and Bolger (2005); Bolger and Shrout (2007); Bolger and Laurenceau (2013); Gistelinck and Loeys (2019); Savord et al. (2023); Koch et al. (2025); Laws et al. (2026) | Important for ILD context and a subsequent ILD paper. Bolger-Shrout actually partitions dependence across temporal levels; Gistelinck-Loeys and Savord model longitudinal actor/partner effects. Koch develops rater-consistency ratios and posterior-draw uncertainty. None establishes the focal route partition at both levels. Laws concerns heterogeneity of physiological covariation. |
 | Non-Gaussian APIM methods | Loeys and Molenberghs (2013); Loeys et al. (2014) | The 2013 paper is a substantial technical study of binary/count APIM; the 2014 paper is a practical GEE guide. Essential generalized-APIM context, with no focal predictor-route partition verified. |
 | General multilevel extensions | Johnson (2014); Leckie et al. (2020) | Substantial methods contributions to random-slope variance summaries and count-model variance/covariance/ICC. Especially relevant to later extensions; not direct APIM predictor-route partitions. |
-| General foundations and syntheses | Kline (2016); Kenny's path-tracing web tutorial; Kenny (1996); Kenny and Cook (1999); Cook and Kenny (2005); Campbell and Kashy (2002); Kenny, Kashy, and Cook (2006); handbook chapters by Kashy/Kenny (2000), Kenny/Kashy (2014), Kenny/Kashy/Bolger (1998), and Gonzalez/Griffin (2004, 2023) | Use a standard APIM foundation and appropriate general tracing source. Preserve the earlier chapters' verification limits; the now-inspected 2024 chapter is classified separately above. |
-| Other applied or duplicate records | Gonzalez and Siarkiewicz (2006); Jang et al. (2025); Burns (2020 abstract) | Respectively, another dyadic correlation decomposition; a related negotiation application without a verified focal passage; and a repeat report of Burns (2019). None adds an independent four-route precedent. |
+| General foundations and syntheses | Kline (2016); Kenny's path-tracing web tutorial; Kenny (1996); Kenny and Cook (1999); Cook and Kenny (2005); Campbell and Kashy (2002); Kenny, Kashy, and Cook (2006); handbook chapters by Kashy/Kenny (2000), Kenny/Kashy (2014), Kenny/Kashy/Bolger (1998), and Gonzalez/Griffin (2004, 2023) | Use a standard APIM foundation and appropriate general tracing source. The 2014 chapter and Campbell-Kashy guide are now full-text verified as adjacent context; preserve the other books/chapters' stated limits. The 2024 chapter is classified separately above. |
+| Other applied correlation decomposition | Gonzalez and Siarkiewicz (2006) | Applied individual/dyad correlation decomposition; a different target from the four-route outcome-covariance partition. |
 
 For Paper 1, the recommended citation backbone is **Kenny, Ackerman, and Kashy
 (2024), Section 23.5**, for published decomposition methods; **Kenny, Kashy,
@@ -53,7 +73,7 @@ assert that the observed scores are normally distributed.
 
 | Source | Design and model used for the focal analysis | What is partitioned / qualification |
 |:--|:--|:--|
-| [Dwyer (2017)](https://pmc.ncbi.nlm.nih.gov/articles/PMC5512865/) | Cross-sectional FLASHE; 1,443 parent-adolescent dyads; linear observed-variable APIM | Fruit/vegetable intake interdependence. Paths from final and controls-only models; calculation supplement remains unavailable. |
+| [Dwyer (2017)](https://pmc.ncbi.nlm.nih.gov/articles/PMC5512865/) | Cross-sectional FLASHE; 1,443 parent-adolescent dyads; linear observed-variable APIM | Covariate-adjusted fruit/vegetable intake interdependence. The verified two-page appendix uses final-model predictor residual moments and controls-only outcome residual covariance 1.980. |
 | [Burns (2019)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6697559/) | Cross-sectional FLASHE; 1,854 dyads; Stata SEM, ML with missing data | Physical-activity covariance; four products per predictor. No nonlinear response link specified. |
 | [Figueroa et al. (2019)](https://pmc.ncbi.nlm.nih.gov/articles/PMC7676308/) | Cross-sectional FLASHE; 1,649 dyads; multiple-group observed-variable SEM | Parent/adolescent beverage-intake covariance; mother/father groups. No generalized count link specified. |
 | [Lee et al. (2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC13166139/) | Baseline surveys from an intervention trial; 467 dyads; Mplus ML linear APIM | Closeness covariance. The article explicitly calls this analysis cross-sectional. Closeness is a 1-7 score; poor-mental-health days are transformed by log(1+x). Neither establishes ordinal/count-link decomposition. |
@@ -88,8 +108,9 @@ presented there. This deserves citation if we discuss an ILD extension.
 merely an applied example. Published pp. 89-95 cover daily residual covariance
 and between-person random intercept/slope covariances, with daily conflict and
 intervention predictors. No focal APIM route partition was located in the full
-text. **Bolger and Laurenceau (2013)** is broader ILD methodology; its exact
-decomposition coverage has not been checked here.
+text. **Bolger and Laurenceau (2013)** is broader ILD methodology. The user's
+7 October book check found no focal decomposition; retain as background,
+without treating this as an independent full-book verification.
 
 **Gistelinck and Loeys (2019)** is a direct longitudinal-APIM methods reference.
 The [paper reproduced in the author's dissertation, Chapter 3](https://backoffice.biblio.ugent.be/download/8635510/8635511)
@@ -97,7 +118,12 @@ separates time-averaged/time-specific actor and partner effects and models
 stable, contemporaneous, and serial dependence (pp. 87-89). Its example uses
 three-week diaries from 66 couples. Modeling effects and covariance at both
 levels does not itself establish four predictor-route contributions at both
-levels; such a partition was not verified here.
+levels; such a partition was not verified here. A 7 October recheck located
+an explicit **89% daily / 11% stable** allocation on dissertation p. 102,
+using daily residual covariance 1.723 and random-intercept covariance .215
+(Table 3.5.2, p. 104). These partition remaining dependence after the fitted
+predictor mean structure, without allocating it to actor/partner predictor
+products. The covariance parameters have intervals; the shares do not.
 
 **Savord et al. (2023)** extends the longitudinal APIM in DSEM to random slopes,
 heterogeneous residual variances, and multiple outcomes. The
@@ -107,13 +133,33 @@ does not provide a verified predictor-route covariance partition. Its covariance
 between random log-residual variances describes correlated volatility, a
 different quantity from covariance between the outcomes themselves.
 
-**Laws et al. (2026)** develops a model of varying physiological interdependence.
-The [publisher introduction](https://www.sciencedirect.com/science/article/pii/S0301051126000724)
-distinguishes concurrent covariance from directional APIM effects; it describes
-DSEM estimation of average interdependence, variation between dyads, and
-predictors of that variation. Full methods were not obtained. It is relevant
-heterogeneity methodology, but currently not verified evidence of separate
-within/between APIM predictor-route partitions or non-Gaussian response links.
+**Koch et al. (2025)** is now checked through its complete
+[June preprint](https://doi.org/10.23668/psycharchives.16498) and later
+[author supplements](https://osf.io/g8hnz/), rather than the exact final journal
+text. Pages 6–11/Eqs. 1–8 decompose reliable variance in self/partner ratings of
+the same person's affect, with random loadings, autoregressions and innovation
+variances. Later code calculates posterior-draw consistency ratios and credible
+intervals, although some shared loadings use plug-in estimates. Simulation
+coverage in the supplement concerns underlying parameters, not these derived
+ratios. Covariates enter a two-step analysis of individual consistency.
+This is substantial adjacent ILD inference methodology; broad claims that
+random-coefficient variance ratios or posterior-derived uncertainty are new
+would be untenable. It does not establish the focal APIM outcome-covariance
+route partition at both temporal levels.
+
+**Laws et al. (2026)** explains and applies a model of varying physiological interdependence.
+Its complete [publisher paper](https://www.sciencedirect.com/science/article/pii/S0301051126000724)
+and supplement are now verified. Pages 6–8/Fig. 1 and the Mplus example model
+Gaussian physiology in two levels, with random intercepts, linear time trends,
+log residual variances and dyad-specific residual correlation on the Fisher-z
+scale. All seven random effects covary. The supplement back-transforms the
+association summary/range and supplies an autoregressive comparison; the
+primary model omits autoregressions. Table 2 reports Bayesian parameter
+intervals and a separate plausible-value range for heterogeneity. Age/health
+variables predict outcomes, while dyadic characteristics predict the random
+association (pp. 9–11/Table 3). This is substantial methods exposition and an
+ILD application, with useful heterogeneity inference, but no actor/partner
+covariance-route allocation at either level or generalized response link.
 
 **RAMpath (Zhang et al., 2015)** provides general linear SEM covariance-path
 calculation, including signed percentages, and longitudinal examples. This
@@ -121,6 +167,11 @@ establishes general software/methodological prior art, not a verified dyadic
 within/between route-partition example. **Griffin and Gonzalez (1995)** separates
 individual and dyad associations in a different correlational model; those
 levels must not be confused with repeated-measurement temporal levels.
+**Gonzalez and Griffin (1999)** is now fully verified: Eq. 3 (p. 457) decomposes
+the role-adjusted own-member X–Y correlation into shared-dyad and individual
+contributions. It includes tests, simulations and SEM syntax for that target,
+with role adjustment and a level-specific covariate extension (pp. 454, 462).
+It supplies neither temporal ILD nor the four APIM outcome-covariance routes.
 
 **Leckie et al. (2020)** is the strongest substantial non-Gaussian methods work
 on level partitions in the current list. The [full paper and supplement](https://www.bristol.ac.uk/cmm/media/leckie/articles/leckie2020.pdf)
@@ -137,9 +188,12 @@ foundation. The [author manuscript](https://documentserver.uhasselt.be/bitstream
 examines binary/count GLMM and GEE estimation, positive/negative within-dyad
 association, and marginal moments/ICC. It does not supply a verified allocation
 to actor/partner predictor routes. **Loeys et al. (2014)** supplies practical
-GEE implementation guidance; its publisher abstract was verified. Non-Gaussian
-APIM itself is therefore firmly established, separately from our proposed
-observed-outcome route-attribution question.
+GEE implementation guidance; its complete publisher text and SAS appendix
+are now verified. The example uses binary and negative-binomial outcomes in
+46 ex-couples, without temporal ILD. Robust coefficient inference accompanies
+working residual correlations, but no covariance-route partition or inference
+for those nuisance correlations. Non-Gaussian APIM itself is firmly established,
+separately from our proposed observed-outcome route-attribution question.
 
 These distinctions delimit the current evidence:
 
@@ -166,7 +220,8 @@ multilevel methods.
 
 ## Covariates: full attribution versus adjusted dependence
 
-Targeted source check, **13 September 2026**. These are distinct reporting
+Targeted source check, **13 September 2026**, with Laws verified **7 October**.
+These are distinct reporting
 questions: attributing the full outcome covariance, including covariates, and
 attributing the covariance remaining after adjustment for covariates.
 
@@ -174,19 +229,20 @@ attributing the covariance remaining after adjustment for covariates.
 |:--|:--|:--|
 | Kenny, Ackerman, and Kashy (2024), pp. 578-579 | The same two shared covariates enter both outcome equations, with role-specific coefficients in the distinguishable case. Example: married/not and children/not. Table 23.3 includes individual-covariate terms, correlations between covariates, and covariate/focal-predictor cross-terms. | Full partition of the overall outcome correlation, including covariate pathways. Table 23.4 groups predictor-covariate cross-terms under covariates and reports total covariate contribution -2.5%; this grouping is a convention, not a uniquely identified causal share. |
 | Kenny (2019), APIM_MM manual pp. 3-4 | Allows between-dyad, within-dyad and mixed covariates, plus optional interactions with member role. Lists six explained groups and unexplained covariance as the seventh. | Broader input support than the chapter's shared-covariate example. The prose does not establish a complete formula/mapping for arbitrary member-specific controls or automatic partner-covariate inclusion. |
-| [Dwyer et al. (2017)](https://pmc.ncbi.nlm.nih.gov/articles/PMC5512865/) | Both motivation predictors and both intake outcomes are regressed on parent sex, adolescent sex/age, and parent education. Uses final APIM and controls-only APIM estimates. | The specification supports an adjustment-oriented interpretation: motivation routes explaining dependence after controls. Exact residual moments and denominator remain unverified without the calculation supplement. No full covariate-route allocation is reported. |
+| [Dwyer et al. (2017)](https://pmc.ncbi.nlm.nih.gov/articles/PMC5512865/) | Both motivation predictors and both intake outcomes are regressed on parent sex, adolescent sex/age, and parent education. Uses final APIM and controls-only APIM estimates. | The now-verified appendix divides route products by controls-only outcome residual covariance 1.980, using final-model residual motivation moments. This is an adjusted partition; no full covariate-route allocation or component intervals are reported. |
 | [Lee et al. (2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC13166139/) | All four core predictor/outcome variables are regressed on mother's age, daughter's age, and maternal non-Hispanic-White indicator. Compares fitted APIM with a model excluding actor/partner effects. | Similar adjustment-oriented interpretation to Dwyer; the main text does not provide all moments needed to reproduce the route percentages. |
 | Ferraris et al. (2022), pp. 1400, 1402, 1406 | Caregiver well-being adjusted for caregiver gender, age and care hours; recipient well-being for recipient gender and ADL. Controls predicting support variables and a controls-only fit are not explicitly documented. | Appendix labels predictor variances and outcome denominator as residual quantities, but their model of origin is unclear. Do not assume an identical adjustment procedure to Dwyer. |
 | [Velten and Margraf (2017)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0172855) | Shared predictors include sexual frequency, initiative, communication, relationship duration and household income; other variables have actor/partner effects. Reports 53.7% attributed to APIM and 27.8% to between-dyad covariates. | Applied total/grouped attribution; the covariates include substantive relationship characteristics, not only demographic controls. Exact cross-term grouping behind the percentage is not supplied. |
 | De Padova et al. (2021) | Demographic/clinical multiple regressions are separate analyses. Supplementary APIMs contain depression alone or intrusion/anxiety symptom predictors, without those adjustment covariates. | The cross-predictor contribution demonstrates multiple focal predictors, not demographic-control attribution. |
 | Cavalcanti et al. (2026) | Demographics and personality enter the fixed mean as substantive APIM predictors and appear in the contribution table. | Demographics are included in fixed-prediction covariance attribution rather than residualized away as a separate control block. |
 | Bolger-Laurenceau workshop / supplied self-efficacy fit | Basic model has the two efficacy predictors and two intake outcomes, no demographic controls. | A benchmark for the basic identity; not a worked covariate-adjustment example. |
+| Laws et al. (2026), pp. 9–11/Table 3 | Age and health indicators predict physiological outcomes and remain in final models; dyad-level proximity, gender pairing, cognitive status and family characteristics predict the random residual association. Covariates are grand-mean centered. | Covariate adjustment plus prediction of heterogeneity, not additive covariate-route attribution. The supplied Mplus example is unconditional; the covariate specification is documented in the main text. |
 
-The interpretation of Dwyer/Lee as targeting adjusted dependence is our
-statistical reading of the documented specifications, not an independently
-reproduced computation from complete fitted moments. It should not be described
-as an exact conditional covariance at a particular covariate value without
-additional assumptions.
+Dwyer's retrieved appendix now establishes its adjusted denominator and
+residual predictor moments. Lee's adjusted-dependence interpretation remains
+our reading of the documented specification, without a complete numerical
+reproduction. A residualized covariance should not be called an exact
+conditional covariance at a particular covariate value without assumptions.
 
 To show why full attribution needs more terms, let P1 and P2 denote the
 actor/partner linear predictions from one focal predictor pair, and let C be a
@@ -248,6 +304,13 @@ The full 2024 Kenny-Ackerman-Kashy chapter is now supplied and inspected.
 Section 23.5 gives the partition, while Section 23.6.3 separately covers
 within/between effects and random slopes; no levelwise predictor-route partition
 is shown. Page 566 excludes nonnormal outcome errors. Dwyer's calculation
-supplement remains missing: the supplied self-efficacy code is a different
-analysis. Chapter-linked OSF files remain unchecked. The nine pending citing
-papers remain unclassified for direct use.
+supplement is now retrieved and verified; its covariate-adjusted motivation
+model differs from the supplied self-efficacy example. Chapter-linked OSF files
+are now checked: the ordinary APIM output partitions correlation, including
+signed covariate terms; the longitudinal code fits within/between predictors
+and random slopes but computes no temporal allocation or predictor-route
+contributions. Its intervals concern parameters/contrasts. Vu et al. (2026) was provisionally excluded from the active
+queue after abstract screening; its full text remains inaccessible, so absence
+of decomposition is unverified. It is not counted as a direct use. Excluded
+applications and the removed duplicate report remain documented in the dated
+audit.

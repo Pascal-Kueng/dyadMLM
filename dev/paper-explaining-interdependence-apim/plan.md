@@ -207,8 +207,9 @@ and Gistelinck et al. (2018) for simulation-to-recommendation structure; see the
 - [x] Assemble the broad APIM scoping review and distinguish six confirmed applied
   uses from total-only explanations, adjacent models, and unverified sources.
 - [x] Obtain and inspect the full 2024 Kenny-Ackerman-Kashy chapter (supplied by J-P).
-- [ ] Obtain Dwyer's calculation supplement; inspect the chapter-linked OSF
-  examples and complete the targeted contribution-inference and extension searches.
+- [x] Obtain and inspect Dwyer's calculation supplement (7 October 2026).
+- [x] Inspect both chapter-linked OSF projects (7 October 2026).
+- [ ] Complete the targeted contribution-inference and extension searches.
 - [ ] Agree with collaborators on Paper 1's target journal, substantive example,
   scope, division of work, feedback cadence, and authorship responsibilities.
 - [ ] Use outline + figures -> feedback -> revised outline -> rough draft as the

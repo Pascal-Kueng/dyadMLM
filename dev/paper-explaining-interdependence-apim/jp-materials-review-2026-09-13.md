@@ -6,6 +6,18 @@ Inspected **13 September 2026**. Source: the user-supplied
 is Git-ignored. Source programs were read as evidence, not executed or modified.
 Numerical reconstruction below uses the stored Mplus output, not a new model fit.
 
+**Folder rechecked 6 October 2026:**
+`/home/pascalkueng/Downloads/Relevant Papers and Resources/` contains the same
+13 files, identical by relative path and SHA-256 to the preserved extraction.
+No sources or files were added or changed. The [current annotated review](literature-review.md)
+labels all 51 current entries: four are in J-P's folder and 47 are not. The
+[October full-text audit](full-text-verification-2026-10-07.md) removes ordinary
+applications and a duplicate report. Koch et al. (2025, online) remains an
+adjacent-methods addition outside the supplied folder.
+
+The later [SEM-MLM practice script](practice-sem-mlm.R) independently reproduces
+the workshop example; it is our working material, not part of J-P's folder.
+
 ## Main implications
 
 1. **The full 2024 Kenny-Ackerman-Kashy chapter closes a major retrieval gap.**
@@ -38,9 +50,12 @@ Numerical reconstruction below uses the stored Mplus output, not a new model fit
 | `flashesmall.csv`, `flashe-lavaan.csv` | Identical numeric 1,486-by-8 matrices, with header/name differences for the two programs. One row per dyad, no temporal panel. |
 | `apim-eff-fv.dgm`, `apim-eff-fv.gh5` | Mplus diagram and plot/data artifacts, not additional studies or statistical methods. GH5 signature/readable metadata inspected; no full binary-data audit. |
 
-Count the two workshop handouts together as one resource entry, bringing the
-main annotated list from 50 to **51**. Do not count the draft, duplicate manual,
-code, or two data formats as independent publications or applications.
+The two workshop handouts count together as one resource entry; in September
+this brought the main annotated list from 50 to **51**. October screening left
+50 after adding Koch et al. and removing Jang (2025) and the repeat Burns (2020)
+entry. Adding Perry et al. (2017) as adjacent visualization methods on 7 October
+brings the current total to **51**. Do not count the draft, duplicate manual, code, or two data
+formats as independent publications or applications.
 
 ## Published chapter: what is now verified
 
@@ -68,14 +83,29 @@ explained part .058 (25%). This is an ordinary APIM with temporally separated
 predictors/outcomes, not intensive longitudinal within/between route attribution.
 Its use of Acitelli et al.'s earlier data does not establish that the original
 data source performed this partition. Chapter-linked partition materials:
-[OSF zt9s6](https://osf.io/zt9s6); linked files not inspected in this pass.
+[OSF zt9s6](https://osf.io/zt9s6): all three current files checked and retained
+7 October 2026. Simple output p. 2/Table 3 reports grouped APIM contribution
+.058 (25.03%) of correlation .231. Complex output p. 3/Table 3 reports signed
+cross-predictor, covariate and predictor-covariate contributions. Neither table
+provides contribution intervals; coefficient/k intervals are separate results.
 
 **Section 23.6.3, pp. 585-588**, separately specifies longitudinal APIMs with
 within-/between-person effects, random intercepts/slopes, and residual
 covariance. The example uses 103 couples and 14 diary days. It reports covariance
 parameters at different levels, but does not apply the Section 23.5 route
 partition at each level. The separate ILD materials are linked at
-[OSF 7w3my](https://osf.io/7w3my); linked files not inspected here.
+[OSF 7w3my](https://osf.io/7w3my): all eight current files checked and retained
+7 October 2026. R lines 146–193 and SPSS output pp. 39–40 include within/between
+predictors, random slopes, residual covariance and random-effect covariances.
+They compute neither stable/daily covariance shares nor predictor-route
+contributions at either temporal level. Reported intervals concern model
+parameters and contrasts. The reduced three-block model follows an unsuccessful
+full random-covariance fit. Source programs were read, not executed.
+
+Both projects' current files, versions and SHA-256 hashes are recorded in the
+[retained inventory](../references/explaining-interdependence-apim/kenny2024-osf-2026-10-07/inventory.tsv).
+These are companion files for the existing chapter, not additional independent
+publications, and they remain outside J-P's supplied 13-file bundle.
 
 **Page 566 excludes nonnormal outcome errors**, including dichotomous, ordinal,
 and count outcomes. Thus this chapter does not establish a generalized-link
@@ -177,5 +207,9 @@ source programs for the present literature-review task.
 - Keep the distinction between ordinary cross-sectional/two-wave APIM,
   level-specific ILD models, and generalized observed-outcome attribution. The
   supplied bundle does not resolve the latter two route-attribution questions.
-- **Still missing:** Dwyer's separate calculation supplement, checks of the two
-  chapter-linked OSF projects, and the unresolved citing papers in the main review.
+- **Retrieved 7 October 2026:** Dwyer's separate calculation supplement,
+  saved outside J-P's bundle. It confirms controls-adjusted route percentages.
+- **OSF checks closed 7 October 2026:** all 11 current files in both linked
+  projects are checked and retained outside J-P's original bundle. They confirm
+  ordinary APIM partitioning and ILD modeling separately, without a worked
+  covariance-route partition at both temporal levels.

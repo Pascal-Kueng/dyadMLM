@@ -1,5 +1,9 @@
 # APIM covariance decomposition: annotated literature review
 
+For the main reading list, use the [focused 15-source overview](focused-reading-list.md).
+This full 51-source review also retains the other 36 background/related entries
+and the source-check record.
+
 Search and source checks: **31 August 2026**.
 
 Forward-citation audit and additions: **13 September 2026**. See the
@@ -8,16 +12,28 @@ Forward-citation audit and additions: **13 September 2026**. See the
 decisions, and unresolved candidates. Original annotations retain their earlier
 verification limits unless explicitly updated below.
 
-The main list contains **51 reference entries**: the original 42 plus
-De Padova et al. (2021), Velten and Margraf (2017), Burns (2020), and Kline
-(2016) from the forward-citation audit, and Gistelinck and Loeys (2019), Savord
-et al. (2023), Loeys and Molenberghs (2013), and Loeys et al. (2014) from the
-subsequent design/model scope check, plus the grouped Bolger-Laurenceau (2025)
-workshop materials supplied by J-P. The [supplied-materials review](jp-materials-review-2026-09-13.md)
-also upgrades the 2024 chapter to full-text-verified methodology. **Nine additional citing papers remain candidates awaiting full-text
-verification** and are listed with the retrieval gaps below. Reference counts
-include teaching material, background sources, and repeat reports; they are not
-counts of independent applications.
+Full-text verification through UZH access and public repositories: **6–7 October
+2026**. See the [verification and exclusion audit](full-text-verification-2026-10-07.md).
+Nine full-text-screened ordinary applications were removed from the focused
+list/candidate queue; the repeat Burns (2020) abstract was also removed as a
+separate entry. Five retained methods sources now have full-text annotations;
+Dwyer's calculation supplement is also retrieved and verified.
+Further checks on 7 October verified the relevant 1998 Kenny-Kashy-Bolger
+sections, Koch's June 2025 preprint and dated author supplements, both
+2024 chapter-linked OSF projects, and Laws's complete publisher PDF/supplement.
+Their version and completeness limits are
+recorded below; none adds a focal decomposition application.
+
+The main list contains **51 reference entries**, including the grouped
+Bolger-Laurenceau (2025) workshop supplied by J-P and Koch et al. (2025, online),
+added as adjacent ILD methodology. Perry et al. (2017), added on 7 October,
+is longitudinal-APIM visualization context, not a new decomposition application.
+The [supplied-materials review](jp-materials-review-2026-09-13.md)
+upgrades the 2024 chapter to full-text-verified methodology. **No candidates
+remain in the active queue.** Vu et al. (2026) was provisionally excluded after
+abstract screening; its full text remains unverified (see below and the audit).
+Reference counts include teaching material and background sources; they are
+not counts of independent applications.
 
 This records the broad scoping review and the earlier writing-model search.
 It is not an exhaustive, database-exported systematic review. Full texts,
@@ -30,6 +46,20 @@ APIM predictor-side path products (actor-actor, two member-driven actor-partner
 routes, and partner-partner), plus residual covariance. Related decompositions
 are retained below, but are not counted as applications of this exact method.
 
+## Presence in J-P's folder: checked 6 October 2026
+
+Compared `/home/pascalkueng/Downloads/Relevant Papers and Resources/` with the
+preserved reference folder: all **13 files match by relative path and SHA-256**.
+They represent four sources: Dwyer (2017), Kenny's APIM_MM manual (2019), Kenny,
+Ackerman, and Kashy (2024), and the grouped Bolger-Laurenceau workshop (2025).
+The chapter draft and workshop data/code are supporting files, not extra studies.
+
+Each source below is labelled **IN J-P'S FOLDER** or **NOT IN J-P'S FOLDER**:
+**4 of 51 entries are present; 47 are absent**. These labels describe file presence, not J-P's
+familiarity with a source. A reference cited inside a supplied document is not
+itself included. The method/design annotations retain their stated verification
+limits; this folder check was not a new exhaustive literature search.
+
 ## Main conclusions and reading order
 
 - Six published applied papers directly use APIM path-tracing decomposition:
@@ -39,7 +69,8 @@ are retained below, but are not counted as applications of this exact method.
   supplementary APIM_MM tables report a grouped partition, including negative
   and cross-predictor contributions. **Velten and Margraf (2017)** report total
   APIM and covariate attribution. Keep these distinct from four separate route
-  rows. **Burns (2020)** is an additional abstract of the existing analysis.
+  rows. The repeat Burns (2020) abstract is recorded in the screening audit,
+  without a separate reference entry.
 - The **Bolger-Laurenceau webinar**, **Kenny handout**, and **APIM_MM manual**
   already show the decomposition, route interpretation, and correlation-unit
   reporting. Signed contributions and software are not unoccupied territory.
@@ -63,6 +94,8 @@ are retained below, but are not counted as applications of this exact method.
 
 ### Bolger and Laurenceau (2016): the closest teaching example
 
+**NOT IN J-P'S FOLDER**
+
 Bolger, N., & Laurenceau, J.-P. (2016, February 5). *Family Life, Activity, Sun,
 Health and Eating (FLASHE) Study webinar: An introduction to dyadic data
 analysis*. National Cancer Institute.
@@ -77,6 +110,8 @@ analysis*. National Cancer Institute.
   predictor in Dwyer. Use 2016, despite a later paper citing the webinar as 2017.
 
 ### Bolger and Laurenceau (2025): matched workshop and analysis materials
+
+**IN J-P'S FOLDER**
 
 Bolger, N., & Laurenceau, J.-P. (2025, July 7-11). *Introduction to dyadic data
 analysis* [Day 1 and Day 2 workshop handouts]. UMass Amherst.
@@ -98,6 +133,8 @@ analysis* [Day 1 and Day 2 workshop handouts]. UMass Amherst.
 
 ### Kenny (n.d.): Explained nonindependence
 
+**NOT IN J-P'S FOLDER**
+
 Kenny, D. A. (n.d.). *Explained nonindependence* [Handout].
 [Author's DOCX](https://davidakenny.net/kkc/c7/Explained_Nonindependence.docx)
 | [Chapter 7 companion page](https://davidakenny.net/kkc/c7/c7.htm).
@@ -111,6 +148,8 @@ Kenny, D. A. (n.d.). *Explained nonindependence* [Handout].
   do not attribute this later handout automatically to the 2006 book.
 
 ### Kenny (2019): APIM_MM documentation
+
+**IN J-P'S FOLDER**
 
 Kenny, D. A. (2019, March 3). *APIM_MM: A web-based package for estimating the
 Actor-Partner Interdependence Model by multilevel modeling*.
@@ -127,6 +166,8 @@ Actor-Partner Interdependence Model by multilevel modeling*.
 
 ### Kenny (n.d.): general path-tracing rules
 
+**NOT IN J-P'S FOLDER**
+
 Kenny, D. A. (n.d.). *Path tracing* [Web tutorial].
 [Author's website](https://davidakenny.net/cm/tracing.htm).
 
@@ -136,6 +177,8 @@ Kenny, D. A. (n.d.). *Path tracing* [Web tutorial].
   tracing tutorial presents the five APIM contributions.
 
 ### Kenny, Ackerman, and Kashy (2024): published decomposition methods
+
+**IN J-P'S FOLDER**
 
 Kenny, D. A., Ackerman, R. A., & Kashy, D. A. (2024). The design and analysis of
 data from dyads and groups. In H. T. Reis, T. West, & C. M. Judd (Eds.),
@@ -157,12 +200,22 @@ data from dyads and groups. In H. T. Reis, T. West, & C. M. Judd (Eds.),
   23.5. Section 23.6.3, pp. 585-588, separately specifies within/between APIM
   effects and random slopes, without a route partition at each level. Page 566
   explicitly excludes nonnormal outcome errors, including binary/ordinal/count.
+- **OSF verified 7 October 2026:** all 11 current files in the
+  [partition](https://osf.io/zt9s6/) and [longitudinal](https://osf.io/7w3my/)
+  projects were retrieved and checked. The ordinary APIM outputs give grouped,
+  signed contributions, including covariates. The ILD scripts/output fit
+  within/between predictors and random slopes but calculate no temporal
+  covariance allocation or predictor-route partition. Their intervals concern
+  model parameters and contrasts, not contribution shares. See the
+  [file inventory](../references/explaining-interdependence-apim/kenny2024-osf-2026-10-07/inventory.tsv).
 - **Versions:** The supplied highlighted DOCX is an undated draft containing
   2022 references, not a verified 2019 publication. Use published Table 23.3;
   it corrects several draft indexes. See the [bundle assessment](jp-materials-review-2026-09-13.md)
   for checked sign/row-placement issues in the published examples.
 
 ### Wickham and Knee (2012): theoretical rationale and total explained covariance
+
+**NOT IN J-P'S FOLDER**
 
 Wickham, R. E., & Knee, C. R. (2012). Interdependence theory and the actor-partner
 interdependence model: Where theory and method converge.
@@ -182,6 +235,8 @@ interdependence model: Where theory and method converge.
 
 ### Dwyer et al. (2017): the paper J-P mentioned
 
+**IN J-P'S FOLDER**
+
 Dwyer, L. A., Bolger, N., Laurenceau, J.-P., Patrick, H., Oh, A. Y., Nebeling,
 L. C., & Hennessy, E. (2017). Autonomous motivation and fruit/vegetable intake in
 parent-adolescent dyads. *American Journal of Preventive Medicine, 52*(6),
@@ -197,15 +252,18 @@ parent-adolescent dyads. *American Journal of Preventive Medicine, 52*(6),
   establish an APIM-specific partition in Kline's textbook.
 - **Covariates:** Both motivation predictors and both intake outcomes are
   regressed on parent sex, adolescent sex/age, and parent education. This and
-  the controls-only comparison support an adjusted-dependence interpretation;
-  exact residual moments/denominator remain unverified without the supplement.
-- **Use/caution:** Essential direct precedent and substantive writing example.
-  The calculation supplement (`NIHMS868627-supplement.pdf`) was inaccessible;
-  its precise denominator, equations, and possible inference are unverified.
-  J-P's supplied PDF is the main nine-page article only; the accompanying
-  self-efficacy example is not this missing motivation-model supplement.
+  the controls-only comparison target dependence after adjustment.
+- **Supplement verified 7 October 2026:** The two-page appendix divides the
+  four products by controls-only outcome residual covariance **1.980**, using
+  final-model motivation residual variances .763 (adolescent), .490 (parent),
+  and covariance .181. It supplies the formulas and point estimates, without
+  contribution intervals. Essential direct precedent for an adjusted partition.
+  The supplement is now saved separately; it was not in J-P's folder, whose
+  self-efficacy example fits a different model.
 
 ### Burns (2019): contribution table in correlation units
+
+**NOT IN J-P'S FOLDER**
 
 Burns, R. D. (2019). Enjoyment, self-efficacy, and physical activity within
 parent-adolescent dyads: Application of the actor-partner interdependence model.
@@ -224,6 +282,8 @@ parent-adolescent dyads: Application of the actor-partner interdependence model.
 
 ### Figueroa et al. (2019): another parent-adolescent application
 
+**NOT IN J-P'S FOLDER**
+
 Figueroa, R., Kalyoncu, Z. B., Saltzman, J. A., & Davison, K. K. (2019).
 Autonomous motivation, sugar-sweetened beverage consumption and healthy beverage
 intake in US families: Differences between mother-adolescent and
@@ -240,6 +300,8 @@ father-adolescent dyads. *Public Health Nutrition, 22*(6), 1010-1018.
   from the percentages alone.
 
 ### Lee et al. (2021): mental health and relationship closeness
+
+**NOT IN J-P'S FOLDER**
 
 Lee, H., Henry, K. L., Buller, D. B., Pagoto, S., Baker, K., Walkosz, B.,
 Hillhouse, J., Berteletti, J., & Bibeau, J. (2021). Mutual influences of mother's
@@ -261,6 +323,8 @@ actor-partner interdependence model. *Journal of Child and Family Studies, 30*,
   dependence target, although full numerical reconstruction is unavailable.
 
 ### Ferraris et al. (2022): explicit formulas in an appendix
+
+**NOT IN J-P'S FOLDER**
 
 Ferraris, G., Fisher, O., Lamura, G., Fabbietti, P., Gagliardi, C., & Hagedoorn,
 M. (2022). Dyadic associations between perceived social support and psychological
@@ -285,6 +349,8 @@ well-being in caregivers and older care recipients.
 
 ### Fu et al. (2025): four routes plus residual in a later application
 
+**NOT IN J-P'S FOLDER**
+
 Fu, Y., Almes, H., Constantino, N., Schmidt, D., & Burns, R. D. (2025).
 Associations of parental perceived health with child movement behaviors within
 two-parent households. *International Journal of Physical Activity and Health,
@@ -300,6 +366,8 @@ two-parent households. *International Journal of Physical Activity and Health,
   not this partition; apparent outcome-label inconsistencies warrant checking.
 
 ### De Padova et al. (2021): grouped partition with signed and cross-predictor contributions
+
+**NOT IN J-P'S FOLDER**
 
 De Padova, S., et al. (2021). Post-traumatic stress symptoms in long-term
 disease-free cancer survivors and their family caregivers.
@@ -321,21 +389,11 @@ disease-free cancer survivors and their family caregivers.
   supplement differ in labelling the overall correlation; see the dated audit
   before reproducing numbers. Reporting was verified, not every calculation.
 
-### Burns (2020): conference abstract of the already-listed application
-
-Burns, R. D. (2020). Enjoyment, Self-Efficacy, and Physical Activity Within
-Parent-Adolescent Dyads. In *Peer-Reviewed Abstracts*, *Research Quarterly for
-Exercise and Sport, 91*(sup1).
-[Publisher collection](https://www.tandfonline.com/doi/full/10.1080/02701367.2020.1761754).
-
-- **Verified 13 September 2026:** Indexed publisher text identifies the author,
-  1,854 FLASHE dyads, and member-/actor-driven covariance contributions matching
-  Burns (2019). Count as an additional report of the same analysis, not an
-  independent application. The individual abstract page remains unverified.
-
 ## 3. Especially close recent preprint
 
 ### Cavalcanti et al. (2026): signed, multi-predictor decomposition
+
+**NOT IN J-P'S FOLDER**
 
 Cavalcanti, J. C., Lachmann, T., Cooney, G., Madureira, S., & Skantze, G. (2026,
 June 5). *Individual and shared components of conversational enjoyment: The role
@@ -359,6 +417,8 @@ of demographics and personality* [Preprint, version 1].
 
 ### Velten and Margraf (2017): total APIM and covariate attribution
 
+**NOT IN J-P'S FOLDER**
+
 Velten, J., & Margraf, J. (2017). Satisfaction guaranteed? How individual,
 partner, and relationship factors impact sexual satisfaction within partnerships.
 *PLOS ONE, 12*(2), e0172855.
@@ -373,6 +433,8 @@ partner, and relationship factors impact sexual satisfaction within partnerships
 
 ### Griffin and Gonzalez (1995): exchangeable dyadic correlations
 
+**NOT IN J-P'S FOLDER**
+
 Griffin, D., & Gonzalez, R. (1995). The correlational analysis of dyad-level data:
 Models for the exchangeable case. *Psychological Bulletin, 118*(3), 430-439.
 [DOI](https://doi.org/10.1037/0033-2909.118.3.430)
@@ -386,6 +448,8 @@ Models for the exchangeable case. *Psychological Bulletin, 118*(3), 430-439.
 
 ### Gonzalez and Siarkiewicz (2006): applied individual/dyad decomposition
 
+**NOT IN J-P'S FOLDER**
+
 Gonzalez, R., & Siarkiewicz, M. (2006). Jak zbadać związek między stopniem zaufania
 a poziomem satysfakcji z małżeństwa? [How can we analyze a relationship between
 trust and satisfaction in married couples?]. *Nowiny Psychologiczne, 1*, 15-25.
@@ -397,6 +461,8 @@ trust and satisfaction in married couples?]. *Nowiny Psychologiczne, 1*, 15-25.
   dyadic model, not an APIM five-route table. Polish text with English abstract.
 
 ### Jang (2016): total explained nonindependence in negotiation
+
+**NOT IN J-P'S FOLDER**
 
 Jang, D. (2016). *Negotiation in all its phases: Theory and data on behavior
 before, during, and after bargaining* [Doctoral dissertation, Washington
@@ -416,6 +482,8 @@ direct applications of the focal decomposition.
 
 ### Kline (2016): general path-tracing source directly cited by Dwyer
 
+**NOT IN J-P'S FOLDER**
+
 Kline, R. B. (2016). *Principles and practice of structural equation modeling*
 (4th ed.). Guilford Press.
 
@@ -424,6 +492,8 @@ Kline, R. B. (2016). *Principles and practice of structural equation modeling*
   foundation; APIM-specific partition content in the book was not verified.
 
 ### Boker, McArdle, and Neale (2002)
+
+**NOT IN J-P'S FOLDER**
 
 *An algorithm for the hierarchical organization of path diagrams and calculation
 of components of expected covariance*. *Structural Equation Modeling, 9*(2),
@@ -436,6 +506,8 @@ of components of expected covariance*. *Structural Equation Modeling, 9*(2),
 
 ### Ledermann, Macho, and Kenny (2011)
 
+**NOT IN J-P'S FOLDER**
+
 *Assessing mediation in dyadic data using the actor-partner interdependence
 model*. *Structural Equation Modeling, 18*(4), 595-612.
 [DOI](https://doi.org/10.1080/10705511.2011.607099).
@@ -447,6 +519,8 @@ model*. *Structural Equation Modeling, 18*(4), 595-612.
 
 ### Laurenceau and Bolger (2005)
 
+**NOT IN J-P'S FOLDER**
+
 *Using diary methods to study marital and family processes*.
 *Journal of Family Psychology, 19*(1), 86-97.
 [DOI](https://doi.org/10.1037/0893-3200.19.1.86).
@@ -457,6 +531,8 @@ model*. *Structural Equation Modeling, 18*(4), 595-612.
   bias-study template.
 
 ### Bolger and Shrout (2007)
+
+**NOT IN J-P'S FOLDER**
 
 *Accounting for statistical dependency in longitudinal data on dyads*. In
 T. D. Little, J. A. Bovaird, & N. A. Card (Eds.), *Modeling contextual effects in
@@ -473,7 +549,27 @@ longitudinal studies* (pp. 285-298). Lawrence Erlbaum Associates.
   correlation into daily (75%) and person-level (25%) components. This is a real
   ILD level partition, but not four APIM predictor routes at each level.
 
+### Perry et al. (2017): longitudinal APIM visualization
+
+**NOT IN J-P'S FOLDER**
+
+*Graphic Methods for Interpreting Longitudinal Dyadic Patterns From
+Repeated-Measures Actor–Partner Interdependence Models*.
+[DOI](https://doi.org/10.1037/fam0000293)
+| [Local author manuscript](../references/visualization/2017-perry-et-al-graphic-methods-longitudinal-apim.pdf).
+
+- **Coverage/use:** Main methods/results, figures and plotting appendix checked
+  7 October. Vector fields display predicted dyadic change, stability and
+  attractors from actor/partner coefficients. Examples include minute-level
+  heart-rate series for three couples and seven repeated observations in 59
+  couples. Pages 21–22 explicitly state that the multilevel coefficients combine
+  within- and between-couple associations. No outcome-covariance route partition
+  at either temporal level is shown. Relevant visualization methods and applied
+  examples, not evidence of the focal decomposition.
+
 ### Gistelinck, Loeys, Decuyper, and Dewitte (2018)
+
+**NOT IN J-P'S FOLDER**
 
 *Indistinguishability tests in the actor-partner interdependence model*.
 *British Journal of Mathematical and Statistical Psychology, 71*(3), 472-498.
@@ -486,6 +582,8 @@ longitudinal studies* (pp. 285-298). Lawrence Erlbaum Associates.
 
 ### Jones and West (2005)
 
+**NOT IN J-P'S FOLDER**
+
 *Covariance decomposition in undirected Gaussian graphical models*.
 *Biometrika, 92*(4), 779-786.
 [DOI](https://doi.org/10.1093/biomet/92.4.779).
@@ -497,6 +595,8 @@ longitudinal studies* (pp. 285-298). Lawrence Erlbaum Associates.
 
 ### Zhang, Hamagami, Grimm, and McArdle (2015)
 
+**NOT IN J-P'S FOLDER**
+
 *Using R package RAMpath for tracing SEM path diagrams and conducting complex
 longitudinal data analysis*. *Structural Equation Modeling, 22*(1), 132-147.
 [DOI](https://doi.org/10.1080/10705511.2014.935257).
@@ -507,6 +607,8 @@ longitudinal data analysis*. *Structural Equation Modeling, 22*(1), 132-147.
 
 ### Kenny and Ledermann (2010)
 
+**NOT IN J-P'S FOLDER**
+
 *Detecting, measuring, and testing dyadic patterns in the actor-partner
 interdependence model*. *Journal of Family Psychology, 24*(3), 359-366.
 [DOI](https://doi.org/10.1037/a0019651).
@@ -516,6 +618,8 @@ interdependence model*. *Journal of Family Psychology, 24*(3), 359-366.
   estimands; ratio inference is not evidence for covariance-route inference.
 
 ### Stas, Kenny, Mayer, and Loeys (2018)
+
+**NOT IN J-P'S FOLDER**
 
 *Giving dyadic data analysis away: A user-friendly app for actor-partner
 interdependence models*. *Personal Relationships, 25*, 103-119.
@@ -529,7 +633,7 @@ interdependence models*. *Personal Relationships, 25*, 103-119.
 
 ## 6. Foundations, extension context, and screened leads
 
-- **Gistelinck and Loeys (2019).** *The actor-partner interdependence model
+- **NOT IN J-P'S FOLDER** - **Gistelinck and Loeys (2019).** *The actor-partner interdependence model
   for longitudinal dyadic data: An implementation in the SEM framework*.
   *Structural Equation Modeling, 26*(3), 329-347.
   [DOI](https://doi.org/10.1080/10705511.2018.1527223)
@@ -538,10 +642,16 @@ interdependence models*. *Personal Relationships, 25*, 103-119.
   time-averaged/time-specific actor and partner effects, random-intercept
   covariance, daily residual covariance, and serial dependence. The application
   uses three-week diaries from 66 couples. Inspected equations and covariance
-  structure in dissertation pp. 87-89; no focal predictor-route covariance
-  partition at both levels established. Strong ILD foundation, not a direct
-  decomposition application. Published online in 2018, journal issue in 2019.
-- **Savord, McNeish, Iida, Quiroz, and Ha (2023).** *Fitting the longitudinal
+  structure in dissertation pp. 87-89. Rechecked 7 October: p. 102 and Table
+  3.5.2 (p. 104) explicitly attribute 89% of modeled same-day dependence to
+  daily residual covariance and 11% to random-intercept covariance. This is
+  remaining dependence after the predictor mean structure, not attribution
+  to actor/partner predictor products at either level. Covariance-parameter
+  intervals are supplied; intervals for these shares are not. Strong ILD
+  methods with an applied level partition, not the focal route partition.
+  [Local dissertation](../references/explaining-interdependence-apim/gistelinck-dissertation-l-apim.pdf).
+  Published online in 2018, journal issue in 2019.
+- **NOT IN J-P'S FOLDER** - **Savord, McNeish, Iida, Quiroz, and Ha (2023).** *Fitting the longitudinal
   actor-partner interdependence model as a dynamic structural equation model in
   Mplus*. *Structural Equation Modeling, 30*(2), 296-314.
   [DOI](https://doi.org/10.1080/10705511.2022.2065279)
@@ -552,7 +662,12 @@ interdependence models*. *Personal Relationships, 25*, 103-119.
   Between-dyad covariance of log-residual variances concerns correlated
   volatility, not itself covariance between outcomes. Published online in 2022,
   journal issue in 2023. Important random-slope extension context.
-- **Loeys and Molenberghs (2013).** *Modeling actor and partner effects in
+  **Code checked 7 October 2026:** the [author-linked OSF bundle](https://osf.io/vamku/?view_only=4f5b4c39fb294b0281566b94b61198da)
+  supplies five fitting scripts: Mplus SEM/DSEM and SAS MLM, including random
+  lagged slopes and multiple outcomes. None calculates predictor-route
+  contributions or shares at either temporal level. The original scripts and
+  provenance are [retained locally](../references/explaining-interdependence-apim/savord2023-code-2026-10-07/README.md).
+- **NOT IN J-P'S FOLDER** - **Loeys and Molenberghs (2013).** *Modeling actor and partner effects in
   dyadic data when outcomes are categorical*. *Psychological Methods, 18*(2),
   220-236. [DOI](https://doi.org/10.1037/a0030640)
   | [Author manuscript](https://documentserver.uhasselt.be/bitstream/1942/14740/1/met_loeys_0112.pdf).
@@ -562,15 +677,17 @@ interdependence models*. *Personal Relationships, 25*, 103-119.
   Full manuscript inspected; no actor/partner predictor-route covariance
   attribution located. Essential non-Gaussian APIM context, distinct from
   Leckie's general multilevel variance-partition contribution.
-- **Loeys, Cook, De Smet, Wietzker, and Buysse (2014).** *The actor-partner
+- **NOT IN J-P'S FOLDER** - **Loeys, Cook, De Smet, Wietzker, and Buysse (2014).** *The actor-partner
   interdependence model for categorical dyadic data: A user-friendly guide to
   GEE*. *Personal Relationships, 21*(2), 225-241.
   [DOI](https://doi.org/10.1111/pere.12028).
-  Added 13 September 2026. Practical methodological guide to binary/count APIM
-  with SPSS/SAS examples. Publisher abstract verified; exact covariance-route
-  decomposition not verified. The 2013 paper above is the stronger technical
-  citation for the generalized-model extension.
-- **Johnson (2014).** *Extension of Nakagawa and Schielzeth's R-squared GLMM
+  Full text and SAS appendix verified 6–7 October 2026. Substantial practical
+  guide to logistic/negative-binomial GEE, illustrated with 46 ex-couples;
+  no temporal ILD panel. Reports robust actor/partner inference and working
+  residual correlations (.09 binary, −.07 count), without inference for those
+  nuisance correlations or a predictor-route partition. Retain as non-Gaussian
+  APIM methods context; the 2013 paper is the stronger technical foundation.
+- **NOT IN J-P'S FOLDER** - **Johnson (2014).** *Extension of Nakagawa and Schielzeth's R-squared GLMM
   to random slopes models*. *Methods in Ecology and Evolution, 5*(9), 944-946.
   [DOI](https://doi.org/10.1111/2041-210X.12225)
   | [Institutional record](https://eprints.gla.ac.uk/94906/).
@@ -579,7 +696,7 @@ interdependence models*. *Personal Relationships, 25*, 103-119.
   not an APIM covariance-route decomposition or evidence for component inference.
   Full author manuscript checked September 2026: Eq. 11 averages random-effect
   variances using the trace of the implied random-effect covariance matrix.
-- **Leckie, Browne, Goldstein, Merlo, and Austin (2020).** *Partitioning
+- **NOT IN J-P'S FOLDER** - **Leckie, Browne, Goldstein, Merlo, and Austin (2020).** *Partitioning
   variation in multilevel models for count data*. *Psychological Methods,
   25*(6), 787-801. [DOI](https://doi.org/10.1037/met0000265)
   | [Institutional record](https://portal.research.lu.se/en/publications/partitioning-variation-in-multilevel-models-for-count-data/).
@@ -591,102 +708,149 @@ interdependence models*. *Personal Relationships, 25*, 103-119.
   [Supplement S4.3](https://www.bristol.ac.uk/cmm/media/leckie/articles/leckie2020.pdf),
   p. 31/PDF page 46, derives cross-unit covariance by total covariance, conditional
   on covariates and averaging over random effects. Not a direct APIM route-inference precedent.
-- **Kenny (1996).** *Models of non-independence in dyadic research*.
+- **NOT IN J-P'S FOLDER** - **Kenny (1996).** *Models of non-independence in dyadic research*.
   *Journal of Social and Personal Relationships, 13*, 279-294.
   [DOI](https://doi.org/10.1177/0265407596132007).
-  Foundation for alternative dyadic dependence models. Abstract verified;
-  specific decomposition content not verified in full text.
-- **Kenny and Cook (1999).** *Partner effects in relationship research:
+  Full article verified 7 October 2026. Substantial foundation for partner
+  effects, mutual influence and common fate. Gives actor/partner equations,
+  within-/between-dyad slope estimation, covariates and coefficient tests
+  (pp. 283–289), without an explicit four-product outcome-covariance partition.
+  Within/between refers to members and dyads, not temporal ILD. Its toy-sharing
+  count example uses linear analysis, not a generalized response model.
+- **NOT IN J-P'S FOLDER** - **Kenny and Cook (1999).** *Partner effects in relationship research:
   Conceptual issues, analytic difficulties, and illustrations*.
   *Personal Relationships, 6*, 433-448.
   [DOI](https://doi.org/10.1111/j.1475-6811.1999.tb00202.x).
   Local full text screened: APIM patterns and residual nonindependence,
   including negative residual dependence; no explicit four-route expansion
   or contribution table located. Adjacent, not a confirmed direct precedent.
-- **Cook and Kenny (2005).** *The actor-partner interdependence model: A model
+- **NOT IN J-P'S FOLDER** - **Cook and Kenny (2005).** *The actor-partner interdependence model: A model
   of bidirectional effects in developmental studies*.
   *International Journal of Behavioral Development, 29*, 101-109.
   [DOI](https://doi.org/10.1080/01650250444000405).
   Author-posted full text screened: actor/partner paths and remaining
   nonindependence, but no explicit four-product decomposition located.
-- **Campbell and Kashy (2002).** *Estimating actor, partner, and interaction
+- **NOT IN J-P'S FOLDER** - **Campbell and Kashy (2002).** *Estimating actor, partner, and interaction
   effects for dyadic data using PROC MIXED and HLM: A user-friendly guide*.
   *Personal Relationships, 9*, 327-342.
   [DOI](https://doi.org/10.1111/1475-6811.00023).
-  Foundational applied estimation guide; specific partition content remains
-  unverified because the full relevant text was not obtained.
-- **Kenny, Kashy, and Cook (2006).** *Dyadic data analysis*. Guilford Press.
+  Full article verified 6–7 October 2026. Foundational PROC MIXED/HLM guide
+  using fictitious cross-sectional dyads, gender/experimental-condition
+  adjustment, and actor/partner interactions. Page 332 reports a partial ICC;
+  Tables 2–3 report ordinary coefficients and covariance parameters, without
+  allocating outcome covariance to predictor routes. Its member/dyad hierarchy
+  is not temporal ILD. Retain for estimation and SEM/MLM context.
+- **NOT IN J-P'S FOLDER** - **Kenny, Kashy, and Cook (2006).** *Dyadic data analysis*. Guilford Press.
   [Publisher](https://www.guilford.com/books/Dyadic-Data-Analysis/Kenny-Kashy-Cook/9781572309869).
   Chapter 7, pp. 144-184, is the APIM foundation. The companion handout was
   verified, but a corresponding printed decomposition passage was not.
-- **Ledermann and Kenny (2017).** *Analyzing dyadic data with multilevel
+- **NOT IN J-P'S FOLDER** - **Ledermann and Kenny (2017).** *Analyzing dyadic data with multilevel
   modeling versus structural equation modeling: A tale of two methods*.
   *Journal of Family Psychology, 31*(4), 442-452.
   [DOI](https://doi.org/10.1037/fam0000290).
   Local full text screened: useful for SEM/MLM estimation, standardization,
   missing data, and parameter availability. No explicit route partition found;
   citing APIM_MM alone does not establish use of its decomposition.
-- **Kenny and Kashy (2014).** *The design and analysis of data from dyads and
+- **NOT IN J-P'S FOLDER** - **Kenny and Kashy (2014).** *The design and analysis of data from dyads and
   groups*. In *Handbook of research methods in social and personality psychology*
   (2nd ed., pp. 589-607). [DOI](https://doi.org/10.1017/CBO9780511996481.027).
-  Older two-author chapter, not the Ackerman chapter. Metadata verified;
-  relevant full-text subsection unverified.
-- **Kashy and Kenny (2000).** *The analysis of data from dyads and groups*.
+  Full chapter verified 7 October 2026 through Cambridge/UZH. Substantial
+  synthesis of APIM estimation, distinguishability, dyadic patterns, mediation,
+  and group models; no focal four-route covariance allocation located.
+  The conclusion explicitly excludes over-time dyadic data from its scope.
+  Group/SRM variance partitions are different targets. Retain as foundational
+  context; cite the 2024 Ackerman chapter for direct decomposition methods.
+- **NOT IN J-P'S FOLDER** - **Kashy and Kenny (2000).** *The analysis of data from dyads and groups*.
   In *Handbook of research methods in social and personality psychology*
   (1st ed., pp. 451-477). Earlier chapter cited by APIM_MM; specific
   decomposition content remains unverified.
-- **Kenny, Kashy, and Bolger (1998).** *Data analysis in social psychology*.
+- **NOT IN J-P'S FOLDER** - **Kenny, Kashy, and Bolger (1998).** *Data analysis in social psychology*.
   In *The handbook of social psychology* (4th ed., Vol. 1, pp. 233-265).
   [Author's PDF](https://www.columbia.edu/~nb2229/docs/KennyKashyBolger1998-Data_analysis.pdf).
-  A different handbook and author team. Related dependence-analysis background;
-  no focal four-route passage verified in this review.
-- **Gonzalez and Griffin (1999).** *The correlational analysis of dyad-level
+  Relevant sections checked 7 October 2026: pp. 244–245 explain actor/partner
+  effects and pooled between-/within-group regressions; pp. 246–251 cover
+  general multilevel random intercepts/slopes and inference. Pages 262–263
+  discuss diary-level mediation/moderation. No focal paired-outcome covariance
+  route partition was located in these sections. Retain as methods background,
+  not direct decomposition evidence. The author scan is incomplete: printed
+  p. 238 is missing, although these relevant sections are present.
+- **NOT IN J-P'S FOLDER** - **Gonzalez and Griffin (1999).** *The correlational analysis of dyad-level
   data in the distinguishable case*. *Personal Relationships, 6*, 449-469.
   [DOI](https://doi.org/10.1111/j.1475-6811.1999.tb00203.x).
-  Related correlational-model lineage; the relevant full text was not verified
-  for the focal APIM partition.
-- **Gonzalez and Griffin (2004).** *Measuring individuals in a social
+  Full article and appendix verified 6–7 October 2026. Substantial methods
+  treatment with diagrams, equations, SEM syntax, and correlation-inference
+  simulations. Equation 3 (p. 457) partitions the role-adjusted own-member X–Y
+  correlation into shared-dyad and individual contributions; it does not
+  partition Cov(Y1,Y2) into actor/partner routes. Individual/dyad latent levels
+  are cross-sectional, not temporal ILD. Pages 454 and 462 address role-mean
+  adjustment and an extension to covariates at both latent levels.
+- **NOT IN J-P'S FOLDER** - **Gonzalez and Griffin (2004).** *Measuring individuals in a social
   environment: Conceptualizing dyadic and group interaction*.
   [Author's chapter PDF](https://websites.umich.edu/~gonzo/papers/gonzalez-griffin-methodshb.pdf).
   Graphical/conceptual background on individual and group levels; screened as
   adjacent rather than a confirmed four-route APIM application.
-- **Gonzalez and Griffin (2023).** *Dyadic data analysis*. In *APA handbook of
+- **NOT IN J-P'S FOLDER** - **Gonzalez and Griffin (2023).** *Dyadic data analysis*. In *APA handbook of
   research methods in psychology* (2nd ed., Vol. 3, Chapter 21).
   [DOI](https://doi.org/10.1037/0000320-021)
   | [Author's proof](https://websites.umich.edu/~gonzo/papers/gonzalez-griffin-2023-dyad.pdf).
   General dyadic-analysis chapter screened; no focal route-partition passage
   confirmed. Absence of a search-text match is not proof of absence.
-- **Bolger and Laurenceau (2013).** *Intensive longitudinal methods: An
+- **NOT IN J-P'S FOLDER** - **Bolger and Laurenceau (2013).** *Intensive longitudinal methods: An
   introduction to diary and experience sampling research*. Guilford Press.
   [Publisher](https://www.guilford.com/books/Intensive-Longitudinal-Methods/Bolger-Laurenceau/9781462506781).
-  Background for ILD estimands and accessible exposition; not verified here
-  as presenting the focal decomposition. Figueroa's procedural citation is
-  the webinar, not this book.
-- **Laws et al. (2026).** *The random dyadic interdependence model: Modeling
+  Background for ILD estimands and accessible exposition. **User check,
+  7 October 2026:** the book does not contain the focal decomposition; retain
+  as ILD background, not direct decomposition evidence. This is the user's
+  source check, not a new independent full-book inspection. Figueroa's
+  procedural citation is the webinar, not this book.
+- **NOT IN J-P'S FOLDER** - **Laws et al. (2026).** *The random dyadic interdependence model: Modeling
   variability in physiological covariation within dyads*.
   *Biological Psychology, 206*, 109259.
   [DOI](https://doi.org/10.1016/j.biopsycho.2026.109259).
-  Related Bolger-coauthored extension context for dyad-varying covariation.
-  September screening additionally inspected the publisher introduction, which
-  distinguishes concurrent covariance from directional APIM effects. Full
-  methods remain inaccessible; not verified as an APIM path partition or as
-  validation of inference for our components.
-- **Jang, Bottom, and Elfenbein (2025).** *From preparation to performance:
-  Conscientiousness predicts negotiation planning and value claiming*.
-  *Journal of Behavioral Decision Making, 38*(2), e70015.
-  [DOI](https://doi.org/10.1002/bdm.70015).
-  Related published negotiation study; no decomposition passage located.
-  Do not count it merely because it uses an APIM application.
+  **Verified 7 October 2026:** complete publisher PDF and supplement, now saved
+  locally. Substantial methods exposition/application of Gaussian two-level
+  DSEM to 102 parent–adult-child dyads and 47,988 synchronized 10-second bins.
+  Pages 6–8/Fig. 1 model latent within/between outcomes, random intercepts,
+  time trends, log residual variances and dyad-specific residual correlation
+  on the Fisher-z scale. No actor/partner predictor
+  routes or covariance-contribution shares at either temporal level are supplied.
+  Age/health covariates predict physiological outcomes; dyadic characteristics
+  predict heterogeneity in residual association (pp. 9–11/Table 3). These are
+  adjustment/moderation, not covariate-route attribution. Bayesian intervals
+  concern model parameters, association summaries and predictors; Table 2's
+  plausible-value range describes between-dyad heterogeneity. The supplement
+  supplies unconditional Mplus code and an autoregressive comparison, not
+  contribution inference. Keep as adjacent ILD heterogeneity methods; no
+  generalized response link or focal APIM partition at both levels. The NIH
+  manuscript's April 2027 embargo no longer blocks verification of this source.
+- **NOT IN J-P'S FOLDER** - **Koch, Jaehne, Riediger, Rauers, and Holtmann (2025, online).**
+  *Idiographic interrater reliability measures for intensive longitudinal
+  multirater data*. *British Journal of Mathematical and Statistical Psychology*.
+  Published online 20 December 2025.
+  [DOI](https://doi.org/10.1111/bmsp.70022)
+  | [June preprint](https://doi.org/10.23668/psycharchives.16498)
+  | [Author supplements](https://osf.io/g8hnz/).
+  **Verified 7 October 2026:** complete June 30 preprint and later August/September
+  supplements; final journal text remains unverified. Substantial ILD methods
+  for self/partner ratings of the same person's affect: 100 couples, 86 occasions.
+  Pages 6–11/Eqs. 1–8 distinguish shared and rater-specific variance, with random
+  loadings, autoregressions and innovation variances. These are rater-consistency
+  ratios, not actor/partner routes in paired-outcome covariance. Later code
+  computes posterior-draw ratios and credible intervals; some shared loadings
+  use plug-in estimates. Supplementary coverage rows concern model parameters,
+  not the derived ratios. Covariates predict individual consistency in a
+  two-step analysis. Keep as adjacent Gaussian latent time-series methodology,
+  not a focal decomposition at both temporal levels.
 
 ## 7. Implications for this manuscript
 
-The [methods, design, and citation map](method-scope-and-citation-map.md), checked
-13 September 2026, distinguishes substantial methods contributions from applied
+The [methods, design, and citation map](method-scope-and-citation-map.md), updated
+7 October 2026, distinguishes substantial methods contributions from applied
 precedents and recommends citations for Paper 1. It also records the verified
 analysis designs and response models. The eight closest published application
 analyses are cross-sectional; Cavalcanti uses repeated encounters with crossed
-random effects. Bolger and Shrout already partition ILD dependence across
-temporal levels, and Leckie et al. derive non-Gaussian multilevel covariance and
+random effects. Bolger and Shrout, and Gistelinck and Loeys, already partition
+ILD dependence across temporal levels. Leckie et al. derive non-Gaussian multilevel covariance and
 ICC expressions. Neither establishes the focal APIM predictor-route partition
 at both temporal levels or under nonlinear response links.
 
@@ -711,13 +875,24 @@ Source checks do not establish permission to redistribute the files.
 
 ### Manuscript-specific local copies
 
-J-P's supplied archive is also available in the ignored reference folder. Its
+J-P's supplied materials are preserved in the ignored reference folder. Its
 [inventory and source links](jp-materials-review-2026-09-13.md#file-inventory-and-roles)
 cover the full 2024 chapter, highlighted draft, workshop handouts, R/Mplus files,
 and datasets. The supplied APIM_MM manual is byte-identical to the copy below.
 
 | Source | Local file | Provenance/version |
 |:--|:--|:--|
+| Campbell and Kashy (2002) | [PDF](../references/explaining-interdependence-apim/2002-campbell-kashy-proc-mixed-hlm.pdf) | Licensed Wiley article retrieved through UZH, 6 October 2026; full text screened |
+| Gonzalez and Griffin (1999) | [PDF](../references/explaining-interdependence-apim/1999-gonzalez-griffin-distinguishable-correlations.pdf) | Licensed Wiley article retrieved through UZH, 6 October 2026; publication year 1999 despite download filename |
+| Kenny (1996) | [PDF](../references/explaining-interdependence-apim/1996-kenny-models-nonindependence.pdf) | Licensed Sage scan retrieved through UZH, 7 October 2026; full text/diagrams screened |
+| Kenny, Kashy, and Bolger (1998) | [PDF](../references/explaining-interdependence-apim/1998-kenny-kashy-bolger-data-analysis.pdf) | Author-hosted scan retrieved 7 October 2026; relevant APIM/MLM/diary sections checked; printed p. 238 is missing |
+| Kenny et al. (2024), OSF companion files | [Inventory](../references/explaining-interdependence-apim/kenny2024-osf-2026-10-07/inventory.tsv) | All 11 current files in two projects, with versions and SHA-256; checked 7 October 2026; code read, not executed |
+| Koch et al. (2025), primary preprint | [PDF](../references/explaining-interdependence-apim/2025-koch-et-al-idiographic-interrater-reliability-psycharchives-preprint-2025-06-30.pdf) | Complete June 30 PsychArchives preprint; checksum verified 7 October 2026; not the final journal version |
+| Koch et al. (2025), later author materials | [Supplement PDF](../references/explaining-interdependence-apim/2025-koch-et-al-idiographic-interrater-reliability-osf-supplement-2025-08-28.pdf), [code provenance](../references/explaining-interdependence-apim/koch2025-osf-2026-10-07/koch-code-provenance.json) | August 28 supplement and August/September posterior-processing scripts; checked 7 October 2026; scripts preserved without execution |
+| Laws et al. (2026) | [PDF](../references/explaining-interdependence-apim/2026-laws-et-al-random-dyadic-interdependence-model.pdf), [supplement DOCX](../references/explaining-interdependence-apim/2026-laws-et-al-random-dyadic-interdependence-model-supplement.docx) | User-downloaded publisher PDF and publisher supplement retrieved through UZH, 7 October 2026; full text, figure, tables and embedded Mplus code checked; code not executed |
+| Dwyer et al. (2017), calculation appendix | [PDF](../references/explaining-interdependence-apim/2017-dwyer-calculation-supplement.pdf) | Two-page PMC supplement retrieved and verified 7 October 2026; controls-adjusted denominator and four formulas |
+| Gistelinck and Loeys (2019), dissertation Chapter 3 | [PDF](../references/explaining-interdependence-apim/gistelinck-dissertation-l-apim.pdf) | UGent dissertation containing the paper; pp. 102/104 level-attribution calculation and covariance table rechecked 7 October 2026; author version, not publisher PDF |
+| Savord et al. (2023), author code | [Code inventory and scope](../references/explaining-interdependence-apim/savord2023-code-2026-10-07/README.md) | Five original Mplus/SAS scripts from the author-linked OSF, with URLs and hashes; inspected 7 October 2026; code not executed |
 | Griffin and Gonzalez (1995) | [PDF](../references/explaining-interdependence-apim/1995-griffin-gonzalez-exchangeable-correlations.pdf) | Author-hosted scanned article; preserved from the review |
 | Stas et al. (2018) | [PDF](../references/explaining-interdependence-apim/2018-stas-et-al-apim-sem.pdf) | Author-hosted main article; preserved from the review |
 | Kenny (2019), APIM_MM | [PDF](../references/explaining-interdependence-apim/2019-kenny-apim-mm-documentation.pdf) | Author's March 3, 2019 documentation |
@@ -726,6 +901,7 @@ and datasets. The supplied APIM_MM manual is byte-identical to the copy below.
 | Kenny (n.d.), explained nonindependence | [DOCX](../references/explaining-interdependence-apim/kenny-nd-explained-nonindependence.docx) | Author's handout; preserved from the review |
 | De Padova et al. (2021), APIM output | [DOCX](../references/explaining-interdependence-apim/2021-de-padova-et-al-apim-supplement.docx) | Supplement retrieved through Europe PMC, 13 September 2026; four partition tables |
 | Velten and Margraf (2017), S2 Table | [DOCX](../references/explaining-interdependence-apim/2017-velten-margraf-s2.docx) | Publisher supplement, checked 13 September 2026; slope estimates only |
+| Velten and Margraf (2017), S1 Text | [DOCX](../references/explaining-interdependence-apim/2017-velten-margraf-s1-model.docx) | [Publisher supplement](https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0172855.s005&type=supplementary), checked 7 October 2026; model equation/explanation, not executable syntax |
 
 ### Shared copies left in their existing locations
 
@@ -735,37 +911,36 @@ and datasets. The supplied APIM_MM manual is byte-identical to the copy below.
 
 ### Priority retrieval gaps
 
-- **Dwyer calculation supplement:** not retrieved; ask the authors for
-  `NIHMS868627-supplement.pdf` or an equivalent calculation document.
+- **Dwyer calculation supplement: closed 7 October 2026.** The genuine
+  two-page PDF is saved and verified; see its local link above and annotation.
 - **Kenny, Ackerman, and Kashy (2024): closed.** Full chapter supplied by J-P;
-  Section 23.5 and relevant longitudinal sections inspected. Chapter-linked
-  OSF example files remain unchecked; see the supplied-materials review.
+  Section 23.5 and relevant longitudinal sections inspected. Both linked OSF
+  projects are now checked and retained; see the supplied-materials review.
+- **Koch: primary preprint and author supplements retrieved and verified.**
+  The exact final journal version remains unchecked.
+- **1998 Kenny-Kashy-Bolger chapter: relevant sections verified.** The author
+  scan omits printed p. 238; do not treat this as complete chapter retrieval.
+- **Laws (2026): closed.** Complete publisher PDF and supplement checked and
+  retained, including the annotated Mplus example.
+- **Still unresolved:** Kashy-Kenny (2000) chapter;
+  the printed Kenny-Kashy-Cook (2006) APIM passage; Kline (2016) book content.
+  The user's Bolger-Laurenceau (2013) book check is recorded above.
 - **Bolger-Laurenceau webinar:** inspected online, but not saved locally;
   the download host did not resolve during organization. Use the source link
   above. Do not substitute the different July 2017 FLASHE overview slides.
 - Other sources without a local link were inspected online or retained as
   explicitly labelled leads; a complete PDF library has not been assembled.
 
-### Additional citing papers awaiting full-text verification
+### Abstract-screened lead: provisional exclusion
 
-These nine candidates were retained by the 13 September citation audit. Their
-titles, abstracts, previews, or citation records do not establish use of the
-focal partition. They are additional retrieval leads, not confirmed additions
-to the applied-use count. Titles below are shortened descriptions; see the
-[dated audit](citation-audit-2026-09-13.md#unresolved-candidates-and-retrieval-priorities)
-for the search context and access limits.
-
-| Candidate | Topic | Citation route |
-|:--|:--|:--|
-| [Park and Park (2024)](https://doi.org/10.1111/ijpo.13153) | Motivation and dietary behaviours in parent-adolescent dyads | Cites Dwyer |
-| [Park and Park (2025)](https://doi.org/10.1016/j.appet.2025.107872) | Self-efficacy, motivation, dietary behaviors, and APIM mediation | Cites Dwyer |
-| [Niu et al. (2026)](https://doi.org/10.1016/j.jadohealth.2026.01.016) | Motivational factors, dietary behaviors, and family meal structure | Cites Dwyer |
-| [Welch et al. (2019)](https://doi.org/10.1007/s10865-019-00041-4) | Social support, loneliness, eating, and activity | Cites Dwyer |
-| [Vu et al. (2026)](https://doi.org/10.1123/jpah.2025-0490) | Acculturation and physical activity in South Asian mother-daughter dyads | Cites Burns |
-| [Lu et al. (2022)](https://doi.org/10.1007/s10826-022-02241-0) | Mobile media use and food consumption in parent-child dyads | Cites Dwyer |
-| [Niermann et al. (2020 online; 2022 issue)](https://doi.org/10.1080/13229400.2020.1773901) | Parent/child self-efficacy, support, and physical activity | Cites Dwyer |
-| [Kim and Chae (2024 online; 2025 issue)](https://doi.org/10.1111/jan.16474) | Family strengths, depression, and life satisfaction in disabled-child/parent-caregiver dyads | Cites Ferraris |
-| [Thai thesis (2022)](https://doi.org/10.58837/chula.the.2022.540) | Social support, positive experience, and well-being in older cancer patient-caregiver dyads | Cites Ferraris |
+**Vu et al. (2026) is NOT IN J-P'S FOLDER**, checked against the folder on
+6 October 2026. Its [abstract](https://pubmed.ncbi.nlm.nih.gov/42463118/)
+describes baseline APIM associations in 126 South Asian mother–daughter dyads,
+without mentioning covariance decomposition or explained nonindependence.
+Removed from the active queue on 7 October as a **provisional abstract-based
+exclusion**; full text remains inaccessible, so absence of the focal method is
+unverified. The [October audit](full-text-verification-2026-10-07.md) preserves
+this limitation separately from the nine full-text exclusions.
 
 ## 9. Search trail and limits
 
