@@ -239,7 +239,7 @@ test_that("zero-inflated and hurdle checks use the combined response", {
 })
 
 
-test_that("an inactive zero component does not change response predictions", {
+test_that("zero-inflation random effects can activate the mixture", {
   skip_if_not_installed("glmmTMB")
   withr::local_seed(8143)
   fitting_data <- data.frame(
@@ -248,7 +248,7 @@ test_that("an inactive zero component does not change response predictions", {
     zero_offset = rep(c(-0.5, 0.5), times = 50)
   )
   fitting_data$outcome <- stats::rpois(100, exp(1 + 0.3 * fitting_data$predictor))
-  # glmmTMB omits the zero mixture without fixed coefficients. Fix its unused variance.
+  # Fix the variance so this model also fits when older versions omit the mixture.
   model <- glmmTMB::glmmTMB(
     outcome ~ predictor, ziformula = ~0 + offset(zero_offset) + (1 | study),
     family = stats::poisson(), data = fitting_data,
@@ -261,10 +261,28 @@ test_that("an inactive zero component does not change response predictions", {
   fitted_coefficients <- glmmTMB::fixef(model)$cond
   expected_response <- exp(fitted_coefficients["(Intercept)"] +
     fitted_coefficients["predictor"] * fitting_data$predictor)
+  if (utils::packageVersion("glmmTMB") >= "1.1.15.1") {
+    expected_response <- expected_response * stats::plogis(-fitting_data$zero_offset)
+  }
   expect_equal(simulations$predicted_response, as.numeric(expected_response))
-  expect_equal(simulations$predicted_response, as.numeric(stats::predict(
-    model, newdata = NULL, type = "response", re.form = NA
-  )))
+})
+
+
+test_that("a zero component with only offsets stays inactive", {
+  skip_if_not_installed("glmmTMB")
+  fitting_data <- data.frame(
+    outcome = rep(1:4, times = 25),
+    zero_offset = rep(c(-0.5, 0.5), times = 50)
+  )
+  model <- glmmTMB::glmmTMB(
+    outcome ~ 1, ziformula = ~0 + offset(zero_offset),
+    family = stats::poisson(), data = fitting_data
+  )
+  expect_identical(ncol(stats::model.matrix(model, component = "zi")), 0L)
+  simulations <- simulate_dyad_responses(model, nsim = 2, seed = 8145)
+  expected_mean <- exp(glmmTMB::fixef(model)$cond["(Intercept)"])
+  expect_equal(simulations$predicted_response,
+               rep(as.numeric(expected_mean), nrow(fitting_data)))
 })
 
 
