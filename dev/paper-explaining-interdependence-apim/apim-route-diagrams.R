@@ -18,6 +18,7 @@
 # `values` and `p_values` give estimates for the paths and covariances (named
 # a1, a2, p1, p2, c1, c2, cov_x1_x2, cov_x1_c, cov_x2_c, psi), and
 # `contributions` gives the size of each route (named as in apim_routes).
+# Percentages are relative to the sum of all routes.
 
 local({
   helper_file <- c(
@@ -154,7 +155,7 @@ with_roles <- function(expression, roles) {
 draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
                              labels = NULL, roles = c("1", "2"),
                              values = NULL, p_values = NULL,
-                             contributions = NULL, total = NULL,
+                             contributions = NULL,
                              formula = NULL, text_scale = 1, newpage = TRUE) {
   available <- names(apim_routes)
   if (!covariate) {
@@ -182,17 +183,13 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
     ends = "both", type = "closed"
   )
 
-  # Everything the highlighted routes use, and the predictors whose
-  # variance they use.
+  # Everything the highlighted routes use, and the variables their paths
+  # start from.
   active <- unique(unlist(lapply(apim_routes[routes], \(r) c(r$paths, r$link))))
   is_active <- function(element) element %in% active
-  source_nodes <- unique(c(
-    vapply(intersect(active, names(layout$paths)), \(p) layout$paths[[p]]$from, ""),
-    intersect(active, c("X1", "X2", "C"))
-  ))
-  if (any(c("cov_x1_x2", "cov_x1_c") %in% active)) source_nodes <- c(source_nodes, "X1")
-  if (any(c("cov_x1_x2", "cov_x2_c") %in% active)) source_nodes <- c(source_nodes, "X2")
-  if (any(c("cov_x1_c", "cov_x2_c") %in% active)) source_nodes <- c(source_nodes, "C")
+  source_nodes <- vapply(
+    intersect(active, names(layout$paths)), \(p) layout$paths[[p]]$from, ""
+  )
 
   # Label of a path or arc: its symbol, plus its estimate when highlighted.
   element_label <- function(name, symbol) {
@@ -213,28 +210,37 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
   on.exit(grid::popViewport(), add = TRUE)
 
+  # Faint elements first, highlighted ones on top. All labels come after
+  # all lines, so no line crosses a label.
+  by_activity <- function(names) names[order(is_active(names))]
+
   # Paths into the outcomes, from the right edge of the source box to the
-  # left edge of the outcome box.
+  # left edge of the outcome box. A path's name is its type (a, p or c) and
+  # the member it points to: a1 is a[S1].
   path_colours <- c(a = "actor", p = "partner", c = "covariate")
-  for (name in names(layout$paths)) {
+  path_geometry <- function(name) {
     path <- layout$paths[[name]]
-    x0 <- layout$nodes[[path$from]][1] + half_width
-    x1 <- layout$nodes[[path$to]][1] - half_width - .diagram_arrow_clearance
-    colour <- diagram_colours[[path_colours[[substr(name, 1, 1)]]]]
-    on <- is_active(name)
+    x <- c(
+      layout$nodes[[path$from]][1] + half_width,
+      layout$nodes[[path$to]][1] - half_width - .diagram_arrow_clearance
+    )
+    list(
+      x = x, y = path$y,
+      label_x = x[1] + path$label * (x[2] - x[1]),
+      label_y = path$y[1] + path$label * (path$y[2] - path$y[1]),
+      colour = diagram_colours[[path_colours[[substr(name, 1, 1)]]]]
+    )
+  }
+  for (name in by_activity(names(layout$paths))) {
+    path <- path_geometry(name)
+    colour <- colour_if(is_active(name), path$colour)
     grid::grid.segments(
-      native(x0), native(path$y[1]), native(x1), native(path$y[2]),
+      native(path$x[1]), native(path$y[1]), native(path$x[2]), native(path$y[2]),
       arrow = arrow_head,
       gp = grid::gpar(
-        col = colour_if(on, colour), fill = colour_if(on, colour),
-        lwd = (if (on) 2.4 else 1.2) * text_scale
+        col = colour, fill = colour,
+        lwd = (if (is_active(name)) 2.4 else 1.2) * text_scale
       )
-    )
-    symbol <- str2lang(paste0(substr(name, 1, 1), "[S", substr(name, 2, 2), "]"))
-    draw_label(
-      element_label(name, symbol),
-      x0 + path$label * (x1 - x0),
-      path$y[1] + path$label * (path$y[2] - path$y[1]), on, colour
     )
   }
 
@@ -246,7 +252,7 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
   )
   if (word_roles) arc_symbols <- lapply(arc_symbols, \(symbol) quote(sigma))
   left_edge <- layout$nodes$X1[1] - half_width
-  for (name in names(layout$arcs)) {
+  for (name in by_activity(names(layout$arcs))) {
     arc <- layout$arcs[[name]]
     on <- is_active(name)
     colour <- colour_if(on, diagram_colours[["covariance"]])
@@ -257,8 +263,19 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
       gp = grid::gpar(col = colour, fill = colour,
                       lwd = (if (on) 2 else 1.2) * text_scale)
     )
+  }
+
+  # Labels of paths and arcs, on top of all lines.
+  for (name in by_activity(names(layout$paths))) {
+    path <- path_geometry(name)
+    symbol <- str2lang(paste0(substr(name, 1, 1), "[S", substr(name, 2, 2), "]"))
+    draw_label(element_label(name, symbol), path$label_x, path$label_y,
+               is_active(name), path$colour)
+  }
+  for (name in by_activity(names(layout$arcs))) {
+    arc <- layout$arcs[[name]]
     draw_label(element_label(name, arc_symbols[[name]]), arc$label[1],
-               arc$label[2], on, diagram_colours[["covariance"]])
+               arc$label[2], is_active(name), diagram_colours[["covariance"]])
   }
 
   # Residuals point into the outcomes; psi is their covariance.
@@ -309,7 +326,7 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
   for (name in names(layout$nodes)) {
     position <- layout$nodes[[name]]
     residual_node <- name %in% c("e1", "e2")
-    on <- if (name %in% c("Y1", "Y2")) TRUE else if (residual_node) is_active("psi") else name %in% source_nodes
+    on <- if (residual_node) is_active("psi") else name %in% c("Y1", "Y2", source_nodes)
     node_colour <- colour_if(on, diagram_colours[["ink"]])
     gp <- grid::gpar(
       fill = if (residual_node) "white" else diagram_colours[["surface"]],
@@ -345,7 +362,8 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
   }
   if (is.null(formula) && length(routes) == 1L) formula <- apim_routes[[routes]]$formula
   if (!is.null(formula)) formula <- with_roles(formula, roles)
-  if (!is.null(contributions) && !is.null(total)) {
+  if (!is.null(contributions)) {
+    total <- sum(contributions[available])
     value <- sum(contributions[routes])
     amount <- sprintf("%.3f (%.1f%%)", value, 100 * value / total)
     formula <- if (is.null(formula)) {
