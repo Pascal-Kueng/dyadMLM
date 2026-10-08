@@ -68,7 +68,8 @@ test_that("missing predictor values affect only their own panels", {
                                                 plot = FALSE), "Incomplete.*3")
   expect_identical(result$pit, expected)
   pattern <- result$compositions[[1]]$patterns[[2]][[1]]
-  expect_named(pattern, c("positions", "labels", "limits", "binned", "smooth", "numeric", "quantiles"))
+  expect_named(pattern, c("positions", "labels", "limits", "binned", "smooth", "numeric", "ranked",
+                        "quantiles"))
   expect_equal(unname(pattern$positions), c(0, 1))
   summaries <- lapply(c(.25, .5, .75), function(probability) {
     t(vapply(c(0, 1), function(group) {

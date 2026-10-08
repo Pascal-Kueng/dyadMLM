@@ -231,6 +231,9 @@ available_check_predictor <- function(x) {
 }
 
 calculate_residual_pattern <- function(pit, predictor, rows, role_rows) {
+  # Experiment only: "current", "ranked_bins" (A), "kernel" (B) or "qgam" (C); see
+  # also the option dyadMLM.kernel_bandwidth below.
+  smoother <- getOption("dyadMLM.residual_smoother", "current")
   available <- available_check_predictor(predictor)
   composition_rows <- unlist(role_rows, use.names = FALSE)
   composition_rows <- composition_rows[available[composition_rows]]
@@ -238,6 +241,15 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows) {
   if (!length(rows)) return(NULL)
   available_values <- predictor[composition_rows]
   binned <- is.numeric(predictor) && length(unique(available_values)) > 8
+  ranked <- binned && smoother != "current"
+  if (ranked) {
+    # Ranks shared by all roles spread observations evenly along the axis, so
+    # the long tail of a skewed predictor does not take up most of it.
+    ticks <- signif(stats::quantile(available_values, 0:4 / 4, names = FALSE), 2)
+    ticks[duplicated(ticks)] <- ""
+    available_values <- (rank(available_values) - .5) / length(available_values)
+    predictor[composition_rows] <- available_values
+  }
   # Role-specific bins avoid sparsely populated edges caused by pooling roles.
   grouping_rows <- if (binned) rows else composition_rows
   groups <- if (binned) {
@@ -250,37 +262,101 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows) {
   positions <- if (is.numeric(predictor)) {
     vapply(rows_by_group, function(rows) mean(predictor[rows]), numeric(1))
   } else seq_along(rows_by_group)
-  labels <- if (is.numeric(predictor)) format(positions, trim = TRUE) else names(rows_by_group)
+  labels <- if (ranked) ticks else if (is.numeric(predictor)) format(positions, trim = TRUE)
+    else names(rows_by_group)
   limits <- if (is.numeric(predictor)) range(available_values) else range(positions)
   padding <- if (is.numeric(predictor)) {
     if (!binned && length(positions) > 1) .2 * min(diff(positions)) else 0
   } else .45
-  smooth <- binned && length(positions) >= 4
+  # (C) uses the same rule and grid as (B).
+  kernel <- ranked && smoother %in% c("kernel", "qgam")
+  # (B) needs no bins, only enough observations and more than one value.
+  smooth <- binned && (if (kernel) length(rows) >= 80 && length(positions) > 1
+                       else length(positions) >= 4)
   if (smooth) {
     grid <- seq(min(predictor[rows]), max(predictor[rows]), length.out = 101)
+    # (B) weights each observation, with a bandwidth that is a fixed share of the
+    # role's rank range; otherwise bin quartiles are weighted, with the bin spacing.
+    centres <- if (kernel) predictor[rows] else positions
+    bandwidth <- if (kernel) getOption("dyadMLM.kernel_bandwidth", .2) * diff(range(grid))
+      else stats::median(diff(positions))
     # Fixed positive weights keep quartiles ordered and within 0--1.
-    log_weights <- -.5 * (outer(grid, positions, "-") / stats::median(diff(positions)))^2
+    log_weights <- -.5 * (outer(grid, centres, "-") / bandwidth)^2
     weights <- exp(log_weights - apply(log_weights, 1, max))
     weights <- weights / rowSums(weights)
   }
-  quartiles <- lapply(rows_by_group, function(group_rows) {
-    apply(pit[intersect(rows, group_rows), , drop = FALSE], 2,
-          stats::quantile, probs = c(.25, .5, .75), names = FALSE)
-  })
-  quartile_curves <- lapply(1:3, function(i) {
-    values <- do.call(rbind, lapply(quartiles, function(group) group[i, ]))
-    if (smooth) weights %*% values else values
-  })
+  curves <- if (smooth && smoother == "qgam") {
+    qgam_quartiles(pit[rows, , drop = FALSE], predictor[rows], grid)
+  } else if (smooth && kernel) {
+    # A light second pass over about three grid steps removes small steps where
+    # residuals near a quartile are sparse.
+    second <- exp(-.5 * (outer(seq_along(grid), seq_along(grid), "-") / 3)^2)
+    kronecker(diag(3), second / rowSums(second)) %*%
+      kernel_quartiles(pit[rows, , drop = FALSE], weights)
+  } else {
+    quartiles <- lapply(rows_by_group, function(group_rows) {
+      apply(pit[intersect(rows, group_rows), , drop = FALSE], 2,
+            stats::quantile, probs = c(.25, .5, .75), names = FALSE)
+    })
+    do.call(rbind, lapply(1:3, function(i) {
+      values <- do.call(rbind, lapply(quartiles, function(group) group[i, ]))
+      if (smooth) weights %*% values else values
+    }))
+  }
   # One envelope covers all three quartiles and positions in this panel.
-  joint <- residual_curve_summary(do.call(rbind, quartile_curves))
-  positions_per_curve <- nrow(quartile_curves[[1]])
+  joint <- residual_curve_summary(curves)
+  positions_per_curve <- nrow(curves) / 3
   quantiles <- lapply(1:3, function(i) {
     indices <- seq_len(positions_per_curve) + (i - 1L) * positions_per_curve
     lapply(joint, `[`, indices)
   })
   list(positions = if (smooth) grid else positions, labels = labels,
        limits = limits + c(-padding, padding), binned = binned, smooth = smooth,
-       numeric = is.numeric(predictor), quantiles = quantiles)
+       numeric = is.numeric(predictor), ranked = ranked, quantiles = quantiles)
+}
+
+# Weighted quartiles of each dataset (columns of `values`) at each grid point
+# (rows of `weights`, each summing to one). As for type 5 quantiles, each sorted
+# value sits at the middle of its weight, and quartiles interpolate between values.
+kernel_quartiles <- function(values, weights) {
+  weights <- t(weights)
+  n <- nrow(weights)
+  points <- rep(seq_len(ncol(weights)), 3)
+  probabilities <- rep(c(.25, .5, .75), each = ncol(weights))
+  # One running sum over all columns; earlier columns add one each.
+  earlier <- rep(seq_len(ncol(weights)) - 1, each = n)
+  apply(values, 2, function(x) {
+    order <- order(x)
+    x <- x[order]
+    sorted <- weights[order, , drop = FALSE]
+    middle <- cumsum(sorted) - earlier - sorted / 2
+    below <- c(colSums(middle < .25), colSums(middle < .5), colSums(middle < .75))
+    k <- pmin(pmax(below, 1), n - 1)
+    lower <- middle[cbind(k, points)]
+    fraction <- (probabilities - lower) / (middle[cbind(k + 1, points)] - lower)
+    x[k] + pmin(pmax(fraction, 0), 1) * (x[k + 1] - x[k])
+  })
+}
+
+# (C) DHARMa's quantile lines (DHARMa::testQuantiles with rank = TRUE): qgam fitted
+# to the observed residuals with its own tuning. Simulated datasets reuse that
+# tuning: learning rate (lsig), err and smoothing parameter (sp). Returns the
+# three quartile lines stacked, one column per dataset.
+qgam_quartiles <- function(values, x, grid) {
+  k <- min(length(unique(x)), 10)
+  do.call(rbind, lapply(c(.25, .5, .75), function(q) {
+    fit <- function(residuals, ...) {
+      utils::capture.output(model <- qgam::qgam(res ~ s(pred, k = k),
+        data = data.frame(res = residuals - q, pred = x), qu = q, ...))
+      model
+    }
+    observed <- fit(values[, 1])
+    vapply(seq_len(ncol(values)), function(dataset) {
+      model <- if (dataset == 1L) observed else fit(values[, dataset], lsig = observed$calibr$lsig,
+        err = observed$calibr$err, argGam = list(sp = observed$sp))
+      as.numeric(stats::predict(model, data.frame(pred = grid))) + q
+    }, numeric(length(grid)))
+  }))
 }
 
 #' @export
@@ -316,9 +392,11 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
       else paste0("PIT quartiles by ", name, "\n(fit across predictor values)")
     if (is.null(pattern)) return(plot_check_empty(title, "No available predictor values"))
     graphics::plot(pattern$positions, rep(.5, length(pattern$positions)), type = "n", ylim = c(0, 1),
-      xlim = pattern$limits, xaxt = if (pattern$binned) "s" else "n", yaxt = "n", main = title,
-      xlab = if (is.null(name)) "Predicted outcome" else name, ylab = "PIT quartiles")
+      xlim = pattern$limits, xaxt = if (pattern$binned && !pattern$ranked) "s" else "n",
+      yaxt = "n", main = title, ylab = "PIT quartiles",
+      xlab = paste0(if (is.null(name)) "Predicted outcome" else name, if (pattern$ranked) " (ranked)"))
     if (!pattern$binned) graphics::axis(1, pattern$positions, pattern$labels, cex.axis = .8)
+    if (pattern$ranked) graphics::axis(1, 0:4 / 4, pattern$labels)
     graphics::axis(2, c(0, .25, .5, .75, 1))
     graphics::abline(h = c(.25, .5, .75), lty = 2, col = check_colours$reference)
     draw_quartiles(pattern$positions, pattern$quantiles, pattern$smooth,
