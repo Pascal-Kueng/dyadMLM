@@ -44,8 +44,7 @@ See \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} for how pr
 
 \item{ask}{Whether to pause between figures on an interactive device.
 \code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
-and \code{FALSE} draws without pausing. In panel mode, each composition is one
-figure. File devices never pause.}
+and \code{FALSE} draws without pausing. File devices never pause.}
 
 \item{panels}{If \code{TRUE} (default), show each composition in one figure, with
 two rows and up to three columns. If \code{FALSE}, draw each statistic separately.
@@ -76,7 +75,7 @@ currently supports cross-sectional dyads only (one response per partner).
 }
 \section{Reading the plots}{
 
-Histograms show simulated summaries. Red lines mark observed values.
+Blue histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95\% of simulations (no formal confidence
 intervals).
 The heading shows the dyad composition, its number of usable dyads, and the
@@ -202,9 +201,5 @@ print(check)
 \references{
 Woody, E., & Sadler, P. (2005). Structural equation models for
 interchangeable dyads: Being the same makes a difference. \emph{Psychological
-Methods, 10}(2), 139-158. \doi{10.1037/1082-989X.10.2.139}.
-
-Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
-assessment of model fitness via realized discrepancies. \emph{Statistica Sinica,
-6}, 733-807.
+Methods, 10}(2), 139--158. \doi{10.1037/1082-989X.10.2.139}.
 }

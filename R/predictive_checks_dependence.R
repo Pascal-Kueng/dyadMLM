@@ -33,8 +33,7 @@
 #'   See [simulate_dyad_responses()] for how predictions are defined.
 #' @param ask Whether to pause between figures on an interactive device.
 #'   `NULL` (default) pauses when there is more than one figure, `TRUE` pauses
-#'   and `FALSE` draws without pausing. In panel mode, each composition is one
-#'   figure. File devices never pause.
+#'   and `FALSE` draws without pausing. File devices never pause.
 #' @param panels If `TRUE` (default), show each composition in one figure, with
 #'   two rows and up to three columns. If `FALSE`, draw each statistic separately.
 #'   Graphics settings are restored afterwards.
@@ -52,7 +51,7 @@
 #'   omission counts and settings, and can be saved and plotted later.
 #'
 #' @section Reading the plots:
-#' Histograms show simulated summaries. Red lines mark observed values.
+#' Blue histograms show simulated summaries. Red lines mark observed values.
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
 #' The heading shows the dyad composition, its number of usable dyads, and the
@@ -168,11 +167,7 @@
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
-#'   Methods, 10*(2), 139-158. \doi{10.1037/1082-989X.10.2.139}.
-#'
-#' Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
-#' assessment of model fitness via realized discrepancies. *Statistica Sinica,
-#' 6*, 733-807.
+#'   Methods, 10*(2), 139--158. \doi{10.1037/1082-989X.10.2.139}.
 #'
 #' @export
 check_partner_dependence <- function(
@@ -326,11 +321,7 @@ check_partner_dependence <- function(
                    compositions$n_pairs[skipped_composition_indices], ")",
                    collapse = "; "), ".", call. = FALSE)
   }
-  if (missing(role)) {
-    message("No role supplied: summaries pool partners. Supply `role` to check ",
-            "each composition separately, even if the model did not include it. ",
-            "Use `role = NULL` to pool without this message.")
-  }
+  if (missing(role)) message_pooled_roles()
   if (plot) graphics::plot(check_result, ask = ask, panels = panels)
   return(invisible(check_result))
 }
@@ -495,19 +486,13 @@ calculate_partner_pair_statistics <- function(
 
 ### Summarising statistics ----------------------------------------------------
 
-# Middle 95% of the defined simulated values, as printed and plotted.
-simulated_middle_95 <- function(simulated_values) {
-  stats::quantile(simulated_values[is.finite(simulated_values)], c(0.025, 0.975),
-                  names = FALSE)
-}
-
 # Compare each observed statistic of one composition with its simulations.
 # Takes one statistics tibble: a dataset column, then one column per statistic,
 # with the observed row first.
 summarise_partner_statistics <- function(statistics) {
   statistics <- statistics[, -1]
   observed <- unlist(statistics[1, ], use.names = FALSE)
-  limits <- unname(vapply(statistics[-1, ], simulated_middle_95, numeric(2)))
+  limits <- unname(vapply(statistics[-1, ], simulated_rank_limits, numeric(2)))
   tibble::tibble(
     statistic = names(statistics),
     observed = observed,
@@ -572,12 +557,16 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
     values <- matrix(formatC(c(rows$observed, rows$lower, rows$upper),
                              format = "f", digits = digits, width = 9), ncol = 3L)
     # Statistic names come last so long names cannot split the table.
-    cat(sprintf("%9s %9s %9s    %s\n", "Observed", "2.5%", "97.5%", "Statistic"))
+    cat(sprintf("%9s %9s %9s    %s\n", "Observed", "Lower", "Upper", "Statistic"))
     cat(sprintf("%s %s %s %s  %s\n", values[, 1], values[, 2], values[, 3],
                 ifelse(rows$outside, "*", " "), rows$statistic), sep = "")
   }
 
   n_outside <- sum(x$summary$outside)
+  if (any(is.infinite(c(x$summary$lower, x$summary$upper)))) {
+    cat("\nToo few simulations for finite 95% limits: statistics with fewer than",
+        "39 defined simulations cannot be flagged.\n")
+  }
   cat("\nOutside the middle 95% of simulations", if (n_outside > 0L) " (*)", ": ",
       n_outside, " of ", nrow(x$summary), " observed statistics.\n",
       if (n_outside > 0L) "Some departures occur by chance; these are descriptive checks, not significance tests.\n" else
@@ -604,7 +593,7 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
 #' @param x A `dyadMLM_partner_check` object.
 #' @inheritParams check_partner_dependence
 #' @param ... Additional graphical arguments passed to [graphics::plot()].
-#'   `freq`, `xlim`, `ylim`, `main`, `sub`, and `xlab` are controlled by this
+#'   `freq`, `xlim`, `main`, and `sub` are controlled by this
 #'   method.
 #'
 #' @return Invisibly, `x`.
@@ -646,93 +635,57 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
 plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
 
   checked_composition_indices <- which(x$compositions$n_pairs >= 3L)
-  number_of_figures <- if (panels) length(checked_composition_indices) else
-    sum(vapply(x$compositions$statistics[checked_composition_indices], ncol, integer(1)) - 1L)
-  if (is.null(ask)) {
-    ask <- number_of_figures > 1L
-  }
-  # File devices and report rendering should never wait for keyboard input.
-  # orNone = TRUE also pauses when the first plot will open an interactive device.
-  ask <- ask && grDevices::dev.interactive(orNone = TRUE)
-
-  if (panels) {
-    previous_graphics_settings <- graphics::par(no.readonly = TRUE)
-    on.exit({
-      graphics::par(previous_graphics_settings)
-      # Restoring the layout resets scaling; scaling changes the plot region.
-      graphics::par(previous_graphics_settings[c("cex", "mex", "plt")])
-    }, add = TRUE)
-  }
-  previous_plot_pause_setting <- grDevices::devAskNewPage(ask)
-  on.exit(grDevices::devAskNewPage(previous_plot_pause_setting), add = TRUE)
+  local_check_paging(ask, panels, if (panels) length(checked_composition_indices) else
+    sum(vapply(x$compositions$statistics[checked_composition_indices], ncol, integer(1)) - 1L))
 
   n_simulations <- x$n_simulations
-  suggested_histogram_bins <- min(100L, max(20L, round(n_simulations / 5)))
 
   for (composition_index in checked_composition_indices) {
     composition <- x$compositions[composition_index, ]
     # The first row is observed; the remaining rows are simulations.
     composition_statistics <- composition$statistics[[1]][, -1]
-    composition_title <- paste0(composition$label, " - ", composition$n_pairs,
-                                " of ", x$n_pairs, " usable dyads")
-    if (panels) {
-      graphics::par(mfrow = c(2, ncol(composition_statistics) / 2),
-                    mar = c(5.1, 4.1, 4, 1), oma = c(0, 0, 3, 0),
-                    cex = 0.7, cex.main = 1)
-    }
-
-    # Match observed values and simulations by position, since names may repeat.
-    for (statistic_index in seq_along(composition_statistics)) {
-      statistic_name <- names(composition_statistics)[[statistic_index]]
-      observed_statistic_value <- composition_statistics[[statistic_index]][1]
-
-      simulated_statistic_values <-
-        composition_statistics[[statistic_index]][-1]
-      simulated_statistic_values <-
-        simulated_statistic_values[is.finite(simulated_statistic_values)]
-
-      middle_95_simulation_limits <- simulated_middle_95(simulated_statistic_values)
-
-      simulated_statistic_histogram <- graphics::hist(
-        simulated_statistic_values,
-        breaks = suggested_histogram_bins, plot = FALSE
-      )
-
-      maximum_bin_count <- max(simulated_statistic_histogram$counts)
-
-      # Keep complete bars visible and reserve a band above them for the legend.
-      plot_title <- paste(strwrap(statistic_name, width = if (panels) 30 else 60),
-                          collapse = "\n")
-      if (!panels) plot_title <- paste(composition_title, plot_title, sep = "\n")
-      plot_subtitle <- paste0(length(simulated_statistic_values), "/", n_simulations,
-                              " simulations used")
-      if (!panels) plot_subtitle <- paste(x$response, plot_subtitle, sep = "; ")
-      graphics::plot(
-        simulated_statistic_histogram, freq = TRUE,
-        xlim = range(observed_statistic_value, simulated_statistic_histogram$breaks),
-        ylim = c(0, maximum_bin_count * if (panels) 1.4 else 1.25),
-        main = plot_title,
-        sub = plot_subtitle,
-        xlab = "Summary value", ...
-      )
-
-      graphics::segments(middle_95_simulation_limits, 0, middle_95_simulation_limits,
-                         maximum_bin_count, lty = 2, col = "grey40")
-
-      graphics::segments(observed_statistic_value, 0,
-                         observed_statistic_value, maximum_bin_count,
-                         lwd = 2.5, col = "red")
-
-      graphics::legend(
-        "top", legend = c("Observed", "Middle 95% of simulations"),
-        lty = c(1, 2), lwd = c(2.5, 1), col = c("red", "grey40"),
-        horiz = !panels, cex = if (panels) 0.85 else 1, bty = "n"
-      )
+    page_title <- paste("Partner dependence", paste0(composition$n_pairs, " of ", x$n_pairs,
+                        " usable dyads"), x$response, sep = " - ")
+    footer <- paste(n_simulations, "simulations.", check_footer)
+    draw_statistics <- function() {
+      # Match observed values and simulations by position, since names may repeat.
+      for (statistic_index in seq_along(composition_statistics)) {
+        statistic_name <- names(composition_statistics)[[statistic_index]]
+        values <- composition_statistics[[statistic_index]]
+        simulations_used <- sum(is.finite(values[-1]))
+        statistic_type <- sub(" \\(.*", "", statistic_name)
+        labels <- switch(statistic_type,
+          "SD" = c(paste0(statistic_name, "\n(variability within this role)"),
+            "Beyond right: more variability in this role; left: less."),
+          "Common member SD" = c("Common member SD\n(pooled variability)",
+            "Beyond right: more pooled variability; left: less."),
+          "Partner correlation" = c("Partner correlation\n(how partners vary together)",
+            "Beyond right: more positive than predicted;\nbeyond left: more negative."),
+          "Dyad-average SD" = c("Dyad-average SD\n(variation between dyad averages)",
+            "Beyond right: dyad averages vary more; left: less."),
+          "Half-difference SD" = c("Half-difference SD\n(variation in partner differences)",
+            "Beyond right: partner differences vary more; left: less."),
+          "Half-difference RMS" = c("Half-difference RMS\n(size of partner differences)",
+            "Beyond right: larger partner differences; left: smaller."),
+          "Dyad-average/role-difference correlation" = c(
+            "Dyad-average/role-difference correlation\n(which role varies more)",
+            paste0("Positive: ", sub("^SD \\((.*)\\)$", "\\1", names(composition_statistics)[1]),
+              " varies more;\nnegative: ",
+              sub("^SD \\((.*)\\)$", "\\1", names(composition_statistics)[2]), " varies more.")))
+        guide <- paste("Red should usually lie between dashed limits.", labels[2], sep = "\n")
+        if (simulations_used != n_simulations) guide <- paste(guide,
+          paste0(simulations_used, "/", n_simulations, " simulations used"), sep = "\n")
+        if (panels) plot_check_statistic(values, labels[1], sub = guide, ...)
+        else plot_check_page(composition$label, page_title, c(1, 1),
+          plot_check_statistic(values, labels[1], sub = guide, ...), footer = footer,
+          mar = c(7.8, 4.5, 4, .8))
+      }
     }
     if (panels) {
-      graphics::mtext(paste(composition_title, x$response, sep = "; "),
-                      side = 3, outer = TRUE, line = 1, cex = 1, font = 2)
-    }
+      plot_check_page(composition$label, page_title,
+        c(2, ncol(composition_statistics) / 2), draw_statistics(),
+        footer = footer, mar = c(7.8, 4.5, 4, .8))
+    } else draw_statistics()
   }
   return(invisible(x))
 }

@@ -1,0 +1,281 @@
+"condition","scenario_label","fit_family","n_dyads","view","role","statistic","checked","flagged","rate","rate_lower","rate_upper"
+1,"Correct model","gaussian",400,"pooled","Pooled","actor_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+1,"Correct model","gaussian",400,"pooled","Pooled","mean_distance",200,0,0,0,0.0188453263772666
+1,"Correct model","gaussian",400,"pooled","Pooled","partner_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+1,"Correct model","gaussian",400,"pooled","Pooled","predicted_quantiles",200,3,0.015,0.00511423779325831,0.0431657287926903
+1,"Correct model","gaussian",400,"pooled","Pooled","qq",200,7,0.035,0.0170555420085672,0.0704706115222907
+1,"Correct model","gaussian",400,"roles","A","actor_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+1,"Correct model","gaussian",400,"roles","A","mean_distance",200,1,0.005,0.000883168715600978,0.0277737043978929
+1,"Correct model","gaussian",400,"roles","A","partner_quantiles",200,12,0.06,0.0346521942543319,0.101931692957663
+1,"Correct model","gaussian",400,"roles","A","predicted_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+1,"Correct model","gaussian",400,"roles","A","qq",200,10,0.05,0.0273826456007639,0.089578148138776
+1,"Correct model","gaussian",400,"roles","B","actor_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+1,"Correct model","gaussian",400,"roles","B","mean_distance",200,5,0.025,0.0107247196517613,0.057178340406642
+1,"Correct model","gaussian",400,"roles","B","partner_quantiles",200,10,0.05,0.0273826456007639,0.089578148138776
+1,"Correct model","gaussian",400,"roles","B","predicted_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+1,"Correct model","gaussian",400,"roles","B","qq",200,6,0.03,0.0138203143401113,0.0638942924545192
+1,"Correct model","gaussian",400,"roles","Either","actor_quantiles",200,13,0.065,0.038376354649153,0.108019079299069
+1,"Correct model","gaussian",400,"roles","Either","mean_distance",200,6,0.03,0.0138203143401113,0.0638942924545192
+1,"Correct model","gaussian",400,"roles","Either","partner_quantiles",200,21,0.105,0.0697074879268102,0.15518031991123
+1,"Correct model","gaussian",400,"roles","Either","predicted_quantiles",200,14,0.07,0.0421521718283428,0.114054808856106
+1,"Correct model","gaussian",400,"roles","Either","qq",200,15,0.075,0.045974917184382,0.120043610236295
+2,"Correct model","nbinom2",400,"pooled","Pooled","actor_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+2,"Correct model","nbinom2",400,"pooled","Pooled","mean_distance",200,1,0.005,0.000883168715600978,0.0277737043978929
+2,"Correct model","nbinom2",400,"pooled","Pooled","partner_quantiles",200,3,0.015,0.00511423779325831,0.0431657287926903
+2,"Correct model","nbinom2",400,"pooled","Pooled","predicted_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+2,"Correct model","nbinom2",400,"pooled","Pooled","qq",200,6,0.03,0.0138203143401113,0.0638942924545192
+2,"Correct model","nbinom2",400,"roles","A","actor_quantiles",200,12,0.06,0.0346521942543319,0.101931692957663
+2,"Correct model","nbinom2",400,"roles","A","mean_distance",200,4,0.02,0.00780442641634947,0.0502870869058264
+2,"Correct model","nbinom2",400,"roles","A","partner_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+2,"Correct model","nbinom2",400,"roles","A","predicted_quantiles",200,4,0.02,0.00780442641634947,0.0502870869058264
+2,"Correct model","nbinom2",400,"roles","A","qq",200,3,0.015,0.00511423779325831,0.0431657287926903
+2,"Correct model","nbinom2",400,"roles","B","actor_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+2,"Correct model","nbinom2",400,"roles","B","mean_distance",200,3,0.015,0.00511423779325831,0.0431657287926903
+2,"Correct model","nbinom2",400,"roles","B","partner_quantiles",200,9,0.045,0.023852543001493,0.0832967040018196
+2,"Correct model","nbinom2",400,"roles","B","predicted_quantiles",200,10,0.05,0.0273826456007639,0.089578148138776
+2,"Correct model","nbinom2",400,"roles","B","qq",200,5,0.025,0.0107247196517613,0.057178340406642
+2,"Correct model","nbinom2",400,"roles","Either","actor_quantiles",200,19,0.095,0.0616631027173865,0.143601611648199
+2,"Correct model","nbinom2",400,"roles","Either","mean_distance",200,7,0.035,0.0170555420085672,0.0704706115222907
+2,"Correct model","nbinom2",400,"roles","Either","partner_quantiles",200,16,0.08,0.04984058588976,0.125989488267144
+2,"Correct model","nbinom2",400,"roles","Either","predicted_quantiles",200,14,0.07,0.0421521718283428,0.114054808856106
+2,"Correct model","nbinom2",400,"roles","Either","qq",200,8,0.04,0.0204056320661523,0.0769320682009329
+3,"Omitted partner effect","gaussian",400,"pooled","Pooled","actor_quantiles",200,14,0.07,0.0421521718283428,0.114054808856106
+3,"Omitted partner effect","gaussian",400,"pooled","Pooled","mean_distance",200,0,0,0,0.0188453263772666
+3,"Omitted partner effect","gaussian",400,"pooled","Pooled","partner_quantiles",200,199,0.995,0.972226295602107,0.999116831284399
+3,"Omitted partner effect","gaussian",400,"pooled","Pooled","predicted_quantiles",200,14,0.07,0.0421521718283428,0.114054808856106
+3,"Omitted partner effect","gaussian",400,"pooled","Pooled","qq",200,4,0.02,0.00780442641634947,0.0502870869058264
+3,"Omitted partner effect","gaussian",400,"roles","A","actor_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+3,"Omitted partner effect","gaussian",400,"roles","A","mean_distance",200,7,0.035,0.0170555420085672,0.0704706115222907
+3,"Omitted partner effect","gaussian",400,"roles","A","partner_quantiles",200,176,0.88,0.827657479017032,0.918020072936245
+3,"Omitted partner effect","gaussian",400,"roles","A","predicted_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+3,"Omitted partner effect","gaussian",400,"roles","A","qq",200,9,0.045,0.023852543001493,0.0832967040018196
+3,"Omitted partner effect","gaussian",400,"roles","B","actor_quantiles",200,20,0.1,0.0656704486690959,0.149405812432717
+3,"Omitted partner effect","gaussian",400,"roles","B","mean_distance",200,3,0.015,0.00511423779325831,0.0431657287926903
+3,"Omitted partner effect","gaussian",400,"roles","B","partner_quantiles",200,180,0.9,0.850594187567283,0.934329551330904
+3,"Omitted partner effect","gaussian",400,"roles","B","predicted_quantiles",200,20,0.1,0.0656704486690959,0.149405812432717
+3,"Omitted partner effect","gaussian",400,"roles","B","qq",200,11,0.055,0.0309853417034588,0.0957869987723084
+3,"Omitted partner effect","gaussian",400,"roles","Either","actor_quantiles",200,28,0.14,0.0986698263345564,0.194898808657076
+3,"Omitted partner effect","gaussian",400,"roles","Either","mean_distance",200,9,0.045,0.023852543001493,0.0832967040018196
+3,"Omitted partner effect","gaussian",400,"roles","Either","partner_quantiles",200,196,0.98,0.949712913094174,0.992195573583651
+3,"Omitted partner effect","gaussian",400,"roles","Either","predicted_quantiles",200,28,0.14,0.0986698263345564,0.194898808657076
+3,"Omitted partner effect","gaussian",400,"roles","Either","qq",200,19,0.095,0.0616631027173865,0.143601611648199
+4,"NB2 size 10 fitted as Poisson","poisson",400,"pooled","Pooled","actor_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+4,"NB2 size 10 fitted as Poisson","poisson",400,"pooled","Pooled","mean_distance",200,7,0.035,0.0170555420085672,0.0704706115222907
+4,"NB2 size 10 fitted as Poisson","poisson",400,"pooled","Pooled","partner_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+4,"NB2 size 10 fitted as Poisson","poisson",400,"pooled","Pooled","predicted_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+4,"NB2 size 10 fitted as Poisson","poisson",400,"pooled","Pooled","qq",200,4,0.02,0.00780442641634947,0.0502870869058264
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","A","actor_quantiles",200,15,0.075,0.045974917184382,0.120043610236295
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","A","mean_distance",200,12,0.06,0.0346521942543319,0.101931692957663
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","A","partner_quantiles",200,13,0.065,0.038376354649153,0.108019079299069
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","A","predicted_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","A","qq",200,16,0.08,0.04984058588976,0.125989488267144
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","B","actor_quantiles",200,11,0.055,0.0309853417034588,0.0957869987723084
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","B","mean_distance",200,8,0.04,0.0204056320661523,0.0769320682009329
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","B","partner_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","B","predicted_quantiles",200,10,0.05,0.0273826456007639,0.089578148138776
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","B","qq",200,11,0.055,0.0309853417034588,0.0957869987723084
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","Either","actor_quantiles",200,25,0.125,0.0861197447571265,0.178014250025823
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","Either","mean_distance",200,20,0.1,0.0656704486690959,0.149405812432717
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","Either","partner_quantiles",200,20,0.1,0.0656704486690959,0.149405812432717
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","Either","predicted_quantiles",200,15,0.075,0.045974917184382,0.120043610236295
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles","Either","qq",200,26,0.13,0.0902820227966932,0.183663518722484
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"pooled","Pooled","actor_quantiles",200,199,0.995,0.972226295602107,0.999116831284399
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"pooled","Pooled","mean_distance",200,0,0,0,0.0188453263772666
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"pooled","Pooled","partner_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"pooled","Pooled","predicted_quantiles",200,180,0.9,0.850594187567283,0.934329551330904
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"pooled","Pooled","qq",200,4,0.02,0.00780442641634947,0.0502870869058264
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","A","actor_quantiles",200,175,0.875,0.821985749974177,0.913880255242874
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","A","mean_distance",200,4,0.02,0.00780442641634947,0.0502870869058264
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","A","partner_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","A","predicted_quantiles",200,124,0.62,0.551067180156192,0.684409941513264
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","A","qq",200,8,0.04,0.0204056320661523,0.0769320682009329
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","B","actor_quantiles",200,169,0.845,0.788393094076579,0.888603630723107
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","B","mean_distance",200,3,0.015,0.00511423779325831,0.0431657287926903
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","B","partner_quantiles",200,4,0.02,0.00780442641634947,0.0502870869058264
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","B","predicted_quantiles",200,136,0.68,0.612481015658864,0.740734666845319
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","B","qq",200,8,0.04,0.0204056320661523,0.0769320682009329
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","Either","actor_quantiles",200,197,0.985,0.95683427120731,0.994885762206742
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","Either","mean_distance",200,6,0.03,0.0138203143401113,0.0638942924545192
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","Either","partner_quantiles",200,11,0.055,0.0309853417034588,0.0957869987723084
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","Either","predicted_quantiles",200,171,0.855,0.799513324692185,0.897106493579956
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles","Either","qq",200,14,0.07,0.0421521718283428,0.114054808856106
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"pooled","Pooled","actor_quantiles",200,187,0.935,0.891980920700931,0.961623645350847
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"pooled","Pooled","mean_distance",200,1,0.005,0.000883168715600978,0.0277737043978929
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"pooled","Pooled","partner_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"pooled","Pooled","predicted_quantiles",200,134,0.67,0.602166847737769,0.731425741293961
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"pooled","Pooled","qq",200,3,0.015,0.00511423779325831,0.0431657287926903
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","A","actor_quantiles",200,119,0.595,0.525797100813387,0.660622287174932
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","A","mean_distance",200,7,0.035,0.0170555420085672,0.0704706115222907
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","A","partner_quantiles",200,12,0.06,0.0346521942543319,0.101931692957663
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","A","predicted_quantiles",200,68,0.34,0.277915459709088,0.408115044731637
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","A","qq",200,6,0.03,0.0138203143401113,0.0638942924545192
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","B","actor_quantiles",200,110,0.55,0.480756151384757,0.617359315977516
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","B","mean_distance",200,3,0.015,0.00511423779325831,0.0431657287926903
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","B","partner_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","B","predicted_quantiles",200,74,0.37,0.306126084098591,0.438773700759498
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","B","qq",200,9,0.045,0.023852543001493,0.0832967040018196
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","Either","actor_quantiles",200,166,0.83,0.771841163716874,0.87572092087413
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","Either","mean_distance",200,10,0.05,0.0273826456007639,0.089578148138776
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","Either","partner_quantiles",200,18,0.09,0.0576874488621932,0.137765718767165
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","Either","predicted_quantiles",200,119,0.595,0.525797100813387,0.660622287174932
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles","Either","qq",200,15,0.075,0.045974917184382,0.120043610236295
+7,"Correct model","gaussian",100,"pooled","Pooled","actor_quantiles",200,3,0.015,0.00511423779325831,0.0431657287926903
+7,"Correct model","gaussian",100,"pooled","Pooled","mean_distance",200,0,0,0,0.0188453263772666
+7,"Correct model","gaussian",100,"pooled","Pooled","partner_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+7,"Correct model","gaussian",100,"pooled","Pooled","predicted_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+7,"Correct model","gaussian",100,"pooled","Pooled","qq",200,5,0.025,0.0107247196517613,0.057178340406642
+7,"Correct model","gaussian",100,"roles","A","actor_quantiles",200,1,0.005,0.000883168715600978,0.0277737043978929
+7,"Correct model","gaussian",100,"roles","A","mean_distance",200,3,0.015,0.00511423779325831,0.0431657287926903
+7,"Correct model","gaussian",100,"roles","A","partner_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+7,"Correct model","gaussian",100,"roles","A","predicted_quantiles",200,4,0.02,0.00780442641634947,0.0502870869058264
+7,"Correct model","gaussian",100,"roles","A","qq",200,2,0.01,0.00274665813354444,0.0357217617161768
+7,"Correct model","gaussian",100,"roles","B","actor_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+7,"Correct model","gaussian",100,"roles","B","mean_distance",200,2,0.01,0.00274665813354444,0.0357217617161768
+7,"Correct model","gaussian",100,"roles","B","partner_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+7,"Correct model","gaussian",100,"roles","B","predicted_quantiles",200,9,0.045,0.023852543001493,0.0832967040018196
+7,"Correct model","gaussian",100,"roles","B","qq",200,2,0.01,0.00274665813354444,0.0357217617161768
+7,"Correct model","gaussian",100,"roles","Either","actor_quantiles",200,9,0.045,0.023852543001493,0.0832967040018196
+7,"Correct model","gaussian",100,"roles","Either","mean_distance",200,4,0.02,0.00780442641634947,0.0502870869058264
+7,"Correct model","gaussian",100,"roles","Either","partner_quantiles",200,11,0.055,0.0309853417034588,0.0957869987723084
+7,"Correct model","gaussian",100,"roles","Either","predicted_quantiles",200,13,0.065,0.038376354649153,0.108019079299069
+7,"Correct model","gaussian",100,"roles","Either","qq",200,4,0.02,0.00780442641634947,0.0502870869058264
+8,"Correct model","nbinom2",100,"pooled","Pooled","actor_quantiles",200,3,0.015,0.00511423779325831,0.0431657287926903
+8,"Correct model","nbinom2",100,"pooled","Pooled","mean_distance",200,1,0.005,0.000883168715600978,0.0277737043978929
+8,"Correct model","nbinom2",100,"pooled","Pooled","partner_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+8,"Correct model","nbinom2",100,"pooled","Pooled","predicted_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+8,"Correct model","nbinom2",100,"pooled","Pooled","qq",200,8,0.04,0.0204056320661523,0.0769320682009329
+8,"Correct model","nbinom2",100,"roles","A","actor_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+8,"Correct model","nbinom2",100,"roles","A","mean_distance",200,7,0.035,0.0170555420085672,0.0704706115222907
+8,"Correct model","nbinom2",100,"roles","A","partner_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+8,"Correct model","nbinom2",100,"roles","A","predicted_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+8,"Correct model","nbinom2",100,"roles","A","qq",200,7,0.035,0.0170555420085672,0.0704706115222907
+8,"Correct model","nbinom2",100,"roles","B","actor_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+8,"Correct model","nbinom2",100,"roles","B","mean_distance",200,4,0.02,0.00780442641634947,0.0502870869058264
+8,"Correct model","nbinom2",100,"roles","B","partner_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+8,"Correct model","nbinom2",100,"roles","B","predicted_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+8,"Correct model","nbinom2",100,"roles","B","qq",200,5,0.025,0.0107247196517613,0.057178340406642
+8,"Correct model","nbinom2",100,"roles","Either","actor_quantiles",200,12,0.06,0.0346521942543319,0.101931692957663
+8,"Correct model","nbinom2",100,"roles","Either","mean_distance",200,10,0.05,0.0273826456007639,0.089578148138776
+8,"Correct model","nbinom2",100,"roles","Either","partner_quantiles",200,14,0.07,0.0421521718283428,0.114054808856106
+8,"Correct model","nbinom2",100,"roles","Either","predicted_quantiles",200,14,0.07,0.0421521718283428,0.114054808856106
+8,"Correct model","nbinom2",100,"roles","Either","qq",200,11,0.055,0.0309853417034588,0.0957869987723084
+9,"Correct model","ordinal",100,"pooled","Pooled","actor_quantiles",200,1,0.005,0.000883168715600978,0.0277737043978929
+9,"Correct model","ordinal",100,"pooled","Pooled","mean_distance",200,1,0.005,0.000883168715600978,0.0277737043978929
+9,"Correct model","ordinal",100,"pooled","Pooled","partner_quantiles",200,0,0,0,0.0188453263772666
+9,"Correct model","ordinal",100,"pooled","Pooled","predicted_quantiles",200,1,0.005,0.000883168715600978,0.0277737043978929
+9,"Correct model","ordinal",100,"pooled","Pooled","qq",200,3,0.015,0.00511423779325831,0.0431657287926903
+9,"Correct model","ordinal",100,"roles","A","actor_quantiles",200,4,0.02,0.00780442641634947,0.0502870869058264
+9,"Correct model","ordinal",100,"roles","A","mean_distance",200,9,0.045,0.023852543001493,0.0832967040018196
+9,"Correct model","ordinal",100,"roles","A","partner_quantiles",200,3,0.015,0.00511423779325831,0.0431657287926903
+9,"Correct model","ordinal",100,"roles","A","predicted_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+9,"Correct model","ordinal",100,"roles","A","qq",200,2,0.01,0.00274665813354444,0.0357217617161768
+9,"Correct model","ordinal",100,"roles","B","actor_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+9,"Correct model","ordinal",100,"roles","B","mean_distance",200,3,0.015,0.00511423779325831,0.0431657287926903
+9,"Correct model","ordinal",100,"roles","B","partner_quantiles",200,4,0.02,0.00780442641634947,0.0502870869058264
+9,"Correct model","ordinal",100,"roles","B","predicted_quantiles",200,2,0.01,0.00274665813354444,0.0357217617161768
+9,"Correct model","ordinal",100,"roles","B","qq",200,2,0.01,0.00274665813354444,0.0357217617161768
+9,"Correct model","ordinal",100,"roles","Either","actor_quantiles",200,9,0.045,0.023852543001493,0.0832967040018196
+9,"Correct model","ordinal",100,"roles","Either","mean_distance",200,11,0.055,0.0309853417034588,0.0957869987723084
+9,"Correct model","ordinal",100,"roles","Either","partner_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+9,"Correct model","ordinal",100,"roles","Either","predicted_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+9,"Correct model","ordinal",100,"roles","Either","qq",200,4,0.02,0.00780442641634947,0.0502870869058264
+10,"Omitted partner effect","gaussian",100,"pooled","Pooled","actor_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+10,"Omitted partner effect","gaussian",100,"pooled","Pooled","mean_distance",200,0,0,0,0.0188453263772666
+10,"Omitted partner effect","gaussian",100,"pooled","Pooled","partner_quantiles",200,85,0.425,0.358536125435139,0.494290673521451
+10,"Omitted partner effect","gaussian",100,"pooled","Pooled","predicted_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+10,"Omitted partner effect","gaussian",100,"pooled","Pooled","qq",200,4,0.02,0.00780442641634947,0.0502870869058264
+10,"Omitted partner effect","gaussian",100,"roles","A","actor_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+10,"Omitted partner effect","gaussian",100,"roles","A","mean_distance",200,1,0.005,0.000883168715600978,0.0277737043978929
+10,"Omitted partner effect","gaussian",100,"roles","A","partner_quantiles",200,53,0.265,0.208681541471091,0.330175761926224
+10,"Omitted partner effect","gaussian",100,"roles","A","predicted_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+10,"Omitted partner effect","gaussian",100,"roles","A","qq",200,3,0.015,0.00511423779325831,0.0431657287926903
+10,"Omitted partner effect","gaussian",100,"roles","B","actor_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+10,"Omitted partner effect","gaussian",100,"roles","B","mean_distance",200,1,0.005,0.000883168715600978,0.0277737043978929
+10,"Omitted partner effect","gaussian",100,"roles","B","partner_quantiles",200,59,0.295,0.236139438568492,0.361587145246188
+10,"Omitted partner effect","gaussian",100,"roles","B","predicted_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+10,"Omitted partner effect","gaussian",100,"roles","B","qq",200,4,0.02,0.00780442641634947,0.0502870869058264
+10,"Omitted partner effect","gaussian",100,"roles","Either","actor_quantiles",200,10,0.05,0.0273826456007639,0.089578148138776
+10,"Omitted partner effect","gaussian",100,"roles","Either","mean_distance",200,2,0.01,0.00274665813354444,0.0357217617161768
+10,"Omitted partner effect","gaussian",100,"roles","Either","partner_quantiles",200,98,0.49,0.421562783312132,0.558814123215413
+10,"Omitted partner effect","gaussian",100,"roles","Either","predicted_quantiles",200,10,0.05,0.0273826456007639,0.089578148138776
+10,"Omitted partner effect","gaussian",100,"roles","Either","qq",200,7,0.035,0.0170555420085672,0.0704706115222907
+11,"Residual SD rises with actor predictor","gaussian",100,"pooled","Pooled","actor_quantiles",200,107,0.535,0.465866468723632,0.60281435842996
+11,"Residual SD rises with actor predictor","gaussian",100,"pooled","Pooled","mean_distance",200,178,0.89,0.839073090026985,0.926227555398747
+11,"Residual SD rises with actor predictor","gaussian",100,"pooled","Pooled","partner_quantiles",200,32,0.16,0.11567412031587,0.217140701620671
+11,"Residual SD rises with actor predictor","gaussian",100,"pooled","Pooled","predicted_quantiles",200,75,0.375,0.310854368584098,0.443856963010218
+11,"Residual SD rises with actor predictor","gaussian",100,"pooled","Pooled","qq",200,128,0.64,0.571415281660031,0.703308026954335
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","A","actor_quantiles",200,59,0.295,0.236139438568492,0.361587145246188
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","A","mean_distance",200,139,0.695,0.628014479020216,0.75463584369265
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","A","partner_quantiles",200,10,0.05,0.0273826456007639,0.089578148138776
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","A","predicted_quantiles",200,34,0.17,0.12427907912587,0.228158836283126
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","A","qq",200,75,0.375,0.310854368584098,0.443856963010218
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","B","actor_quantiles",200,49,0.245,0.190568680890372,0.309042435562034
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","B","mean_distance",200,141,0.705,0.638412854753812,0.763860561431508
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","B","partner_quantiles",200,14,0.07,0.0421521718283428,0.114054808856106
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","B","predicted_quantiles",200,29,0.145,0.102893506420044,0.200486675307815
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","B","qq",200,85,0.425,0.358536125435139,0.494290673521451
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","Either","actor_quantiles",200,89,0.445,0.377806010029534,0.514266975871966
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","Either","mean_distance",200,170,0.85,0.793944207158333,0.89286406437758
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","Either","partner_quantiles",200,20,0.1,0.0656704486690959,0.149405812432717
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","Either","predicted_quantiles",200,53,0.265,0.208681541471091,0.330175761926224
+11,"Residual SD rises with actor predictor","gaussian",100,"roles","Either","qq",200,109,0.545,0.475786113724881,0.612517806901165
+12,"Role SD ratio: 1.50","gaussian",100,"pooled","Pooled","actor_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+12,"Role SD ratio: 1.50","gaussian",100,"pooled","Pooled","mean_distance",200,1,0.005,0.000883168715600978,0.0277737043978929
+12,"Role SD ratio: 1.50","gaussian",100,"pooled","Pooled","partner_quantiles",200,9,0.045,0.023852543001493,0.0832967040018196
+12,"Role SD ratio: 1.50","gaussian",100,"pooled","Pooled","predicted_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+12,"Role SD ratio: 1.50","gaussian",100,"pooled","Pooled","qq",200,10,0.05,0.0273826456007639,0.089578148138776
+12,"Role SD ratio: 1.50","gaussian",100,"roles","A","actor_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+12,"Role SD ratio: 1.50","gaussian",100,"roles","A","mean_distance",200,100,0.5,0.431360859603892,0.568639140396108
+12,"Role SD ratio: 1.50","gaussian",100,"roles","A","partner_quantiles",200,3,0.015,0.00511423779325831,0.0431657287926903
+12,"Role SD ratio: 1.50","gaussian",100,"roles","A","predicted_quantiles",200,5,0.025,0.0107247196517613,0.057178340406642
+12,"Role SD ratio: 1.50","gaussian",100,"roles","A","qq",200,40,0.2,0.150452009260981,0.260855186565379
+12,"Role SD ratio: 1.50","gaussian",100,"roles","B","actor_quantiles",200,10,0.05,0.0273826456007639,0.089578148138776
+12,"Role SD ratio: 1.50","gaussian",100,"roles","B","mean_distance",200,51,0.255,0.199604951720313,0.319629258204547
+12,"Role SD ratio: 1.50","gaussian",100,"roles","B","partner_quantiles",200,12,0.06,0.0346521942543319,0.101931692957663
+12,"Role SD ratio: 1.50","gaussian",100,"roles","B","predicted_quantiles",200,14,0.07,0.0421521718283428,0.114054808856106
+12,"Role SD ratio: 1.50","gaussian",100,"roles","B","qq",200,44,0.22,0.168165383588333,0.282387999182937
+12,"Role SD ratio: 1.50","gaussian",100,"roles","Either","actor_quantiles",200,13,0.065,0.038376354649153,0.108019079299069
+12,"Role SD ratio: 1.50","gaussian",100,"roles","Either","mean_distance",200,110,0.55,0.480756151384757,0.617359315977516
+12,"Role SD ratio: 1.50","gaussian",100,"roles","Either","partner_quantiles",200,15,0.075,0.045974917184382,0.120043610236295
+12,"Role SD ratio: 1.50","gaussian",100,"roles","Either","predicted_quantiles",200,17,0.085,0.0537457501774756,0.131895870715656
+12,"Role SD ratio: 1.50","gaussian",100,"roles","Either","qq",200,73,0.365,0.301405264649268,0.433682973472594
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"pooled","Pooled","actor_quantiles",200,94,0.47,0.402047548732654,0.539083170849982
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"pooled","Pooled","mean_distance",200,0,0,0,0.0188453263772666
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"pooled","Pooled","partner_quantiles",200,3,0.015,0.00511423779325831,0.0431657287926903
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"pooled","Pooled","predicted_quantiles",200,45,0.225,0.172623697150891,0.287741232356605
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"pooled","Pooled","qq",200,9,0.045,0.023852543001493,0.0832967040018196
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","A","actor_quantiles",200,27,0.135,0.0944657045478791,0.189291383707526
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","A","mean_distance",200,5,0.025,0.0107247196517613,0.057178340406642
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","A","partner_quantiles",200,4,0.02,0.00780442641634947,0.0502870869058264
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","A","predicted_quantiles",200,17,0.085,0.0537457501774756,0.131895870715656
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","A","qq",200,7,0.035,0.0170555420085672,0.0704706115222907
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","B","actor_quantiles",200,31,0.155,0.111396369276893,0.211606905923421
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","B","mean_distance",200,4,0.02,0.00780442641634947,0.0502870869058264
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","B","partner_quantiles",200,6,0.03,0.0138203143401113,0.0638942924545192
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","B","predicted_quantiles",200,21,0.105,0.0697074879268102,0.15518031991123
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","B","qq",200,11,0.055,0.0309853417034588,0.0957869987723084
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","Either","actor_quantiles",200,53,0.265,0.208681541471091,0.330175761926224
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","Either","mean_distance",200,9,0.045,0.023852543001493,0.0832967040018196
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","Either","partner_quantiles",200,10,0.05,0.0273826456007639,0.089578148138776
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","Either","predicted_quantiles",200,34,0.17,0.12427907912587,0.228158836283126
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles","Either","qq",200,17,0.085,0.0537457501774756,0.131895870715656
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"pooled","Pooled","actor_quantiles",200,50,0.25,0.195081680068175,0.314340983120458
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"pooled","Pooled","mean_distance",200,0,0,0,0.0188453263772666
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"pooled","Pooled","partner_quantiles",200,4,0.02,0.00780442641634947,0.0502870869058264
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"pooled","Pooled","predicted_quantiles",200,28,0.14,0.0986698263345564,0.194898808657076
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"pooled","Pooled","qq",200,7,0.035,0.0170555420085672,0.0704706115222907
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","A","actor_quantiles",200,16,0.08,0.04984058588976,0.125989488267144
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","A","mean_distance",200,1,0.005,0.000883168715600978,0.0277737043978929
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","A","partner_quantiles",200,7,0.035,0.0170555420085672,0.0704706115222907
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","A","predicted_quantiles",200,11,0.055,0.0309853417034588,0.0957869987723084
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","A","qq",200,12,0.06,0.0346521942543319,0.101931692957663
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","B","actor_quantiles",200,14,0.07,0.0421521718283428,0.114054808856106
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","B","mean_distance",200,3,0.015,0.00511423779325831,0.0431657287926903
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","B","partner_quantiles",200,8,0.04,0.0204056320661523,0.0769320682009329
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","B","predicted_quantiles",200,12,0.06,0.0346521942543319,0.101931692957663
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","B","qq",200,4,0.02,0.00780442641634947,0.0502870869058264
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","Either","actor_quantiles",200,26,0.13,0.0902820227966932,0.183663518722484
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","Either","mean_distance",200,4,0.02,0.00780442641634947,0.0502870869058264
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","Either","partner_quantiles",200,15,0.075,0.045974917184382,0.120043610236295
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","Either","predicted_quantiles",200,20,0.1,0.0656704486690959,0.149405812432717
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles","Either","qq",200,16,0.08,0.04984058588976,0.125989488267144

@@ -45,26 +45,14 @@ partner_check_plot_fixture <- function() {
 
 
 test_that("panel mode produces one page per composition", {
-  skip_if(Sys.which("pdfinfo") == "", "pdfinfo is needed to count PDF pages")
   check_result <- partner_check_plot_fixture()
   # A small composition stays in the overview but has no plot page.
   check_result$compositions[4L, ] <- list("mother - child", 2L, list(NULL))
   check_result$n_pairs <- 362L
 
   for (panels in c(TRUE, FALSE)) {
-    pdf_path <- tempfile(fileext = ".pdf")
-    grDevices::pdf(pdf_path, width = 12, height = 8)
-    tryCatch({
-      if (panels) {
-        plot(check_result, ask = FALSE)
-      } else {
-        plot(check_result, panels = FALSE, ask = FALSE)
-      }
-    }, finally = grDevices::dev.off())
-    pdf_information <- system2("pdfinfo", shQuote(pdf_path), stdout = TRUE)
-    unlink(pdf_path)
-    page_count <- as.integer(sub("^Pages:\\s+", "",
-                                 pdf_information[grepl("^Pages:", pdf_information)]))
+    page_count <- count_pdf_pages(plot(check_result, panels = panels, ask = FALSE),
+                                  width = 12, height = 8)
     expect_identical(page_count, if (panels) 3L else 14L)
   }
 })
@@ -74,60 +62,57 @@ test_that("compositions use row-wise panels with clear titles and pair counts", 
   check_result <- partner_check_plot_fixture()
   grDevices::pdf(NULL, width = 12, height = 8)
   on.exit(grDevices::dev.off(), add = TRUE)
-  recorded_statistic_titles <- character()
   recorded_panel_positions <- list()
-  recorded_figure_text <- character()
-  expected_statistic_titles <- unlist(lapply(
-    check_result$compositions$statistics, function(statistics) names(statistics)[-1]
-  ))
+  recorded_margin_text <- list()
   original_title <- graphics::title
   original_margin_text <- graphics::mtext
   local_mocked_bindings(title = function(main = NULL, sub = NULL, ...) {
-    statistic_title <- gsub("\\s+", " ", main)
-    if (length(statistic_title) == 1L &&
-        statistic_title %in% expected_statistic_titles) {
-      recorded_statistic_titles <<- c(recorded_statistic_titles, statistic_title)
-      recorded_panel_positions[[length(recorded_panel_positions) + 1L]] <<-
-        graphics::par("mfg")
-    }
-    recorded_figure_text <<- c(recorded_figure_text, main, sub)
+    recorded_panel_positions[[length(recorded_panel_positions) + 1L]] <<-
+      graphics::par("mfg")
     original_title(main = main, sub = sub, ...)
   }, mtext = function(text, ...) {
-    recorded_figure_text <<- c(recorded_figure_text, text)
+    recorded_margin_text[[length(recorded_margin_text) + 1L]] <<- c(list(text = text), list(...))
     original_margin_text(text, ...)
   }, .package = "graphics")
 
   visible_result <- withVisible(plot(check_result, ask = FALSE))
   expect_false(visible_result$visible)
   expect_identical(visible_result$value, check_result)
-  expect_identical(recorded_statistic_titles, expected_statistic_titles)
   expected_panel_positions <- rbind(
     cbind(rep(1:2, each = 3L), rep(1:3, 2L), 2L, 3L),
     cbind(rep(1:2, each = 2L), rep(1:2, 2L), 2L, 2L),
     cbind(rep(1:2, each = 2L), rep(1:2, 2L), 2L, 2L)
   )
   expect_equal(do.call(rbind, recorded_panel_positions), expected_panel_positions)
-  for (composition_label in check_result$compositions$label) {
-    composition_titles <- recorded_figure_text[
-      grepl(composition_label, recorded_figure_text, fixed = TRUE)
-    ]
-    expect_true(length(composition_titles) >= 1L)
-    expect_true(any(grepl("120.*360", composition_titles)))
-  }
+  headings <- Filter(function(text) isTRUE(text$outer) && isTRUE(text$side == 3) &&
+    length(text$text) == 1L && text$text %in% check_result$compositions$label,
+    recorded_margin_text)
+  subtitles <- Filter(function(text) isTRUE(text$outer) && isTRUE(text$side == 3) &&
+    length(text$text) == 1L && grepl("120.*360", text$text), recorded_margin_text)
+  expect_identical(vapply(headings, `[[`, "", "text"), check_result$compositions$label)
+  expect_length(subtitles, 3)
+  expect_true(all(vapply(headings, `[[`, 0, "font") == 2))
+  expect_true(all(vapply(headings, `[[`, 0, "cex") > vapply(subtitles, `[[`, 0, "cex")))
+  expect_true(all(grepl("model-centred", vapply(subtitles, `[[`, "", "text"))))
 })
 
 
-test_that("individual plots identify each composition and its pair counts", {
+test_that("individual plots retain composition, pair counts and interpretation", {
   check_result <- partner_check_plot_fixture()
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   graphics::par(mfcol = c(1, 2), plt = c(0.2, 0.8, 0.2, 0.8))
   previous_graphics_settings <- graphics::par(c("mfcol", "mar", "plt"))
   recorded_plot_text <- character()
+  recorded_margin_text <- character()
   original_title <- graphics::title
+  original_mtext <- graphics::mtext
   local_mocked_bindings(title = function(main = NULL, sub = NULL, ...) {
     recorded_plot_text <<- c(recorded_plot_text, paste(main, sub, collapse = " "))
     original_title(main = main, sub = sub, ...)
+  }, mtext = function(text, ...) {
+    recorded_margin_text <<- c(recorded_margin_text, text)
+    original_mtext(text, ...)
   }, .package = "graphics")
 
   plot(check_result, panels = FALSE, ask = FALSE)
@@ -136,12 +121,11 @@ test_that("individual plots identify each composition and its pair counts", {
   expect_length(recorded_plot_text, 14L)
   for (composition_index in seq_len(nrow(check_result$compositions))) {
     composition <- check_result$compositions[composition_index, ]
-    composition_plot_text <- recorded_plot_text[
-      startsWith(recorded_plot_text, paste0(composition$label, " - "))
-    ]
-    expect_length(composition_plot_text, ncol(composition$statistics[[1]]) - 1L)
-    expect_true(all(grepl("120.*360", composition_plot_text)))
+    expect_equal(sum(recorded_margin_text == composition$label),
+                 ncol(composition$statistics[[1]]) - 1L)
   }
+  expect_equal(sum(grepl("120.*360", recorded_margin_text)), 14)
+  expect_equal(sum(grepl("Red should usually lie between dashed limits", recorded_margin_text)), 14)
 })
 
 
@@ -194,7 +178,7 @@ test_that("panel plotting restores graphics settings after success and errors", 
                 cex = 0.9, mex = 1.2, cex.main = 1.1)
   graphics::par(plt = c(0.2, 0.8, 0.2, 0.8))
   previous_graphics_settings <- graphics::par(
-    c("mfcol", "mfg", "mar", "oma", "cex", "mex", "cex.main", "plt")
+    c("mfcol", "mfg", "mar", "oma", "cex", "mex", "cex.main", "mgp", "las", "plt", "new")
   )
   # Use the real pause setting: restoring par() can overwrite it too.
   grDevices::devAskNewPage(TRUE)
@@ -216,4 +200,15 @@ test_that("panel plotting restores graphics settings after success and errors", 
   expect_equal(graphics::par(names(previous_graphics_settings)),
                previous_graphics_settings)
   expect_true(grDevices::devAskNewPage())
+})
+
+
+test_that("a failed plot on a new device does not overlay the next plot", {
+  check_result <- partner_check_plot_fixture()
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  local_mocked_bindings(hist = function(...) stop("test histogram failure"),
+                        .package = "graphics")
+  expect_error(plot(check_result, ask = FALSE), "test histogram failure")
+  expect_false(graphics::par("new"))
 })

@@ -1,0 +1,35 @@
+"condition","family","scenario","scenario_label","role_mean","sd_ratio","zero_probability","nb_size","fit_family","n_dyads","n_times","dyad_sd","repetitions","reference_draws"
+1,"gaussian","correct","Correct model",0,1,0,3,"gaussian",40,1,0.6,500,1000
+2,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,0.6,500,1000
+3,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,0.6,500,1000
+4,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",40,1,0.6,500,1000
+5,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",100,1,0.6,500,1000
+6,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",400,1,0.6,500,1000
+7,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",40,1,0.6,500,1000
+8,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",100,1,0.6,500,1000
+9,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",400,1,0.6,500,1000
+10,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",40,1,0.6,500,1000
+11,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",100,1,0.6,500,1000
+12,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",400,1,0.6,500,1000
+13,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",40,1,0.6,500,1000
+14,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",100,1,0.6,500,1000
+15,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",400,1,0.6,500,1000
+16,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",40,1,0.6,500,1000
+17,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,0.6,500,1000
+18,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,0.6,500,1000
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",40,1,0.6,500,1000
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",100,1,0.6,500,1000
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",400,1,0.6,500,1000
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",40,1,0.6,500,1000
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",100,1,0.6,500,1000
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",400,1,0.6,500,1000
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",40,1,0.6,500,1000
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",100,1,0.6,500,1000
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",400,1,0.6,500,1000
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",40,1,0.6,500,1000
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",100,1,0.6,500,1000
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",400,1,0.6,500,1000
+31,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,1.2,500,1000
+32,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,1.2,500,1000
+33,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,6,0.6,500,1000
+34,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",100,6,0.6,500,1000

@@ -2,6 +2,15 @@
 
 * Changed the package license from MIT to GPL-3.
 
+* Added experimental `check_dyad_residuals()` for simulated PIT residuals and
+  `check_dyad_outcomes()` for response distributions, SDs, extremes, and zero
+  counts. Both reuse `simulate_dyad_responses()` output, keep partner and time
+  dependence in their references, and can show dyad compositions and roles
+  separately. PIT follows Florian Hartig's DHARMa approach and Dunn and Smyth's
+  (1996) randomized quantile residuals; DHARMa is not required. A
+  [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
+  shows how often the checks flag correct and mismatched models.
+
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),
   [#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).

@@ -1,0 +1,793 @@
+"run","condition","family","scenario","scenario_label","fit_family","n_dyads","n_times","dyad_sd","view","pages","check","panel_set","checked","flagged","rate","rate_lower","rate_upper"
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"pooled",FALSE,"both","all",500,59,0.118,0.0925930082515065,0.149231987861119
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"pooled",FALSE,"both","current",500,28,0.056,0.0390256206831515,0.0797447936467069
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,43,0.086,0.0644731424036077,0.113839811498558
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"pooled",FALSE,"residual","all",500,54,0.108,0.0837228096370504,0.138254673284807
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"pooled",FALSE,"residual","current",500,23,0.046,0.0308451083708162,0.0680777927682732
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,38,0.076,0.0558690270374278,0.102596413673968
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"roles",FALSE,"both","all",500,155,0.31,0.271038911273569,0.351858338101821
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"roles",FALSE,"both","current",500,97,0.194,0.161726466643237,0.230939629719233
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,135,0.27,0.232948539203106,0.310558657409208
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"roles",FALSE,"residual","all",500,130,0.26,0.223485723185383,0.300173960236162
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"roles",FALSE,"residual","current",500,69,0.138,0.110518008898884,0.17100201359528
+"main",1,"gaussian","correct","Correct model","gaussian",40,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,109,0.218,0.184033726435988,0.256266401584327
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"both","all",500,54,0.108,0.0837228096370504,0.138254673284807
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"both","current",500,32,0.064,0.0456960160447894,0.0889524088376841
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,33,0.066,0.0473785263597739,0.0912394011608535
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"residual","all",500,40,0.08,0.0592981294098526,0.107106316577851
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"residual","current",500,17,0.034,0.0213345198085322,0.0537713655016345
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,19,0.038,0.0244601180558304,0.0585847725306439
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"both","all",500,142,0.284,0.246237771955659,0.325055943123732
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"both","current",500,97,0.194,0.161726466643237,0.230939629719233
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,118,0.236,0.200881295471559,0.275144356292141
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"residual","all",500,114,0.228,0.193381769115001,0.266765872096084
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"residual","current",500,61,0.122,0.0961592783150937,0.15360472307384
+"main",2,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,86,0.172,0.141454119843651,0.207547447499127
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"both","all",500,58,0.116,0.0908136565110379,0.147041836963434
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"both","current",500,38,0.076,0.0558690270374278,0.102596413673968
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,49,0.098,0.0749239188646062,0.127206050866482
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"residual","all",500,42,0.084,0.0627441368038304,0.111599314460181
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"residual","current",500,21,0.042,0.0276323101084517,0.0633515857543301
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,32,0.064,0.0456960160447894,0.0889524088376841
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"both","all",500,143,0.286,0.248140053216093,0.327123164501452
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"both","current",500,96,0.192,0.159876218595883,0.228820375128433
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,120,0.24,0.204637860033381,0.279326797006626
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"residual","all",500,114,0.228,0.193381769115001,0.266765872096084
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"residual","current",500,59,0.118,0.0925930082515065,0.149231987861119
+"main",3,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,86,0.172,0.141454119843651,0.207547447499127
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"pooled",FALSE,"both","all",500,43,0.086,0.0644731424036077,0.113839811498558
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"pooled",FALSE,"both","current",500,27,0.054,0.0373743501810575,0.0774265615106471
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,34,0.068,0.0490665074249069,0.0935209227338743
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"pooled",FALSE,"residual","all",500,33,0.066,0.0473785263597739,0.0912394011608535
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"pooled",FALSE,"residual","current",500,17,0.034,0.0213345198085322,0.0537713655016345
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,24,0.048,0.0324652069413532,0.07042719683589
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"roles",FALSE,"both","all",500,409,0.818,0.781797364670608,0.849353554795844
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"roles",FALSE,"both","current",500,396,0.792,0.754263696880083,0.825283688290371
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,401,0.802,0.764826020930416,0.834568877430807
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"roles",FALSE,"residual","all",500,407,0.814,0.777545905940215,0.84566600824993
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"roles",FALSE,"residual","current",500,393,0.786,0.747941877243587,0.819697000012405
+"main",4,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",40,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,399,0.798,0.760597113760494,0.830858779324421
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"pooled",FALSE,"both","all",500,71,0.142,0.114129360445696,0.175329667324775
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"pooled",FALSE,"both","current",500,38,0.076,0.0558690270374278,0.102596413673968
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,50,0.1,0.0766775627373017,0.12942190963194
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"pooled",FALSE,"residual","all",500,57,0.114,0.0890369009940029,0.144849089842315
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"pooled",FALSE,"residual","current",500,23,0.046,0.0308451083708162,0.0680777927682732
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,35,0.07,0.0507597429450181,0.0957971898519168
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"roles",FALSE,"both","all",500,499,0.998,0.988759293294853,0.999646863605441
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"roles",FALSE,"both","current",500,498,0.996,0.985534284784823,0.998902369477317
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,498,0.996,0.985534284784823,0.998902369477317
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"roles",FALSE,"residual","all",500,498,0.996,0.985534284784823,0.998902369477317
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"roles",FALSE,"residual","current",500,496,0.992,0.979612964165895,0.996884684819938
+"main",5,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,497,0.994,0.982509747895947,0.99795740372804
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"pooled",FALSE,"both","all",500,74,0.148,0.119561405389205,0.181806130295727
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"pooled",FALSE,"both","current",500,48,0.096,0.073173504665419,0.124986962427515
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,54,0.108,0.0837228096370504,0.138254673284807
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"pooled",FALSE,"residual","all",500,50,0.1,0.0766775627373017,0.12942190963194
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"pooled",FALSE,"residual","current",500,22,0.044,0.0292339556286072,0.0657194428723284
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,28,0.056,0.0390256206831515,0.0797447936467069
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"roles",FALSE,"both","all",500,500,1,0.992375659538448,1
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"roles",FALSE,"both","current",500,500,1,0.992375659538448,1
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"roles",FALSE,"residual","all",500,500,1,0.992375659538448,1
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"roles",FALSE,"residual","current",500,500,1,0.992375659538448,1
+"main",6,"gaussian","mean_large","Omitted role means: +/-0.4","gaussian",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,500,1,0.992375659538448,1
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"pooled",FALSE,"both","all",500,51,0.102,0.0784343521031695,0.131634622904226
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"pooled",FALSE,"both","current",500,25,0.05,0.0340937452438494,0.0727681611715476
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,33,0.066,0.0473785263597739,0.0912394011608535
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"pooled",FALSE,"residual","all",500,44,0.088,0.0662059844749289,0.11607647206539
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"pooled",FALSE,"residual","current",500,18,0.036,0.0228910609802927,0.0561843269680277
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,26,0.052,0.0357302651157053,0.0751011439378455
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"roles",FALSE,"both","all",500,209,0.418,0.375553048071933,0.461697343763761
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"roles",FALSE,"both","current",500,175,0.35,0.309480173144661,0.392807128993805
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,192,0.384,0.342407674617792,0.427361172369288
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"roles",FALSE,"residual","all",500,202,0.404,0.361879224693068,0.44758464867555
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"roles",FALSE,"residual","current",500,165,0.33,0.290217899729181,0.372374376027747
+"main",7,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",40,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,183,0.366,0.324947604882213,0.409095718361483
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"pooled",FALSE,"both","all",500,72,0.144,0.11593807411035,0.177490456298275
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"pooled",FALSE,"both","current",500,46,0.092,0.0696827236804521,0.120538738136175
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,59,0.118,0.0925930082515065,0.149231987861119
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"pooled",FALSE,"residual","all",500,53,0.106,0.0819570502729703,0.136050930010733
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"pooled",FALSE,"residual","current",500,25,0.05,0.0340937452438494,0.0727681611715476
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,39,0.078,0.0575813934761616,0.104853549873389
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"roles",FALSE,"both","all",500,349,0.698,0.656372312057082,0.736608449120143
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"roles",FALSE,"both","current",500,324,0.648,0.605154037114123,0.688589158109257
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,329,0.658,0.615356215080009,0.69823449333414
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"roles",FALSE,"residual","all",500,338,0.676,0.633771514389349,0.715544717768184
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"roles",FALSE,"residual","current",500,312,0.624,0.580749179384767,0.665359984180768
+"main",8,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,317,0.634,0.590904281638517,0.675052395117786
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"pooled",FALSE,"both","all",500,79,0.158,0.128652697864436,0.192562351011266
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"pooled",FALSE,"both","current",500,43,0.086,0.0644731424036077,0.113839811498558
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,58,0.116,0.0908136565110379,0.147041836963434
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"pooled",FALSE,"residual","all",500,61,0.122,0.0961592783150937,0.15360472307384
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"pooled",FALSE,"residual","current",500,24,0.048,0.0324652069413532,0.07042719683589
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,40,0.08,0.0592981294098526,0.107106316577851
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"roles",FALSE,"both","all",500,500,1,0.992375659538448,1
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"roles",FALSE,"both","current",500,500,1,0.992375659538448,1
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"roles",FALSE,"residual","all",500,500,1,0.992375659538448,1
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"roles",FALSE,"residual","current",500,500,1,0.992375659538448,1
+"main",9,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,500,1,0.992375659538448,1
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"pooled",FALSE,"both","all",500,67,0.134,0.106915001871521,0.166666015346335
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"pooled",FALSE,"both","current",500,49,0.098,0.0749239188646062,0.127206050866482
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,58,0.116,0.0908136565110379,0.147041836963434
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"pooled",FALSE,"residual","all",500,44,0.088,0.0662059844749289,0.11607647206539
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"pooled",FALSE,"residual","current",500,24,0.048,0.0324652069413532,0.07042719683589
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,34,0.068,0.0490665074249069,0.0935209227338743
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"roles",FALSE,"both","all",500,253,0.506,0.462298638833493,0.549609869080968
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"roles",FALSE,"both","current",500,218,0.436,0.393185603123056,0.479790312456023
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,235,0.47,0.426648051851946,0.513809408575747
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"roles",FALSE,"residual","all",500,218,0.436,0.393185603123056,0.479790312456023
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"roles",FALSE,"residual","current",500,177,0.354,0.313342305196902,0.396884002217872
+"main",10,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",40,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,198,0.396,0.354081703502757,0.439504159313246
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"both","all",500,78,0.156,0.126830791403845,0.190414754833703
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"both","current",500,56,0.112,0.0872628001941023,0.142653688004062
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,70,0.14,0.112322660187864,0.173166864944454
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"residual","all",500,56,0.112,0.0872628001941023,0.142653688004062
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"residual","current",500,30,0.06,0.0423483564809462,0.0843610631252198
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,45,0.09,0.0679425478891394,0.118309411289333
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"both","all",500,402,0.804,0.766942507613641,0.836421893385736
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"both","current",500,378,0.756,0.716495193143907,0.791601144539778
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,392,0.784,0.745837119472032,0.817832255145806
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"residual","all",500,352,0.704,0.662554664322289,0.742334604769398
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"residual","current",500,295,0.59,0.546362688124597,0.632264930592324
+"main",11,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,324,0.648,0.605154037114123,0.688589158109257
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"both","all",500,114,0.228,0.193381769115001,0.266765872096084
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"both","current",500,68,0.136,0.108715443407237,0.168835076448773
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,82,0.164,0.134128920315872,0.198994636474291
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"residual","all",500,94,0.188,0.156179964134967,0.224577624313042
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"residual","current",500,38,0.076,0.0558690270374278,0.102596413673968
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,56,0.112,0.0872628001941023,0.142653688004062
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"both","all",500,500,1,0.992375659538448,1
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"both","current",500,500,1,0.992375659538448,1
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"residual","all",500,496,0.992,0.979612964165895,0.996884684819938
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"residual","current",500,495,0.99,0.976806900244269,0.99572124610341
+"main",12,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,495,0.99,0.976806900244269,0.99572124610341
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"pooled",FALSE,"both","all",500,43,0.086,0.0644731424036077,0.113839811498558
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"pooled",FALSE,"both","current",500,23,0.046,0.0308451083708162,0.0680777927682732
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,32,0.064,0.0456960160447894,0.0889524088376841
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"pooled",FALSE,"residual","all",500,35,0.07,0.0507597429450181,0.0957971898519168
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"pooled",FALSE,"residual","current",500,14,0.028,0.0167509747207564,0.0464464026749489
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,24,0.048,0.0324652069413532,0.07042719683589
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"roles",FALSE,"both","all",500,164,0.328,0.28829618984059,0.370326583278184
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"roles",FALSE,"both","current",500,113,0.226,0.191509780865554,0.264668357707377
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,143,0.286,0.248140053216093,0.327123164501452
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"roles",FALSE,"residual","all",500,137,0.274,0.236740625665821,0.314705576222801
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"roles",FALSE,"residual","current",500,84,0.168,0.137788232976844,0.203274329089627
+"main",13,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",40,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,115,0.23,0.19525492517447,0.268862218674768
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"pooled",FALSE,"both","all",500,68,0.136,0.108715443407237,0.168835076448773
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"pooled",FALSE,"both","current",500,52,0.104,0.0801942067698911,0.133844270875658
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,61,0.122,0.0961592783150937,0.15360472307384
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"pooled",FALSE,"residual","all",500,49,0.098,0.0749239188646062,0.127206050866482
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"pooled",FALSE,"residual","current",500,32,0.064,0.0456960160447894,0.0889524088376841
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,42,0.084,0.0627441368038304,0.111599314460181
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"roles",FALSE,"both","all",500,240,0.48,0.436528426573732,0.52377654704473
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"roles",FALSE,"both","current",500,204,0.408,0.365782390930815,0.45162048771411
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,223,0.446,0.40300639158533,0.489817037184518
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"roles",FALSE,"residual","all",500,193,0.386,0.344351476714006,0.429386872911228
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"roles",FALSE,"residual","current",500,145,0.29,0.251947419877366,0.331254803116486
+"main",14,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,170,0.34,0.299838858453714,0.382600930493983
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"pooled",FALSE,"both","all",500,68,0.136,0.108715443407237,0.168835076448773
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"pooled",FALSE,"both","current",500,43,0.086,0.0644731424036077,0.113839811498558
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,52,0.104,0.0801942067698911,0.133844270875658
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"pooled",FALSE,"residual","all",500,52,0.104,0.0801942067698911,0.133844270875658
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"pooled",FALSE,"residual","current",500,23,0.046,0.0308451083708162,0.0680777927682732
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,33,0.066,0.0473785263597739,0.0912394011608535
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"roles",FALSE,"both","all",500,437,0.874,0.842032282280136,0.900264711054623
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"roles",FALSE,"both","current",500,418,0.836,0.801005363525709,0.865871079684128
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,427,0.854,0.82035073377969,0.882251233173531
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"roles",FALSE,"residual","all",500,385,0.77,0.731137781325232,0.80474507482553
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"roles",FALSE,"residual","current",500,348,0.696,0.654313321596336,0.734697936942735
+"main",15,"gaussian","variance_small","Role SD ratio: 1.25","gaussian",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,367,0.734,0.693592210484465,0.770839598179529
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"pooled",FALSE,"both","all",499,49,0.0981963927855711,0.0750757109596538,0.127456234316977
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"pooled",FALSE,"both","current",499,32,0.064128256513026,0.0457883303200869,0.0891278696682784
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"pooled",FALSE,"both","without histogram and outliers",499,38,0.0761523046092184,0.0559820117602431,0.102798568918098
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"pooled",FALSE,"residual","all",499,42,0.0841683366733467,0.0628711103288772,0.111819057476115
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"pooled",FALSE,"residual","current",499,25,0.0501002004008016,0.0341625295477501,0.0729118929689763
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",499,31,0.062124248496994,0.0441081197420967,0.0868306834646059
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"roles",FALSE,"both","all",499,138,0.276553106212425,0.239127526159069,0.317392732685541
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"roles",FALSE,"both","current",499,86,0.172344689378758,0.14174223060843,0.207953395589721
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"roles",FALSE,"both","without histogram and outliers",499,109,0.218436873747495,0.184409711247574,0.256766040928819
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"roles",FALSE,"residual","all",499,119,0.238476953907816,0.203173802552951,0.277775917440069
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"roles",FALSE,"residual","current",499,65,0.130260521042084,0.103530476108096,0.162639817675138
+"main",16,"nbinom2","correct","Correct model","nbinom2",40,1,0.6,"roles",FALSE,"residual","without histogram and outliers",499,89,0.178356713426854,0.147264343077817,0.214363473465321
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"both","all",500,64,0.128,0.101526823995237,0.160145685308158
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"both","current",500,35,0.07,0.0507597429450181,0.0957971898519168
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,46,0.092,0.0696827236804521,0.120538738136175
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"residual","all",500,57,0.114,0.0890369009940029,0.144849089842315
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"residual","current",500,28,0.056,0.0390256206831515,0.0797447936467069
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,39,0.078,0.0575813934761616,0.104853549873389
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"both","all",500,137,0.274,0.236740625665821,0.314705576222801
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"both","current",500,100,0.2,0.167285498971757,0.237289105305174
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,114,0.228,0.193381769115001,0.266765872096084
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"residual","all",500,109,0.218,0.184033726435988,0.256266401584327
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"residual","current",500,69,0.138,0.110518008898884,0.17100201359528
+"main",17,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,85,0.17,0.139620366103961,0.205411698600663
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"both","all",500,82,0.164,0.134128920315872,0.198994636474291
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"both","current",500,55,0.11,0.0854914151566031,0.140455570403408
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,68,0.136,0.108715443407237,0.168835076448773
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"residual","all",500,63,0.126,0.099735288945377,0.157967717719864
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"residual","current",500,34,0.068,0.0490665074249069,0.0935209227338743
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,47,0.094,0.0714264085922213,0.122764555862559
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"both","all",500,153,0.306,0.267213463731136,0.347744780367946
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"both","current",500,114,0.228,0.193381769115001,0.266765872096084
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,140,0.28,0.242436043041275,0.320918666761808
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"residual","all",500,113,0.226,0.191509780865554,0.264668357707377
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"residual","current",500,70,0.14,0.112322660187864,0.173166864944454
+"main",18,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,99,0.198,0.165431122569193,0.235173979069584
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"both","all",500,109,0.218,0.184033726435988,0.256266401584327
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"both","current",500,82,0.164,0.134128920315872,0.198994636474291
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,93,0.186,0.15433399175007,0.222454094059785
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"residual","all",500,92,0.184,0.152489479378161,0.22032910379354
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"residual","current",500,64,0.128,0.101526823995237,0.160145685308158
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,75,0.15,0.121375957691388,0.183961080631698
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"both","all",500,239,0.478,0.434550960393876,0.521784510586432
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"both","current",500,208,0.416,0.373597466793146,0.459683422404394
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,228,0.456,0.412844817581755,0.499826124378862
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"residual","all",500,208,0.416,0.373597466793146,0.459683422404394
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"residual","current",500,176,0.352,0.311410841890743,0.394845962885877
+"main",19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,196,0.392,0.350187377789679,0.435459479750016
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"both","all",500,174,0.348,0.307550302056948,0.390767497443364
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"both","current",500,146,0.292,0.253852493835628,0.333319231796378
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,163,0.326,0.286375316035247,0.368277954445373
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"residual","all",500,137,0.274,0.236740625665821,0.314705576222801
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"residual","current",500,107,0.214,0.180302999987595,0.252058122756413
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,126,0.252,0.215933848381372,0.291847824487558
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"both","all",500,295,0.59,0.546362688124597,0.632264930592324
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"both","current",500,259,0.518,0.474232111367919,0.561493412375465
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,276,0.552,0.508179738010616,0.595027330581383
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"residual","all",500,259,0.518,0.474232111367919,0.561493412375465
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"residual","current",500,218,0.436,0.393185603123056,0.479790312456023
+"main",20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,239,0.478,0.434550960393876,0.521784510586432
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"both","all",500,441,0.882,0.850768012138881,0.907406991748493
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"both","current",500,426,0.852,0.818193869704273,0.880438594610795
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,431,0.862,0.82899798640472,0.889481991101116
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"residual","all",500,394,0.788,0.750047884182445,0.821560495711701
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"residual","current",500,366,0.732,0.691516279462188,0.768946026563652
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,378,0.756,0.716495193143907,0.791601144539778
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"both","all",500,466,0.932,0.906479077266126,0.950933492575093
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"both","current",500,450,0.9,0.87057809036806,0.923322437262698
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,463,0.926,0.899665246677769,0.945838815248988
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"residual","all",500,440,0.88,0.848580401375589,0.905625099873631
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"residual","current",500,404,0.808,0.771179624871567,0.840123781404117
+"main",21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,425,0.85,0.816038919368302,0.878624042308612
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"both","all",500,70,0.14,0.112322660187864,0.173166864944454
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"both","current",500,47,0.094,0.0714264085922213,0.122764555862559
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,55,0.11,0.0854914151566031,0.140455570403408
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"residual","all",500,58,0.116,0.0908136565110379,0.147041836963434
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"residual","current",500,34,0.068,0.0490665074249069,0.0935209227338743
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,43,0.086,0.0644731424036077,0.113839811498558
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"both","all",500,139,0.278,0.240536607528625,0.318848599636304
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"both","current",500,100,0.2,0.167285498971757,0.237289105305174
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,115,0.23,0.19525492517447,0.268862218674768
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"residual","all",500,121,0.242,0.206517808551129,0.281416351127032
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"residual","current",500,79,0.158,0.128652697864436,0.192562351011266
+"main",22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",40,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,96,0.192,0.159876218595883,0.228820375128433
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"both","all",500,75,0.15,0.121375957691388,0.183961080631698
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"both","current",500,55,0.11,0.0854914151566031,0.140455570403408
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,63,0.126,0.099735288945377,0.157967717719864
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"residual","all",500,61,0.122,0.0961592783150937,0.15360472307384
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"residual","current",500,39,0.078,0.0575813934761616,0.104853549873389
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,48,0.096,0.073173504665419,0.124986962427515
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"both","all",500,166,0.332,0.292140441857513,0.374421336537568
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"both","current",500,136,0.272,0.23484409220522,0.312632607045247
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,153,0.306,0.267213463731136,0.347744780367946
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"residual","all",500,143,0.286,0.248140053216093,0.327123164501452
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"residual","current",500,107,0.214,0.180302999987595,0.252058122756413
+"main",23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,127,0.254,0.217820254915187,0.293930920591897
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"both","all",500,124,0.248,0.212164208345948,0.287678459246675
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"both","current",500,93,0.186,0.15433399175007,0.222454094059785
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,101,0.202,0.169141220675579,0.239402886239506
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"residual","all",500,103,0.206,0.172856641273367,0.243626470918025
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"residual","current",500,67,0.134,0.106915001871521,0.166666015346335
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,80,0.16,0.130476372350164,0.194708179163691
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"both","all",500,249,0.498,0.454356860591708,0.541673636770138
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"both","current",500,188,0.376,0.334640015819232,0.419250820615233
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,217,0.434,0.391223572633178,0.477782840307747
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"residual","all",500,215,0.43,0.387301647590359,0.473765760074258
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"residual","current",500,143,0.286,0.248140053216093,0.327123164501452
+"main",24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,179,0.358,0.317207603401289,0.400957709289792
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"pooled",FALSE,"both","all",500,130,0.26,0.223485723185383,0.300173960236162
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"pooled",FALSE,"both","current",500,98,0.196,0.163578106614264,0.233057492386359
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,109,0.218,0.184033726435988,0.256266401584327
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"pooled",FALSE,"residual","all",500,125,0.25,0.214048496747821,0.289763673482955
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"pooled",FALSE,"residual","current",500,92,0.184,0.152489479378161,0.22032910379354
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,103,0.206,0.172856641273367,0.243626470918025
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"roles",FALSE,"both","all",500,194,0.388,0.346296029350054,0.431411822913334
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"roles",FALSE,"both","current",500,159,0.318,0.278700261176422,0.360074998751583
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,174,0.348,0.307550302056948,0.390767497443364
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"roles",FALSE,"residual","all",500,170,0.34,0.299838858453714,0.382600930493983
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"roles",FALSE,"residual","current",500,131,0.262,0.225376269417238,0.302252916642461
+"main",25,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",40,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,148,0.296,0.257665395230602,0.337445335677711
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"pooled",FALSE,"both","all",500,213,0.426,0.383382578366752,0.469745824021558
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"pooled",FALSE,"both","current",500,170,0.34,0.299838858453714,0.382600930493983
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,184,0.368,0.326884548378757,0.411128277503093
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"pooled",FALSE,"residual","all",500,206,0.412,0.369688475931219,0.455653407990014
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"pooled",FALSE,"residual","current",500,163,0.326,0.286375316035247,0.368277954445373
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,177,0.354,0.313342305196902,0.396884002217872
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"roles",FALSE,"both","all",500,264,0.528,0.484195771664216,0.571377265269937
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"roles",FALSE,"both","current",500,218,0.436,0.393185603123056,0.479790312456023
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,235,0.47,0.426648051851946,0.513809408575747
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"roles",FALSE,"residual","all",500,252,0.504,0.460312154390353,0.547626850885955
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"roles",FALSE,"residual","current",500,202,0.404,0.361879224693068,0.44758464867555
+"main",26,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,222,0.444,0.40104081918142,0.487813106950274
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"pooled",FALSE,"both","all",500,487,0.974,0.956028509165776,0.984743616076673
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"pooled",FALSE,"both","current",500,473,0.946,0.922573438489353,0.962625649818942
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,476,0.952,0.92957280316411,0.967534793058647
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"pooled",FALSE,"residual","all",500,486,0.972,0.953553597325051,0.983249025279244
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"pooled",FALSE,"residual","current",500,471,0.942,0.917943812143745,0.959316270888243
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,475,0.95,0.927231838828453,0.965906254756151
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"roles",FALSE,"both","all",500,472,0.944,0.920255206353293,0.960974379316848
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"roles",FALSE,"both","current",500,453,0.906,0.877235444137441,0.928573591407779
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,457,0.914,0.886160188501443,0.935526857596392
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"roles",FALSE,"residual","all",500,464,0.928,0.901931595983038,0.947541968581874
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"roles",FALSE,"residual","current",500,438,0.876,0.844212587112216,0.902053908860697
+"main",27,"nbinom2","zeros_large","Omitted zero inflation: 25%","nbinom2",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,446,0.892,0.861745326715193,0.91627719036295
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"pooled",FALSE,"both","all",500,79,0.158,0.128652697864436,0.192562351011266
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"pooled",FALSE,"both","current",500,50,0.1,0.0766775627373017,0.12942190963194
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,63,0.126,0.099735288945377,0.157967717719864
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"pooled",FALSE,"residual","all",500,72,0.144,0.11593807411035,0.177490456298275
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"pooled",FALSE,"residual","current",500,43,0.086,0.0644731424036077,0.113839811498558
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,56,0.112,0.0872628001941023,0.142653688004062
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"roles",FALSE,"both","all",500,139,0.278,0.240536607528625,0.318848599636304
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"roles",FALSE,"both","current",500,102,0.204,0.170998272911148,0.241515336642091
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,125,0.25,0.214048496747821,0.289763673482955
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"roles",FALSE,"residual","all",500,113,0.226,0.191509780865554,0.264668357707377
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"roles",FALSE,"residual","current",500,74,0.148,0.119561405389205,0.181806130295727
+"main",28,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",40,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,97,0.194,0.161726466643237,0.230939629719233
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"pooled",FALSE,"both","all",500,101,0.202,0.169141220675579,0.239402886239506
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"pooled",FALSE,"both","current",500,70,0.14,0.112322660187864,0.173166864944454
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,84,0.168,0.137788232976844,0.203274329089627
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"pooled",FALSE,"residual","all",500,95,0.19,0.158027378829729,0.226699712256433
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"pooled",FALSE,"residual","current",500,60,0.12,0.0943749001263691,0.151419598624411
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,75,0.15,0.121375957691388,0.183961080631698
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"roles",FALSE,"both","all",500,194,0.388,0.346296029350054,0.431411822913334
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"roles",FALSE,"both","current",500,132,0.264,0.227267831413052,0.304330857284801
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,168,0.336,0.295988007827049,0.37851277584434
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"roles",FALSE,"residual","all",500,164,0.328,0.28829618984059,0.370326583278184
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"roles",FALSE,"residual","current",500,95,0.19,0.158027378829729,0.226699712256433
+"main",29,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,133,0.266,0.229160401820471,0.306407789515535
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"pooled",FALSE,"both","all",500,223,0.446,0.40300639158533,0.489817037184518
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"pooled",FALSE,"both","current",500,183,0.366,0.324947604882213,0.409095718361483
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,201,0.402,0.359928740326145,0.445565630404319
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"pooled",FALSE,"residual","all",500,200,0.4,0.357978990794738,0.443545877297573
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"pooled",FALSE,"residual","current",500,154,0.308,0.269125748054559,0.349801998682677
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,174,0.348,0.307550302056948,0.390767497443364
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"roles",FALSE,"both","all",500,300,0.6,0.556454122702427,0.642021009205262
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"roles",FALSE,"both","current",500,261,0.522,0.478215489413568,0.565449039606124
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,279,0.558,0.514191529649283,0.600924046857177
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"roles",FALSE,"residual","all",500,249,0.498,0.454356860591708,0.541673636770138
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"roles",FALSE,"residual","current",500,202,0.404,0.361879224693068,0.44758464867555
+"main",30,"nbinom2","zeros_small","Omitted zero inflation: 10%","nbinom2",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,224,0.448,0.404972669418617,0.491820261989384
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"pooled",FALSE,"both","all",500,47,0.094,0.0714264085922213,0.122764555862559
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"pooled",FALSE,"both","current",500,29,0.058,0.0406837291117572,0.082056187856255
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"pooled",FALSE,"both","without histogram and outliers",500,35,0.07,0.0507597429450181,0.0957971898519168
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"pooled",FALSE,"residual","all",500,39,0.078,0.0575813934761616,0.104853549873389
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"pooled",FALSE,"residual","current",500,19,0.038,0.0244601180558304,0.0585847725306439
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"pooled",FALSE,"residual","without histogram and outliers",500,27,0.054,0.0373743501810575,0.0774265615106471
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",FALSE,"both","all",500,135,0.27,0.232948539203106,0.310558657409208
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",FALSE,"both","current",500,78,0.156,0.126830791403845,0.190414754833703
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",FALSE,"both","without histogram and outliers",500,107,0.214,0.180302999987595,0.252058122756413
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",FALSE,"residual","all",500,112,0.224,0.189638971259908,0.262569664674868
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",FALSE,"residual","current",500,49,0.098,0.0749239188646062,0.127206050866482
+"main",31,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",FALSE,"residual","without histogram and outliers",500,79,0.158,0.128652697864436,0.192562351011266
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"pooled",FALSE,"both","all",500,64,0.128,0.101526823995237,0.160145685308158
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"pooled",FALSE,"both","current",500,30,0.06,0.0423483564809462,0.0843610631252198
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"pooled",FALSE,"both","without histogram and outliers",500,49,0.098,0.0749239188646062,0.127206050866482
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"pooled",FALSE,"residual","all",500,61,0.122,0.0961592783150937,0.15360472307384
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"pooled",FALSE,"residual","current",500,25,0.05,0.0340937452438494,0.0727681611715476
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"pooled",FALSE,"residual","without histogram and outliers",500,44,0.088,0.0662059844749289,0.11607647206539
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"roles",FALSE,"both","all",500,131,0.262,0.225376269417238,0.302252916642461
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"roles",FALSE,"both","current",500,92,0.184,0.152489479378161,0.22032910379354
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"roles",FALSE,"both","without histogram and outliers",500,107,0.214,0.180302999987595,0.252058122756413
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"roles",FALSE,"residual","all",500,119,0.238,0.202759019180792,0.277236135221061
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"roles",FALSE,"residual","current",500,75,0.15,0.121375957691388,0.183961080631698
+"main",32,"nbinom2","correct","Correct model","nbinom2",100,1,1.2,"roles",FALSE,"residual","without histogram and outliers",500,91,0.182,0.150646445204156,0.218202635329392
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"pooled",FALSE,"both","all",480,67,0.139583333333333,0.111433237448496,0.17345648481025
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"pooled",FALSE,"both","current",480,44,0.0916666666666667,0.0689936931723766,0.120823564415567
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"pooled",FALSE,"both","without histogram and outliers",480,55,0.114583333333333,0.0890976382679134,0.146189058945197
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"pooled",FALSE,"residual","all",480,48,0.1,0.0762566499236719,0.13009494934615
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"pooled",FALSE,"residual","current",480,23,0.0479166666666667,0.0321387835809028,0.0708731801771776
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"pooled",FALSE,"residual","without histogram and outliers",480,34,0.0708333333333333,0.0511288863039106,0.0973525170793363
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"roles",FALSE,"both","all",480,147,0.30625,0.26668840302853,0.34888815286779
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"roles",FALSE,"both","current",480,99,0.20625,0.172454369829666,0.24471008588411
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"roles",FALSE,"both","without histogram and outliers",480,121,0.252083333333333,0.215311942778548,0.29279139218556
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"roles",FALSE,"residual","all",480,113,0.235416666666667,0.199655892323962,0.275378759276389
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"roles",FALSE,"residual","current",480,59,0.122916666666667,0.0965012362160219,0.155319802678967
+"main",33,"gaussian","correct","Correct model","gaussian",100,6,0.6,"roles",FALSE,"residual","without histogram and outliers",480,83,0.172916666666667,0.141716753365483,0.209310335620778
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"pooled",FALSE,"both","all",498,57,0.114457831325301,0.0893988463893626,0.145419255521979
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"pooled",FALSE,"both","current",498,30,0.0602409638554217,0.0425197426324452,0.0846946548601789
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"pooled",FALSE,"both","without histogram and outliers",498,42,0.0843373493975904,0.0629985989129596,0.112039667210206
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"pooled",FALSE,"residual","all",498,46,0.0923694779116466,0.0699655096848263,0.121014045981853
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"pooled",FALSE,"residual","current",498,18,0.036144578313253,0.0229834768387216,0.0564070520233614
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"pooled",FALSE,"residual","without histogram and outliers",498,31,0.0622489959839357,0.0441973902790875,0.087002329599415
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"roles",FALSE,"both","all",498,498,1,0.992345274083729,1
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"roles",FALSE,"both","current",498,497,0.997991967871486,0.988714506662988,0.999645445034862
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"roles",FALSE,"both","without histogram and outliers",498,497,0.997991967871486,0.988714506662988,0.999645445034862
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"roles",FALSE,"residual","all",498,498,1,0.992345274083729,1
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"roles",FALSE,"residual","current",498,497,0.997991967871486,0.988714506662988,0.999645445034862
+"main",34,"gaussian","mean_small","Omitted role means: +/-0.2","gaussian",100,6,0.6,"roles",FALSE,"residual","without histogram and outliers",498,497,0.997991967871486,0.988714506662988,0.999645445034862
+"add-on",101,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",TRUE,"both","all",500,186,0.372,0.330760748488524,0.415191082669634
+"add-on",101,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",TRUE,"both","current",500,121,0.242,0.206517808551129,0.281416351127032
+"add-on",101,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",TRUE,"both","without histogram and outliers",500,161,0.322,0.282536092425501,0.364178172778811
+"add-on",101,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",TRUE,"residual","all",500,162,0.324,0.284455282231816,0.366228485610651
+"add-on",101,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",TRUE,"residual","current",500,91,0.182,0.150646445204156,0.218202635329392
+"add-on",101,"gaussian","correct","Correct model","gaussian",100,1,1.2,"roles",TRUE,"residual","without histogram and outliers",500,134,0.268,0.231053973436348,0.308483720537812
+"add-on",102,"gaussian","correct","Correct model","gaussian",400,1,1.2,"roles",TRUE,"both","all",500,226,0.452,0.408907337809289,0.49582459887502
+"add-on",102,"gaussian","correct","Correct model","gaussian",400,1,1.2,"roles",TRUE,"both","current",500,143,0.286,0.248140053216093,0.327123164501452
+"add-on",102,"gaussian","correct","Correct model","gaussian",400,1,1.2,"roles",TRUE,"both","without histogram and outliers",500,198,0.396,0.354081703502757,0.439504159313246
+"add-on",102,"gaussian","correct","Correct model","gaussian",400,1,1.2,"roles",TRUE,"residual","all",500,192,0.384,0.342407674617792,0.427361172369288
+"add-on",102,"gaussian","correct","Correct model","gaussian",400,1,1.2,"roles",TRUE,"residual","current",500,103,0.206,0.172856641273367,0.243626470918025
+"add-on",102,"gaussian","correct","Correct model","gaussian",400,1,1.2,"roles",TRUE,"residual","without histogram and outliers",500,163,0.326,0.286375316035247,0.368277954445373
+"add-on",103,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,1.2,"roles",TRUE,"both","all",500,312,0.624,0.580749179384767,0.665359984180768
+"add-on",103,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,1.2,"roles",TRUE,"both","current",500,276,0.552,0.508179738010616,0.595027330581383
+"add-on",103,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,1.2,"roles",TRUE,"both","without histogram and outliers",500,303,0.606,0.562517809307217,0.647865830514934
+"add-on",103,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,1.2,"roles",TRUE,"residual","all",500,298,0.596,0.55241535132445,0.638120775306932
+"add-on",103,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,1.2,"roles",TRUE,"residual","current",500,259,0.518,0.474232111367919,0.561493412375465
+"add-on",103,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,1.2,"roles",TRUE,"residual","without histogram and outliers",500,288,0.576,0.532265218043708,0.618575882206136
+"add-on",104,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,1.2,"roles",TRUE,"both","all",500,478,0.956,0.934280557127672,0.970766044371393
+"add-on",104,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,1.2,"roles",TRUE,"both","current",500,474,0.948,0.924898856062154,0.964269734884295
+"add-on",104,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,1.2,"roles",TRUE,"both","without histogram and outliers",500,475,0.95,0.927231838828453,0.965906254756151
+"add-on",104,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,1.2,"roles",TRUE,"residual","all",500,474,0.948,0.924898856062154,0.964269734884295
+"add-on",104,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,1.2,"roles",TRUE,"residual","current",500,469,0.938,0.913340286898362,0.955980790857318
+"add-on",104,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,1.2,"roles",TRUE,"residual","without histogram and outliers",500,470,0.94,0.91563893687478,0.957651643519054
+"add-on",105,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,1.2,"roles",TRUE,"both","all",500,437,0.874,0.842032282280136,0.900264711054623
+"add-on",105,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,1.2,"roles",TRUE,"both","current",500,387,0.774,0.735331642292623,0.808490219134446
+"add-on",105,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,1.2,"roles",TRUE,"both","without histogram and outliers",500,430,0.86,0.826833135055546,0.887677339812136
+"add-on",105,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,1.2,"roles",TRUE,"residual","all",500,370,0.74,0.699826039763838,0.776514276814617
+"add-on",105,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,1.2,"roles",TRUE,"residual","current",500,215,0.43,0.387301647590359,0.473765760074258
+"add-on",105,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,1.2,"roles",TRUE,"residual","without histogram and outliers",500,334,0.668,0.625578663462432,0.707859558142487
+"add-on",106,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,1.2,"roles",TRUE,"both","all",500,500,1,0.992375659538448,1
+"add-on",106,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,1.2,"roles",TRUE,"both","current",500,498,0.996,0.985534284784823,0.998902369477317
+"add-on",106,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,1.2,"roles",TRUE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"add-on",106,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,1.2,"roles",TRUE,"residual","all",500,499,0.998,0.988759293294853,0.999646863605441
+"add-on",106,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,1.2,"roles",TRUE,"residual","current",500,449,0.898,0.868365377095774,0.92156564789683
+"add-on",106,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,1.2,"roles",TRUE,"residual","without histogram and outliers",500,498,0.996,0.985534284784823,0.998902369477317
+"add-on",107,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",100,1,1.2,"roles",TRUE,"both","all",500,407,0.814,0.777545905940215,0.84566600824993
+"add-on",107,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",100,1,1.2,"roles",TRUE,"both","current",500,368,0.736,0.695669142715199,0.772732168586948
+"add-on",107,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",100,1,1.2,"roles",TRUE,"both","without histogram and outliers",500,395,0.79,0.752155153040702,0.823422729491597
+"add-on",107,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",100,1,1.2,"roles",TRUE,"residual","all",500,357,0.714,0.672876835498548,0.751859946783907
+"add-on",107,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",100,1,1.2,"roles",TRUE,"residual","current",500,297,0.594,0.550397066127292,0.636169557865937
+"add-on",107,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",100,1,1.2,"roles",TRUE,"residual","without histogram and outliers",500,339,0.678,0.635821827221189,0.717463907574499
+"add-on",108,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",400,1,1.2,"roles",TRUE,"both","all",500,500,1,0.992375659538448,1
+"add-on",108,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",400,1,1.2,"roles",TRUE,"both","current",500,499,0.998,0.988759293294853,0.999646863605441
+"add-on",108,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",400,1,1.2,"roles",TRUE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"add-on",108,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",400,1,1.2,"roles",TRUE,"residual","all",500,473,0.946,0.922573438489353,0.962625649818942
+"add-on",108,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",400,1,1.2,"roles",TRUE,"residual","current",500,453,0.906,0.877235444137441,0.928573591407779
+"add-on",108,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson","poisson",400,1,1.2,"roles",TRUE,"residual","without histogram and outliers",500,471,0.942,0.917943812143745,0.959316270888243
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"both","all",500,46,0.092,0.0696827236804521,0.120538738136175
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"both","current",500,37,0.074,0.054161184751012,0.100334753322231
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,46,0.092,0.0696827236804521,0.120538738136175
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"residual","all",500,29,0.058,0.0406837291117572,0.082056187856255
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"residual","current",500,20,0.04,0.0260407973897773,0.0609735958348508
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,29,0.058,0.0406837291117572,0.082056187856255
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",TRUE,"both","all",500,79,0.158,0.128652697864436,0.192562351011266
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",TRUE,"both","current",500,52,0.104,0.0801942067698911,0.133844270875658
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,79,0.158,0.128652697864436,0.192562351011266
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",TRUE,"residual","all",500,64,0.128,0.101526823995237,0.160145685308158
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",TRUE,"residual","current",500,36,0.072,0.0524580314181262,0.0980684040169625
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,64,0.128,0.101526823995237,0.160145685308158
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"both","all",500,122,0.244,0.208398855460222,0.283504806856093
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"both","current",500,104,0.208,0.174716311709629,0.245736303119917
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,122,0.244,0.208398855460222,0.283504806856093
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"residual","all",500,92,0.184,0.152489479378161,0.22032910379354
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"residual","current",500,74,0.148,0.119561405389205,0.181806130295727
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,92,0.184,0.152489479378161,0.22032910379354
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",TRUE,"both","all",500,182,0.364,0.323011435918927,0.407062384686616
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",TRUE,"both","current",500,132,0.264,0.227267831413052,0.304330857284801
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,182,0.364,0.323011435918927,0.407062384686616
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",TRUE,"residual","all",500,157,0.314,0.274867855836098,0.3559683988156
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",TRUE,"residual","current",500,107,0.214,0.180302999987595,0.252058122756413
+"confirmation",1,"gaussian","correct","Correct model","gaussian",100,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,157,0.314,0.274867855836098,0.3559683988156
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"both","all",500,54,0.108,0.0837228096370504,0.138254673284807
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"both","current",500,42,0.084,0.0627441368038304,0.111599314460181
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,54,0.108,0.0837228096370504,0.138254673284807
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"residual","all",500,44,0.088,0.0662059844749289,0.11607647206539
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"residual","current",500,32,0.064,0.0456960160447894,0.0889524088376841
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,44,0.088,0.0662059844749289,0.11607647206539
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",TRUE,"both","all",500,84,0.168,0.137788232976844,0.203274329089627
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",TRUE,"both","current",500,52,0.104,0.0801942067698911,0.133844270875658
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,84,0.168,0.137788232976844,0.203274329089627
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",TRUE,"residual","all",500,75,0.15,0.121375957691388,0.183961080631698
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",TRUE,"residual","current",500,43,0.086,0.0644731424036077,0.113839811498558
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,75,0.15,0.121375957691388,0.183961080631698
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"both","all",500,140,0.28,0.242436043041275,0.320918666761808
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"both","current",500,107,0.214,0.180302999987595,0.252058122756413
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,140,0.28,0.242436043041275,0.320918666761808
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"residual","all",500,109,0.218,0.184033726435988,0.256266401584327
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"residual","current",500,74,0.148,0.119561405389205,0.181806130295727
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,109,0.218,0.184033726435988,0.256266401584327
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",TRUE,"both","all",500,223,0.446,0.40300639158533,0.489817037184518
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",TRUE,"both","current",500,155,0.31,0.271038911273569,0.351858338101821
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,223,0.446,0.40300639158533,0.489817037184518
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",TRUE,"residual","all",500,195,0.39,0.348241330401104,0.433436024500437
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",TRUE,"residual","current",500,123,0.246,0.210280991685671,0.285592173268798
+"confirmation",2,"gaussian","correct","Correct model","gaussian",400,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,195,0.39,0.348241330401104,0.433436024500437
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"both","all",500,66,0.132,0.10511672384832,0.164494790731383
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"both","current",500,51,0.102,0.0784343521031695,0.131634622904226
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,66,0.132,0.10511672384832,0.164494790731383
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"residual","all",500,39,0.078,0.0575813934761616,0.104853549873389
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"residual","current",500,24,0.048,0.0324652069413532,0.07042719683589
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,39,0.078,0.0575813934761616,0.104853549873389
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",TRUE,"both","all",500,98,0.196,0.163578106614264,0.233057492386359
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",TRUE,"both","current",500,62,0.124,0.0979460911393035,0.155787412887784
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,98,0.196,0.163578106614264,0.233057492386359
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",TRUE,"residual","all",500,73,0.146,0.117748766826469,0.17964926622031
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",TRUE,"residual","current",500,36,0.072,0.0524580314181262,0.0980684040169625
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,73,0.146,0.117748766826469,0.17964926622031
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"both","all",500,394,0.788,0.750047884182445,0.821560495711701
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"both","current",500,382,0.764,0.724855643707859,0.799118704528441
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,394,0.788,0.750047884182445,0.821560495711701
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"residual","all",500,317,0.634,0.590904281638517,0.675052395117786
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"residual","current",500,293,0.586,0.542331222350414,0.628357391090199
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,317,0.634,0.590904281638517,0.675052395117786
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",TRUE,"both","all",500,417,0.834,0.798864683802693,0.86404225676899
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",TRUE,"both","current",500,394,0.788,0.750047884182445,0.821560495711701
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,417,0.834,0.798864683802693,0.86404225676899
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",TRUE,"residual","all",500,363,0.726,0.685294423777199,0.763259374334179
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",TRUE,"residual","current",500,317,0.634,0.590904281638517,0.675052395117786
+"confirmation",3,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",100,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,363,0.726,0.685294423777199,0.763259374334179
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"both","all",500,90,0.18,0.148804907912759,0.216074669982634
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"both","current",500,79,0.158,0.128652697864436,0.192562351011266
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,90,0.18,0.148804907912759,0.216074669982634
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"residual","all",500,51,0.102,0.0784343521031695,0.131634622904226
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"residual","current",500,37,0.074,0.054161184751012,0.100334753322231
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,51,0.102,0.0784343521031695,0.131634622904226
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",TRUE,"both","all",500,126,0.252,0.215933848381372,0.291847824487558
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",TRUE,"both","current",500,91,0.182,0.150646445204156,0.218202635329392
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,126,0.252,0.215933848381372,0.291847824487558
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",TRUE,"residual","all",500,93,0.186,0.15433399175007,0.222454094059785
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",TRUE,"residual","current",500,51,0.102,0.0784343521031695,0.131634622904226
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,93,0.186,0.15433399175007,0.222454094059785
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"both","all",500,500,1,0.992375659538448,1
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"both","current",500,500,1,0.992375659538448,1
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"residual","all",500,498,0.996,0.985534284784823,0.998902369477317
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"residual","current",500,497,0.994,0.982509747895947,0.99795740372804
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,498,0.996,0.985534284784823,0.998902369477317
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",TRUE,"both","all",500,500,1,0.992375659538448,1
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",TRUE,"both","current",500,500,1,0.992375659538448,1
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",TRUE,"residual","all",500,499,0.998,0.988759293294853,0.999646863605441
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",TRUE,"residual","current",500,498,0.996,0.985534284784823,0.998902369477317
+"confirmation",4,"gaussian","variance_large","Role SD ratio: 1.50","gaussian",400,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,499,0.998,0.988759293294853,0.999646863605441
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",FALSE,"both","all",500,494,0.988,0.974069638883553,0.994489004825972
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",FALSE,"both","current",500,482,0.964,0.943815673031972,0.977108939019707
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,494,0.988,0.974069638883553,0.994489004825972
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",FALSE,"residual","all",500,484,0.968,0.948655130954558,0.980208486373429
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",FALSE,"residual","current",500,449,0.898,0.868365377095774,0.92156564789683
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,484,0.968,0.948655130954558,0.980208486373429
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",TRUE,"both","all",500,499,0.998,0.988759293294853,0.999646863605441
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",TRUE,"both","current",500,492,0.984,0.968748891466606,0.991870746966612
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,499,0.998,0.988759293294853,0.999646863605441
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",TRUE,"residual","all",500,496,0.992,0.979612964165895,0.996884684819938
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",TRUE,"residual","current",500,470,0.94,0.91563893687478,0.957651643519054
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,496,0.992,0.979612964165895,0.996884684819938
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",FALSE,"both","all",500,491,0.982,0.966148329091261,0.990501806703803
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",FALSE,"both","current",500,487,0.974,0.956028509165776,0.984743616076673
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,491,0.982,0.966148329091261,0.990501806703803
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",FALSE,"residual","all",500,470,0.94,0.91563893687478,0.957651643519054
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",FALSE,"residual","current",500,443,0.886,0.855150910157685,0.910963099005997
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,470,0.94,0.91563893687478,0.957651643519054
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",TRUE,"both","all",500,497,0.994,0.982509747895947,0.99795740372804
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",TRUE,"both","current",500,492,0.984,0.968748891466606,0.991870746966612
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,497,0.994,0.982509747895947,0.99795740372804
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",TRUE,"residual","all",500,488,0.976,0.958522942536099,0.986218685344503
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",TRUE,"residual","current",500,456,0.912,0.88392352793461,0.933794015525071
+"confirmation",5,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",100,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,488,0.976,0.958522942536099,0.986218685344503
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",FALSE,"both","all",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",FALSE,"both","current",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",FALSE,"residual","all",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",FALSE,"residual","current",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",TRUE,"both","all",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",TRUE,"both","current",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",TRUE,"residual","all",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",TRUE,"residual","current",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",FALSE,"both","all",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",FALSE,"both","current",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",FALSE,"residual","all",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",FALSE,"residual","current",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",TRUE,"both","all",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",TRUE,"both","current",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",TRUE,"residual","all",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",TRUE,"residual","current",500,500,1,0.992375659538448,1
+"confirmation",6,"gaussian","heteroscedastic","Residual SD rises with actor predictor","gaussian",400,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,500,1,0.992375659538448,1
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",FALSE,"both","all",500,53,0.106,0.0819570502729703,0.136050930010733
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",FALSE,"both","current",500,42,0.084,0.0627441368038304,0.111599314460181
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,53,0.106,0.0819570502729703,0.136050930010733
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",FALSE,"residual","all",500,38,0.076,0.0558690270374278,0.102596413673968
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",FALSE,"residual","current",500,26,0.052,0.0357302651157053,0.0751011439378455
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,38,0.076,0.0558690270374278,0.102596413673968
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",TRUE,"both","all",500,293,0.586,0.542331222350414,0.628357391090199
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",TRUE,"both","current",500,286,0.572,0.528243850362942,0.614658244610594
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,293,0.586,0.542331222350414,0.628357391090199
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",TRUE,"residual","all",500,286,0.572,0.528243850362942,0.614658244610594
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",TRUE,"residual","current",500,278,0.556,0.512186893049726,0.59895918081858
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,286,0.572,0.528243850362942,0.614658244610594
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",FALSE,"both","all",500,134,0.268,0.231053973436348,0.308483720537812
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",FALSE,"both","current",500,111,0.222,0.18776935138163,0.260469781914993
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,134,0.268,0.231053973436348,0.308483720537812
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",FALSE,"residual","all",500,102,0.204,0.170998272911148,0.241515336642091
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",FALSE,"residual","current",500,77,0.154,0.12501068027834,0.188265363321054
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,102,0.204,0.170998272911148,0.241515336642091
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",TRUE,"both","all",500,338,0.676,0.633771514389349,0.715544717768184
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",TRUE,"both","current",500,323,0.646,0.603115997782129,0.686657694803098
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,338,0.676,0.633771514389349,0.715544717768184
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",TRUE,"residual","all",500,320,0.64,0.597006617075836,0.680858567594929
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",TRUE,"residual","current",500,304,0.608,0.564540520249984,0.649812622210321
+"confirmation",7,"gaussian","omitted_partner","Omitted partner effect","gaussian",100,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,320,0.64,0.597006617075836,0.680858567594929
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",FALSE,"both","all",500,89,0.178,0.146964886707335,0.213945188549904
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",FALSE,"both","current",500,81,0.162,0.132301788389839,0.19685226576217
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,89,0.178,0.146964886707335,0.213945188549904
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",FALSE,"residual","all",500,60,0.12,0.0943749001263691,0.151419598624411
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",FALSE,"residual","current",500,52,0.104,0.0801942067698911,0.133844270875658
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,60,0.12,0.0943749001263691,0.151419598624411
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",TRUE,"both","all",500,498,0.996,0.985534284784823,0.998902369477317
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",TRUE,"both","current",500,498,0.996,0.985534284784823,0.998902369477317
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,498,0.996,0.985534284784823,0.998902369477317
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",TRUE,"residual","all",500,498,0.996,0.985534284784823,0.998902369477317
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",TRUE,"residual","current",500,498,0.996,0.985534284784823,0.998902369477317
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,498,0.996,0.985534284784823,0.998902369477317
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",FALSE,"both","all",500,167,0.334,0.294063812455877,0.376467468577358
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",FALSE,"both","current",500,150,0.3,0.261481932140698,0.341567804043923
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,167,0.334,0.294063812455877,0.376467468577358
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",FALSE,"residual","all",500,117,0.234,0.199004698594033,0.273051450531512
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",FALSE,"residual","current",500,99,0.198,0.165431122569193,0.235173979069584
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,117,0.234,0.199004698594033,0.273051450531512
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",TRUE,"both","all",500,493,0.986,0.971386930862215,0.993202210209156
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",TRUE,"both","current",500,492,0.984,0.968748891466606,0.991870746966612
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,493,0.986,0.971386930862215,0.993202210209156
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",TRUE,"residual","all",500,492,0.984,0.968748891466606,0.991870746966612
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",TRUE,"residual","current",500,490,0.98,0.963579816753121,0.989100816403789
+"confirmation",8,"gaussian","omitted_partner","Omitted partner effect","gaussian",400,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,492,0.984,0.968748891466606,0.991870746966612
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"both","all",500,57,0.114,0.0890369009940029,0.144849089842315
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"both","current",500,48,0.096,0.073173504665419,0.124986962427515
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,57,0.114,0.0890369009940029,0.144849089842315
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"residual","all",500,46,0.092,0.0696827236804521,0.120538738136175
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"residual","current",500,36,0.072,0.0524580314181262,0.0980684040169625
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,46,0.092,0.0696827236804521,0.120538738136175
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",TRUE,"both","all",500,85,0.17,0.139620366103961,0.205411698600663
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",TRUE,"both","current",500,61,0.122,0.0961592783150937,0.15360472307384
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,85,0.17,0.139620366103961,0.205411698600663
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",TRUE,"residual","all",500,75,0.15,0.121375957691388,0.183961080631698
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",TRUE,"residual","current",500,50,0.1,0.0766775627373017,0.12942190963194
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,75,0.15,0.121375957691388,0.183961080631698
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"both","all",500,116,0.232,0.197129238452715,0.270957408034677
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"both","current",500,94,0.188,0.156179964134967,0.224577624313042
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,116,0.232,0.197129238452715,0.270957408034677
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"residual","all",500,94,0.188,0.156179964134967,0.224577624313042
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"residual","current",500,71,0.142,0.114129360445696,0.175329667324775
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,94,0.188,0.156179964134967,0.224577624313042
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",TRUE,"both","all",500,174,0.348,0.307550302056948,0.390767497443364
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",TRUE,"both","current",500,130,0.26,0.223485723185383,0.300173960236162
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,174,0.348,0.307550302056948,0.390767497443364
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",TRUE,"residual","all",500,157,0.314,0.274867855836098,0.3559683988156
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",TRUE,"residual","current",500,109,0.218,0.184033726435988,0.256266401584327
+"confirmation",9,"nbinom2","correct","Correct model","nbinom2",100,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,157,0.314,0.274867855836098,0.3559683988156
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"both","all",500,50,0.1,0.0766775627373017,0.12942190963194
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"both","current",500,44,0.088,0.0662059844749289,0.11607647206539
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,50,0.1,0.0766775627373017,0.12942190963194
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"residual","all",500,37,0.074,0.054161184751012,0.100334753322231
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"residual","current",500,30,0.06,0.0423483564809462,0.0843610631252198
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,37,0.074,0.054161184751012,0.100334753322231
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",TRUE,"both","all",500,83,0.166,0.13595774323101,0.201135316197307
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",TRUE,"both","current",500,61,0.122,0.0961592783150937,0.15360472307384
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,83,0.166,0.13595774323101,0.201135316197307
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",TRUE,"residual","all",500,70,0.14,0.112322660187864,0.173166864944454
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",TRUE,"residual","current",500,47,0.094,0.0714264085922213,0.122764555862559
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,70,0.14,0.112322660187864,0.173166864944454
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"both","all",500,124,0.248,0.212164208345948,0.287678459246675
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"both","current",500,90,0.18,0.148804907912759,0.216074669982634
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,124,0.248,0.212164208345948,0.287678459246675
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"residual","all",500,96,0.192,0.159876218595883,0.228820375128433
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"residual","current",500,58,0.116,0.0908136565110379,0.147041836963434
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,96,0.192,0.159876218595883,0.228820375128433
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",TRUE,"both","all",500,191,0.382,0.340464625234193,0.425334719114733
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",TRUE,"both","current",500,133,0.266,0.229160401820471,0.306407789515535
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,191,0.382,0.340464625234193,0.425334719114733
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",TRUE,"residual","all",500,168,0.336,0.295988007827049,0.37851277584434
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",TRUE,"residual","current",500,102,0.204,0.170998272911148,0.241515336642091
+"confirmation",10,"nbinom2","correct","Correct model","nbinom2",400,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,168,0.336,0.295988007827049,0.37851277584434
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"both","all",500,71,0.142,0.114129360445696,0.175329667324775
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"both","current",500,55,0.11,0.0854914151566031,0.140455570403408
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,71,0.142,0.114129360445696,0.175329667324775
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"residual","all",500,62,0.124,0.0979460911393035,0.155787412887784
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"residual","current",500,45,0.09,0.0679425478891394,0.118309411289333
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,62,0.124,0.0979460911393035,0.155787412887784
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",TRUE,"both","all",500,106,0.212,0.178439504288299,0.249952115817556
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",TRUE,"both","current",500,69,0.138,0.110518008898884,0.17100201359528
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,106,0.212,0.178439504288299,0.249952115817556
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",TRUE,"residual","all",500,97,0.194,0.161726466643237,0.230939629719233
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",TRUE,"residual","current",500,59,0.118,0.0925930082515065,0.149231987861119
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,97,0.194,0.161726466643237,0.230939629719233
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"both","all",500,171,0.342,0.30176550666586,0.384643784919991
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"both","current",500,147,0.294,0.255758487435757,0.335382740834403
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,171,0.342,0.30176550666586,0.384643784919991
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"residual","all",500,144,0.288,0.250043271115854,0.329189449239844
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"residual","current",500,117,0.234,0.199004698594033,0.273051450531512
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,144,0.288,0.250043271115854,0.329189449239844
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",TRUE,"both","all",500,223,0.446,0.40300639158533,0.489817037184518
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",TRUE,"both","current",500,180,0.36,0.319141432405071,0.402993382924164
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,223,0.446,0.40300639158533,0.489817037184518
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",TRUE,"residual","all",500,203,0.406,0.363830442134063,0.449602933872708
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",TRUE,"residual","current",500,154,0.308,0.269125748054559,0.349801998682677
+"confirmation",11,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",100,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,203,0.406,0.363830442134063,0.449602933872708
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"both","all",500,97,0.194,0.161726466643237,0.230939629719233
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"both","current",500,83,0.166,0.13595774323101,0.201135316197307
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,97,0.194,0.161726466643237,0.230939629719233
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"residual","all",500,75,0.15,0.121375957691388,0.183961080631698
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"residual","current",500,58,0.116,0.0908136565110379,0.147041836963434
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,75,0.15,0.121375957691388,0.183961080631698
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",TRUE,"both","all",500,140,0.28,0.242436043041275,0.320918666761808
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",TRUE,"both","current",500,106,0.212,0.178439504288299,0.249952115817556
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,140,0.28,0.242436043041275,0.320918666761808
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",TRUE,"residual","all",500,122,0.244,0.208398855460222,0.283504806856093
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",TRUE,"residual","current",500,81,0.162,0.132301788389839,0.19685226576217
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,122,0.244,0.208398855460222,0.283504806856093
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"both","all",500,214,0.428,0.385341755389406,0.471756149637058
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"both","current",500,179,0.358,0.317207603401289,0.400957709289792
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,214,0.428,0.385341755389406,0.471756149637058
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"residual","all",500,179,0.358,0.317207603401289,0.400957709289792
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"residual","current",500,137,0.274,0.236740625665821,0.314705576222801
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,179,0.358,0.317207603401289,0.400957709289792
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",TRUE,"both","all",500,290,0.58,0.536289456803554,0.622490648722598
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",TRUE,"both","current",500,225,0.45,0.406939651781332,0.493822782264823
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,290,0.58,0.536289456803554,0.622490648722598
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",TRUE,"residual","all",500,265,0.53,0.486190591424253,0.573351948148054
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",TRUE,"residual","current",500,187,0.374,0.332699999994879,0.417221333801432
+"confirmation",12,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson","poisson",400,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,265,0.53,0.486190591424253,0.573351948148054
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",FALSE,"both","all",500,29,0.058,0.0406837291117572,0.082056187856255
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",FALSE,"both","current",500,23,0.046,0.0308451083708162,0.0680777927682732
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,29,0.058,0.0406837291117572,0.082056187856255
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",FALSE,"residual","all",500,12,0.024,0.013781314655497,0.0414770574639007
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",FALSE,"residual","current",500,6,0.012,0.0055109951740277,0.0259303611164473
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,12,0.024,0.013781314655497,0.0414770574639007
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",TRUE,"both","all",500,52,0.104,0.0801942067698911,0.133844270875658
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",TRUE,"both","current",500,27,0.054,0.0373743501810575,0.0774265615106471
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,52,0.104,0.0801942067698911,0.133844270875658
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",TRUE,"residual","all",500,36,0.072,0.0524580314181262,0.0980684040169625
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",TRUE,"residual","current",500,11,0.022,0.0123280082699276,0.0389608612113164
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,36,0.072,0.0524580314181262,0.0980684040169625
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",FALSE,"both","all",500,71,0.142,0.114129360445696,0.175329667324775
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",FALSE,"both","current",500,55,0.11,0.0854914151566031,0.140455570403408
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,71,0.142,0.114129360445696,0.175329667324775
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",FALSE,"residual","all",500,43,0.086,0.0644731424036077,0.113839811498558
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",FALSE,"residual","current",500,26,0.052,0.0357302651157053,0.0751011439378455
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,43,0.086,0.0644731424036077,0.113839811498558
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",TRUE,"both","all",500,130,0.26,0.223485723185383,0.300173960236162
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",TRUE,"both","current",500,76,0.152,0.123192392673802,0.186114148287439
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,130,0.26,0.223485723185383,0.300173960236162
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",TRUE,"residual","all",500,106,0.212,0.178439504288299,0.249952115817556
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",TRUE,"residual","current",500,48,0.096,0.073173504665419,0.124986962427515
+"confirmation",13,"ordinal","correct","Correct model","ordinal",100,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,106,0.212,0.178439504288299,0.249952115817556
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",FALSE,"both","all",500,29,0.058,0.0406837291117572,0.082056187856255
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",FALSE,"both","current",500,22,0.044,0.0292339556286072,0.0657194428723284
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",FALSE,"both","without histogram and outliers",500,29,0.058,0.0406837291117572,0.082056187856255
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",FALSE,"residual","all",500,10,0.02,0.0108991835962108,0.0364201832468793
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",FALSE,"residual","current",500,3,0.006,0.00204259627196024,0.0174902521040534
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",FALSE,"residual","without histogram and outliers",500,10,0.02,0.0108991835962108,0.0364201832468793
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",TRUE,"both","all",500,44,0.088,0.0662059844749289,0.11607647206539
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",TRUE,"both","current",500,23,0.046,0.0308451083708162,0.0680777927682732
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",TRUE,"both","without histogram and outliers",500,44,0.088,0.0662059844749289,0.11607647206539
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",TRUE,"residual","all",500,26,0.052,0.0357302651157053,0.0751011439378455
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",TRUE,"residual","current",500,4,0.008,0.00311531518006224,0.0203870358341052
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"pooled",TRUE,"residual","without histogram and outliers",500,26,0.052,0.0357302651157053,0.0751011439378455
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",FALSE,"both","all",500,109,0.218,0.184033726435988,0.256266401584327
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",FALSE,"both","current",500,82,0.164,0.134128920315872,0.198994636474291
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",FALSE,"both","without histogram and outliers",500,109,0.218,0.184033726435988,0.256266401584327
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",FALSE,"residual","all",500,71,0.142,0.114129360445696,0.175329667324775
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",FALSE,"residual","current",500,42,0.084,0.0627441368038304,0.111599314460181
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",FALSE,"residual","without histogram and outliers",500,71,0.142,0.114129360445696,0.175329667324775
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",TRUE,"both","all",500,161,0.322,0.282536092425501,0.364178172778811
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",TRUE,"both","current",500,103,0.206,0.172856641273367,0.243626470918025
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",TRUE,"both","without histogram and outliers",500,161,0.322,0.282536092425501,0.364178172778811
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",TRUE,"residual","all",500,129,0.258,0.221596200222813,0.298093980560578
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",TRUE,"residual","current",500,65,0.13,0.103320650364635,0.162321361576914
+"confirmation",14,"ordinal","correct","Correct model","ordinal",400,1,0.6,"roles",TRUE,"residual","without histogram and outliers",500,129,0.258,0.221596200222813,0.298093980560578

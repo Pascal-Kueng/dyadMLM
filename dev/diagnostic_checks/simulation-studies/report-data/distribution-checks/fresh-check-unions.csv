@@ -1,0 +1,57 @@
+"condition","scenario_label","fit_family","n_dyads","view","pages","checked","flagged","rate","rate_lower","rate_upper"
+1,"Correct model","gaussian",400,"pooled",FALSE,200,17,0.085,0.0537457501774756,0.131895870715656
+1,"Correct model","gaussian",400,"pooled",TRUE,200,22,0.11,0.073772444601253,0.160926909973015
+1,"Correct model","gaussian",400,"roles",FALSE,200,44,0.22,0.168165383588333,0.282387999182937
+1,"Correct model","gaussian",400,"roles",TRUE,200,65,0.325,0.263915715392343,0.3926801488397
+2,"Correct model","nbinom2",400,"pooled",FALSE,200,22,0.11,0.073772444601253,0.160926909973015
+2,"Correct model","nbinom2",400,"pooled",TRUE,200,28,0.14,0.0986698263345564,0.194898808657076
+2,"Correct model","nbinom2",400,"roles",FALSE,200,38,0.19,0.141671715277907,0.250012387075999
+2,"Correct model","nbinom2",400,"roles",TRUE,200,62,0.31,0.249989448360781,0.37717177566258
+3,"Omitted partner effect","gaussian",400,"pooled",FALSE,200,25,0.125,0.0861197447571265,0.178014250025823
+3,"Omitted partner effect","gaussian",400,"pooled",TRUE,200,199,0.995,0.972226295602107,0.999116831284399
+3,"Omitted partner effect","gaussian",400,"roles",FALSE,200,64,0.32,0.25926533315468,0.387518984341135
+3,"Omitted partner effect","gaussian",400,"roles",TRUE,200,197,0.985,0.95683427120731,0.994885762206742
+4,"NB2 size 10 fitted as Poisson","poisson",400,"pooled",FALSE,200,25,0.125,0.0861197447571265,0.178014250025823
+4,"NB2 size 10 fitted as Poisson","poisson",400,"pooled",TRUE,200,34,0.17,0.12427907912587,0.228158836283126
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles",FALSE,200,66,0.33,0.26857425870604,0.397833152262231
+4,"NB2 size 10 fitted as Poisson","poisson",400,"roles",TRUE,200,86,0.43,0.363343223334344,0.499295122358473
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"pooled",FALSE,200,182,0.91,0.862234281232835,0.942312551137807
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"pooled",TRUE,200,200,1,0.981154673622733,1
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles",FALSE,200,179,0.895,0.84481968008877,0.93029251207319
+5,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",400,"roles",TRUE,200,198,0.99,0.964278238283823,0.997253341866456
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"pooled",FALSE,200,136,0.68,0.612481015658864,0.740734666845319
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"pooled",TRUE,200,192,0.96,0.923067931799067,0.979594367933848
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles",FALSE,200,135,0.675,0.6073198511603,0.736084284607657
+6,"Shift of 1.2 in the top 10% of actor","gaussian",400,"roles",TRUE,200,179,0.895,0.84481968008877,0.93029251207319
+7,"Correct model","gaussian",100,"pooled",FALSE,200,14,0.07,0.0421521718283428,0.114054808856106
+7,"Correct model","gaussian",100,"pooled",TRUE,200,20,0.1,0.0656704486690959,0.149405812432717
+7,"Correct model","gaussian",100,"roles",FALSE,200,34,0.17,0.12427907912587,0.228158836283126
+7,"Correct model","gaussian",100,"roles",TRUE,200,45,0.225,0.172623697150891,0.287741232356605
+8,"Correct model","nbinom2",100,"pooled",FALSE,200,17,0.085,0.0537457501774756,0.131895870715656
+8,"Correct model","nbinom2",100,"pooled",TRUE,200,25,0.125,0.0861197447571265,0.178014250025823
+8,"Correct model","nbinom2",100,"roles",FALSE,200,37,0.185,0.13730192800616,0.244570627611517
+8,"Correct model","nbinom2",100,"roles",TRUE,200,49,0.245,0.190568680890372,0.309042435562034
+9,"Correct model","ordinal",100,"pooled",FALSE,200,10,0.05,0.0273826456007639,0.089578148138776
+9,"Correct model","ordinal",100,"pooled",TRUE,200,11,0.055,0.0309853417034588,0.0957869987723084
+9,"Correct model","ordinal",100,"roles",FALSE,200,27,0.135,0.0944657045478791,0.189291383707526
+9,"Correct model","ordinal",100,"roles",TRUE,200,38,0.19,0.141671715277907,0.250012387075999
+10,"Omitted partner effect","gaussian",100,"pooled",FALSE,200,13,0.065,0.038376354649153,0.108019079299069
+10,"Omitted partner effect","gaussian",100,"pooled",TRUE,200,90,0.45,0.382640684022484,0.519243848615243
+10,"Omitted partner effect","gaussian",100,"roles",FALSE,200,26,0.13,0.0902820227966932,0.183663518722484
+10,"Omitted partner effect","gaussian",100,"roles",TRUE,200,110,0.55,0.480756151384757,0.617359315977516
+11,"Residual SD rises with actor predictor","gaussian",100,"pooled",FALSE,200,197,0.985,0.95683427120731,0.994885762206742
+11,"Residual SD rises with actor predictor","gaussian",100,"pooled",TRUE,200,199,0.995,0.972226295602107,0.999116831284399
+11,"Residual SD rises with actor predictor","gaussian",100,"roles",FALSE,200,197,0.985,0.95683427120731,0.994885762206742
+11,"Residual SD rises with actor predictor","gaussian",100,"roles",TRUE,200,200,1,0.981154673622733,1
+12,"Role SD ratio: 1.50","gaussian",100,"pooled",FALSE,200,28,0.14,0.0986698263345564,0.194898808657076
+12,"Role SD ratio: 1.50","gaussian",100,"pooled",TRUE,200,39,0.195,0.146055205344005,0.255440443746127
+12,"Role SD ratio: 1.50","gaussian",100,"roles",FALSE,200,164,0.82,0.760885249712751,0.867053741405798
+12,"Role SD ratio: 1.50","gaussian",100,"roles",TRUE,200,167,0.835,0.777342184609405,0.880031446717827
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"pooled",FALSE,200,62,0.31,0.249989448360781,0.37717177566258
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"pooled",TRUE,200,119,0.595,0.525797100813387,0.660622287174932
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles",FALSE,200,63,0.315,0.254623209902285,0.382349560857304
+13,"Omitted curvature: 0.3 (actor^2 - 1)","gaussian",100,"roles",TRUE,200,91,0.455,0.387482193098835,0.524213886275119
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"pooled",FALSE,200,39,0.195,0.146055205344005,0.255440443746127
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"pooled",TRUE,200,76,0.38,0.315590058486736,0.448932819843808
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles",FALSE,200,42,0.21,0.15928412069979,0.271646168599025
+14,"Shift of 1.2 in the top 10% of actor","gaussian",100,"roles",TRUE,200,65,0.325,0.263915715392343,0.3926801488397

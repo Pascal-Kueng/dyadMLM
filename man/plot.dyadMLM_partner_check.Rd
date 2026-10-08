@@ -11,15 +11,14 @@
 
 \item{ask}{Whether to pause between figures on an interactive device.
 \code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
-and \code{FALSE} draws without pausing. In panel mode, each composition is one
-figure. File devices never pause.}
+and \code{FALSE} draws without pausing. File devices never pause.}
 
 \item{panels}{If \code{TRUE} (default), show each composition in one figure, with
 two rows and up to three columns. If \code{FALSE}, draw each statistic separately.
 Graphics settings are restored afterwards.}
 
 \item{...}{Additional graphical arguments passed to \code{\link[graphics:plot]{graphics::plot()}}.
-\code{freq}, \code{xlim}, \code{ylim}, \code{main}, \code{sub}, and \code{xlab} are controlled by this
+\code{freq}, \code{xlim}, \code{main}, and \code{sub} are controlled by this
 method.}
 }
 \value{
