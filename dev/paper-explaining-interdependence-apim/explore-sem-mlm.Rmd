@@ -647,3 +647,279 @@ ggplot(ci_plot_data, aes(x = estimate, y = route, colour = route)) +
   labs(x = "Covariance contribution", y = NULL) +
   theme_minimal()
 ```
+
+## 5. The routes as path diagrams
+
+Each panel highlights one route: a path into the teen's intake, a path into
+the parent's intake, and what links the two starting points. That is either
+the covariance of the two efficacies (σ) or the variance of one efficacy
+(thick box). The numbers are the glmmTMB estimates from section 2, and the
+stars come from the bootstrap in section 3. Below each panel are the formula,
+the contribution and its share of the total covariance.
+
+`apim-route-diagrams.R` draws the diagrams. It numbers the members: the teen
+is member 1 and the parent member 2.
+
+```{r route-diagram-inputs}
+source("apim-route-diagrams.R")
+
+# Two-sided bootstrap p-value: twice the share of draws on the far side of 0.
+bootstrap_p_values <- glmmtmb_draws |>
+  dplyr::summarise(dplyr::across(
+    dplyr::everything(),
+    \(draws) min(1, 2 * min(mean(draws <= 0), mean(draws >= 0)))
+  )) |>
+  unlist()
+estimates <- setNames(glmmtmb_cis$estimate, glmmtmb_cis$parameter)
+
+# Our names, and the matching names in the diagram.
+diagram_names <- c(
+  a1 = "actor_teen", a2 = "actor_parent",
+  p1 = "partner_parent_to_teen", p2 = "partner_teen_to_parent",
+  cov_x1_x2 = "cov_efficacy", psi = "residual_cov",
+  actor_driven = "actor_driven", partner_driven = "partner_driven",
+  x1_driven = "teen_driven", x2_driven = "parent_driven",
+  residual = "residual"
+)
+diagram_estimates <- setNames(estimates[diagram_names], names(diagram_names))
+diagram_p_values <- setNames(
+  bootstrap_p_values[diagram_names], names(diagram_names)
+)
+```
+
+```{r route-diagrams, dev="svg", fig.width=12, fig.height=10.4}
+draw_apim_route_grid(
+  list(
+    "1. Actor-driven" = "actor_driven", "2. Partner-driven" = "partner_driven",
+    "3. Teen-driven" = "x1_driven", "4. Parent-driven" = "x2_driven",
+    "5. Residual" = "residual", "All routes" = "all"
+  ),
+  formulas = list("All routes" = quote(Cov(Y[S1], Y[S2]))),
+  labels = list(predictor = "Efficacy", outcome = "Intake"),
+  roles = c("teen", "parent"),
+  values = diagram_estimates, p_values = diagram_p_values,
+  contributions = diagram_estimates, total = estimates[["total_covariance"]]
+)
+```
+
+## 6. Example with a covariate
+
+We add one covariate: the parent's gender (`parent_female`, 1 = mother,
+0 = father). It has the same value for both members and can affect both
+partners' intake. The outcome covariance then has ten routes instead of five:
+
+- the four APIM routes, as before;
+- one route through the covariate itself (parent-gender-driven);
+- four routes where a path from efficacy and a path from the covariate meet
+  through the covariance between efficacy and the covariate;
+- the residual.
+
+Teen-driven and parent-driven still mean the routes through the teen's and
+the parent's efficacy. We include parent gender as a covariate only, without
+interactions with efficacy. In J-P and Niall's product-term model, these
+interactions are small (p = .09 to .77), so the actor and partner effects can
+be the same for mothers and fathers.
+
+### Fit the model with the covariate
+
+```{r covariate-fit}
+# The parent's gender (1 = mother), on both rows of each dyad.
+covariate_apim <- flashe_apim |>
+  dplyr::mutate(parent_female = is_female[role == "parent"], .by = dyad_id)
+
+# The model from section 2, plus the covariate's effect on each intake.
+covariate_fit <- update(
+  apim_mlm_fit,
+  . ~ . + .is_teen:parent_female + .is_parent:parent_female,
+  data = covariate_apim
+)
+
+fixed_effects <- glmmTMB::fixef(covariate_fit)$cond
+residual_covariance_matrix <- glmmTMB::VarCorr(covariate_fit)$cond$dyad_id
+predictor_moments <- cov.wt(
+  flashe_data[c(
+    "efficacy_centered_teen", "efficacy_centered_parent", "is_female_parent"
+  )],
+  method = "ML"
+)$cov
+
+# All estimates we need, in one row.
+covariate_estimates <- tibble::tibble(
+  actor_teen = fixed_effects[[".is_teen:.efficacy_centered_actor"]],
+  actor_parent = fixed_effects[[".is_parent:.efficacy_centered_actor"]],
+  partner_parent_to_teen = fixed_effects[[".is_teen:.efficacy_centered_partner"]],
+  partner_teen_to_parent = fixed_effects[[".is_parent:.efficacy_centered_partner"]],
+  gender_teen = fixed_effects[[".is_teen:parent_female"]],
+  gender_parent = fixed_effects[[".is_parent:parent_female"]],
+  var_efficacy_teen = predictor_moments[1, 1],
+  var_efficacy_parent = predictor_moments[2, 2],
+  var_gender = predictor_moments[3, 3],
+  cov_efficacy = predictor_moments[1, 2],
+  cov_teen_gender = predictor_moments[1, 3],
+  cov_parent_gender = predictor_moments[2, 3],
+  residual_cov = residual_covariance_matrix[1, 2]
+)
+print_table(covariate_estimates)
+```
+
+### All ten routes
+
+Each route is the path into the teen's intake, times the variance or
+covariance that links the two starting points, times the path into the
+parent's intake.
+
+```{r covariate-routes}
+covariate_routes <- covariate_estimates |>
+  dplyr::transmute(
+    # The four APIM routes, with slopes adjusted for the covariate.
+    actor_driven = actor_teen * cov_efficacy * actor_parent,
+    partner_driven = partner_parent_to_teen * cov_efficacy * partner_teen_to_parent,
+    teen_driven = actor_teen * var_efficacy_teen * partner_teen_to_parent,
+    parent_driven = partner_parent_to_teen * var_efficacy_parent * actor_parent,
+    # The covariate as a common cause of both intakes.
+    parent_gender_driven = gender_teen * var_gender * gender_parent,
+    # One path from efficacy and one from the covariate.
+    teen_actor_with_gender = actor_teen * cov_teen_gender * gender_parent,
+    gender_with_teen_partner = gender_teen * cov_teen_gender * partner_teen_to_parent,
+    gender_with_parent_actor = gender_teen * cov_parent_gender * actor_parent,
+    parent_partner_with_gender = partner_parent_to_teen * cov_parent_gender * gender_parent,
+    residual = residual_cov
+  ) |>
+  tidyr::pivot_longer(
+    dplyr::everything(), names_to = "route", values_to = "estimate"
+  )
+print_table(covariate_routes)
+
+# The routes add up to the observed covariance of the two intakes.
+c(
+  sum_of_routes = sum(covariate_routes$estimate),
+  observed = cov.wt(
+    flashe_data[c("produce_intake_teen", "produce_intake_parent")],
+    method = "ML"
+  )$cov[1, 2]
+)
+```
+
+The diagram shows all paths with their estimates. The teen is member 1, the
+parent member 2, and C the covariate.
+
+```{r covariate-all-paths, dev="svg", fig.width=9, fig.height=5.4}
+# Our names, and the matching names in the diagram.
+covariate_diagram_values <- with(covariate_estimates, c(
+  a1 = actor_teen, a2 = actor_parent,
+  p1 = partner_parent_to_teen, p2 = partner_teen_to_parent,
+  c1 = gender_teen, c2 = gender_parent, cov_x1_x2 = cov_efficacy,
+  cov_x1_c = cov_teen_gender, cov_x2_c = cov_parent_gender, psi = residual_cov
+))
+covariate_diagram_routes <- c(
+  actor_driven = "actor_driven", partner_driven = "partner_driven",
+  teen_driven = "x1_driven", parent_driven = "x2_driven",
+  parent_gender_driven = "covariate_driven",
+  teen_actor_with_gender = "x1_actor_with_c",
+  gender_with_teen_partner = "c_with_x1_partner",
+  gender_with_parent_actor = "c_with_x2_actor",
+  parent_partner_with_gender = "x2_partner_with_c",
+  residual = "residual"
+)
+covariate_contributions <- setNames(
+  covariate_routes$estimate, covariate_diagram_routes[covariate_routes$route]
+)
+
+draw_apim_routes(
+  "all", covariate = TRUE,
+  labels = list(predictor = "Efficacy", outcome = "Intake", covariate = "Parent gender"),
+  roles = c("teen", "parent"), values = covariate_diagram_values,
+  contributions = covariate_contributions,
+  total = sum(covariate_contributions),
+  formula = quote(Cov(Y[S1], Y[S2]))
+)
+```
+
+### Group the routes
+
+We suggest four groups. The four APIM routes stay separate, as in the
+analysis without the covariate. The covariate's own route is its own group.
+The four mixed routes are summed into one group: on their own they are small
+and hard to interpret, and together they show how much efficacy and the
+covariate share. The residual is the last group.
+
+```{r covariate-groups, dev="svg", fig.width=13, fig.height=7.6}
+route_groups <- c(
+  actor_driven = "Actor-driven", partner_driven = "Partner-driven",
+  teen_driven = "Teen-driven", parent_driven = "Parent-driven",
+  parent_gender_driven = "Parent-gender-driven",
+  teen_actor_with_gender = "Efficacy and parent gender together",
+  gender_with_teen_partner = "Efficacy and parent gender together",
+  gender_with_parent_actor = "Efficacy and parent gender together",
+  parent_partner_with_gender = "Efficacy and parent gender together",
+  residual = "Residual"
+)
+
+draw_apim_route_grid(
+  list(
+    "APIM routes" = apim_buckets$predictor,
+    "Parent-gender-driven" = apim_buckets$covariate,
+    "Efficacy and parent gender together" = apim_buckets$mixed,
+    "Residual" = apim_buckets$residual
+  ),
+  covariate = TRUE,
+  labels = list(predictor = "Efficacy", outcome = "Intake", covariate = "Parent gender"),
+  roles = c("teen", "parent"), values = covariate_diagram_values,
+  contributions = covariate_contributions,
+  total = sum(covariate_contributions), text_scale = 0.8
+)
+```
+
+The table compares each group with the model without the covariate.
+
+```{r covariate-group-table}
+covariate_groups <- covariate_routes |>
+  dplyr::mutate(group = factor(route_groups[route], unique(route_groups))) |>
+  dplyr::summarise(estimate = sum(estimate), .by = group) |>
+  dplyr::mutate(percent = 100 * estimate / sum(estimate))
+
+# The same routes from the model without the covariate (section 3).
+without_covariate <- glmmtmb_cis |>
+  dplyr::filter(parameter %in% names(route_labels)) |>
+  dplyr::transmute(
+    group = route_labels[parameter], estimate_without_covariate = estimate
+  )
+
+covariate_group_table <- covariate_groups |>
+  dplyr::left_join(without_covariate, by = "group")
+print_table(covariate_group_table)
+```
+
+### Plot the groups
+
+```{r covariate-waterfall, dev="svg", fig.width=10, fig.height=4}
+covariate_plot_data <- covariate_groups |>
+  dplyr::mutate(end = cumsum(estimate), start = end - estimate)
+
+ggplot(covariate_plot_data, aes(fill = group)) +
+  geom_rect(aes(
+    xmin = as.numeric(group) - 0.4, xmax = as.numeric(group) + 0.4,
+    ymin = pmin(start, end), ymax = pmax(start, end)
+  )) +
+  geom_text(
+    aes(x = as.numeric(group), y = pmax(start, end),
+        label = sprintf("%.1f%%", percent)),
+    vjust = -0.6, colour = "#475569", size = 3.5
+  ) +
+  geom_hline(
+    yintercept = sum(covariate_groups$estimate),
+    linetype = "dotted", colour = "#475569"
+  ) +
+  scale_x_continuous(
+    breaks = seq_along(levels(covariate_groups$group)),
+    labels = scales::label_wrap(12)(levels(covariate_groups$group))
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0.02, 0.12))) +
+  # The section 2 colours, plus two greens for the covariate groups.
+  scale_fill_manual(values = c(
+    route_colours[1:4], "#5E9E6E", "#A9CDB0", route_colours[5]
+  )) +
+  labs(x = NULL, y = "Outcome covariance") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
