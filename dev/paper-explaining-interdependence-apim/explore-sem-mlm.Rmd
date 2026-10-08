@@ -465,58 +465,44 @@ ggplot(plot_data, aes(x = estimate, y = model, fill = route)) +
 ## 3. Add confidence intervals for glmmTMB
 
 We use the same bootstrap method as lavaan in section 1. We draw 1486 dyads
-with replacement and repeat the glmmTMB steps from section 2 on them. We do
+with replacement and refit the glmmTMB model from section 2 to them. We do
 this 1999 times. For each estimate, the 2.5% and 97.5% quantiles of the 1999
 values give the 95% CI. This does not assume normally distributed data.
 
-### The glmmTMB steps as a function
+### Functions for one bootstrap sample
 
-`add_contributions()` contains the decomposition formulas from section 2.
-`estimate_apim()` repeats the glmmTMB steps from section 2 for any data with
-one row per dyad: reshape, prepare the predictors, fit the model and collect
-the estimates. It returns every estimate in one row, with lavaan's names.
+`draw_dyads()` takes the drawn dyads from the long data of section 2.
+`estimate_apim()` refits the section 2 model to these data and collects all
+estimates as in section 2. `add_contributions()` contains the decomposition
+formulas from section 2.
 
 ```{r bootstrap-functions}
-# The decomposition formulas from section 2.
-add_contributions <- function(estimates) {
-  estimates |>
-    dplyr::mutate(
-      actor_driven = actor_teen * cov_efficacy * actor_parent,
-      partner_driven = partner_parent_to_teen * cov_efficacy * partner_teen_to_parent,
-      teen_driven = actor_teen * var_efficacy_teen * partner_teen_to_parent,
-      parent_driven = actor_parent * var_efficacy_parent * partner_parent_to_teen,
-      residual = residual_cov,
-      explained = actor_driven + partner_driven + teen_driven + parent_driven,
-      total_covariance = explained + residual
-    )
+# Take the drawn dyads from the long data, two rows each. Each drawn dyad gets
+# a new ID, so a dyad drawn twice counts as two dyads.
+draw_dyads <- function(long_data, dyads) {
+  tibble::tibble(dyad_id = dyads, new_dyad_id = seq_along(dyads)) |>
+    # many-to-many: a dyad can be drawn twice, and each dyad has two rows.
+    dplyr::inner_join(
+      long_data, by = "dyad_id", relationship = "many-to-many"
+    ) |>
+    dplyr::mutate(dyad_id = new_dyad_id) |>
+    dplyr::select(-new_dyad_id)
 }
 
-estimate_apim <- function(data) {
-  # As in section 2: reshape, prepare the predictors and refit. New dyad IDs
-  # make a dyad that was drawn twice count as two dyads.
-  long <- data |>
-    dplyr::mutate(dyad_id = dplyr::row_number()) |>
-    tidyr::pivot_longer(
-      cols = -dyad_id,
-      names_to = c(".value", "role"),
-      names_pattern = "(.+)_(parent|teen)$"
-    ) |>
-    dplyr::mutate(person_id = dplyr::row_number())
-  prepared <- dyadMLM::prepare_dyad_data(
-    long, dyad = dyad_id, member = person_id, role = role,
-    predictors = efficacy_centered, model_types = "apim"
-  )
-  fit <- update(apim_mlm_fit, data = prepared)
-
-  # Get the model estimates and the predictor variances and covariance
-  # (divided by n, as in section 2). In both matrices, parent comes first.
+# Refit the model to the long data, and compute the predictor variances and
+# covariance (divided by n) from the wide data, as in section 2. Returns every
+# estimate in one row, with lavaan's names.
+estimate_apim <- function(model, long_data, wide_data) {
+  # update() refits the model, with the same formula and settings, to new data.
+  fit <- update(model, data = long_data)
   fixed_effects <- glmmTMB::fixef(fit)$cond
   residual_covariance_matrix <- glmmTMB::VarCorr(fit)$cond$dyad_id
   predictor_covariance_matrix <- cov.wt(
-    data[c("efficacy_centered_parent", "efficacy_centered_teen")],
+    wide_data[c("efficacy_centered_parent", "efficacy_centered_teen")],
     method = "ML"
   )$cov
 
+  # In both matrices, parent comes first.
   tibble::tibble(
     intercept_parent = fixed_effects[[".is_parent"]],
     intercept_teen = fixed_effects[[".is_teen"]],
@@ -533,22 +519,36 @@ estimate_apim <- function(data) {
   ) |>
     add_contributions()
 }
+
+# The decomposition formulas from section 2.
+add_contributions <- function(estimates) {
+  estimates |>
+    dplyr::mutate(
+      actor_driven = actor_teen * cov_efficacy * actor_parent,
+      partner_driven = partner_parent_to_teen * cov_efficacy * partner_teen_to_parent,
+      teen_driven = actor_teen * var_efficacy_teen * partner_teen_to_parent,
+      parent_driven = actor_parent * var_efficacy_parent * partner_parent_to_teen,
+      residual = residual_cov,
+      explained = actor_driven + partner_driven + teen_driven + parent_driven,
+      total_covariance = explained + residual
+    )
+}
 ```
 
 ### Bootstrap
 
 ```{r bootstrap-cache-key}
 # knitr caches the next chunk. It reruns only if that chunk changes or if
-# the data, the model fit or the two functions above change.
+# the data, the model fit or the three functions above change.
 bootstrap_key <- digest::digest(list(
-  flashe_data, logLik(apim_mlm_fit),
+  flashe_data, logLik(apim_mlm_fit), deparse(draw_dyads),
   deparse(estimate_apim), deparse(add_contributions)
 ))
 ```
 
 ```{r glmmtmb-bootstrap, cache = TRUE, cache.extra = bootstrap_key}
-# 1999 samples, each holding 1486 dyads (rows of flashe_data) drawn with
-# replacement.
+# 1999 samples of 1486 dyads, drawn with replacement. A dyad's number is its
+# row in flashe_data and its dyad_id in flashe_apim.
 set.seed(2026)
 bootstrap <- tibble::tibble(
   dyads = replicate(
@@ -556,10 +556,16 @@ bootstrap <- tibble::tibble(
   )
 )
 
-# Estimate everything in each sample (about 5 to 15 minutes on 4 cores).
+# Refit the model to each sample (about 5 to 15 minutes on 4 cores).
 bootstrap <- bootstrap |>
   dplyr::mutate(estimates = parallel::mclapply(
-    dyads, \(rows) estimate_apim(flashe_data[rows, ]), mc.cores = 4
+    dyads,
+    \(drawn) estimate_apim(
+      model = apim_mlm_fit,
+      long_data = draw_dyads(flashe_apim, drawn),
+      wide_data = flashe_data[drawn, ]
+    ),
+    mc.cores = 4
   ))
 ```
 
@@ -581,7 +587,7 @@ percentile_cis <- function(draws) {
 glmmtmb_draws <- dplyr::bind_rows(bootstrap$estimates)
 
 # Estimates from the full data, with their 95% CIs.
-glmmtmb_cis <- estimate_apim(flashe_data) |>
+glmmtmb_cis <- estimate_apim(apim_mlm_fit, flashe_apim, flashe_data) |>
   tidyr::pivot_longer(
     dplyr::everything(), names_to = "parameter", values_to = "estimate"
   ) |>
