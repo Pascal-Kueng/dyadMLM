@@ -471,20 +471,19 @@ ggplot(plot_data, aes(x = estimate, y = model, fill = route)) +
 
 ## 3. Add confidence intervals for glmmTMB
 
-We bootstrap as lavaan did in part 1: draw 1486 dyads with replacement,
-repeat part 2 on this sample, and do this 1999 times. The middle 95% of the
-1999 results gives each 95% CI. It does not assume normal data, and it can be
-asymmetric, which suits products of estimates.
+We use the same bootstrap as lavaan in part 1. We draw 1486 dyads with
+replacement and repeat part 2 on them. We do this 1999 times. For each
+estimate, the 2.5% and 97.5% quantiles of the 1999 values give the 95% CI.
+This does not assume normally distributed data.
 
-### Repeat part 2 for any data
+### Part 2 as a function
 
-`add_contributions()` holds the decomposition formulas from parts 1 and 2.
-`estimate_apim()` repeats part 2 for any data with one row per dyad. It
-returns all estimates, including the contributions, as a one-row tibble
-named as in lavaan.
+`add_contributions()` contains the formulas from part 2. `estimate_apim()`
+runs all of part 2 on any data with one row per dyad. It returns every
+estimate in one row, with lavaan's names.
 
 ```{r bootstrap-functions}
-# The decomposition formulas from parts 1 and 2, for a table of estimates.
+# The decomposition formulas from part 2.
 add_contributions <- function(estimates) {
   estimates |>
     dplyr::mutate(
@@ -499,8 +498,8 @@ add_contributions <- function(estimates) {
 }
 
 estimate_apim <- function(data) {
-  # Reshape, prepare and refit as in part 2. Numbering the dyads anew makes
-  # a dyad drawn twice count as two dyads.
+  # As in part 2: reshape, prepare the predictors and refit. New dyad IDs
+  # make a dyad that was drawn twice count as two dyads.
   long <- data |>
     dplyr::mutate(dyad_id = dplyr::row_number()) |>
     tidyr::pivot_longer(
@@ -515,8 +514,8 @@ estimate_apim <- function(data) {
   )
   fit <- update(apim_mlm_fit, data = prepared)
 
-  # Model estimates and, as in part 2, the predictor variances and covariance
-  # (dividing by n). Both matrices are ordered parent, teen.
+  # The estimates, and the predictor variances and covariance (divided by n,
+  # as in part 2). In both matrices, parent comes first.
   fixed_effects <- glmmTMB::fixef(fit)$cond
   residual_covariance_matrix <- glmmTMB::VarCorr(fit)$cond$dyad_id
   predictor_covariance_matrix <- cov.wt(
@@ -545,9 +544,8 @@ estimate_apim <- function(data) {
 ### Bootstrap
 
 ```{r bootstrap-cache-key}
-# knitr caches the bootstrap below. It reruns it when that chunk changes or
-# when this key changes: when the data, the model fit, estimate_apim() or
-# add_contributions() change.
+# The next chunk is cached. knitr only reruns it if its code or this key
+# changes, that is, if the data, the model or the two functions change.
 bootstrap_key <- digest::digest(list(
   flashe_data, logLik(apim_mlm_fit),
   deparse(estimate_apim), deparse(add_contributions)
@@ -572,7 +570,7 @@ bootstrap <- bootstrap |>
 ```
 
 ```{r glmmtmb-cis}
-# 95% percentile CIs: the 2.5% and 97.5% quantiles of each column of draws.
+# 95% CI for each column: its 2.5% and 97.5% quantiles.
 percentile_cis <- function(draws) {
   draws |>
     tidyr::pivot_longer(
@@ -588,7 +586,7 @@ percentile_cis <- function(draws) {
 # One row per sample, one column per estimate.
 glmmtmb_draws <- dplyr::bind_rows(bootstrap$estimates)
 
-# Estimates from the full data, with their 95% percentile CIs.
+# Estimates from the full data, with their 95% CIs.
 glmmtmb_cis <- estimate_apim(flashe_data) |>
   tidyr::pivot_longer(
     dplyr::everything(), names_to = "parameter", values_to = "estimate"
@@ -599,7 +597,7 @@ glmmtmb_cis <- estimate_apim(flashe_data) |>
 ### Compare the CIs with lavaan
 
 ```{r compare-cis}
-# inner_join keeps the estimates that both models have.
+# Keep the estimates that both models have.
 ci_comparison <- dplyr::inner_join(
   lavaan_estimates,
   glmmtmb_cis,
@@ -614,17 +612,15 @@ ci_comparison <- dplyr::inner_join(
 print_table(ci_comparison)
 ```
 
-The two bootstraps draw different samples, so their CI limits differ
-slightly by chance. Within this resampling noise, they agree.
-`explore-sem-mlm-details.Rmd` refits lavaan to the same samples, where all
-estimates agree in every sample. It also compares other CI methods,
-including a faster alternative for glmmTMB: a Monte Carlo CI with
-`vcov(apim_mlm_fit, full = TRUE, sandwich = TRUE)`.
+The CIs are very close. They differ a little because lavaan and glmmTMB
+drew different random samples. In `explore-sem-mlm-details.Rmd`, lavaan is
+refit to the same samples as glmmTMB, and then every estimate agrees. That
+file also compares other CI methods. For glmmTMB, a Monte Carlo CI with
+`vcov(apim_mlm_fit, full = TRUE, sandwich = TRUE)` is a faster option.
 
 ## 4. Plot the confidence intervals
 
-Each panel shows one contribution on its own scale, with the 95% CIs from
-both bootstraps.
+One panel per contribution, each on its own scale.
 
 ```{r decomposition-intervals, dev="svg", fig.width=8, fig.height=5}
 ci_plot_data <- dplyr::bind_rows(
@@ -645,6 +641,6 @@ ggplot(ci_plot_data, aes(x = estimate, y = model, colour = route)) +
   scale_colour_manual(values = route_colours) +
   labs(x = "Covariance contribution", y = NULL) +
   theme_minimal() +
-  # Room for the last tick label on the right.
+  # Leave room for the last x-axis label.
   theme(plot.margin = margin(5.5, 15, 5.5, 5.5))
 ```
