@@ -464,7 +464,7 @@ ggplot(plot_data, aes(x = estimate, y = model, fill = route)) +
 
 ## 3. Add confidence intervals for glmmTMB
 
-We use the same bootstrap as lavaan in part 1. We draw 1486 dyads with
+We use the same bootstrap method as lavaan in part 1. We draw 1486 dyads with
 replacement and repeat part 2 on them. We do this 1999 times. For each
 estimate, the 2.5% and 97.5% quantiles of the 1999 values give the 95% CI.
 This does not assume normally distributed data.
@@ -472,7 +472,7 @@ This does not assume normally distributed data.
 ### Part 2 as a function
 
 `add_contributions()` contains the formulas from part 2. `estimate_apim()`
-runs all of part 2 on any data with one row per dyad. It returns every
+repeats part 2 for any data with one row per dyad. It returns every
 estimate in one row, with lavaan's names.
 
 ```{r bootstrap-functions}
@@ -507,8 +507,8 @@ estimate_apim <- function(data) {
   )
   fit <- update(apim_mlm_fit, data = prepared)
 
-  # The estimates, and the predictor variances and covariance (divided by n,
-  # as in part 2). In both matrices, parent comes first.
+  # Get the model estimates and the predictor variances and covariance
+  # (divided by n, as in part 2). In both matrices, parent comes first.
   fixed_effects <- glmmTMB::fixef(fit)$cond
   residual_covariance_matrix <- glmmTMB::VarCorr(fit)$cond$dyad_id
   predictor_covariance_matrix <- cov.wt(
@@ -537,8 +537,8 @@ estimate_apim <- function(data) {
 ### Bootstrap
 
 ```{r bootstrap-cache-key}
-# The next chunk is cached. knitr only reruns it if its code or this key
-# changes, that is, if the data, the model or the two functions change.
+# knitr caches the next chunk. It reruns only if that chunk changes or if
+# the data, the model fit or the two functions above change.
 bootstrap_key <- digest::digest(list(
   flashe_data, logLik(apim_mlm_fit),
   deparse(estimate_apim), deparse(add_contributions)
@@ -607,9 +607,10 @@ print_table(ci_comparison)
 
 The CIs are very close. They differ a little because lavaan and glmmTMB
 drew different random samples. In `explore-sem-mlm-details.Rmd`, lavaan is
-refit to the same samples as glmmTMB, and then every estimate agrees. That
-file also compares other CI methods. For glmmTMB, a Monte Carlo CI with
-`vcov(apim_mlm_fit, full = TRUE, sandwich = TRUE)` is a faster option.
+refit to the same samples as glmmTMB. Then all estimates agree in every
+sample (differences below 1e-4). That file also compares other CI methods.
+For glmmTMB, a Monte Carlo CI based on
+`vcov(apim_mlm_fit, full = TRUE, sandwich = TRUE)` is faster.
 
 ## 4. Plot the confidence intervals
 

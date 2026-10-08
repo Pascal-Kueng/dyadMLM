@@ -10,8 +10,8 @@ output:
 ---
 
 This notebook checks the glmmTMB bootstrap from `explore-sem-mlm.Rmd` and
-compares other ways to get CIs. It first runs the main notebook in the
-background, so all its results are available here.
+compares other ways to get CIs. It first runs the main notebook with its
+output hidden, so all its results are available here.
 
 ```{r run-main-notebook, include=FALSE}
 # Use the main notebook's cache and figure folders, so the bootstrap is not
@@ -35,13 +35,13 @@ estimates in every sample, apart from tiny optimizer differences.
 
 ```{r same-samples}
 # Refit lavaan to any data and return all estimates in one row. as.list()
-# is needed because coef() returns a special lavaan class.
+# turns lavaan's vector class into plain numbers.
 estimate_lavaan <- function(data) {
   fit <- update(apim_fit, data = data, se = "none")
   tibble::as_tibble_row(as.list(coef(fit, type = "user")))
 }
 
-# One row per sample and one column per estimate, as in glmmtmb_draws.
+# One row per sample, columns in the same order as glmmtmb_draws.
 lavaan_draws <- parallel::mclapply(
   bootstrap$dyads, \(rows) estimate_lavaan(flashe_data[rows, ]), mc.cores = 4
 ) |>
@@ -62,10 +62,11 @@ methods:
 - The same delta method with robust standard errors (`estimator = "MLR"`),
   which do not assume normal data.
 - A Monte Carlo CI for glmmTMB (Preacher & Selig, 2012). It draws many sets
-  of estimates from their estimated sampling distribution and computes the
-  contributions for each set. With `sandwich = TRUE`, the model uncertainty is
-  robust and clustered by dyad. The predictor variances and covariance are
-  drawn assuming normal data.
+  of model estimates from a normal distribution, using the fitted estimates
+  and their covariance matrix. Then it computes the contributions for each
+  set. With `sandwich = TRUE`, this covariance matrix is robust and clustered
+  by dyad. The predictor variances and covariance are drawn assuming normal
+  data.
 
 ```{r delta-method}
 # Without se = "bootstrap", lavaan uses the delta method. MLR makes its
@@ -80,7 +81,7 @@ mlr_fit <- sem(
 ```
 
 ```{r monte-carlo}
-# Takes about 3 minutes, mostly for the sandwich matrix.
+# Takes about 2 minutes, mostly for the sandwich matrix.
 set.seed(2026)
 n_draws <- 20000
 n_dyads <- nrow(flashe_data)
