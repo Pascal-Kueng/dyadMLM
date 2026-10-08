@@ -621,9 +621,10 @@ For glmmTMB, a Monte Carlo CI based on
 
 ## 4. Plot the confidence intervals
 
-One panel per contribution, each on its own scale.
+Each point is an estimate, and each line its 95% CI. Both panels share the
+x-axis, so the sizes of the contributions can be compared.
 
-```{r decomposition-intervals, dev="svg", fig.width=8, fig.height=5}
+```{r decomposition-intervals, dev="svg", fig.width=10, fig.height=4}
 ci_plot_data <- dplyr::bind_rows(
   lavaan = lavaan_decomposition, glmmTMB = glmmtmb_cis,
   .id = "model"
@@ -635,13 +636,14 @@ ci_plot_data <- dplyr::bind_rows(
                    labels = unname(route_labels))
   )
 
-ggplot(ci_plot_data, aes(x = estimate, y = model, colour = route)) +
+ggplot(ci_plot_data, aes(x = estimate, y = route, colour = route)) +
   geom_pointrange(aes(xmin = ci_low, xmax = ci_high),
                   show.legend = FALSE) +
-  facet_wrap(~ route, ncol = 1, scales = "free_x") +
+  geom_vline(xintercept = 0, linetype = "dotted") +
+  facet_wrap(~ model) +
+  # List the contributions from top to bottom, in the order of the tables.
+  scale_y_discrete(limits = rev) +
   scale_colour_manual(values = route_colours) +
   labs(x = "Covariance contribution", y = NULL) +
-  theme_minimal() +
-  # Leave room for the last x-axis label.
-  theme(plot.margin = margin(5.5, 15, 5.5, 5.5))
+  theme_minimal()
 ```
