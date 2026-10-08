@@ -101,10 +101,11 @@ and separate predictors can hide local patterns and interactions.
 A flag is a red value or curve outside its blue range or limits. Each panel
 alone rarely flags a correct model, but flags add up across panels. In our
 \href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulations}
-(also used to choose these panels), at least one panel of the residual and
-outcome checks (ECDFs and category bars not counted) flagged about 6--11\% of
-correct Gaussian and count models when pooled, 16--23\% in either role, and
-24--31\% in either role with actor and partner predictor pages; ordinal models
+(confirmed on fresh seeds at 100 and 400 dyads), at least one panel of the
+residual and outcome checks (ECDFs and category bars not counted) flagged
+about 6--11\% of correct Gaussian and count models when pooled, 16--23\% in
+either role, and
+22--32\% in either role with actor and partner predictor pages; ordinal models
 were flagged less often. So look
 for a consistent pattern, not any single flag. With about 40 dyads, most
 mismatches studied were hard to detect; no flag does not show a good fit.

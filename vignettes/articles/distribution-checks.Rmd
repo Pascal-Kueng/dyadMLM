@@ -59,6 +59,10 @@ reduced <- filter(dropped, panel_set == "current")
 reduced_range <- function(run_name, view_name, with_pages = run_name == "add-on") with(
   filter(reduced, run == run_name, scenario == "correct", view == view_name, pages == with_pages),
   percent_range(rate))
+# A later check of the current panels on fresh seeds
+fresh <- read_results("fresh-check-unions.csv")
+fresh_range <- function(view_name, with_pages = FALSE) with(filter(fresh,
+  scenario_label == "Correct model", view == view_name, pages == with_pages), percent_range(rate))
 detection <- filter(reduced, run == "main", view == "roles", n_times == 1, dyad_sd == .6)
 detected <- function(n, scenarios, keep = TRUE)
   detection$rate[detection$n_dyads == n & (detection$scenario %in% scenarios) == keep]
@@ -86,8 +90,8 @@ The study uses `r unique(conditions$repetitions)` datasets per condition and
 `r format(unique(conditions$reference_draws), big.mark = ",")` reference simulations per dataset.
 Unless noted, this summary counts only the panels the package still shows.
 The PIT distance patterns were removed after the confirmation run, so these
-rates were recomputed, not confirmed on fresh seeds (see
-[Panels removed after the study](#panels-removed-after-the-study)).
+rates were recomputed, and a smaller later check confirmed some of them on
+fresh seeds (see [Panels removed after the study](#panels-removed-after-the-study)).
 
 - **Single panels rarely flag a correct model, but flags add up.** Each panel
   flagged at most `r distribution_percent(panel_maximum)` of datasets under
@@ -97,9 +101,10 @@ rates were recomputed, not confirmed on fresh seeds (see
   `r reduced_range("add-on", "roles")` in either role with actor and partner
   predictor pages (dyad SD 1.2). The
   [confirmation run](#confirmation-run) gave `r reduced_range("confirmation", "pooled")`,
-  `r reduced_range("confirmation", "roles")`, and `r reduced_range("confirmation", "roles", TRUE)`
-  (dyad SD 0.6, including ordinal models). So look for a consistent pattern,
-  not any single flag.
+  `r reduced_range("confirmation", "roles")`, and `r reduced_range("confirmation", "roles", TRUE)`,
+  and a later check on fresh seeds `r fresh_range("pooled")`, `r fresh_range("roles")`, and
+  `r fresh_range("roles", TRUE)` (both dyad SD 0.6, including ordinal models).
+  So look for a consistent pattern, not any single flag.
 - **Detection depends strongly on sample size.** With 40 dyads, most
   mismatches were hard to detect: apart from omitted role means of ±0.4
   (`r distribution_percent(detected(40, "mean_large"))`), mismatches were flagged
@@ -534,6 +539,12 @@ correct_cost <- function(with_pages) with(filter(distance, scenario == "correct"
 largest_loss <- slice_max(filter(distance, scenario != "correct"), cost, n = 1, with_ties = FALSE)
 spread <- dropped |> filter(run == "add-on", scenario == "heteroscedastic", view == "roles",
   panel_set != "all") |> arrange(n_dyads, panel_set == "current") |> pull(rate)
+# Confirmation-run settings that the fresh check repeated, in either role with pages
+confirmation_settings <- filter(reduced, run == "confirmation", view == "roles", pages)
+repeated <- inner_join(filter(fresh, view == "roles", pages), confirmation_settings,
+  by = c("scenario_label", "fit_family", "n_dyads"), suffix = c("", "_confirmation"))
+largest_difference <- slice_max(mutate(repeated, difference = rate - rate_confirmation),
+  abs(difference), n = 1, with_ties = FALSE)
 ```
 
 After this study, the package removed three displays. The PIT histogram shows
@@ -571,6 +582,19 @@ in `r distribution_percent(spread[2])` of datasets instead of
 `r distribution_percent(spread[4])`. These rates were recomputed on the same
 datasets, not confirmed on fresh seeds.
 
+A later check confirmed the rates of the remaining panels on fresh seeds in
+`r nrow(repeated)` of the `r nrow(confirmation_settings)` settings of the
+[confirmation run](#confirmation-run), with `r unique(fresh$checked)` datasets each
+(see the [study notes](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md#confirmation-run)).
+Under correct models, at least one flag appeared in `r fresh_range("pooled")` of
+datasets pooled, `r fresh_range("roles")` in either role, and
+`r fresh_range("roles", TRUE)` in either role with predictor pages. In either
+role with pages, rates differed from the confirmation run's by at most
+`r sprintf("%.0f", 100 * abs(largest_difference$difference))` percentage points
+(`r largest_difference$scenario_label`, `r largest_difference$n_dyads` dyads:
+`r distribution_percent(largest_difference$rate)` against
+`r distribution_percent(largest_difference$rate_confirmation)`).
+
 The summary uses the remaining panels; the
 [dropped-panel table](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/report-data/distribution-checks/dropped-panels.csv)
 gives the flag unions with all panels, without the histogram and outlier count,
@@ -604,8 +628,9 @@ dependence; this study did not compare the two approaches.
 - The panels the package still shows were chosen on this study's data, which
   can make their rates look better than they are. The
   [confirmation run](#confirmation-run) checks them on fresh seeds, but the PIT
-  distance patterns were removed after it, so rates without them are not
-  confirmed.
+  distance patterns were removed after it, so rates without them were
+  confirmed only by a smaller later check (see
+  [Panels removed after the study](#panels-removed-after-the-study)).
 - No heavy-tailed residuals, gross outliers, or data errors were simulated, so
   the study does not show whether the remaining panels, such as the QQ plot and
   the largest absolute deviation, reveal them.

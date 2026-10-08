@@ -173,6 +173,19 @@ to `report-data/distribution-checks/` with the prefix `confirmation-`. The run
 needs glmmTMB with `ordinal()` and takes about 18 CPU hours, or about four hours
 with six workers.
 
+A later check confirms the `current` rates of 10 of the confirmation run's
+settings on fresh seeds and adds four (omitted curvature and a shift at high
+actor values, each at 100 and 400 dyads): 200 datasets each with 1,000
+reference simulations, pooled and by role, with and without predictor pages.
+Dataset seeds are 1,110,000,000 + 100,000 × condition + dataset, with the
+offsets above. `report-data/distribution-checks/fresh-check-unions.csv` (flag
+unions) and `fresh-check-panels.csv` (single residual panels) keep the rows for
+the package's PIT quartile lines (smoother `current`, the code at commit
+`09d9e6f6`) from `ranked-axis-check.R` on branch
+`qgam-quartile-lines` (commit `a72e6bf8`), with session information in
+`fresh-check-session-info.txt`. The command was
+`Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/ranked-axis-check.R 200 1000 8 run`.
+
 ## Gaussian covariance pooling
 
 Both models use the package's data preparation and covariance terms, with the
