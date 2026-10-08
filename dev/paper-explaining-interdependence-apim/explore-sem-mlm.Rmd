@@ -652,15 +652,16 @@ ggplot(ci_plot_data, aes(x = estimate, y = route, colour = route)) +
 
 Each panel highlights one route: a path into the teen's intake, a path into
 the parent's intake, and what links the two starting points. That is the
-covariance of the two efficacies (σ), the variance of one efficacy (thick
-box), or, for the residual route, the residual covariance (ψ). A partner path
-is named after the member whose intake it predicts: p~parent~ runs from the
-teen's efficacy to the parent's intake.
+covariance of the two efficacies (σ), the variance of one efficacy (σ², the
+loop on top of its box), or, for the residual route, the residual covariance
+(ψ). A partner path is named after the member whose intake it predicts:
+p~parent~ runs from the teen's efficacy to the parent's intake.
 
 The numbers are the glmmTMB estimates from section 2. The stars are
 bootstrap p-values from the draws in section 3; here no draw crosses zero, so
-every estimate gets three stars. Below each panel are the formula, the
-contribution and its share of the total covariance.
+every path and covariance gets three stars. Variances get no stars, since
+they are always positive. Below each panel are the formula, the contribution
+and its share of the total covariance.
 
 `apim-route-diagrams.R` draws the diagrams. It numbers the members: the teen
 is member 1 and the parent member 2.
@@ -685,15 +686,18 @@ diagram_inputs <- glmmtmb_cis |>
     parameter,
     actor_teen = "a1", actor_parent = "a2",
     partner_parent_to_teen = "p1", partner_teen_to_parent = "p2",
+    var_efficacy_teen = "var_x1", var_efficacy_parent = "var_x2",
     cov_efficacy = "cov_x1_x2", residual_cov = "psi",
     teen_driven = "x1_driven", parent_driven = "x2_driven"
   ))
 diagram_estimates <- tibble::deframe(
   dplyr::select(diagram_inputs, diagram_name, estimate)
 )
-diagram_p_values <- tibble::deframe(
-  dplyr::select(diagram_inputs, diagram_name, p_value)
-)
+# Variances are always positive, so they get no p-value.
+diagram_p_values <- diagram_inputs |>
+  dplyr::filter(!startsWith(diagram_name, "var_")) |>
+  dplyr::select(diagram_name, p_value) |>
+  tibble::deframe()
 ```
 
 ```{r route-diagrams, dev="svg", fig.width=12, fig.height=10.4}
@@ -790,9 +794,9 @@ covariate_routes <- covariate_estimates |>
     parent_gender_driven = gender_teen * var_gender * gender_parent,
     # One path from efficacy and one from the covariate.
     teen_actor_with_gender = actor_teen * cov_teen_gender * gender_parent,
-    gender_with_teen_partner = gender_teen * cov_teen_gender * partner_teen_to_parent,
+    gender_with_parent_partner = gender_teen * cov_teen_gender * partner_teen_to_parent,
     gender_with_parent_actor = gender_teen * cov_parent_gender * actor_parent,
-    parent_partner_with_gender = partner_parent_to_teen * cov_parent_gender * gender_parent,
+    teen_partner_with_gender = partner_parent_to_teen * cov_parent_gender * gender_parent,
     residual = residual_cov
   ) |>
   tidyr::pivot_longer(
@@ -810,16 +814,19 @@ tibble::tibble(
 )
 ```
 
-The diagram shows all paths with their estimates. In the formulas, C stands
-for the covariate.
+The first diagram shows all paths, variances (σ²) and covariances (σ) with
+their estimates. These are all the numbers the routes need. The next diagrams
+show each route on its own. In the formulas, C stands for the covariate.
 
 ```{r covariate-all-paths, dev="svg", fig.width=9, fig.height=5.4}
 # Our names, and the matching names in the diagram.
 covariate_diagram_values <- with(covariate_estimates, c(
   a1 = actor_teen, a2 = actor_parent,
   p1 = partner_parent_to_teen, p2 = partner_teen_to_parent,
-  c1 = gender_teen, c2 = gender_parent, cov_x1_x2 = cov_efficacy,
-  cov_x1_c = cov_teen_gender, cov_x2_c = cov_parent_gender, psi = residual_cov
+  c1 = gender_teen, c2 = gender_parent,
+  var_x1 = var_efficacy_teen, var_x2 = var_efficacy_parent, var_c = var_gender,
+  cov_x1_x2 = cov_efficacy, cov_x1_c = cov_teen_gender,
+  cov_x2_c = cov_parent_gender, psi = residual_cov
 ))
 covariate_contributions <- covariate_routes |>
   dplyr::mutate(route = dplyr::recode(
@@ -827,9 +834,9 @@ covariate_contributions <- covariate_routes |>
     teen_driven = "x1_driven", parent_driven = "x2_driven",
     parent_gender_driven = "covariate_driven",
     teen_actor_with_gender = "x1_actor_with_c",
-    gender_with_teen_partner = "c_with_x1_partner",
+    gender_with_parent_partner = "c_with_x1_partner",
     gender_with_parent_actor = "c_with_x2_actor",
-    parent_partner_with_gender = "x2_partner_with_c"
+    teen_partner_with_gender = "x2_partner_with_c"
   )) |>
   tibble::deframe()
 
@@ -842,44 +849,46 @@ draw_apim_routes(
 )
 ```
 
+```{r covariate-route-diagrams, dev="svg", fig.width=13, fig.height=19}
+draw_apim_route_grid(
+  list(
+    "1. Actor-driven" = "actor_driven", "2. Partner-driven" = "partner_driven",
+    "3. Teen-driven" = "x1_driven", "4. Parent-driven" = "x2_driven",
+    "5. Parent-gender-driven" = "covariate_driven",
+    "6. Teen actor with gender" = "x1_actor_with_c",
+    "7. Gender with parent partner" = "c_with_x1_partner",
+    "8. Gender with parent actor" = "c_with_x2_actor",
+    "9. Teen partner with gender" = "x2_partner_with_c",
+    "10. Residual" = "residual"
+  ),
+  covariate = TRUE,
+  labels = list(predictor = "Efficacy", outcome = "Intake", covariate = "Parent gender"),
+  roles = c("teen", "parent"), values = covariate_diagram_values,
+  contributions = covariate_contributions, text_scale = 0.8
+)
+```
+
 ### Group the routes
 
 We keep the four APIM routes separate, as without the covariate. The
-parent-gender-driven route stays on its own. We add up the four mixed routes:
-each is small and hard to interpret alone. Together, they are the part of the
-outcome covariance that comes from efficacy and parent gender being
-correlated. The residual comes last. In the diagrams, the four APIM routes
-share one panel.
+parent-gender-driven route stays on its own. We add up the four mixed routes
+(6 to 9): each is small and hard to interpret alone. Together, they are the
+part of the outcome covariance that comes from efficacy and parent gender
+being correlated. The residual comes last. The table compares each group
+with the model without the covariate.
 
-```{r covariate-groups, dev="svg", fig.width=13, fig.height=7.6}
+```{r covariate-group-table}
 route_groups <- c(
   actor_driven = "Actor-driven", partner_driven = "Partner-driven",
   teen_driven = "Teen-driven", parent_driven = "Parent-driven",
   parent_gender_driven = "Parent-gender-driven",
   teen_actor_with_gender = "Efficacy and parent gender together",
-  gender_with_teen_partner = "Efficacy and parent gender together",
+  gender_with_parent_partner = "Efficacy and parent gender together",
   gender_with_parent_actor = "Efficacy and parent gender together",
-  parent_partner_with_gender = "Efficacy and parent gender together",
+  teen_partner_with_gender = "Efficacy and parent gender together",
   residual = "Residual"
 )
 
-draw_apim_route_grid(
-  list(
-    "APIM routes" = apim_buckets$predictor,
-    "Parent-gender-driven" = apim_buckets$covariate,
-    "Efficacy and parent gender together" = apim_buckets$mixed,
-    "Residual" = apim_buckets$residual
-  ),
-  covariate = TRUE,
-  labels = list(predictor = "Efficacy", outcome = "Intake", covariate = "Parent gender"),
-  roles = c("teen", "parent"),
-  contributions = covariate_contributions, text_scale = 0.8
-)
-```
-
-The table compares each group with the model without the covariate.
-
-```{r covariate-group-table}
 covariate_groups <- covariate_routes |>
   dplyr::mutate(group = factor(route_groups[route], unique(route_groups))) |>
   dplyr::summarise(estimate = sum(estimate), .by = group) |>
@@ -899,7 +908,7 @@ print_table(covariate_group_table)
 
 With the covariate, the four APIM routes barely change. The
 parent-gender-driven route is slightly negative (−0.4%), and the four mixed
-routes cancel out to almost zero (see the table of all ten routes).
+routes cancel out to almost zero (panels 6 to 9).
 
 ### Plot the groups
 

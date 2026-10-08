@@ -7,7 +7,8 @@
 #   Y2 = a2 X2 + p2 X1 + c2 C + e2
 #
 # Every route joins one path into Y1 with one path into Y2, through the
-# variance or covariance of the variables those two paths start from.
+# variance or covariance of the variables those two paths start from. A
+# variance is drawn as a loop on top of the variable's box.
 #
 #   source("apim-route-diagrams.R")
 #   draw_apim_routes("actor_driven")
@@ -15,9 +16,10 @@
 #   draw_apim_route_grid(list("Mixed" = apim_buckets$mixed), covariate = TRUE)
 #
 # With results: `labels` names the variables, `roles` the two members,
-# `values` and `p_values` give estimates for the paths and covariances (named
-# a1, a2, p1, p2, c1, c2, cov_x1_x2, cov_x1_c, cov_x2_c, psi), and
-# `contributions` gives the size of each route (named as in apim_routes).
+# `values` and `p_values` give estimates for the paths, variances and
+# covariances (named a1, a2, p1, p2, c1, c2, var_x1, var_x2, var_c, cov_x1_x2,
+# cov_x1_c, cov_x2_c, psi), and `contributions` gives the size of each route
+# (named as in apim_routes).
 # Percentages are relative to the sum of all routes.
 
 local({
@@ -43,8 +45,8 @@ diagram_colours <- c(
 )
 
 # Each route: the path into Y1, the path into Y2, and what links their
-# sources (a covariance arc, or a node whose variance is used). S1 and S2
-# stand for the two members' subscripts.
+# sources (a covariance or a variance). S1 and S2 stand for the two members'
+# subscripts.
 apim_routes <- list(
   actor_driven = list(
     paths = c("a1", "a2"), link = "cov_x1_x2",
@@ -55,15 +57,15 @@ apim_routes <- list(
     formula = quote(p[S1] * p[S2] %.% Cov(X[S1], X[S2]))
   ),
   x1_driven = list(
-    paths = c("a1", "p2"), link = "X1",
+    paths = c("a1", "p2"), link = "var_x1",
     formula = quote(a[S1] * p[S2] %.% Var(X[S1]))
   ),
   x2_driven = list(
-    paths = c("p1", "a2"), link = "X2",
+    paths = c("p1", "a2"), link = "var_x2",
     formula = quote(p[S1] * a[S2] %.% Var(X[S2]))
   ),
   covariate_driven = list(
-    paths = c("c1", "c2"), link = "C",
+    paths = c("c1", "c2"), link = "var_c",
     formula = quote(c[S1] * c[S2] %.% Var(italic(C)))
   ),
   x1_actor_with_c = list(
@@ -99,9 +101,10 @@ apim_buckets <- list(
   residual = "residual"
 )
 
-# Positions of nodes, paths and covariance arcs, without and with the
-# covariate. Paths give the heights where they start and end, and how far
-# along the path their label sits.
+# Positions of nodes, paths and arcs, without and with the covariate. Paths
+# give the heights where they start and end, and how far along the path their
+# label sits. Arcs (covariances and variances) give their start, end,
+# curvature and label position.
 apim_layout <- function(covariate) {
   if (!covariate) {
     return(list(
@@ -118,29 +121,43 @@ apim_layout <- function(covariate) {
         p1 = list(from = "X2", to = "Y1", y = c(0.33, 0.66), label = 0.30)
       ),
       arcs = list(
-        cov_x1_x2 = list(y = c(0.67, 0.33), curvature = 0.32, label = c(0.085, 0.50))
+        cov_x1_x2 = list(from = c(0.155, 0.67), to = c(0.155, 0.33),
+                         curvature = 0.32, label = c(0.085, 0.50)),
+        var_x1 = list(from = c(0.225, 0.795), to = c(0.275, 0.795),
+                      curvature = -1, label = c(0.25, 0.88)),
+        var_x2 = list(from = c(0.225, 0.395), to = c(0.275, 0.395),
+                      curvature = -1, label = c(0.25, 0.48))
       )
     ))
   }
   list(
     nodes = list(
-      X1 = c(0.29, 0.80), C = c(0.29, 0.50), X2 = c(0.29, 0.20),
-      Y1 = c(0.72, 0.72), Y2 = c(0.72, 0.28),
-      e1 = c(0.895, 0.72), e2 = c(0.895, 0.28)
+      X1 = c(0.29, 0.74), C = c(0.29, 0.46), X2 = c(0.29, 0.18),
+      Y1 = c(0.72, 0.68), Y2 = c(0.72, 0.24),
+      e1 = c(0.895, 0.68), e2 = c(0.895, 0.24)
     ),
-    box = c(width = 0.16, height = 0.15),
+    box = c(width = 0.16, height = 0.13),
     paths = list(
-      a1 = list(from = "X1", to = "Y1", y = c(0.82, 0.77), label = 0.50),
-      c1 = list(from = "C", to = "Y1", y = c(0.53, 0.72), label = 0.25),
-      p1 = list(from = "X2", to = "Y1", y = c(0.22, 0.67), label = 0.20),
-      p2 = list(from = "X1", to = "Y2", y = c(0.78, 0.33), label = 0.20),
-      c2 = list(from = "C", to = "Y2", y = c(0.47, 0.28), label = 0.25),
-      a2 = list(from = "X2", to = "Y2", y = c(0.18, 0.23), label = 0.50)
+      a1 = list(from = "X1", to = "Y1", y = c(0.76, 0.73), label = 0.50),
+      c1 = list(from = "C", to = "Y1", y = c(0.49, 0.68), label = 0.70),
+      p1 = list(from = "X2", to = "Y1", y = c(0.20, 0.63), label = 0.20),
+      p2 = list(from = "X1", to = "Y2", y = c(0.72, 0.29), label = 0.20),
+      c2 = list(from = "C", to = "Y2", y = c(0.43, 0.24), label = 0.70),
+      a2 = list(from = "X2", to = "Y2", y = c(0.16, 0.19), label = 0.50)
     ),
     arcs = list(
-      cov_x1_c = list(y = c(0.76, 0.54), curvature = 0.45, label = c(0.15, 0.65)),
-      cov_x2_c = list(y = c(0.46, 0.24), curvature = 0.45, label = c(0.15, 0.35)),
-      cov_x1_x2 = list(y = c(0.84, 0.16), curvature = 0.42, label = c(0.07, 0.50))
+      cov_x1_c = list(from = c(0.21, 0.70), to = c(0.21, 0.50),
+                      curvature = 1.1, label = c(0.15, 0.60)),
+      cov_x2_c = list(from = c(0.21, 0.42), to = c(0.21, 0.22),
+                      curvature = 1.1, label = c(0.15, 0.32)),
+      cov_x1_x2 = list(from = c(0.21, 0.78), to = c(0.21, 0.14),
+                       curvature = 0.75, label = c(0.06, 0.46)),
+      var_x1 = list(from = c(0.265, 0.805), to = c(0.315, 0.805),
+                    curvature = -1, label = c(0.29, 0.885)),
+      var_c = list(from = c(0.265, 0.525), to = c(0.315, 0.525),
+                   curvature = -1, label = c(0.29, 0.605)),
+      var_x2 = list(from = c(0.265, 0.245), to = c(0.315, 0.245),
+                    curvature = -1, label = c(0.29, 0.325))
     )
   )
 }
@@ -165,7 +182,7 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
   stopifnot(all(routes %in% available))
 
   # Subscripts: numbers stay numbers, role names are set upright. With role
-  # names, residuals and covariances are drawn without subscripts.
+  # names, residuals, variances and covariances are drawn without subscripts.
   word_roles <- !all(grepl("^[0-9]+$", roles))
   roles <- lapply(roles, \(role) {
     if (grepl("^[0-9]+$", role)) as.numeric(role) else call("plain", as.name(role))
@@ -244,20 +261,25 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
     )
   }
 
-  # Covariances between predictors, as curved double-headed arrows.
+  # Covariances and variances of predictors, as curved double-headed arrows.
   arc_symbols <- list(
     cov_x1_x2 = quote(sigma[X[S1] * X[S2]]),
     cov_x1_c = quote(sigma[X[S1] * italic(C)]),
-    cov_x2_c = quote(sigma[X[S2] * italic(C)])
+    cov_x2_c = quote(sigma[X[S2] * italic(C)]),
+    var_x1 = quote(sigma[X[S1]]^2),
+    var_x2 = quote(sigma[X[S2]]^2),
+    var_c = quote(sigma[italic(C)]^2)
   )
-  if (word_roles) arc_symbols <- lapply(arc_symbols, \(symbol) quote(sigma))
-  left_edge <- layout$nodes$X1[1] - half_width
+  if (word_roles) {
+    arc_symbols[] <- list(quote(sigma))
+    arc_symbols[startsWith(names(arc_symbols), "var")] <- list(quote(sigma^2))
+  }
   for (name in by_activity(names(layout$arcs))) {
     arc <- layout$arcs[[name]]
     on <- is_active(name)
     colour <- colour_if(on, diagram_colours[["covariance"]])
     grid::grid.curve(
-      native(left_edge), native(arc$y[1]), native(left_edge), native(arc$y[2]),
+      native(arc$from[1]), native(arc$from[2]), native(arc$to[1]), native(arc$to[2]),
       curvature = arc$curvature, angle = 90, ncp = 12, square = FALSE,
       arrow = double_arrow,
       gp = grid::gpar(col = colour, fill = colour,
@@ -305,8 +327,7 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
   draw_label(element_label("psi", psi_symbol),
              e1[1], (e1[2] + e2[2]) / 2, on, diagram_colours[["residual"]])
 
-  # Nodes. Predictors used by a highlighted route are dark; a thick border
-  # marks a predictor whose variance the route uses.
+  # Nodes. Predictors used by a highlighted route are dark.
   member_label <- function(variable, symbol, member) {
     if (is.null(labels[[variable]])) {
       return(with_roles(substitute(SYMBOL[S], list(SYMBOL = symbol, S = member)), roles))
@@ -330,8 +351,7 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
     node_colour <- colour_if(on, diagram_colours[["ink"]])
     gp <- grid::gpar(
       fill = if (residual_node) "white" else diagram_colours[["surface"]],
-      col = node_colour,
-      lwd = (if (is_active(name)) 3.2 else 1.8) * text_scale
+      col = node_colour, lwd = 1.8 * text_scale
     )
     if (residual_node) {
       grid::grid.circle(native(position[1]), native(position[2]),
@@ -365,7 +385,9 @@ draw_apim_routes <- function(routes = "all", covariate = FALSE, title = NULL,
   if (!is.null(contributions)) {
     total <- sum(contributions[available])
     value <- sum(contributions[routes])
-    amount <- sprintf("%.3f (%.1f%%)", value, 100 * value / total)
+    # Adding 0 turns a rounded -0 into 0.
+    amount <- sprintf("%.3f (%.1f%%)", round(value, 3) + 0,
+                      round(100 * value / total, 1) + 0)
     formula <- if (is.null(formula)) {
       substitute(plain(Contribution) == plain(AMOUNT), list(AMOUNT = amount))
     } else {
