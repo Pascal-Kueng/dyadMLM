@@ -12,9 +12,7 @@ output:
 This notebook shows the full workflow for the same cross-sectional Gaussian
 APIM in lavaan and glmmTMB. Both give the same point estimates of the
 covariance decomposition, and their bootstrap confidence intervals agree
-within resampling noise. Each dyad has one parent and one teen, with complete
-data. Further checks and other CI methods are in
-`explore-sem-mlm-details.Rmd`.
+within resampling noise. Each dyad has one parent and one teen, with complete data. 
 
 ```{r table-style, include=FALSE}
 # Each table includes its CSS when chunks are run separately.
@@ -114,7 +112,7 @@ apim_model <- '
 '
 
 # Predictor means, variances and covariance are free parameters above.
-# Bootstrap CIs: refit to 1999 samples of the dyads (15 to 30 s on 4 cores).
+# Bootstrap CIs: refit to 1999 samples of the dyads.
 apim_fit <- sem(
   apim_model, fixed.x = FALSE, data = flashe_data, missing = "fiml",
   se = "bootstrap", bootstrap = 1999, iseed = 2026,
@@ -125,12 +123,9 @@ apim_fit <- sem(
 # summary(apim_fit, fit.measures = TRUE)
 ```
 
-### Extract the model parameters
+### Extract the model parameters from lavaan
 
-Lavaan provides both the fitted parameters and the quantities defined with
-`:=`. We extract them once, then display the model parameters and decomposition
-separately. The model parameters include the predictor means, variances and
-covariance as well as the outcome coefficients and residual structure.
+First the usual estimates:
 
 ```{r extract-lavaan}
 # Extract once, using our model labels and including 95% CIs.
@@ -153,14 +148,7 @@ print_table(lavaan_params)
 
 ### Extract the covariance decomposition
 
-The `:=` definitions above apply the Day 2 handout formulas. They calculate
-contributions and percentages from the estimates without changing the fitted
-model. With `se = "bootstrap"`, lavaan recalculates them in each of 1999
-bootstrap samples. The middle 95% of these values gives each 95% confidence interval
-(CI). Each resample re-estimates all parameters, including the predictor
-variances and covariance, so the CIs include all their uncertainty.
-
-We select these estimates and CIs from `lavaan_estimates`:
+Now the covariance decomposition estimates and CIs:
 
 ```{r lavaan-covariance-decomposition}
 # Decomposition: keep only the quantities defined with :=.
@@ -194,12 +182,12 @@ print_table(lavaan_decomposition_table)
 
 ## 2. glmmTMB: reproduce the point estimates
 
-`dyadMLM` prepares the actor and partner predictors; `glmmTMB` fits the model.
-We retain the supplied centering and use maximum likelihood, as in lavaan.
+`dyadMLM` prepares the actor and partner predictors. 
+We retain the supplied centering and use maximum likelihood to mirror lavaan.
 
 ### Reshape and prepare the data
 
-Reshape to one row per person, then construct the actor/partner predictors.
+Reshape to one row per person (long-format):
 
 ```{r prepare-dyadmlm}
 # Each original row is one dyad. Long format has one row per person.
@@ -211,7 +199,11 @@ flashe_long <- flashe_data |>
     names_pattern = "(.+)_(parent|teen)$"
   ) |>
   dplyr::mutate(person_id = dplyr::row_number())
+```
 
+Construct the actor/partner predictors:
+
+```{r prepare-dyadmlm}
 # Construct actor/partner columns without centering the scores again.
 flashe_apim <- dyadMLM::prepare_dyad_data(
   flashe_long,
@@ -260,8 +252,8 @@ apim_mlm_fit <- glmmTMB::glmmTMB(
 
 We extract the needed coefficients, then add labels matching lavaan.
 `dispformula = ~ 0` fixes glmmTMB's separate residual variance at about
-1.5e-8, too small to matter. It does not affect the covariance. The `us()`
-block therefore holds the residual variances and covariance.
+1.5e-8, too small to matter. The `us()` block therefore holds the residual 
+variances and covariance.
 
 ```{r extract-glmmtmb-points}
 # Extract all nine estimates with their original model names.
@@ -297,6 +289,9 @@ print_table(glmmtmb_params_point)
 
 We also need the two efficacy variances and their covariance. We calculate
 these from one row per dyad, dividing by $n$ as in lavaan's ML estimation.
+
+Note: dividing by n-1 (default in cov() might be valid too, just not match
+lavaan exactly anymore.
 
 We then collect all estimates we need for the computation
 in a one-row table, `mlm_inputs`.
@@ -363,9 +358,7 @@ print_table(glmmtmb_decomposition_point)
 
 ### Compare the point estimates with lavaan
 
-We compare the nine parameters estimated by both models. The predictor means, variances and covariance are fitted
-parameters in lavaan. glmmTMB treats the predictors as observed values.
-The differences are below 1e-4 and come from the optimizers' stopping rules.
+The differences are below 1e-4 and come from the optimizers' stopping rules (tested).
 
 ```{r compare-parameter-points}
 parameter_point_comparison <- dplyr::inner_join(
