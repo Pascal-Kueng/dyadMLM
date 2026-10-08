@@ -410,8 +410,7 @@ dyadMLM::check_partner_dependence(
   dyad = coupleID,
   role = gender,
   # Supply the fitting data because gender is not in the model formula.
-  data = apim_distinguishable_data,
-  panels = TRUE
+  data = apim_distinguishable_data
 )
 ```
 
@@ -490,6 +489,15 @@ quartiles across predicted outcomes, which suggests further
 gender differences; the distinguishable APIM shows no flags. The
 [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
 shows how often these panels flag correct and mismatched models.
+
+If you know [DHARMa](https://CRAN.R-project.org/package=DHARMa): the uniform QQ
+plot and the quartile lines across predicted outcomes resemble its residual
+plots and use the same kind of residuals. Three things differ. Our simulations
+redraw all random effects (DHARMa's default holds them at their fitted values),
+so partner dependence stays in the reference. Blue envelopes come from whole
+simulated datasets instead of tests that assume independent residuals, which
+partners' residuals are not. And the checks can be split by role. See
+[why we do not use DHARMa directly](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly).
 
 
 ## Intensive longitudinal APIMs

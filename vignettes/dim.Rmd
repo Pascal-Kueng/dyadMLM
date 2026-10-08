@@ -441,8 +441,7 @@ dyadMLM::check_partner_dependence(
   dyad = coupleID,
   role = gender,
   # Supply the fitting data because gender is not in the model formula.
-  data = cross_exchangeable_data,
-  panels = TRUE
+  data = cross_exchangeable_data
 )
 ```
 

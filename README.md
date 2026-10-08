@@ -246,8 +246,7 @@ check_partner_dependence(
   dyad = coupleID,
   role = gender,
   # Supply the fitting data because gender is not in the model formula.
-  data = prepared_data,
-  panels = TRUE
+  data = prepared_data
 )
 ```
 
@@ -276,7 +275,9 @@ can help assess those restrictions).
 
 The same `simulations` can be reused with `check_dyad_residuals()` and
 `check_dyad_outcomes()`. Use the same `dyad`, `role` and `data`
-arguments.
+arguments. The [APIM
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes)
+shows a worked example.
 
 ## Vignettes and examples
 
