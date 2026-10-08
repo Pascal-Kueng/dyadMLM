@@ -12,7 +12,7 @@ output:
 This notebook shows the full workflow for the same cross-sectional Gaussian
 APIM in lavaan and glmmTMB. Both give the same point estimates of the
 covariance decomposition, and their bootstrap confidence intervals agree
-within resampling noise. Each dyad has one parent and one teen, with complete data. 
+within resampling noise. Each dyad has one parent and one teen, with complete data.
 
 ```{r table-style, include=FALSE}
 # Each table includes its CSS when chunks are run separately.
@@ -182,14 +182,14 @@ print_table(lavaan_decomposition_table)
 
 ## 2. glmmTMB: reproduce the point estimates
 
-`dyadMLM` prepares the actor and partner predictors. 
+`dyadMLM` prepares the actor and partner predictors.
 We retain the supplied centering and use maximum likelihood to mirror lavaan.
 
 ### Reshape and prepare the data
 
 Reshape to one row per person (long-format):
 
-```{r prepare-dyadmlm}
+```{r reshape-long}
 # Each original row is one dyad. Long format has one row per person.
 flashe_long <- flashe_data |>
   dplyr::mutate(dyad_id = dplyr::row_number()) |>
@@ -252,7 +252,7 @@ apim_mlm_fit <- glmmTMB::glmmTMB(
 
 We extract the needed coefficients, then add labels matching lavaan.
 `dispformula = ~ 0` fixes glmmTMB's separate residual variance at about
-1.5e-8, too small to matter. The `us()` block therefore holds the residual 
+1.5e-8, too small to matter. The `us()` block therefore holds the residual
 variances and covariance.
 
 ```{r extract-glmmtmb-points}
@@ -290,8 +290,8 @@ print_table(glmmtmb_params_point)
 We also need the two efficacy variances and their covariance. We calculate
 these from one row per dyad, dividing by $n$ as in lavaan's ML estimation.
 
-Note: dividing by n-1 (default in cov() might be valid too, just not match
-lavaan exactly anymore.
+Note: dividing by n-1 (the default in cov()) might be valid too, but would
+not match lavaan exactly.
 
 We then collect all estimates we need for the computation
 in a one-row table, `mlm_inputs`.
