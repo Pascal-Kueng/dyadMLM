@@ -10,12 +10,20 @@ output:
 ---
 
 This notebook adds checks and other CI methods to `explore-sem-mlm.Rmd`. It
-first runs that notebook's code, so its data, fits and bootstrap results are
-available here.
+first knits that notebook in the background, so its data, fits and bootstrap
+results are available here.
 
 ```{r run-main-notebook, include=FALSE}
-# About 5 to 15 minutes, mostly for the glmmTMB bootstrap.
-source(knitr::purl("explore-sem-mlm.Rmd", output = tempfile(), quiet = TRUE))
+# Use the main notebook's cache and figure folders, so knitr reuses its
+# cached bootstrap. Without that cache, this takes 5 to 15 minutes.
+invisible(knitr::knit_child(
+  "explore-sem-mlm.Rmd",
+  options = list(
+    cache.path = "explore-sem-mlm_cache/html/",
+    fig.path = "explore-sem-mlm_files/figure-html/"
+  ),
+  quiet = TRUE
+))
 ```
 
 ## 1. glmmTMB and lavaan on the same samples
