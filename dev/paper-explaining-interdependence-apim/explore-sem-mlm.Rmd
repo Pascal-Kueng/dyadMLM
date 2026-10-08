@@ -613,16 +613,9 @@ print_table(ci_comparison)
 ```
 
 The CIs are very close. They differ a little because lavaan and glmmTMB
-drew different random samples. In `explore-sem-mlm-details.Rmd`, lavaan is
-refit to the same samples as glmmTMB. Then all estimates agree in every
-sample (differences below 1e-4). That file also compares other CI methods.
-For glmmTMB, a Monte Carlo CI based on
-`vcov(apim_mlm_fit, full = TRUE, sandwich = TRUE)` is faster.
+drew different random samples. 
 
 ## 4. Plot the confidence intervals
-
-Each point is an estimate, and each line its 95% CI. Both panels share the
-x-axis, so the sizes of the contributions can be compared.
 
 ```{r decomposition-intervals, dev="svg", fig.width=10, fig.height=4}
 ci_plot_data <- dplyr::bind_rows(
@@ -648,25 +641,16 @@ ggplot(ci_plot_data, aes(x = estimate, y = route, colour = route)) +
   theme_minimal()
 ```
 
+
 ## 5. The routes as path diagrams
 
-Each panel highlights one route: a path into the teen's intake, a path into
-the parent's intake, and what links the two starting points. That is the
-covariance of the two efficacies (σ), the variance of one efficacy (σ², the
-loop on top of its box), or, for the residual route, the residual covariance
-(ψ). A partner path is named after the member whose intake it predicts:
-p~parent~ runs from the teen's efficacy to the parent's intake.
-
-The numbers are the glmmTMB estimates from section 2. The stars are
-bootstrap p-values from the draws in section 3; here no draw crosses zero, so
-every path and covariance gets three stars. Variances get no stars, since
-they are always positive. Below each panel are the formula, the contribution
-and its share of the total covariance.
+The numbers of the path diagrams are the glmmTMB estimates from section 2. 
+The stars are bootstrap p-values from the draws in section 3. 
 
 `apim-route-diagrams.R` draws the diagrams. It numbers the members: the teen
 is member 1 and the parent member 2.
 
-```{r route-diagram-inputs}
+```{r route-diagram-inputs, echo=FALSE}
 source("apim-route-diagrams.R")
 
 # Two-sided bootstrap p-value: twice the share of draws on the far side of 0.
@@ -700,7 +684,7 @@ diagram_p_values <- diagram_inputs |>
   tibble::deframe()
 ```
 
-```{r route-diagrams, dev="svg", fig.width=12, fig.height=10.4}
+```{r route-diagrams, dev="svg", fig.width=12, fig.height=10.4, echo=FALSE}
 draw_apim_route_grid(
   list(
     "1. Actor-driven" = "actor_driven", "2. Partner-driven" = "partner_driven",
@@ -717,21 +701,8 @@ draw_apim_route_grid(
 
 ## 6. Example with a covariate
 
-We add one covariate: the parent's gender (`parent_female`, 1 = mother,
-0 = father). It has the same value for both members and can affect both
-partners' intake. The outcome covariance then has ten routes instead of five:
-
-- the four APIM routes, as before;
-- one route through the covariate itself (parent-gender-driven);
-- four mixed routes: a path from one efficacy and a path from the covariate,
-  linked by their covariance;
-- the residual.
-
-Teen-driven and parent-driven still mean the routes through the teen's and
-the parent's efficacy. We include parent gender as a covariate only, without
-interactions with efficacy. In J-P and Niall's product-term model, these
-interactions are small (p = .09 to .77), so the actor and partner effects can
-be the same for mothers and fathers.
+We add the parent's gender as a covariate (`parent_female`, 1 = mother,
+0 = father). 
 
 ### Fit the model with the covariate
 
@@ -776,11 +747,7 @@ covariate_estimates <- tibble::tibble(
 print_table(covariate_estimates)
 ```
 
-### All ten routes
-
-Each route is the path into the teen's intake, times the variance or
-covariance that links the two starting points, times the path into the
-parent's intake.
+### Compute all ten routes
 
 ```{r covariate-routes}
 covariate_routes <- covariate_estimates |>
@@ -815,10 +782,9 @@ tibble::tibble(
 ```
 
 The first diagram shows all paths, variances (σ²) and covariances (σ) with
-their estimates. These are all the numbers the routes need. The next diagrams
-show each route on its own. In the formulas, C stands for the covariate.
+their estimates. C stands for the covariate.
 
-```{r covariate-all-paths, dev="svg", fig.width=9, fig.height=5.4}
+```{r covariate-all-paths, dev="svg", fig.width=9, fig.height=5.4, echo=FALSE}
 # Our names, and the matching names in the diagram.
 covariate_diagram_values <- with(covariate_estimates, c(
   a1 = actor_teen, a2 = actor_parent,
@@ -849,7 +815,7 @@ draw_apim_routes(
 )
 ```
 
-```{r covariate-route-diagrams, dev="svg", fig.width=13, fig.height=19}
+```{r covariate-route-diagrams, dev="svg", fig.width=13, fig.height=19, echo=FALSE}
 draw_apim_route_grid(
   list(
     "1. Actor-driven" = "actor_driven", "2. Partner-driven" = "partner_driven",
@@ -872,7 +838,7 @@ draw_apim_route_grid(
 
 We keep the four APIM routes separate, as without the covariate. The
 parent-gender-driven route stays on its own. We add up the four mixed routes
-(6 to 9): each is small and hard to interpret alone. Together, they are the
+(6 to 9) since each is small and hard to interpret alone. Together, they are the
 part of the outcome covariance that comes from efficacy and parent gender
 being correlated. The residual comes last. The table compares each group
 with the model without the covariate.
@@ -905,10 +871,6 @@ covariate_group_table <- covariate_groups |>
   dplyr::left_join(without_covariate, by = "group")
 print_table(covariate_group_table)
 ```
-
-With the covariate, the four APIM routes barely change. The
-parent-gender-driven route is slightly negative (−0.4%), and the four mixed
-routes cancel out to almost zero (panels 6 to 9).
 
 ### Plot the groups
 
