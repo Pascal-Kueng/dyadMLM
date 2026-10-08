@@ -464,19 +464,20 @@ ggplot(plot_data, aes(x = estimate, y = model, fill = route)) +
 
 ## 3. Add confidence intervals for glmmTMB
 
-We use the same bootstrap method as lavaan in part 1. We draw 1486 dyads with
-replacement and repeat part 2 on them. We do this 1999 times. For each
-estimate, the 2.5% and 97.5% quantiles of the 1999 values give the 95% CI.
-This does not assume normally distributed data.
+We use the same bootstrap method as lavaan in section 1. We draw 1486 dyads
+with replacement and repeat the glmmTMB steps from section 2 on them. We do
+this 1999 times. For each estimate, the 2.5% and 97.5% quantiles of the 1999
+values give the 95% CI. This does not assume normally distributed data.
 
-### Part 2 as a function
+### The glmmTMB steps as a function
 
-`add_contributions()` contains the formulas from part 2. `estimate_apim()`
-repeats part 2 for any data with one row per dyad. It returns every
-estimate in one row, with lavaan's names.
+`add_contributions()` contains the decomposition formulas from section 2.
+`estimate_apim()` repeats the glmmTMB steps from section 2 for any data with
+one row per dyad: reshape, prepare the predictors, fit the model and collect
+the estimates. It returns every estimate in one row, with lavaan's names.
 
 ```{r bootstrap-functions}
-# The decomposition formulas from part 2.
+# The decomposition formulas from section 2.
 add_contributions <- function(estimates) {
   estimates |>
     dplyr::mutate(
@@ -491,7 +492,7 @@ add_contributions <- function(estimates) {
 }
 
 estimate_apim <- function(data) {
-  # As in part 2: reshape, prepare the predictors and refit. New dyad IDs
+  # As in section 2: reshape, prepare the predictors and refit. New dyad IDs
   # make a dyad that was drawn twice count as two dyads.
   long <- data |>
     dplyr::mutate(dyad_id = dplyr::row_number()) |>
@@ -508,7 +509,7 @@ estimate_apim <- function(data) {
   fit <- update(apim_mlm_fit, data = prepared)
 
   # Get the model estimates and the predictor variances and covariance
-  # (divided by n, as in part 2). In both matrices, parent comes first.
+  # (divided by n, as in section 2). In both matrices, parent comes first.
   fixed_effects <- glmmTMB::fixef(fit)$cond
   residual_covariance_matrix <- glmmTMB::VarCorr(fit)$cond$dyad_id
   predictor_covariance_matrix <- cov.wt(
