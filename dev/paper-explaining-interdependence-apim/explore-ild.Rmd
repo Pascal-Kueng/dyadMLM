@@ -1,0 +1,20 @@
+---
+title: "APIM exploration: intensive longitudinal data"
+author: "Pascal Küng"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    math_method: mathml
+    df_print: kable
+---
+
+This notebook explores intensive longitudinal dyadic data, using the daily
+diaries of the Time and Ties (T&T) study.
+
+## Load the data
+
+```{r load-tt}
+# One row per person and diary day. merge_data.Rmd in the dashboards
+# repository creates the file; load() creates `df_merged`.
+load("../../../00DashboardsTimeAndTies/Merged_Dataset_long.rda")
+```
