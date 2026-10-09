@@ -39,6 +39,30 @@ test_that("temporary completion adds and then removes only missing member rows",
 })
 
 
+test_that("temporary completion leaves complete data unchanged", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2),
+    x = 1:8
+  )
+  # vctrs cannot bind zero rows to some classes, e.g. classes without vctrs
+  # methods, or `hms` when the hms package is not loaded.
+  data$note <- structure(1:8, class = "dyadMLM_test_class")
+
+  validated <- validate_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    time = time,
+    predictors = x
+  )
+
+  completed <- temporarily_complete_dyad_occasions(validated)
+
+  expect_identical(completed$note, data$note)
+})
+
 test_that("temporary completion recovers APIM partner CBP and lagged values", {
   sparse <- data.frame(
     row_id = 1:10,
