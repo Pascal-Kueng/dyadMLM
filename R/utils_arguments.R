@@ -43,6 +43,24 @@ normalize_model_types <- function(model_types) {
 }
 
 
+# An extra unnamed argument fills the next free argument. So when `data` is
+# supplied twice, the data frame lands in a column argument such as `role`.
+stop_if_data_frame <- function(quo, arg, data) {
+  if (rlang::quo_is_symbol(quo) && rlang::as_name(quo) %in% names(data)) {
+    return(invisible())
+  }
+  value <- tryCatch(rlang::eval_tidy(quo), error = function(e) NULL)
+  if (is.data.frame(value)) {
+    stop(
+      "`", arg, "` received a data frame instead of column names. ",
+      "This usually means `data` was supplied twice, e.g. through the pipe and as an argument. ",
+      "Pass `data` only once.",
+      call. = FALSE
+    )
+  }
+}
+
+
 select_dyad_columns <- function(data, cols_quo, arg) {
   if (rlang::quo_is_null(cols_quo)) {
     return(NULL)
@@ -51,6 +69,7 @@ select_dyad_columns <- function(data, cols_quo, arg) {
   selected_columns <- tryCatch(
     tidyselect::eval_select(cols_quo, data = data),
     error = function(e) {
+      stop_if_data_frame(cols_quo, arg, data)
       stop(
         sprintf(
           paste0(
