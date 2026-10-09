@@ -14,6 +14,8 @@ Working materials for the covariance/path-tracing methods programme.
   routes, waterfall, equal-total comparison, and the argument in section bullets.
 - [Technical notes](paper-idea.Rmd): equations, worked examples, covariate and
   exchangeable identities, and the reusable figure code.
+- [ILD talking points](ild-outline.md): Paper 2 outline with checked
+  references, and the steps for [explore-ild.Rmd](explore-ild.Rmd).
 
 The plan and notes were reconciled with the literature review on **1 September
 2026**. Direct APIM decomposition, signed reporting, diagrams, and software have
