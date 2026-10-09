@@ -68,11 +68,14 @@ temporarily_complete_dyad_occasions <- function(data) {
   )
 
   # Bind rows inserts NA to any variables that are not present in the bound
-  # dataset (e.g., all non-structural columns)
-  temporarily_completed_data <- dplyr::bind_rows(
-    input_data,
-    temporary_missing_member_rows
-  )
+  # dataset (e.g., all non-structural columns). Skip it when nothing is missing:
+  # vctrs can fail to bind zero rows for some classes, such as `hms` columns
+  # when the hms package is not loaded.
+  temporarily_completed_data <- if (nrow(temporary_missing_member_rows) == 0L) {
+    input_data
+  } else {
+    dplyr::bind_rows(input_data, temporary_missing_member_rows)
+  }
 
   # re-add metadata that was removed at the start
   attr(temporarily_completed_data, "dyadMLM") <- metadata

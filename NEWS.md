@@ -13,6 +13,10 @@
   checks list each observed summary with the middle 95% of its simulations, and
   the same comparison is stored in `summary`.
 
+* Fixed an internal vctrs error in `prepare_dyad_data()` when no member rows
+  are missing and the data contain, for example, an `hms` column while the hms
+  package is not loaded.
+
 * Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.
 
