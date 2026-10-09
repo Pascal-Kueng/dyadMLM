@@ -51,6 +51,7 @@
 <li><p>Improved function help and the model-comparison example (thanks to <a href="https://github.com/musanyaks" class="external-link">@musanyaks</a>, <a href="https://github.com/Pascal-Kueng/dyadMLM/pull/50" class="external-link">#50</a>).</p></li>
 <li><p>Added experimental predictive checks for response variances and partner correlations in cross-sectional <code>glmmTMB</code> models with Gaussian or selected non-Gaussian responses, including ordinal, zero-inflated, and hurdle models. Checks and plots can be shown separately for each dyad composition. Printed checks list each observed summary with the middle 95% of its simulations, and the same comparison is stored in <code>summary</code>.</p></li>
 <li><p>Fixed predictive means for <code>glmmTMB</code> 1.1.15.2 and later when the zero-inflation component has random effects but no fixed effects.</p></li>
+<li><p><code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now gives a clear error when <code>data</code> is supplied twice, for example through the pipe and as an argument.</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="dyadmlm-020">dyadMLM 0.2.0<a class="anchor" aria-label="anchor" href="#dyadmlm-020"></a></h2><p class="text-muted">CRAN release: 2026-08-21</p>
