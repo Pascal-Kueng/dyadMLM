@@ -107,12 +107,14 @@ validate_dyad_data <- function(
   if (rlang::quo_is_missing(dyad)) {
     stop("`dyad` must be supplied.", call. = FALSE)
   }
+  stop_if_data_frame(dyad, "dyad", out)
   dyad_name <- rlang::as_name(dyad)
 
   member <- rlang::enquo(member)
   if (rlang::quo_is_missing(member)) {
     stop("`member` must be supplied.", call. = FALSE)
   }
+  stop_if_data_frame(member, "member", out)
   member_name <- rlang::as_name(member)
 
   role <- rlang::enquo(role)
@@ -120,6 +122,7 @@ validate_dyad_data <- function(
   role_name <- NULL
 
   if (has_role) {
+    stop_if_data_frame(role, "role", out)
     role_name <- rlang::as_name(role)
   }
 
@@ -134,6 +137,7 @@ validate_dyad_data <- function(
   time_name <- NULL
 
   if (has_time) {
+    stop_if_data_frame(time, "time", out)
     time_name <- rlang::as_name(time)
   }
 

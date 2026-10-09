@@ -16,6 +16,9 @@
 * Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.
 
+* `prepare_dyad_data()` now gives a clear error when `data` is supplied
+  twice, for example through the pipe and as an argument.
+
 # dyadMLM 0.2.0
 
 * This early API-stabilization release intentionally makes a few direct,
