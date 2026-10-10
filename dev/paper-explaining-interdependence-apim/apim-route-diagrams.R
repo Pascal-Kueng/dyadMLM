@@ -1,6 +1,7 @@
 # Path diagrams for the APIM covariance decomposition, optionally with one
 # covariate C. Dev only, not part of the package. Builds on the vignette
-# diagram helpers and the route diagrams in paper-idea.Rmd.
+# diagram helpers and the route diagrams of the old paper-idea.Rmd (in git
+# history).
 #
 # Model (partner subscripts name the outcome member, as in Kenny):
 #   Y1 = a1 X1 + p1 X2 + c1 C + e1

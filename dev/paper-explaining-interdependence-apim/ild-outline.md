@@ -1,11 +1,11 @@
 # Paper 2 (ILD): talking points and references
 
 Draft, 9 October 2026. These are the main points for decomposing partner
-covariance in daily diary data, with references. It extends the Paper 2
-section of [plan.md](plan.md). The worked example goes in
+covariance in daily diary data, with references. Paper 1 is in
+[paper-1-outline.md](paper-1-outline.md). The worked example goes in
 [explore-ild.Rmd](explore-ild.Rmd). The literature on the decomposition itself
 (teaching sources, applications, closest ILD studies) is in the master list,
-`~/Downloads/APIM-decomposition-literature-2026-10-09.md`.
+[literature.md](literature.md).
 
 On 9 October, agents checked every reference here against Crossref and, where
 possible, against the text. Sources marked *[abstract]* were checked against
