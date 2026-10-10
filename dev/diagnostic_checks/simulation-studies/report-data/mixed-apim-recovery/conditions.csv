@@ -1,0 +1,13 @@
+"condition","n_occasions","n_dyads","design","pooling","dyads_per_composition","repetitions"
+1,1,120,"cross_apim","separate",40,500
+2,1,360,"cross_apim","separate",120,500
+3,1,120,"cross_intercept","separate",40,500
+4,1,360,"cross_intercept","separate",120,500
+5,14,120,"ild_intercept","pooled",40,500
+6,14,360,"ild_intercept","pooled",120,500
+7,14,120,"ild_intercept","separate",40,500
+8,14,360,"ild_intercept","separate",120,500
+9,14,120,"ild_slopes","pooled",40,500
+10,14,360,"ild_slopes","pooled",120,500
+11,14,120,"ild_slopes","separate",40,500
+12,14,360,"ild_slopes","separate",120,500

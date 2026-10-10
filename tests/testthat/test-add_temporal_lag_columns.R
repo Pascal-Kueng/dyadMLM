@@ -224,3 +224,35 @@ test_that("lag predictors work without temporal centering", {
   expect_equal(result$.x_actor_lag1, result$.x_lag1)
   expect_false(any(grepl("cwp.*lag1", names(result))))
 })
+
+test_that("a warning is given when all lag values are missing", {
+  prepare_lagged <- function(data, ...) {
+    prepare_dyad_data(
+      data, dyad = dyad_id, member = person_id, time = time,
+      predictors = x, lag1_predictors = x, seed = 123, ...
+    )
+  }
+
+  # Waves two years apart: no observation at exactly `time - 1`.
+  data <- data.frame(
+    dyad_id = rep(1:2, each = 6),
+    person_id = rep(c("A", "B", "C", "D"), each = 3),
+    time = rep(c(2008, 2010, 2012), 4),
+    x = 1:12
+  )
+  expect_warning(prepare_lagged(data), "All values of `.x_lag1`", fixed = TRUE)
+
+  # Alternating members: lag values exist only on temporary rows for missed
+  # occasions, which are removed before returning.
+  alternating <- data.frame(
+    dyad_id = rep(1:2, each = 4),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    time = rep(1:4, 2),
+    x = 1:8
+  )
+  expect_warning(
+    prepare_lagged(alternating, model_types = "none"),
+    "All values of `.x_lag1`",
+    fixed = TRUE
+  )
+})

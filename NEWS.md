@@ -17,6 +17,28 @@
   are missing and the data contain, for example, an `hms` column while the hms
   package is not loaded.
 
+* `print()` and `summary()` of prepared data now report missing partner data.
+  A new help section in `prepare_dyad_data()` explains how these occasions are
+  prepared.
+
+* `prepare_dyad_data()` gains `partner_exists`, which records whether a
+  partner existed. It keeps people observed alone (singletons and people whose
+  partner did not take part) with their own compositions, and sets partner
+  predictors to 0 where no partner existed (two-part coding, with
+  `.partner_exists` and `.partner_exists_lag1` columns). When the status
+  changes within a dyad in longitudinal data, the status is split into
+  within- and between-person parts, and the partner's usual level (`cbp`) is
+  split by partner status (with numeric `time`). See
+  `vignette("partner-exists")`.
+
+* `prepare_dyad_data()` warns when all lag-1 values of a predictor are
+  missing, for example when `time` counts years with two-year waves
+  ([#83](https://github.com/Pascal-Kueng/dyadMLM/issues/83)).
+
+* `recover_exchangeable_covariance()` recognizes summed indicators such as
+  `I(.is_male_x_male + .is_singleton_male)`, which let people observed alone
+  share the variance of an exchangeable composition.
+
 * Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.
 

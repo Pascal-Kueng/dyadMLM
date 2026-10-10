@@ -117,6 +117,28 @@ variance is non-zero; at zero variance, the correlation is undefined.
 Covariances involving the diary-day slope are therefore supplied entirely by
 the shared block.
 
+People observed alone (see \code{partner_exists} in \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}) can
+share the variance of an exchangeable composition. Add their indicator to
+both blocks, as a sum inside \code{I()}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{(0 + I(.is_male_x_male + .is_singleton_male) | coupleID) +
+  (0 + I(.member_contrast_male_x_male_arbitrary + .is_singleton_male) | coupleID)
+}\if{html}{\out{</div>}}
+
+Automatic matching reads such a sum as the composition's indicator, also in
+interactions such as \code{I(.is_male_x_male + .is_singleton_male):time}. A
+person observed alone is then treated like one member of the dyad (shared
+part 1, difference part +1), so the recovered variances and covariances
+within a member also describe them, as long as their indicator is added to
+this composition's blocks only. Covariances between partners describe dyad
+members only. Added to several compositions, their variance combines them. Recovery
+requires the same added indicators on all terms of a block, and in both
+blocks. Otherwise, recovery stops with an error, because these
+people would get only part of the dyad members' variance. The fitted summed
+columns are checked like the indicator columns. In \code{block_pairings}, give
+the plain indicator names as \code{difference_indicator} and \code{shared_indicator}
+(e.g., \code{.member_contrast_male_x_male_arbitrary}), not the sum.
+
 The random-effect terms may be copied exactly from the model formula.
 Equivalent backend syntax is also recognized, such as
 \code{(1 + time | group)} and \code{us(1 + time | group)}, or

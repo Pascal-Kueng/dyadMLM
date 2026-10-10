@@ -1,7 +1,7 @@
 ---
 title: "APIMs with Mixed Dyad Compositions"
 author: "Pascal Küng"
-bibliography: ../../vignettes/references.bib
+bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{APIMs with Mixed Dyad Compositions}
@@ -17,8 +17,8 @@ knitr::opts_chunk$set(
 
 diagram_candidates <- c(
   "diagram-helpers.Rinc",
-  "../../vignettes/diagram-helpers.Rinc",
-  "vignettes/diagram-helpers.Rinc"
+  "vignettes/diagram-helpers.Rinc",
+  "../../vignettes/diagram-helpers.Rinc"
 )
 diagram_helper <- diagram_candidates[file.exists(diagram_candidates)][1]
 
@@ -42,17 +42,33 @@ mixed_apim_fitted_alt <-
   "Fitted mixed-composition APIM diagram unavailable."
 ```
 
-This vignette covers APIMs that combine distinguishable and exchangeable dyad
-compositions in one analysis. The unified SEM presentation by @Bolger2025Unified
-is the basis and inspiration for this vignette. Here, we implement a similar
-general idea in one multilevel model.
+Suppose you study how support relates to closeness in female–male
+(distinguishable by gender), female–female, and male–male couples.
+Partners within each same-gender composition are treated as indistinguishable
+here, while variances and partner correlations may differ between the two
+compositions. Some people have no partner throughout the study or at certain
+measurement occasions. Others have partners who do not participate or miss
+some occasions. You want to retain these observations, including
+*singletons*: groups with only one member observed in the supplied data.
 
-> **Model-engine support.** The joint mixed-composition models in this vignette
-> use `glmmTMB`. An exact composition-specific Gaussian residual covariance
-> structure is not currently supported for a standard single-response `brms`
-> model. Use `glmmTMB` for the specifications shown here.
+This vignette shows how to analyze these groups in one APIM while accounting
+for dependence between partners' scores. You can compare the different
+compositions and choose which effects, variances, and partner correlations
+to estimate separately or share across groups.
 
-This vignette builds on the regular
+Distinguishable models allow parameters to differ by member role; exchangeable
+models use the same parameters for both members. We adapt the structural
+equation modeling approach of @Bolger2025Unified to a multilevel model.
+
+Joint multilevel APIMs for same- and different-gender couples also have
+methodological and applied precedents
+[@westGenderSexualOrientation2008; @spahrGossipCouples2025].
+
+> **Software.** These models use `glmmTMB`. Standard `brms` models with one
+> outcome variable do not currently support the exact Gaussian residual
+> covariance structures shown here.
+
+This vignette builds on the
 [Actor-Partner Interdependence Model vignette](apim.html). For the broader
 package workflow and an overview of the other model-specific vignettes,
 including the [Dyad-Individual Model](dim.html) and
@@ -61,9 +77,8 @@ including the [Dyad-Individual Model](dim.html) and
 
 ## Cross-sectional mixed-composition APIM
 
-The cross-sectional example uses `dyads_cross`. The data also contain actor and
-partner effects, but the intercept-only model below keeps the focus on the
-composition-specific covariance structures.
+`dyads_cross` was simulated with actor and partner effects. We begin with an
+intercept-only model to focus on residual covariance within each composition.
 
 We first prepare the data with `dyadMLM::prepare_dyad_data()`, which identifies all
 observed dyad compositions.
@@ -80,19 +95,17 @@ mixed_cross_data <- dyadMLM::prepare_dyad_data(
 print(mixed_cross_data, n = 4)
 ```
 
-For each composition, the model uses either distinguishable or exchangeable
-APIM terms. For exchangeable compositions, it uses a sum-and-difference
-parameterization. This gives the two members equal variances while allowing
-their within-dyad covariance to be estimated
+Each composition uses the
+[distinguishable](apim.html#distinguishable-residual-structure) or
+[exchangeable](apim.html#exchangeable-residual-structure) covariance structure
+described in the APIM vignette.
+
+Exchangeable blocks use the sum-and-difference approach
 [@delrosarioPracticalGuideSpecifying2025].
 
 The returned `.member_contrast_*` variables contain `-1` and `1` for the corresponding
 exchangeable composition and `0` for all other compositions.
 `dyadMLM::prepare_dyad_data()` creates this structure automatically.
-The [APIM vignette](apim.html#exchangeable-residual-structure) derives
-the resulting covariance matrix and shows how to back-transform the sum and
-difference variances to the usual equal-variance member-level covariance
-matrix.
 
 The three composition-specific blocks are combined within one joint model:
 
@@ -100,7 +113,11 @@ The three composition-specific blocks are combined within one joint model:
 draw_mixed_apim_diagram()
 ```
 
-The model can then be specified as follows (example for an intercept-only model):
+With one observation per person, the random-effects terms below represent
+within-dyad residual covariance. `dispformula = ~ 0` fixes the remaining
+Gaussian residual variance near zero.
+
+We fit the intercept-only model as follows:
 
 ```{r fit-mixed-cross-sectional-gaussian, eval = has_glmmTMB}
 
@@ -138,10 +155,9 @@ summary(mixed_cross_gaussian_model)
 
 ```
 
-The same composition-specific blocks can be labelled directly from the fitted
-model. For the exchangeable blocks, the common member residual standard
-deviation and correlation are back-transformed from their fitted sum-and-
-difference components.
+The next diagram shows the fitted intercepts, residual standard deviations,
+and within-dyad correlations. For exchangeable dyads, member residual SDs and
+correlations are calculated from the fitted shared and contrast components.
 
 ```{r prepare-fitted-mixed-apim-diagram, include=FALSE, eval=has_glmmTMB}
 mixed_apim_diagram_values <- .extract_mixed_apim_diagram_values(
@@ -175,9 +191,9 @@ mixed_apim_fitted_alt <- sprintf(
 draw_mixed_apim_diagram(model = mixed_cross_gaussian_model)
 ```
 
-The four fixed-effect indicators are mutually exclusive. With $I$ denoting the
-generated `.is_{composition_role}` indicator and $b_0$ a fixed intercept, the
-fixed part of the full model can be written as:
+Exactly one of the four fixed-effect indicators is 1 for each person; the
+others are 0. With $I$ denoting a generated `.is_{composition_role}` indicator
+and $b_0$ a fixed intercept, the model's fixed mean is:
 
 $$
 \mu_{ij}^{\mathrm{fixed}} =
@@ -188,7 +204,7 @@ b_{0,\mathrm{MM}} I_{\mathrm{MM},ij}.
 $$
 
 In `FM,F`, the first part identifies the female-male composition and the final
-`F` identifies the female outcome member. The same composition-first convention
+`F` identifies the female member. The same composition-first convention
 is used throughout this vignette.
 
 The active indicator for each person is shown below:
@@ -200,8 +216,7 @@ The active indicator for each person is shown below:
 | Member of a female-female dyad | 0 | 0 | **1** | 0 | $b_{0,\mathrm{FF}}$ |
 | Member of a male-male dyad | 0 | 0 | 0 | **1** | $b_{0,\mathrm{MM}}$ |
 
-Therefore, for a member of a male-male dyad, for example, the fixed part reduces
-to just $b_{0,\mathrm{MM}}$ via:
+For a member of a male-male dyad, this becomes:
 
 $$
 0 \cdot b_{0,\mathrm{FM,F}} + 0 \cdot b_{0,\mathrm{FM,M}} +
@@ -213,29 +228,23 @@ The random-effects terms reduce in the same way because their indicator columns
 are also `0` outside the relevant composition. The model combines an
 unrestricted distinguishable covariance block for female-male dyads with a
 separate equal-variance covariance block for each exchangeable composition.
-The main APIM vignette introduces the
-[distinguishable](apim.html#distinguishable-residual-structure) and
-[exchangeable](apim.html#exchangeable-residual-structure) structures.
 
 The random-effects terms form composition-specific blocks, so no covariance
 parameters are estimated across compositions. Such parameters would not be
 identified because each dyad belongs to only one composition.
 
-This illustration only covered the fixed-intercept model. The ILD example below
-shows how composition-specific slopes can be added.
+The longitudinal example below adds slopes for each composition.
 
 ### Single versus separate mixed-composition fits
 
-The mixed-composition models described in this vignette fit all dyad compositions in one
-model call. This is useful when the goal is to compare effects across
-compositions, test equality constraints, or make those comparisons within one
-joint fitted model.
+These models fit all dyad compositions in one call. This is useful for
+comparing effects across compositions or testing whether parameters can be
+shared.
 
-`marginaleffects::hypotheses()` allows for testing linear
-combinations of `glmmTMB` fixed effects. In these equations, `conditional_`
-identifies coefficients from the conditional model. A positive estimate means
-that the estimate on the left side is higher than the estimate on the right
-side.
+`marginaleffects::hypotheses()` tests linear combinations of `glmmTMB` fixed
+effects. In these equations, `conditional_` identifies coefficients for the
+modeled mean of `closeness`. A positive estimated difference means the
+coefficient or average on the left is higher than the one on the right.
 
 ```{r mixed-cross-sectional-contrasts, eval = FALSE}
 # Test whether male-male and female-female pooled intercepts are different
@@ -263,41 +272,32 @@ marginaleffects::hypotheses(
 
 ```
 
-Since we only want to compare fixed-effects here, we set `re.form = NA`.
+We set `re.form = NA` to compare fixed effects only.
 
-It is important to note that such a fixed-effect formula with all compositions
-in one model call does not create partial pooling across dyad
-compositions. Estimates for female-female, for instance, are not
-automatically shrunk toward estimates from the other dyad types. In this model,
-almost every parameter is composition-specific. This means that the likelihood largely
-factorizes by composition. Therefore, separate composition-specific fits would
-largely recover the same parameters.
+Fitting all compositions together does not itself create partial pooling:
+estimates are not automatically pulled toward those of other compositions.
+Here, each estimated mean and covariance parameter belongs to one composition.
+Separate fits therefore target the same parameters, apart from numerical
+fitting differences.
 
-The main advantage of estimating everything in a single model is that formal
-parameter comparisons can be made within one fitted model, and that models with
-different versions of pooling can be compared. For example, it can be tested
-whether pooling male-male and female-female couples as same-sex substantially
-worsens model fit, considering both the fixed effects and random-effects
-structure. Such model comparisons, performed with
-`dyadMLM::compare_nested_models()` as
-demonstrated in [Testing distinguishability in the APIM vignette](apim.html#testing-distinguishability),
-require the restricted and unrestricted models to use the same observations and
-require the restricted model to be nested within the unrestricted model.
+We can also compare models that require parameters to be equal across
+compositions. For example, we can test whether sharing fixed effects and
+covariance parameters between male-male and female-female dyads worsens fit.
+Use `dyadMLM::compare_nested_models()`, as shown in
+[Testing distinguishability in the APIM vignette](apim.html#testing-distinguishability).
+Both models must use the same observations. The restricted model must be
+obtained by constraining parameters of the full model.
 
-If partial pooling is desired, for instance with few dyads for one particular type,
-a different model specification would be required, such as a common effect
-plus composition deviations.
+Partial pooling requires a different model, such as a common effect plus
+random composition deviations.
 
 ### Model comparison with a restricted model
 
-The [regular APIM vignette](apim.html#testing-distinguishability) introduces
-`dyadMLM::compare_nested_models()` by
-comparing a distinguishable APIM with its
-exchangeable restriction. Here, we use the same approach for a
-mixed-composition constraint. We treat female-male dyads as exchangeable and
-pool them with male-male dyads, while modeling female-female dyads separately.
-In an applied analysis, these constraints would require a theoretical or empirical
-justification.
+The [APIM vignette](apim.html#testing-distinguishability) compares a
+distinguishable APIM with its exchangeable restriction. Here, we require
+female-male and male-male dyads to share an intercept and an exchangeable
+residual covariance matrix. Female-female dyads keep their own parameters.
+These constraints need theoretical or empirical justification.
 
 ```{r prepare-mixed-cross-sectional-constrained, eval = has_glmmTMB}
 mixed_cross_data_constrained <- dyadMLM::prepare_dyad_data(
@@ -336,10 +336,16 @@ dyadMLM::compare_nested_models(
 )
 ```
 
-Here, the constrained model fits substantially worse
-than the full model. Note that the test evaluates all imposed constraints
-jointly, including the pooled fixed effects and residual covariance structure.
-It does not show which restriction accounts for the difference.
+Here, the constrained model fits worse than the full model. The test evaluates
+all imposed constraints together, including the shared fixed effects and
+residual covariance structure. It does not show which constraint accounts
+for the difference.
+
+## People observed without their partner
+
+Singles, partners who did not take part, and partners lost or gained during a
+study are covered in
+[People Observed Without Their Partner](https://pascal-kueng.github.io/dyadMLM/articles/partner-exists.html).
 
 ## Mixed-composition intensive longitudinal (ILD) Gaussian model
 
@@ -372,25 +378,23 @@ mixed_ild_data <- dyadMLM::prepare_dyad_data(
 print(mixed_ild_data)
 ```
 
-Note that observed person means used to construct the between-person (`cbp`) predictors
-can be unreliable when each member contributes few occasions, which can bias
-between-person estimates [@gottfredsonStraightforwardApproachCoping2019].
+The within-person (`cwp`) and between-person (`cbp`) predictors follow the
+[longitudinal APIM preparation](apim.html#intensive-longitudinal-apims), which
+explains their interpretation and the limitations of observed person means.
 
 This mixed-composition ILD model includes composition-specific fixed
 intercepts, time slopes, and within-person and between-person actor and partner
 effects. It omits random slopes, as they would add several variances and
 covariances to an already large model.
 
-This model is complex and may produce optimizer convergence warnings,
-especially when the random-effects structure is too
-complex for the available data or some components are close to zero
-[@delrosarioPracticalGuideSpecifying2025]. When near-zero covariance components
-make a frequentist fit unstable, regularizing priors in a Bayesian model can
-sometimes help, but they do not replace careful model checks
-[@delrosarioPracticalGuideSpecifying2025]. The exact composition-specific
-Gaussian residual covariance structure is not currently supported for a
-standard single-response `brms` model, so the model below uses `glmmTMB`. For
-these example data, we use the BFGS optimizer with a higher iteration limit.
+The dyad-level random terms describe differences that persist across days.
+The dyad-by-day terms describe residual variation and partner covariance on
+the same day.
+
+This model can be difficult to fit when the data provide too little information
+about its variance and covariance parameters. Variances close to zero can also
+cause estimation problems [@delrosarioPracticalGuideSpecifying2025].
+For these example data, we use the BFGS optimizer with a higher iteration limit.
 
 ```{r fit-mixed-ild-gaussian, eval = FALSE}
 
@@ -459,9 +463,8 @@ summary(mixed_ild_gaussian_model)
 
 ```
 
-This example omits random slopes, as they would add further complexity. To
-extend the model with random slopes, the following blocks would replace the
-stable dyad-level covariance terms in the model above:
+To add random actor and partner slopes, replace the stable dyad-level
+covariance terms with the following blocks:
 
 ```{r mixed-ild-random-slopes, eval = FALSE}
 # distinguishable female-male random intercepts and slopes
@@ -496,21 +499,28 @@ us(
 ```
 
 This extension estimates a very large covariance structure and may not be
-supported by many datasets. Regularizing priors in a Bayesian framework may help
-with estimation, but they do not necessarily make an unsupported random-effects
-structure appropriate.
+supported by many datasets.
 
 ## Takeaway
 
-Mixed dyad compositions do not always require separate models.
-`dyadMLM` creates the necessary columns to fit a joint model and apply various
-pooling and exchangeability constraints.
+These examples bring established methods into one R workflow: compare dyad
+groups, choose which parameters to share, and include people observed alone.
+`dyadMLM` creates the columns for the mixed-composition models.
 
 It is often useful to begin with separate composition-specific models or
 simpler covariance structures. Combine them when an equality constraint or a
 comparison of effects across compositions is part of the research question,
 and add further random effects only when the data support the additional
 complexity.
+
+[Simulations](mixed-apim-recovery.html) supported parameter recovery for the
+cross-sectional and random-intercept Gaussian models combining distinguishable
+and exchangeable dyads. Some 95% Wald confidence intervals included the true value
+less often than expected, and many random-slope fits failed the fit checks.
+
+Singleton models were not included. The proposed extension would check both
+variance choices and shared or separate actor slopes, including partnered
+people observed alone.
 
 ---
 

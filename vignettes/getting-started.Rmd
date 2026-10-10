@@ -63,6 +63,11 @@ Post-estimation functions in `dyadMLM`, including model comparison and
 back-transformation of exchangeable random-effect covariance structures, are
 described in the [Actor-Partner Interdependence Model vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
 
+Samples may also include people observed without their partner: singles,
+people whose partner did not take part, and people who lose or gain a partner
+during a study. [People Observed Without Their Partner](partner-exists.html)
+shows how to keep them in the model.
+
 Other vignettes cover the [Dyad-Individual Model](dim.html) and its equivalence
 to the *exchangeable APIM*, and the [Dyadic Score Model](dsm.html) and its
 equivalence to the *distinguishable APIM*. They also describe the corresponding
