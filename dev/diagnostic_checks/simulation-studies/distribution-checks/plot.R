@@ -7,7 +7,7 @@ distribution_panel_labels <- c(
   predicted_quantiles = "PIT quartiles vs prediction",
   predicted_distance = "PIT distance vs prediction",
   response_sd = "Response SD", maximum_deviation = "Largest deviation",
-  zeros = "Zero count"
+  zeros = "Number of zeros"
 )
 
 distribution_plot_theme <- function() {
@@ -24,7 +24,7 @@ distribution_percent <- function(values) paste0(round(100 * values), "%")
 distribution_run_caption <- function(data) {
   attempted <- range(data$attempted)
   datasets <- if (diff(attempted) == 0) attempted[1] else paste(attempted, collapse = "–")
-  paste0(datasets, " datasets per shown condition; ", unique(data$reference_draws),
+  paste0(datasets, " datasets per shown condition; ", format(unique(data$reference_draws), big.mark = ","),
     " reference simulations per bank.\n")
 }
 
@@ -50,7 +50,7 @@ plot_distribution_panels <- function(summary) {
     ggplot2::geom_point(position = dodge, size = 1.8) +
     ggplot2::facet_grid(family_label ~ sample_label, scales = "free_y", space = "free_y") +
     ggplot2::scale_colour_manual(values = c("#777777", "#0072B2", "#D55E00")) +
-    ggplot2::scale_x_continuous(limits = c(0, NA), labels = distribution_percent) +
+    ggplot2::scale_x_continuous(limits = c(0, NA), breaks = seq(0, 1, .05), labels = distribution_percent) +
     ggplot2::labs(title = "Individual panels under a correct model",
       subtitle = "All observations pooled; no additional predictor pages",
       x = "Datasets flagged (%)", y = NULL, colour = NULL,

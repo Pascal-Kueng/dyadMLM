@@ -439,10 +439,14 @@ We reuse `apim_simulations` with
 [`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)
 and
 [`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html).
+The residual check uses PIT residuals, which rank each outcome from 0 (low)
+to 1 (high) among its simulated values; the outcome check compares outcome
+distributions and summaries.
 We check by gender, although the restricted model treats partners as
 exchangeable, because opposite role differences can cancel when all
-observations are pooled (here, the pooled QQ plot shows no flag). We also add a
-page for the partner's provided support.
+observations are pooled (here, the pooled QQ plot stays inside its envelope). We
+also add a page for the partner's provided support, which can show a missing or
+misspecified partner effect.
 
 ```{r check-residuals-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution for women and men: uniform QQ plots with blue envelopes in the top row and mean PIT distance histograms in the bottom row. Red marks observed values.", "Residual patterns for women and men: PIT quartiles across predicted outcomes with blue envelopes. Red curves show observed values.", "Residual patterns for women and men: PIT quartiles across the partner's provided support with blue envelopes. Red curves show observed values.")}
 dyadMLM::check_dyad_residuals(
@@ -463,11 +467,12 @@ dyadMLM::check_dyad_outcomes(
 )
 ```
 
-Look for red curves or values outside their blue ranges that form one
-consistent pattern. Here, women's closeness is higher than simulated and men's
-is lower, in the QQ plots, the PIT quartiles, and the outcome ECDFs. For men,
-the gap grows at high predicted outcomes and high partner support.
-Mean PIT distance, response SDs, and largest deviations stay within their limits.
+Look for flags (red curves outside their blue envelopes or ranges, or red
+lines outside their dashed limits) that form one consistent pattern. Here,
+women's closeness is higher than simulated and men's is lower, in the QQ plots,
+the PIT quartiles, and the outcome ECDFs. For men, the gap grows at high
+predicted outcomes and high partner support. Mean PIT distance, response SDs,
+and largest absolute deviations stay within their limits.
 The pattern suggests omitted gender differences, at least in mean closeness,
 so we add gender-specific intercepts and compare the actor and partner
 estimates:
@@ -491,12 +496,13 @@ gender differences; the distinguishable APIM shows no flags. The
 shows how often these panels flag correct and mismatched models.
 
 If you know [DHARMa](https://CRAN.R-project.org/package=DHARMa): the uniform QQ
-plot and the quartile lines across predicted outcomes resemble its residual
-plots and use the same kind of residuals. Three things differ. Our simulations
-redraw all random effects (DHARMa's default holds them at their fitted values),
-so partner dependence stays in the reference. Blue envelopes come from whole
+plot and the PIT quartiles across predicted outcomes resemble its residual
+plots and use the same kind of residuals. Two things differ. Our simulations
+redraw all random effects (DHARMa's default since version 0.5.0 holds them at
+their fitted values), so partner dependence stays in the reference. Blue
+envelopes come from whole
 simulated datasets instead of tests that assume independent residuals, which
-partners' residuals are not. And the checks can be split by role. See
+partners' residuals are not. See
 [why we do not use DHARMa directly](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly).
 
 

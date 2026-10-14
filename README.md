@@ -115,7 +115,10 @@ interpretation. Simulation studies show how often the partner check
 detects [omitted partner
 dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance
-pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html).
+pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
+and how often the residual and outcome checks [flag correct and
+mismatched
+models](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html).
 
 ## Quick example
 
@@ -274,7 +277,7 @@ comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_mod
 can help assess those restrictions).
 
 The same `simulations` can be reused with `check_dyad_residuals()` and
-`check_dyad_outcomes()`. Use the same `dyad`, `role` and `data`
+`check_dyad_outcomes()`. Use the same `dyad`, `role`, and `data`
 arguments. The [APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes)
 shows a worked example.
