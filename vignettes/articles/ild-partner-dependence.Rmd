@@ -58,6 +58,8 @@ targeted_detection <- detection_rows |> filter(targeted)
 ar_unrestricted <- primary_figures |>
   filter(part == "ar", model == "no_ar", ar_phi == 0.7, figure == "either")
 lag_figures <- primary_figures |> filter(startsWith(part, "lag_"), figure == "either")
+small_detection <- covariance_rows |> filter(targeted, n_dyads == 50) |>
+  slice_min(rate, n = 1, with_ties = FALSE)
 ```
 
 The saved run targets `r unique(cells$repetitions)` datasets per setting and
@@ -70,8 +72,8 @@ The saved run targets `r unique(cells$repetitions)` datasets per setting and
 - **Omitted partner covariance shows at its level, given enough dyads.** It was
   detected in at least `r scales::percent(min(targeted_detection$rate), accuracy = 1)`
   of datasets with 200 dyads and 14 occasions, but in as few as
-  `r scales::percent(min(filter(covariance_rows, targeted, n_dyads == 50)$rate), accuracy = 1)`
-  with 50 dyads.
+  `r scales::percent(small_detection$rate, accuracy = 1)` with 50 dyads and
+  `r small_detection$n_occasions` occasions.
 - **Omitted autocorrelation is not detected.** A model without AR, but with
   unrestricted covariances, flagged in
   `r scales::percent(max(ar_unrestricted$rate), accuracy = 1)` of datasets despite
@@ -83,18 +85,20 @@ The saved run targets `r unique(cells$repetitions)` datasets per setting and
 ## What the study checks
 
 [`check_partner_dependence(member = person, time = occasion)`](../reference/check_partner_dependence.html) compares the model's
-simulations with two summaries of the observed responses: **member means
+simulations with the observed responses at two levels: **member means
 (between)** and **deviations from those means on shared occasions (within)**.
-This study asks how often those summaries flag under correct covariance
+This study asks how often these checks flag under correct covariance
 restrictions, and what they detect when a restriction is wrong.
 
 The fitted models have two partner covariances: a stable one between partners'
-random intercepts, and a same-occasion one between their dyad-occasion random
+random intercepts, and an occasion one between their dyad-occasion random
 effects. Each omission should show at its targeted level: the between level for
-the stable covariance, and the within level for the same-occasion covariance.
+the stable covariance, and the within level for the occasion covariance.
 
-A **row flag** means that one observed statistic lies outside the middle 95% of
-its simulated values. A **figure flag** means that at least one row flags. These
+A **row flag** means that one observed statistic (one row of the check's
+`summary`) lies outside the middle 95% of its simulated values. Each level has
+its own figure. A **figure flag** means that at least one row in that figure
+flags. These
 are descriptive checks. The 5% line is a benchmark for individual rows, not a
 promised rate or a figure-level threshold. Summaries freely estimated from the
 same data may flag much less often.
@@ -105,13 +109,16 @@ same data may flag much less often.
 All settings use female-male dyads and the generator's fixed-effect terms,
 including role intercepts and actor/partner predictors. Gaussian settings vary the
 number of dyads (50 or 200), occasions (3, 5 or 14), and missingness (0% or 20%).
+Poisson and ordinal settings use 50 or 200 dyads and 5 or 14 complete occasions.
+AR and lagged-outcome settings use 50 or 200 dyads and 14 complete occasions.
 Missing occasions are removed independently per member. A retained response
 still contributes to its member's mean when the partner is missing. Non-lagged
 actor/partner predictors are generated independently between partners at both levels.
 
-Gaussian and Poisson models either retain both covariance blocks or set stable
+Gaussian and Poisson models either retain both covariance blocks (the full model)
+or set stable
 or occasion partner covariance to zero. Ordinal outcomes have four categories,
-a probit link and a shared dyad-day intercept instead of an unrestricted
+a probit link and a shared dyad-occasion intercept instead of an unrestricted
 occasion block. Separate settings make each covariance restriction true.
 Additional Gaussian models impose equal occasion variances or omit AR(1)
 dependence. Lagged-outcome Gaussian and NB2 fits are practical sensitivity
@@ -120,7 +127,9 @@ calibration controls.
 
 Every reference simulation draws new random effects and responses, while keeping
 fitted parameters and predictor values fixed. Models are not refitted. Checks
-subtract the same fixed-effect predictions from observed and simulated responses.
+subtract the same fixed-effect predictions from observed and simulated responses
+(model-centring). The lagged-outcome table also shows raw checks, which skip
+this step.
 Each dataset then supplies its own member means. Nonlinear links and short
 series can let a misfit at one level affect summaries at the other.
 
@@ -139,9 +148,9 @@ uncertainty in an individual model's fitted parameters.
 
 Here the fitted covariance restriction is true. Each panel shows the partner
 correlation row at the targeted level: zero stable covariance at the
-between level, or zero occasion covariance at the within level. Other summaries
-and full-model results remain in the saved tables. These true-restriction settings
-use complete data and 5 or 14 occasions.
+between level, or zero occasion covariance at the within level. Rates for other
+rows remain in the saved tables. These true-restriction settings use complete
+data and 5 or 14 occasions.
 
 ```{r true-restrictions, fig.alt="Partner-correlation flag rates under true zero-covariance restrictions, by family, level, number of occasions and dyad count."}
 ggplot(null_rows, aes(n_occasions, rate, colour = dyads, group = dyads)) +
@@ -154,6 +163,20 @@ ggplot(null_rows, aes(n_occasions, rate, colour = dyads, group = dyads)) +
   scale_y_continuous(labels = scales::label_percent(), limits = c(0, NA)) +
   scale_colour_manual(values = c("#0072B2", "#D55E00")) +
   labs(x = "Occasions", y = "Datasets with a row flag", colour = "Dyads") + study_theme
+```
+
+```{r false-alarm-findings, results='asis'}
+if (!is_pilot) {
+  null_figures <- primary_figures |>
+    semi_join(null_rows, by = c("cell", "model", "response")) |> filter(figure == "either")
+  full_figures <- primary_figures |> filter(model == "correct", figure == "either")
+  gaussian_full <- full_figures |> filter(part == "gaussian")
+  cat(sprintf("Under true zero-covariance restrictions, the partner-correlation row at the targeted level flagged in **%.1f–%.1f%%** of datasets. A flag anywhere in either figure occurred in **%.1f–%.1f%%**. For full models, either-figure rates were **%.1f–%.1f%%** across families and **%.1f–%.1f%%** for Gaussian models.\n\n",
+    100 * min(null_rows$rate), 100 * max(null_rows$rate),
+    100 * min(null_figures$rate), 100 * max(null_figures$rate),
+    100 * min(full_figures$rate), 100 * max(full_figures$rate),
+    100 * min(gaussian_full$rate), 100 * max(gaussian_full$rate)))
+}
 ```
 
 ## Detection at both levels
@@ -188,15 +211,6 @@ effect_sizes |>
 
 ```{r main-findings, results='asis'}
 if (!is_pilot) {
-  null_figures <- primary_figures |>
-    semi_join(null_rows, by = c("cell", "model", "response")) |> filter(figure == "either")
-  full_figures <- primary_figures |> filter(model == "correct", figure == "either")
-  gaussian_full <- full_figures |> filter(part == "gaussian")
-  cat(sprintf("Under true zero-covariance restrictions, the partner-correlation row at the targeted level flagged in **%.1f–%.1f%%** of datasets. A flag anywhere in either figure occurred in **%.1f–%.1f%%**. For full models, either-figure rates were **%.1f–%.1f%%** across families and **%.1f–%.1f%%** for Gaussian models.\n\n",
-    100 * min(null_rows$rate), 100 * max(null_rows$rate),
-    100 * min(null_figures$rate), 100 * max(null_figures$rate),
-    100 * min(full_figures$rate), 100 * max(full_figures$rate),
-    100 * min(gaussian_full$rate), 100 * max(gaussian_full$rate)))
   small_stable <- covariance_rows |> filter(targeted, n_dyads == 50, level == "between")
   small_occasion <- covariance_rows |> filter(targeted, n_dyads == 50, level == "within")
   short_series <- small_occasion |> filter(part == "gaussian", n_occasions == 3) |>
@@ -208,7 +222,7 @@ if (!is_pilot) {
     100 * short_series$rate[1], 100 * short_series$rate[2]))
   sd_rows <- primary_flags |> filter(part == "gaussian", model == "equal_occasion_variances",
     level == "within", statistic == "average_difference_cor")
-  cat(sprintf("The partner-correlation row at the other level flagged at most **%.1f%%** across these covariance-omission settings. That result concerns this row, not every statistic or possible mismatch. In the main Gaussian study, incorrectly pooling occasion SDs with a true ratio of 1.5 was detected in **%.1f–%.1f%%** of datasets.\n\n",
+  cat(sprintf("The partner-correlation row at the other level flagged at most **%.1f%%** across these covariance-omission settings. That result concerns this row, not every statistic or possible mismatch. In the Gaussian settings, where the two roles' true occasion SDs differ by a factor of 1.5, incorrectly imposing equal occasion variances was detected in **%.1f–%.1f%%** of datasets.\n\n",
     100 * max(covariance_rows$rate[!covariance_rows$targeted]),
     100 * min(sd_rows$rate), 100 * max(sd_rows$rate)))
 }

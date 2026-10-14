@@ -43,8 +43,7 @@
 #'   See [simulate_dyad_responses()] for how predictions are defined.
 #' @param ask Whether to pause between figures on an interactive device.
 #'   `NULL` (default) pauses when there is more than one figure, `TRUE` pauses
-#'   and `FALSE` draws without pausing. In panel mode, each composition is one
-#'   figure. File devices never pause.
+#'   and `FALSE` draws without pausing. File devices never pause.
 #' @param panels If `TRUE` (default), show each composition in one figure, with
 #'   two rows and up to three columns. If `FALSE`, draw each statistic separately.
 #'   Graphics settings are restored afterwards.
@@ -113,14 +112,14 @@
 #'
 #' @section Repeated occasions:
 #' With repeated occasions, partners can be similar in two ways: in their
-#' average responses, and in being above or below their own averages on the
-#' same occasions. A model should reproduce both. With `member` and `time`,
+#' mean responses, and in being above or below their own means on the same
+#' occasions. A model should reproduce both. With `member` and `time`,
 #' every dataset (observed and simulated) is split into two levels after any
 #' model-centring. Each level is checked like cross-sectional data:
 #' - **Between:** each member's mean over all their fitted occasions, paired
 #'   within the dyad. Each dyad counts once.
 #' - **Within:** each response minus its member's mean, paired with the
-#'   partner's same statistic on the same occasion. Each shared occasion counts once.
+#'   partner's deviation on the same occasion. Each shared occasion counts once.
 #'
 #' An occasion without the partner still counts in the member's mean.
 #'

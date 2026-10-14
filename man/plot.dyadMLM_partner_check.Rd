@@ -11,8 +11,7 @@
 
 \item{ask}{Whether to pause between figures on an interactive device.
 \code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
-and \code{FALSE} draws without pausing. In panel mode, each composition is one
-figure. File devices never pause.}
+and \code{FALSE} draws without pausing. File devices never pause.}
 
 \item{panels}{If \code{TRUE} (default), show each composition in one figure, with
 two rows and up to three columns. If \code{FALSE}, draw each statistic separately.

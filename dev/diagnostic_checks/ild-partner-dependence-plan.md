@@ -124,7 +124,7 @@ Left out on purpose; suggest separately only if wanted:
 - Port the prototype's hand-calculation tests: both levels, raw and
   model-centred, with and without roles, unpaired occasions, row order and
   member swaps.
-- Errors: duplicate member-occasion rows; `member` without `time`.
+- Errors: duplicate member-occasion rows; `time` without `member`.
 - A composition skipped at the within level with fewer than three dyads that
   share an occasion.
 - Labels that name the level, in the printout and plot headings.
@@ -169,8 +169,9 @@ usable fits, which require optimizer convergence, a positive-definite Hessian an
 a finite log-likelihood. Gaussian models use BFGS; other families use `nlminb`.
 Fits are not retried, and optimizer warnings and failures stay recorded. The full
 ordinal model can reach a boundary when the true day-intercept variance is zero.
-Parameter recovery is reported only for correctly specified models,
-apart from flag rates; lagged-outcome models are excluded from recovery claims.
+Parameter recovery is reported for correctly specified models, plus the stable
+correlation of the model without AR at φ = 0.7 (`serial-recovery.R`).
+Lagged-outcome models are excluded from recovery claims.
 
 Reference simulations keep fitted parameters and predictor values fixed and do
 not refit models. The study estimates flag rates in these settings, not universal

@@ -57,8 +57,7 @@ See \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} for how pr
 
 \item{ask}{Whether to pause between figures on an interactive device.
 \code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
-and \code{FALSE} draws without pausing. In panel mode, each composition is one
-figure. File devices never pause.}
+and \code{FALSE} draws without pausing. File devices never pause.}
 
 \item{panels}{If \code{TRUE} (default), show each composition in one figure, with
 two rows and up to three columns. If \code{FALSE}, draw each statistic separately.
@@ -147,15 +146,15 @@ restriction when both models can be fitted (see \code{\link[=compare_nested_mode
 \section{Repeated occasions}{
 
 With repeated occasions, partners can be similar in two ways: in their
-average responses, and in being above or below their own averages on the
-same occasions. A model should reproduce both. With \code{member} and \code{time},
+mean responses, and in being above or below their own means on the same
+occasions. A model should reproduce both. With \code{member} and \code{time},
 every dataset (observed and simulated) is split into two levels after any
 model-centring. Each level is checked like cross-sectional data:
 \itemize{
 \item \strong{Between:} each member's mean over all their fitted occasions, paired
 within the dyad. Each dyad counts once.
 \item \strong{Within:} each response minus its member's mean, paired with the
-partner's same statistic on the same occasion. Each shared occasion counts once.
+partner's deviation on the same occasion. Each shared occasion counts once.
 }
 
 An occasion without the partner still counts in the member's mean.
