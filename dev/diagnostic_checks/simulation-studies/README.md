@@ -130,6 +130,11 @@ directories of the main study with its add-on and of the confirmation run (by
 default the same). With all panels, it must reproduce the reported rates. The
 `current` set was chosen after both runs, so its rates are recomputed on their
 datasets, not confirmed on fresh seeds.
+[flag-unions.R](distribution-checks/flag-unions.R) recomputes every union of the
+three runs (all references, views, roles, and checks) with only the `current`
+panels and writes `report-data/distribution-checks/flag-unions.csv`, which the
+report uses instead of the saved unions. It takes the same arguments and must
+also reproduce the reported unions with all panels.
 
 [confirmation.R](distribution-checks/confirmation.R) confirms, on fresh seeds,
 how often the remaining panels flag correct and mismatched models. Its design
@@ -162,6 +167,7 @@ was fixed before the run:
 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
   Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/confirmation.R 500 1000 6
 Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/dropped-panels.R
+Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/flag-unions.R
 ```
 
 Arguments and modes match `run.R`. `confirmation.R` reproduces its saved results
