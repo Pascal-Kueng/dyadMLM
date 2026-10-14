@@ -56,8 +56,7 @@ Supports unweighted \code{glmmTMB} models with the following families:
 \item \code{glmmTMB::lognormal()}
 \item \code{glmmTMB::skewnormal()}
 \item \code{glmmTMB::t_family()} with more than two degrees of freedom
-\item \code{glmmTMB::ordinal()} (currently only available in the development version
-of \code{glmmTMB})
+\item \code{glmmTMB::ordinal()} (glmmTMB 1.1.15.2 or later)
 }
 
 Smooth terms (\code{s()}) are not supported: simulations would draw new curves.

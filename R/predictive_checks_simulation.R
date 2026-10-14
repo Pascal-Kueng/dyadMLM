@@ -42,8 +42,7 @@
 #' - `glmmTMB::lognormal()`
 #' - `glmmTMB::skewnormal()`
 #' - `glmmTMB::t_family()` with more than two degrees of freedom
-#' - `glmmTMB::ordinal()` (currently only available in the development version
-#'   of `glmmTMB`)
+#' - `glmmTMB::ordinal()` (glmmTMB 1.1.15.2 or later)
 #'
 #' Smooth terms (`s()`) are not supported: simulations would draw new curves.
 #' Fixed-effect splines such as `splines::ns()` are supported.
