@@ -11,10 +11,49 @@ output:
 This notebook explores intensive longitudinal dyadic data, using the daily
 diaries of the Time and Ties (T&T) study.
 
-## Load the data
+## Load the ILD data
 
 ```{r load-tt}
 # One row per person and diary day. merge_data.Rmd in the dashboards
 # repository creates the file; load() creates `df_merged`.
 load("../../../00DashboardsTimeAndTies/Merged_Dataset_long.rda")
 ```
+
+## MLM (glmmTMB) 
+
+```{r}
+library(dyadMLM)
+library(glmmTMB)
+library(dplyr)
+
+df <- df_merged |>
+  mutate(
+    support = (
+      daily_sp_support1 + daily_sp_support2 + daily_sp_support3) / 3, 
+    gender = factor(baseline_gender_option, levels = c(1,2), labels = c('male', 'female'))
+  ) |>
+  dyadMLM::prepare_dyad_data(
+    dyad = coupleID, 
+    member = userID, 
+    role = gender, 
+    time = diaryday, 
+    predictors = support, 
+    keep_compositions = 'male-female',
+    include_arbitrary_member_contrast = TRUE
+  ) |> print()
+  
+```
+
+## Within-person only model (glmmTMB)
+
+## Between-person only model (glmmTMB)
+
+## Mixed model (glmmTMB)
+
+## Latent mixed model (lavaan)
+
+
+
+
+
+

@@ -32,6 +32,9 @@ print_table <- function(data) {
 
 ```{r load-flashe}
 library(lavaan)
+library(glmmTMB)
+library(dyadMLM)
+
 flashe_data <- read.csv(
   file.path(
     "../references/explaining-interdependence-apim",
