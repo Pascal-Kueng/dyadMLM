@@ -104,14 +104,10 @@ and separate predictors can hide local patterns and interactions.
 
 A flag is a red curve or point outside its blue envelope or range, or a red
 line outside its dashed limits. Each panel alone rarely flags a correct
-model, but flags add up across panels. In our
-\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulations}
-(confirmed on fresh seeds at 100 and 400 dyads), at least one panel of the
-residual and outcome checks (ECDFs and category bars not counted) flagged
-about 6--11\% of correct Gaussian and negative-binomial models when pooled,
-16--23\% in either role, and 22--32\% in either role with actor and partner
-predictor pages; ordinal models were flagged less often. So look for a
-consistent pattern, not any single flag.
+model, but flags add up across panels, roles, and predictor pages, so look
+for a consistent pattern, not any single flag. The
+\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulation study}
+reports how often correct and mismatched models were flagged.
 
 With about 40 dyads, most mismatches studied were hard to detect; the absence
 of flags does not show a good fit. Panels suggest possible problems, not their
