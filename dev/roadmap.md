@@ -950,8 +950,9 @@ preparation, diagnostics, and interpretation contracts are stable.
       df is only available for `lm` or `glm` versions of the model.
     - `sandwich::vcovCL()` works, but only with CR0/CR1-type corrections.
     - `sandwich::vcovBS(type = "jackknife")` had the best small-sample
-      coverage of the clustered options. It silently gives wrong standard errors when the model drops
-      rows (e.g., `missing_partner` rows), so fit on complete cases first.
+      coverage of the clustered options. It silently gives wrong standard
+      errors when the model drops rows (e.g., `missing_partner` rows), so fit
+      on complete cases first.
     - The built-in sandwich of `glmmTMB` fails for `ordinal()`.
     - `multgee::ordLORgee()` works; `geepack::ordgee()` diverged silently.
   - Coverage of the partner slope (500 replications, 10-22 complete dyads):
@@ -1040,21 +1041,22 @@ them as one release commitment.
     cells (`where = FALSE`), uses partner variables only where a partner exists
     (e.g., `I(ifelse(P == 1, x_partner, 0))`), and lets the partner status `P`
     interact with own variables. Without these `ifelse()` terms, singletons'
-    own missing values silently stayed `NA`. Models that ignore status-specific relations
-    were biased. Treating the structural zeros as observed made imputations too
-    narrow (coverage about 85%). With status changes in ILD, only the
-    one-model approach is possible; it is untested with `2l` methods.
+    own missing values silently stayed `NA`. Models that ignore status-specific
+    relations were biased. Treating the structural zeros as observed made
+    imputations too narrow (coverage about 85%). With status changes in ILD,
+    only the one-model approach is possible; it is untested with `2l` methods.
   - To retain people whose partner did not take part (the deferred completely
     unobserved members), add a row for the absent partner (own ID, role,
-    outcome `NA`) and impute their predictors in a dyad-level model. The absent partner's rows then drop out of models, but
-    the dyad is labelled complete: `.is_<role>_x_missing` disappears and
-    printed counts include people who did not take part. A later option to
-    mark rows as not participating could keep the label.
+    outcome `NA`) and impute their predictors in a dyad-level model. The absent
+    partner's rows then drop out of models, but the dyad is labelled complete:
+    `.is_<role>_x_missing` disappears and printed counts include people who did
+    not take part. A later option to mark rows as not participating could keep
+    the label.
   - In ILD, rows for occasions a partner missed are only added temporarily
     during preparation, so users must add them before imputing.
   - Reshape to one row per dyad by member position, with roles as columns, not
-    by role (reshaping by role fails for same-sex dyads). Convert character columns to factors;
-    `mice` silently drops them from the imputation model.
+    by role (reshaping by role fails for same-sex dyads). Convert character
+    columns to factors; `mice` silently drops them from the imputation model.
   - `partner_exists` and roles must be observed and identical across
     imputations.
   - Centering is recomputed in each imputation, so the `.partner_exists`
