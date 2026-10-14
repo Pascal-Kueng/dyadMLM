@@ -64,68 +64,8 @@ simulated datasets. Save it with \code{plot = FALSE} and draw it later with
 Check where each observed outcome falls among its simulated values (PIT
 residuals), using complete datasets from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
 For checks on the outcome scale, also run \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}.
+To read the plots and follow up flags, see \link[=dyad_check_plots]{the plot guide}.
 }
-\section{Reading the plots}{
-
-Start with everyone pooled (\code{role = NULL}), then also inspect meaningful
-roles, such as gender, even when the model treats partners as exchangeable:
-role-specific problems show only there. Use \code{predictors} to examine other
-measured characteristics. For separate QQ plots and summaries by a
-person-level categorical characteristic, use that variable as \code{role}.
-
-Each composition gets one pooled column for same-role partners, or separate
-columns for distinct roles. Supplying roles does not change the model's
-assumptions. Observations whose composition or role is unknown, for example
-because the partner's row is missing and \code{data} was not supplied, are omitted
-with a warning.
-
-For each composition, the first page shows uniform QQ and mean PIT distance. The second shows PIT
-quartiles against predicted outcomes. Each supplied predictor gets another
-page like the second.
-
-PIT (probability integral transform) residuals rank each outcome from 0 (low)
-to 1 (high) relative to its own simulated values. A suitable model should
-produce ranks roughly evenly spread between 0 and 1, allowing for the
-variation shown in blue. PIT distance is \code{2 * abs(PIT - 0.5)}. Blue envelopes
-are global: they are built so that the whole red curve of a correct model
-stays inside in a nominal 95\% of datasets. This holds within each panel, not
-across roles, predictors, or pages. Because the model was fitted to these same data,
-departures often look smaller than they are, as in the settings studied by
-Robins et al. (2000) and in our simulations.
-
-Predicted outcomes and numeric predictors with more than eight distinct values
-are grouped into up to eight bins per role, with at least about 20
-observations per bin; with four or more bins, quartiles are smoothed across
-neighboring bins. These are full-model residuals, not partial effects; bins
-and separate predictors can hide local patterns and interactions.
-}
-
-\section{Reading flags}{
-
-A flag is a red curve or point outside its blue envelope or range, or a red
-line outside its dashed limits. Each panel alone rarely flags a correct
-model, but flags add up across panels, roles, and predictor pages, so look
-for a consistent pattern, not any single flag. The
-\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulation study}
-reports how often correct and mismatched models were flagged.
-
-With about 40 dyads, most mismatches studied were hard to detect; the absence
-of flags does not show a good fit. Panels suggest possible problems, not their
-cause. Neither a flag nor its absence shows whether estimates or standard
-errors are wrong: fit the model the pattern suggests and compare the
-estimates and standard errors you report. Mismatches showed mainly in these
-panels of both checks:
-\itemize{
-\item Poisson fitted to overdispersed counts: mean PIT distance, number of zeros, QQ.
-\item Extra zeros: QQ and PIT quartiles; the number of zeros less often.
-\item Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
-\item Different role SDs: response SD and mean PIT distance, by role.
-\item Spread rising with a predictor: largest absolute deviation, mean PIT distance, QQ.
-\item Omitted partner effect: PIT quartiles across the partner's predictor
-(supply it in \code{predictors} of \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}).
-}
-}
-
 \section{Scope}{
 
 Complete simulated datasets keep the fitted partner and time dependence and
@@ -138,8 +78,8 @@ differ from DHARMa's plots and tests (see the
 \href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly}{distribution-checks article}).
 They do not directly assess serial correlation.
 
-Predicted outcomes set random effects to zero, which differs from averaging
-over random effects for nonlinear links. Uses the families and fitted rows
+The "Predicted outcome" axis sets random effects to zero (see
+\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}). Uses the families and fitted rows
 supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}; observations have equal weight. For
 cross-sectional data, check partner correlations with
 \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
@@ -194,11 +134,6 @@ Myllymäki, M., Mrkvička, T., Grabarnik, P., Seijo, H., & Hahn, U. (2017).
 Global envelope tests for spatial processes. \emph{Journal of the Royal
 Statistical Society: Series B (Statistical Methodology), 79}(2), 381--404.
 \doi{10.1111/rssb.12172}
-
-Robins, J. M., van der Vaart, A., & Ventura, V. (2000). Asymptotic
-distribution of P values in composite null models. \emph{Journal of the American
-Statistical Association, 95}(452), 1143--1156.
-\doi{10.1080/01621459.2000.10474310}
 }
 \seealso{
 \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}, \code{\link[=check_partner_dependence]{check_partner_dependence()}}

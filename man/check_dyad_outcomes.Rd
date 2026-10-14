@@ -54,51 +54,8 @@ Compare the observed outcome distribution and summaries (response SD, largest
 absolute deviation, number of zeros) with complete datasets from
 \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
 For PIT residual patterns, also run \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
+To read the plots and follow up flags, see \link[=dyad_check_plots]{the plot guide}.
 }
-\section{Reading the plots}{
-
-The first row compares outcome distributions. Ordinal responses use bars for
-all defined categories, with separate 95\% ranges per category, so one red
-point outside can occur by chance. Other outcomes show the proportion at or
-below each value (ECDF) for the observations and up to 30 simulated datasets.
-
-The remaining rows compare the response SD (standard deviation of outcome
-minus prediction), the largest absolute deviation from prediction, and, when
-the composition has simulated zeros (or observed zeros, for count and Tweedie
-families), the number of zeros. The SD includes random effects; it does not
-isolate the model's residual variance or dispersion parameter. For complete
-cross-sectional dyads with distinct roles, these SDs match the role SDs of
-\code{\link[=check_partner_dependence]{check_partner_dependence()}} with its default \code{response = "model-centred"}.
-Ordinal summaries depend on the category scores \verb{1, 2, ..., K}. Use a tall
-plotting window to keep all rows readable.
-}
-
-\section{Reading flags}{
-
-A flag is a red curve or point outside its blue envelope or range, or a red
-line outside its dashed limits. Each panel alone rarely flags a correct
-model, but flags add up across panels, roles, and predictor pages, so look
-for a consistent pattern, not any single flag. The
-\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulation study}
-reports how often correct and mismatched models were flagged.
-
-With about 40 dyads, most mismatches studied were hard to detect; the absence
-of flags does not show a good fit. Panels suggest possible problems, not their
-cause. Neither a flag nor its absence shows whether estimates or standard
-errors are wrong: fit the model the pattern suggests and compare the
-estimates and standard errors you report. Mismatches showed mainly in these
-panels of both checks:
-\itemize{
-\item Poisson fitted to overdispersed counts: mean PIT distance, number of zeros, QQ.
-\item Extra zeros: QQ and PIT quartiles; the number of zeros less often.
-\item Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
-\item Different role SDs: response SD and mean PIT distance, by role.
-\item Spread rising with a predictor: largest absolute deviation, mean PIT distance, QQ.
-\item Omitted partner effect: PIT quartiles across the partner's predictor
-(supply it in \code{predictors} of \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}).
-}
-}
-
 \section{Scope}{
 
 Complete simulated datasets keep the fitted partner and time dependence and
@@ -111,8 +68,8 @@ differ from DHARMa's plots and tests (see the
 \href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly}{distribution-checks article}).
 They do not directly assess serial correlation.
 
-Predicted outcomes set random effects to zero, which differs from averaging
-over random effects for nonlinear links. Uses the families and fitted rows
+The "Predicted outcome" axis sets random effects to zero (see
+\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}). Uses the families and fitted rows
 supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}; observations have equal weight. For
 cross-sectional data, check partner correlations with
 \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
