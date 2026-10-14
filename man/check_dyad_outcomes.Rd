@@ -22,8 +22,9 @@ more simulated datasets for stable comparisons.}
 \item{dyad, role, member}{Column names, with or without quotes, identifying
 dyads, roles, and members within dyads. Looked up in the fitted model frame
 or \code{data}. With \code{role = NULL}, all observations are pooled. Otherwise supply
-\code{dyad}; also supply \code{member} for repeated observations, with \code{role} unchanged
-within each member.}
+\code{dyad}; also supply \code{member} for repeated observations, where each member
+must keep the same \code{role}. Each composition (pair of partners' roles, such
+as female-male) is then checked separately.}
 
 \item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
 If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
@@ -32,7 +33,7 @@ If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
 \code{NULL} (default) pauses when there is more than one figure, \code{TRUE} pauses
 and \code{FALSE} draws without pausing. File devices never pause.}
 
-\item{panels}{If \code{TRUE} (default), arrange checks in complete panels by
+\item{panels}{If \code{TRUE} (default), arrange checks in figures by
 composition, with one column per role or a pooled column. If \code{FALSE}, draw
 each check and role separately.}
 
@@ -41,53 +42,56 @@ columns are absent from the model frame, or to identify compositions using
 partners whose responses were excluded during fitting.}
 }
 \value{
-Invisibly returns a \code{dyadMLM_outcome_check} list containing compositions,
-role-specific summary matrices, and outcome distributions. Matrix columns
-are observed data followed by simulations. Save it with \code{plot = FALSE} and
-draw it later with \code{plot(result)}.
+Invisibly returns a \code{dyadMLM_outcome_check} list with role-specific
+summary matrices and outcome distributions in \code{compositions}. Matrix columns
+are observed data followed by all simulated datasets. Save it with
+\code{plot = FALSE} and draw it later with \code{plot(result)}, which also takes \code{ask}
+and \code{panels}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Compare observed outcomes with complete datasets from
+Compare the observed outcome distribution and summaries (response SD, largest
+absolute deviation, number of zeros) with complete datasets from
 \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
-For PIT residual patterns, use \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
+For PIT residual patterns, also run \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
 }
 \section{Reading the plots}{
-
-Compositions and role columns are arranged as in \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
 
 The first row compares outcome distributions. Ordinal responses use bars for
 all defined categories, with separate 95\% ranges per category, so one red
 point outside can occur by chance. Other outcomes show the proportion at or
 below each value (ECDF) for the observations and up to 30 simulated datasets.
 
-The remaining rows compare the SD (standard deviation) of outcome minus
-prediction, the largest absolute deviation from prediction, and zero counts
-when the composition has simulated zeros, or observed zeros for count and
-Tweedie families. The SD includes random effects; it does not isolate the
-model's residual variance or dispersion parameter. For complete
-cross-sectional dyads with distinct roles, these SDs match the default role
-SDs in \code{\link[=check_partner_dependence]{check_partner_dependence()}}. Ordinal summaries depend on the category
-scores. Use a tall plotting window to keep all rows readable.
+The remaining rows compare the response SD (standard deviation of outcome
+minus prediction), the largest absolute deviation from prediction, and, when
+the composition has simulated zeros (or observed zeros, for count and Tweedie
+families), the number of zeros. The SD includes random effects; it does not
+isolate the model's residual variance or dispersion parameter. For complete
+cross-sectional dyads with distinct roles, these SDs match the role SDs of
+\code{\link[=check_partner_dependence]{check_partner_dependence()}} with its default \code{response = "model-centred"}.
+Ordinal summaries depend on the category scores \verb{1, 2, ..., K}. Use a tall
+plotting window to keep all rows readable.
 }
 
 \section{Reading flags}{
 
-A flag is a red value or curve outside its blue range or limits. Each panel
-alone rarely flags a correct model, but flags add up across panels. In our
+A flag is a red curve or point outside its blue envelope or range, or a red
+line outside its dashed limits. Each panel alone rarely flags a correct
+model, but flags add up across panels. In our
 \href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulations}
 (confirmed on fresh seeds at 100 and 400 dyads), at least one panel of the
 residual and outcome checks (ECDFs and category bars not counted) flagged
-about 6--11\% of correct Gaussian and count models when pooled, 16--23\% in
-either role, and
-22--32\% in either role with actor and partner predictor pages; ordinal models
-were flagged less often. So look
-for a consistent pattern, not any single flag. With about 40 dyads, most
-mismatches studied were hard to detect; no flag does not show a good fit.
-Panels suggest possible problems, not their cause. Neither a flag nor its
-absence shows whether estimates or standard errors are wrong: fit the model
-the pattern suggests and compare the estimates and standard errors you
-report. Mismatches showed mainly in these panels:
+about 6--11\% of correct Gaussian and negative-binomial models when pooled,
+16--23\% in either role, and 22--32\% in either role with actor and partner
+predictor pages; ordinal models were flagged less often. So look for a
+consistent pattern, not any single flag.
+
+With about 40 dyads, most mismatches studied were hard to detect; the absence
+of flags does not show a good fit. Panels suggest possible problems, not their
+cause. Neither a flag nor its absence shows whether estimates or standard
+errors are wrong: fit the model the pattern suggests and compare the
+estimates and standard errors you report. Mismatches showed mainly in these
+panels of both checks:
 \itemize{
 \item Poisson fitted to overdispersed counts: mean PIT distance, number of zeros, QQ.
 \item Extra zeros: QQ and PIT quartiles; the number of zeros less often.
@@ -108,7 +112,7 @@ random effects that absorb all residual variation would reproduce the data
 almost exactly. Parameters stay fixed at their fitted values; parameter
 uncertainty is not included. These are descriptive checks, not significance tests, and
 differ from DHARMa's plots and tests (see the
-\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly}{article}).
+\href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly}{distribution-checks article}).
 They do not directly assess serial correlation.
 
 Predicted outcomes set random effects to zero, which differs from averaging

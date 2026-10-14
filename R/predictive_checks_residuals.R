@@ -1,13 +1,13 @@
 #' Check residual distributions and patterns
 #'
 #' `r lifecycle::badge("experimental")`
-#' Check where each observed outcome falls among its simulated values, using
-#' complete datasets from [simulate_dyad_responses()].
-#' For checks on the outcome scale, use [check_dyad_outcomes()].
+#' Check where each observed outcome falls among its simulated values (PIT
+#' residuals), using complete datasets from [simulate_dyad_responses()].
+#' For checks on the outcome scale, also run [check_dyad_outcomes()].
 #'
 #' @param simulations An object from [simulate_dyad_responses()]. At least 200
 #'   datasets are required; 1,000 or more are recommended.
-#' @param predictors Optional column names, e.g. `c("age", "stress")`, looked up
+#' @param predictors Optional quoted column names, e.g. `c("age", "stress")`, looked up
 #'   in the model frame or `data`. Pass predictors the model omits or may
 #'   misspecify, especially the partner's. `NULL` (default) omits additional
 #'   predictor pages. Missing or infinite values are omitted only from that
@@ -15,45 +15,49 @@
 #' @param seed Seed for randomized PIT residuals. The caller's random-number
 #'   state is restored afterwards. With `NULL`, use and advance the caller's RNG.
 #' @inheritParams check_partner_dependence
-#' @param panels If `TRUE` (default), arrange checks in complete panels by
+#' @param panels If `TRUE` (default), arrange checks in figures by
 #'   composition, with one column per role or a pooled column. If `FALSE`, draw
 #'   each check and role separately.
 #' @param dyad,role,member Column names, with or without quotes, identifying
 #'   dyads, roles, and members within dyads. Looked up in the fitted model frame
 #'   or `data`. With `role = NULL`, all observations are pooled. Otherwise supply
-#'   `dyad`; also supply `member` for repeated observations, with `role` unchanged
-#'   within each member.
+#'   `dyad`; also supply `member` for repeated observations, where each member
+#'   must keep the same `role`. Each composition (pair of partners' roles, such
+#'   as female-male) is then checked separately.
 #' @param data The unchanged data used to fit the model. Supply it when required
 #'   columns are absent from the model frame, or to identify compositions using
 #'   partners whose responses were excluded during fitting.
 #'
 #' @return Invisibly returns a `dyadMLM_residual_check` list with the `pit` matrix
-#'   and calculated summaries in `compositions`. PIT rows are fitted observations;
-#'   columns are observed data followed by all simulated datasets.
-#'   Save it with `plot = FALSE` and draw it later with `plot(result)`.
+#'   (after any centring) and calculated summaries in `compositions`. PIT rows
+#'   are fitted observations; columns are observed data followed by all
+#'   simulated datasets. Save it with `plot = FALSE` and draw it later with
+#'   `plot(result)`, which also takes `ask` and `panels`.
 #'
 #' @section Reading the plots:
 #' Start with everyone pooled (`role = NULL`), then also inspect meaningful
 #' roles, such as gender, even when the model treats partners as exchangeable:
 #' role-specific problems show only there. Use `predictors` to examine other
-#' measured characteristics. For separate QQ plots and summaries by a categorical
-#' characteristic, use that variable as `role`.
+#' measured characteristics. For separate QQ plots and summaries by a
+#' person-level categorical characteristic, use that variable as `role`.
 #'
-#' A composition is the combination of partners' roles. Each composition gets
-#' one pooled column for same-role partners, or separate columns for distinct
-#' roles. Supplying roles does not change the model's assumptions. Unknown
-#' compositions are omitted with a warning.
+#' Each composition gets one pooled column for same-role partners, or separate
+#' columns for distinct roles. Supplying roles does not change the model's
+#' assumptions. Observations whose composition or role is unknown, for example
+#' because the partner's row is missing and `data` was not supplied, are omitted
+#' with a warning.
 #'
-#' The first page shows uniform QQ and mean PIT distance. The second shows PIT
+#' For each composition, the first page shows uniform QQ and mean PIT distance. The second shows PIT
 #' quartiles against predicted outcomes. Each supplied predictor gets another
 #' page like the second.
 #'
 #' PIT (probability integral transform) residuals rank each outcome from 0 (low)
 #' to 1 (high) relative to its own simulated values. A suitable model should
 #' produce ranks roughly evenly spread between 0 and 1, allowing for the
-#' variation shown in blue. PIT distance is `2 * abs(PIT - 0.5)`. Blue curve
-#' envelopes are nominal 95% global envelopes within each panel, not across
-#' roles, predictors, or pages. Because the model was fitted to these same data,
+#' variation shown in blue. PIT distance is `2 * abs(PIT - 0.5)`. Blue envelopes
+#' are global: they are built so that the whole red curve of a correct model
+#' stays inside in a nominal 95% of datasets. This holds within each panel, not
+#' across roles, predictors, or pages. Because the model was fitted to these same data,
 #' departures often look smaller than they are, as in the settings studied by
 #' Robins et al. (2000) and in our simulations.
 #'
@@ -64,21 +68,23 @@
 #' and separate predictors can hide local patterns and interactions.
 #'
 #' @section Reading flags:
-#' A flag is a red value or curve outside its blue range or limits. Each panel
-#' alone rarely flags a correct model, but flags add up across panels. In our
+#' A flag is a red curve or point outside its blue envelope or range, or a red
+#' line outside its dashed limits. Each panel alone rarely flags a correct
+#' model, but flags add up across panels. In our
 #' [simulations](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
 #' (confirmed on fresh seeds at 100 and 400 dyads), at least one panel of the
 #' residual and outcome checks (ECDFs and category bars not counted) flagged
-#' about 6--11% of correct Gaussian and count models when pooled, 16--23% in
-#' either role, and
-#' 22--32% in either role with actor and partner predictor pages; ordinal models
-#' were flagged less often. So look
-#' for a consistent pattern, not any single flag. With about 40 dyads, most
-#' mismatches studied were hard to detect; no flag does not show a good fit.
-#' Panels suggest possible problems, not their cause. Neither a flag nor its
-#' absence shows whether estimates or standard errors are wrong: fit the model
-#' the pattern suggests and compare the estimates and standard errors you
-#' report. Mismatches showed mainly in these panels:
+#' about 6--11% of correct Gaussian and negative-binomial models when pooled,
+#' 16--23% in either role, and 22--32% in either role with actor and partner
+#' predictor pages; ordinal models were flagged less often. So look for a
+#' consistent pattern, not any single flag.
+#'
+#' With about 40 dyads, most mismatches studied were hard to detect; the absence
+#' of flags does not show a good fit. Panels suggest possible problems, not their
+#' cause. Neither a flag nor its absence shows whether estimates or standard
+#' errors are wrong: fit the model the pattern suggests and compare the
+#' estimates and standard errors you report. Mismatches showed mainly in these
+#' panels of both checks:
 #' - Poisson fitted to overdispersed counts: mean PIT distance, number of zeros, QQ.
 #' - Extra zeros: QQ and PIT quartiles; the number of zeros less often.
 #' - Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
@@ -95,7 +101,7 @@
 #' almost exactly. Parameters stay fixed at their fitted values; parameter
 #' uncertainty is not included. These are descriptive checks, not significance tests, and
 #' differ from DHARMa's plots and tests (see the
-#' [article](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly)).
+#' [distribution-checks article](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly)).
 #' They do not directly assess serial correlation.
 #'
 #' Predicted outcomes set random effects to zero, which differs from averaging
