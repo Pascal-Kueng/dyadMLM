@@ -57,9 +57,10 @@
 #' matching [glmmTMB's predictions][glmmTMB::family_glmmTMB]. The checks compare
 #' observed and simulated scores. The scores do not measure
 #' distances on an underlying continuous scale.
-#' With few observations per random effect, Laplace estimation can bias ordinal
-#' random-effect variances and affect the dependence predicted by the model.
-#' Refitting with the same approximation does not necessarily remove this bias.
+#' Because each dyad contains only two people, glmmTMB tends to underestimate
+#' the dyad variance in ordinal models. Simulations then show less partner
+#' dependence than the data, so the partner check can flag a correct ordinal
+#' model, especially with many dyads.
 #'
 #' The model's fitted link is used for prediction and simulation. Predictions
 #' and simulated responses must be finite.
