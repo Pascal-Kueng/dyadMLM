@@ -85,6 +85,8 @@ test_that("simulation metadata respects fixed and tied conditional coefficients"
     free = TRUE, absent = FALSE, role_means = TRUE, zero_dispersion = TRUE, fixed = FALSE,
     shared = FALSE, shared_roles = TRUE, fixed_slope = TRUE
   ))
+  simulations <- simulate_dyad_responses(model, nsim = 1, seed = 9244)
+  expect_identical(attr(simulations, "dyadMLM")$random_effects, "no")
 })
 
 

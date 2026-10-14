@@ -67,10 +67,10 @@
 #' [check_partner_dependence()] currently requires cross-sectional dyads.
 #'
 #' @section Technical details:
-#' Each simulation draws new random effects and then new responses from the
-#' fitted model. Random effects within each block are drawn together using
-#' their fitted variances and correlations. This also applies to random effects
-#' in the zero-inflation and dispersion models, if present.
+#' Each simulation draws new random effects, if the model has any, and then new
+#' responses from the fitted model. Random effects within each block are drawn
+#' together using their fitted variances and correlations. This also applies to
+#' random effects in the zero-inflation and dispersion models, if present.
 #'
 #' Fitted parameters and predictors, including any lagged responses, stay fixed.
 #' The model is not refitted, and uncertainty in parameter estimates is not
@@ -236,12 +236,13 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     model_frame = frame
   )
 
+  has_random_effects <- any(lengths(lapply(model$modelInfo$reTrms, `[[`, "cnms")) > 0L)
   attr(out, "dyadMLM") <- list(
     backend = "glmmTMB",
     family = family$family,
     link = family$link,
     reference = "plug-in predictive",
-    random_effects = "new",
+    random_effects = if (has_random_effects) "new" else "no",
     parameter_uncertainty = "excluded",
     free_conditional_intercept = free_conditional_intercept,
     seed = seed

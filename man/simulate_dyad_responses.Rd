@@ -84,10 +84,10 @@ and simulated responses must be finite.
 
 \section{Technical details}{
 
-Each simulation draws new random effects and then new responses from the
-fitted model. Random effects within each block are drawn together using
-their fitted variances and correlations. This also applies to random effects
-in the zero-inflation and dispersion models, if present.
+Each simulation draws new random effects, if the model has any, and then new
+responses from the fitted model. Random effects within each block are drawn
+together using their fitted variances and correlations. This also applies to
+random effects in the zero-inflation and dispersion models, if present.
 
 Fitted parameters and predictors, including any lagged responses, stay fixed.
 The model is not refitted, and uncertainty in parameter estimates is not
