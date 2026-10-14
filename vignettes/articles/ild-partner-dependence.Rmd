@@ -45,20 +45,20 @@ simulations with two summaries of the observed responses: **member means
 This study asks how often those summaries flag under correct covariance
 restrictions, and what they detect when a restriction is wrong.
 
-The saved run targets `r unique(cells$repetitions)` datasets per cell and
+The fitted models have two partner covariances: a stable one between partners'
+random intercepts, and a same-occasion one between their dyad-occasion random
+effects. Each omission should show at its targeted level: the between level for
+the stable covariance, and the within level for the same-occasion covariance.
+
+The saved run targets `r unique(cells$repetitions)` datasets per setting and
 `r unique(cells$reference_draws)` reference simulations per fitted model, across
-`r nrow(cells)` cells. `r if (is_pilot) "**These are pilot results for checking the workflow; they do not establish calibration or detection rates.**" else "The results describe these simulated settings; they do not establish calibration for every supported model."`
+`r nrow(cells)` settings. `r if (is_pilot) "**These are pilot results for checking the workflow. They do not establish calibration or detection rates.**" else "The results describe these simulated settings. They do not establish calibration for every supported model."`
 
 A **row flag** means that one observed statistic lies outside the middle 95% of
 its simulated values. A **figure flag** means that at least one row flags. These
 are descriptive checks. The 5% line is a benchmark for individual rows, not a
 promised rate or a figure-level threshold. Summaries freely estimated from the
 same data may flag much less often.
-
-The report uses rank limits based on ordered simulated values. These can change
-flags compared with the earlier interpolated-quantile rule, shown below as a
-sensitivity comparison. Both rules were recomputed from the saved simulations;
-no new fits were needed.
 
 <details>
 <summary>Design and interpretation</summary>
@@ -81,13 +81,13 @@ calibration controls.
 
 Every reference simulation draws new random effects and responses, while keeping
 fitted parameters and predictor values fixed. Models are not refitted. Checks
-subtract the same fixed-effect predictions from observed and simulated responses;
-each dataset then supplies its own member means. Nonlinear links and short
+subtract the same fixed-effect predictions from observed and simulated responses.
+Each dataset then supplies its own member means. Nonlinear links and short
 series can let a misfit at one level affect summaries at the other.
 
 Plots and tables below use fits with optimizer convergence, a positive-definite
-Hessian and a finite log-likelihood. Gaussian models use BFGS; other families use
-`nlminb`. Failed fits are not retried. The saved tables also report all available
+Hessian and a finite log-likelihood. Gaussian models use BFGS, and other families
+use `nlminb`. Failed fits are not retried. The saved tables also report all available
 checks, including fits that fail those criteria, and preserve failures separately.
 
 Error bars and brackets are 95% Wilson intervals for flag rates. Monte Carlo SEs
@@ -99,7 +99,7 @@ uncertainty in an individual model's fitted parameters.
 ## False alarms under a true restriction
 
 Here the fitted covariance restriction is true. Each panel shows the partner
-correlation row at the corresponding level: zero stable covariance at the
+correlation row at the targeted level: zero stable covariance at the
 between level, or zero occasion covariance at the within level. Other summaries
 and full-model results remain in the saved tables. These true-restriction settings
 use complete data and 5 or 14 occasions.
@@ -146,8 +146,8 @@ ggplot(detection_rows, aes(rate, restriction)) +
 
 Response-scale correlations below describe the generated data after subtracting
 their true fixed-effect means. They help distinguish response-scale dependence
-from latent covariance parameters. These estimates use large complete samples;
-they are not fitted-model results.
+from latent covariance parameters. These estimates use large complete samples.
+They are not fitted-model results.
 
 ```{r response-effect-sizes}
 effect_sizes |>
@@ -167,7 +167,7 @@ if (!is_pilot) {
     semi_join(null_rows, by = c("cell", "model", "response")) |> filter(figure == "either")
   full_figures <- primary_figures |> filter(model == "correct", figure == "either")
   gaussian_full <- full_figures |> filter(part == "gaussian")
-  cat(sprintf("Under true zero-covariance restrictions, targeted correlation rows flagged **%.1f–%.1f%%** of datasets; a flag anywhere in either figure occurred in **%.1f–%.1f%%**. For full models, either-figure rates were **%.1f–%.1f%%** across families and **%.1f–%.1f%%** for Gaussian models.\n\n",
+  cat(sprintf("Under true zero-covariance restrictions, the partner-correlation row at the targeted level flagged in **%.1f–%.1f%%** of datasets. A flag anywhere in either figure occurred in **%.1f–%.1f%%**. For full models, either-figure rates were **%.1f–%.1f%%** across families and **%.1f–%.1f%%** for Gaussian models.\n\n",
     100 * min(null_rows$rate), 100 * max(null_rows$rate),
     100 * min(null_figures$rate), 100 * max(null_figures$rate),
     100 * min(full_figures$rate), 100 * max(full_figures$rate),
@@ -181,7 +181,7 @@ if (!is_pilot) {
   small_occasion <- covariance_rows |> filter(targeted, n_dyads == 50, level == "within")
   short_series <- small_occasion |> filter(part == "gaussian", n_occasions == 3) |>
     arrange(missing_share)
-  cat(sprintf("With 200 dyads and 14 complete occasions, targeted detection was **%.1f–%.1f%%**. At 50 dyads it was **%.1f–%.1f%%** for omitted stable covariance and **%.1f–%.1f%%** for omitted occasion covariance. In Gaussian data with 50 dyads and 3 occasions, occasion-covariance detection fell from **%.1f%%** with complete data to **%.1f%%** with 20%% missing member occasions.\n\n",
+  cat(sprintf("With 200 dyads and 14 complete occasions, detection at the targeted level was **%.1f–%.1f%%**. At 50 dyads it was **%.1f–%.1f%%** for omitted stable covariance and **%.1f–%.1f%%** for omitted occasion covariance. In Gaussian data with 50 dyads and 3 occasions, occasion-covariance detection fell from **%.1f%%** with complete data to **%.1f%%** with 20%% missing member occasions.\n\n",
     100 * min(targeted_detection$rate), 100 * max(targeted_detection$rate),
     100 * min(small_stable$rate), 100 * max(small_stable$rate),
     100 * min(small_occasion$rate), 100 * max(small_occasion$rate),
@@ -196,10 +196,12 @@ if (!is_pilot) {
 
 ## Serial dependence and lagged outcomes
 
-The AR comparison holds total occasion variances equal. It checks the
-within-level correlation between the partner average and half-difference when the fitted model imposes
-that true equality but omits serial dependence. The φ = 0 setting is the control;
-φ = 0.7 adds serial dependence to the generated data.
+Omitted autocorrelation raises two questions: does it cause false alarms for
+other restrictions, and does the check reveal it? The generated data have AR(1)
+dependence (φ = 0.7) or none (φ = 0, the control), and the models in this
+section omit it. One model also imposes equal occasion variances for both roles,
+which is true here. The table shows the row that checks this restriction: the
+within-level dyad-average/role-difference correlation.
 
 ```{r ar-restriction}
 ar_rows <- primary_flags |>
@@ -221,7 +223,7 @@ if (!is_pilot) {
     tidyr::pivot_wider(names_from = ar_phi, values_from = c(rate, mcse)) |>
     mutate(change = .data[["rate_0.7"]] - rate_0,
       change_mcse = sqrt(.data[["mcse_0.7"]]^2 + mcse_0^2))
-  cat(sprintf("From φ = 0 to φ = 0.7, row-flag rates rose by **%.1f and %.1f percentage points** at 50 and 200 dyads (Monte Carlo SEs **%.1f and %.1f**, independent cells): small and imprecise increases. The variance equality is true; the mismatch is the omitted serial dependence.\n\n",
+  cat(sprintf("From φ = 0 to φ = 0.7, row-flag rates rose by **%.1f and %.1f percentage points** at 50 and 200 dyads (Monte Carlo SEs **%.1f and %.1f**, independent settings): small and imprecise increases. The variance equality is true, so the mismatch is the omitted serial dependence.\n\n",
     100 * ar_changes$change[1], 100 * ar_changes$change[2],
     100 * ar_changes$change_mcse[1], 100 * ar_changes$change_mcse[2]))
   if (all(ar_unrestricted$rate == 0))
@@ -229,7 +231,7 @@ if (!is_pilot) {
   if (file.exists(file.path(params$output_directory, "serial-recovery.csv"))) {
     serial_recovery <- read_results("serial-recovery.csv") |> left_join(cells, by = "cell") |>
       arrange(n_dyads)
-    cat(sprintf("Despite those quiet checks, estimated stable correlation averaged **%.3f and %.3f** at 50 and 200 dyads, versus a true **%.2f** (Monte Carlo SEs **%.3f and %.3f**).\n\n",
+    cat(sprintf("Yet the unrestricted model without AR underestimated the stable partner correlation: **%.3f and %.3f** on average at 50 and 200 dyads, versus a true **%.2f** (Monte Carlo SEs **%.3f and %.3f**).\n\n",
       serial_recovery$mean[1], serial_recovery$mean[2], serial_recovery$true_value[1],
       serial_recovery$mcse[1], serial_recovery$mcse[2]))
   }
@@ -240,7 +242,7 @@ These checks can be misleading when the model includes lagged outcomes as predic
 For these models, simulations keep the observed lag predictors fixed.
 The following table compares raw and model-centred checks using the same
 simulations. It reports a flag **anywhere in either figure**. High rates can
-reflect this simulation limitation as well as fitting behavior; they are not
+reflect this simulation limitation as well as fitting behavior. They are not
 false-alarm estimates for a clean null model.
 
 ```{r lag-sensitivity}
@@ -259,8 +261,8 @@ outcome-derived predictors fixed gives a valid simulation reference.
 ## Fitting and sensitivity checks
 
 The denominator of each rate is the number of datasets for which that check was
-available in the stated fit subset. The table counts models across all cells in
-each part; a single generated dataset may supply several fitted models.
+available in the stated fit subset. Each table row counts one family's models
+across all settings. A single generated dataset may supply several fitted models.
 
 ```{r fit-availability}
 fits |>
@@ -281,7 +283,7 @@ fit_comparison <- flags |>
   filter(rule == "rank") |>
   select(cell, model, response, level, statistic, fits, rate) |>
   tidyr::pivot_wider(names_from = fits, values_from = rate)
-cat(sprintf("The largest per-row difference between the primary rank rule and the earlier quantile rule was **%.1f percentage points**. The largest difference between all available checks and usable fits was **%.1f percentage points**, among rows available in both subsets.\n\n",
+cat(sprintf("Flags use rank limits from the ordered simulated values, as `check_partner_dependence()` does. Interpolated quantiles would change per-row rates by at most **%.1f percentage points**. The largest difference between all available checks and usable fits was **%.1f percentage points**, among rows available in both subsets.\n\n",
   100 * max(abs(rule_comparison$quantile - rule_comparison$rank), na.rm = TRUE),
   100 * max(abs(fit_comparison$all - fit_comparison$usable), na.rm = TRUE)))
 ```
@@ -289,7 +291,7 @@ cat(sprintf("The largest per-row difference between the primary rank rule and th
 Parameter recovery is kept separate from check performance. The saved recovery
 table contains estimates only for correctly specified models, excluding the
 lagged-outcome sensitivity fits. This compact view gives the largest absolute
-bias across cells for fixed predictor effects and latent partner correlations.
+bias across settings for fixed predictor effects and latent partner correlations.
 
 ```{r parameter-recovery}
 parameter_labels <- c(x_actor = "Actor effect", x_partner = "Partner effect",

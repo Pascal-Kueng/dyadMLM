@@ -105,7 +105,7 @@ used the isolated sampler repair described below.
 ## Longitudinal partner-dependence checks
 
 This study checks member means and same-occasion deviations separately. Gaussian,
-Poisson and ordinal settings cover correct models and omitted partner covariance;
+Poisson and ordinal settings cover correct models and omitted partner covariance.
 Gaussian settings also impose equal occasion variances or omit serial dependence.
 Zero-covariance Gaussian, Poisson and ordinal settings check false alarms under a true
 restriction. Lagged-outcome Gaussian and NB2 models are practical sensitivity
@@ -120,7 +120,7 @@ Rscript -e 'source("dev/diagnostic_checks/simulation-studies/ild-partner-depende
 `check.R` checks the generator and study bookkeeping. The runner's arguments are
 datasets per cell, reference simulations per fit, workers, and
 `run` or `summarise`. The defaults are shown. Use `2L, 200L, 10L, "run"` for a short
-pilot. Run from a fixed checkout; rerun the same command to resume saved blocks.
+pilot. Run from a fixed checkout. Rerun the same command to resume saved blocks.
 Changed simulation code or settings require a new output directory.
 
 Results go to `results/ild-partner-dependence/<datasets>-datasets-<draws>-draws/`.

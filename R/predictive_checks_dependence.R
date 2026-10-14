@@ -4,11 +4,12 @@
 #'
 #' `r lifecycle::badge("experimental")`
 #' A dyadic model should reproduce how much responses vary and how strongly
-#' partners' responses are related. This check computes variances and correlations
-#' of simulated responses based on the model and compares them to the observed
-#' response variances and correlations from the data.
-#' This helps identify mismatches in the model's assumptions and works for both
-#' cross-sectional and longitudinal models.
+#' partners' responses are related. This check compares the observed response
+#' variances and partner correlations with those of responses simulated from the
+#' fitted model. This helps identify mismatches in the model's assumptions,
+#' especially when a less restricted model does not converge and so cannot be
+#' used for model comparison. It works for both cross-sectional and longitudinal
+#' models (for repeated occasions, supply `member` and `time`).
 #'
 #' @param simulations An object returned by [simulate_dyad_responses()].
 #' @param dyad The dyad column name. Looked up first
@@ -21,14 +22,14 @@
 #'   female-male) is checked separately,
 #'   using exchangeable summaries for same-role pairs and role-specific
 #'   summaries otherwise. For repeated occasions, each member must keep the
-#'   same role within their dyad; rows with missing roles are omitted.
+#'   same role within their dyad. Rows with missing roles are omitted.
 #' @param member The column name identifying each member.
 #'   Only needed for repeated occasions, ignored without a `time` argument.
 #'   Looked up first in the fitted model frame, then in `data` if supplied.
-#' @param time For repeated observation, `time` identifies the column name
-#'   identifying each occasion. Requires `member` to be supplied. Every fitted
+#' @param time The column name identifying each occasion. Only needed for
+#'   repeated occasions. Requires `member` to be supplied. `time` must identify
+#'   occasions that partners exactly share, such as the diary day. Every fitted
 #'   row needs a known `member` and `time`.
-#'   `time` must identify occasions that partners exactly share, such as the diary day.
 #'   Looked up first in the fitted model frame, then in `data` if supplied.
 #' @param plot If `TRUE` (default), draw the comparison plots for visual checks.
 #'   If `FALSE`, `ask` and `panels` are ignored.
@@ -57,7 +58,8 @@
 #'   and have `NULL` statistics. Each tibble has one observed row
 #'   followed by one row per simulation, identified by `dataset`. `summary`
 #'   compares each `observed` statistic with the middle 95% of its simulations
-#'   (`lower`, `upper`) and marks those `outside` it. The object includes
+#'   (`lower`, `upper`) and marks those `outside` it. Rows with missing dyad IDs
+#'   or roles and incomplete dyads are omitted with a warning. The object includes
 #'   omission counts and settings, and can be saved and plotted later.
 #'   With repeated occasions, `compositions` has a `level` column (`"between"`
 #'   or `"within"`), and each label ends with its level. Within rows count the
@@ -68,9 +70,24 @@
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
 #' The heading shows the dyad composition, its number of usable dyads, and the
-#' total across all compositions. The top row shows member SDs and partner
-#' correlation. The bottom row shows the same information using dyad averages
-#' and partner differences.
+#' total across all compositions.
+#'
+#' The top row compares:
+#' - **Response SDs:** one for each role, or one common SD for exchangeable members.
+#' - **Partner correlation:** how strongly partners' responses are related.
+#'
+#' The bottom row shows the same information using dyad averages and
+#' half-differences:
+#' - **Dyad-average SD:** how much dyads differ in their average response.
+#' - **Half-difference SD or RMS:** each partner difference is divided by two.
+#'   With distinct roles, the SD shows how much signed differences vary
+#'   across dyads. For exchangeable members, the RMS (root mean square) shows
+#'   their typical size, regardless of
+#'   partner order.
+#' - **Dyad-average/role-difference correlation:** shown only for distinct roles,
+#'   because it depends on how partners are ordered. Positive values indicate
+#'   greater variance for the first named role. Negative values indicate greater
+#'   variance for the second.
 #'
 #' An observed value far from most simulated values may indicate that the
 #' model does not reproduce that feature of the data well.
@@ -84,29 +101,8 @@
 #' occur by chance, especially when checking several summaries.
 #' They invite investigation, not formal rejection of the model. The
 #' [covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
-#' illustrates detection and false alarms when checking each composition; 10 to
-#' 29% of correctly pooled models had at least one flag.
-#'
-#' The top row compares:
-#' - **Response SDs:** one for each role, or one common SD for exchangeable members.
-#' - **Partner correlation:** how strongly partners' responses are related.
-#'
-#' The bottom row shows:
-#' - **Dyad-average SD:** how much dyads differ in their average response.
-#' - **Half-difference SD or RMS:** each partner difference is divided by two.
-#'   With distinct roles, the SD shows how much signed differences vary
-#'   across dyads. For exchangeable members, the RMS (root mean square) shows
-#'   their typical size, regardless of
-#'   partner order.
-#' - **Dyad-average/role-difference correlation:** shown only for distinct roles,
-#'   because it depends on how partners are ordered. Positive values indicate
-#'   greater variance for the first named role. Negative values indicate greater
-#'   variance for the second.
-#'
-#' These checks are particularly useful when a less restricted model does not
-#' converge and so cannot be used for model comparison. They show how well the
-#' simpler model
-#' reproduces the observed variances and partner correlations.
+#' illustrates detection and false alarms when checking each composition. In
+#' that study, 10 to 29% of correctly pooled models had at least one flag.
 #'
 #' A flexible covariance model will usually reproduce features it estimated from
 #' the same data. Agreement alone therefore does not establish good fit.
@@ -115,12 +111,12 @@
 #' Use a suitable model comparison to formally test a specific covariance
 #' restriction when both models can be fitted (see [compare_nested_models()]).
 #'
-#' Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
-#'
 #' @section Repeated occasions:
-#' With `member` and `time`, every dataset (observed and simulated) is split
-#' into two levels after centering. Each level is checked like
-#' cross-sectional data:
+#' With repeated occasions, partners can be similar in two ways: in their
+#' average responses, and in being above or below their own averages on the
+#' same occasions. A model should reproduce both. With `member` and `time`,
+#' every dataset (observed and simulated) is split into two levels after any
+#' model-centring. Each level is checked like cross-sectional data:
 #' - **Between:** each member's mean over all their fitted occasions, paired
 #'   within the dyad. Each dyad counts once.
 #' - **Within:** each response minus its member's mean, paired with the
@@ -141,11 +137,11 @@
 #'   variance) or nonlinear links. Thus, both levels should be interpreted
 #'   together.
 #' - Check dependence across occasions (e.g., autocorrelation) separately.
-#'   If the model omits a temporal dependence, within-person summaries may be
-#'   incorrect, and these checks may not reveal it.
+#'   If the model omits temporal dependence, its covariance estimates can be
+#'   biased, and these checks may not reveal it.
 #' - These checks can be misleading when the model includes lagged outcomes
 #'   as predictors.
-#' - Poorly estimated same-occasion effects can affect the within checks.
+#' - Poorly estimated occasion-level random effects can affect the within checks.
 #'   Check the fitted model's convergence and covariance estimates.
 #'
 #' @section Technical details:

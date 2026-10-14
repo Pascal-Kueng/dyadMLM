@@ -31,16 +31,16 @@ mismatches that pooling may hide. Each dyad composition (role pair, such as
 female-male) is checked separately,
 using exchangeable summaries for same-role pairs and role-specific
 summaries otherwise. For repeated occasions, each member must keep the
-same role within their dyad; rows with missing roles are omitted.}
+same role within their dyad. Rows with missing roles are omitted.}
 
 \item{member}{The column name identifying each member.
 Only needed for repeated occasions, ignored without a \code{time} argument.
 Looked up first in the fitted model frame, then in \code{data} if supplied.}
 
-\item{time}{For repeated observation, \code{time} identifies the column name
-identifying each occasion. Requires \code{member} to be supplied. Every fitted
+\item{time}{The column name identifying each occasion. Only needed for
+repeated occasions. Requires \code{member} to be supplied. \code{time} must identify
+occasions that partners exactly share, such as the diary day. Every fitted
 row needs a known \code{member} and \code{time}.
-\code{time} must identify occasions that partners exactly share, such as the diary day.
 Looked up first in the fitted model frame, then in \code{data} if supplied.}
 
 \item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
@@ -75,7 +75,8 @@ composition. Compositions with fewer than three complete dyads are skipped
 and have \code{NULL} statistics. Each tibble has one observed row
 followed by one row per simulation, identified by \code{dataset}. \code{summary}
 compares each \code{observed} statistic with the middle 95\% of its simulations
-(\code{lower}, \code{upper}) and marks those \code{outside} it. The object includes
+(\code{lower}, \code{upper}) and marks those \code{outside} it. Rows with missing dyad IDs
+or roles and incomplete dyads are omitted with a warning. The object includes
 omission counts and settings, and can be saved and plotted later.
 With repeated occasions, \code{compositions} has a \code{level} column (\code{"between"}
 or \code{"within"}), and each label ends with its level. Within rows count the
@@ -84,11 +85,12 @@ dyads that share at least one occasion.
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 A dyadic model should reproduce how much responses vary and how strongly
-partners' responses are related. This check computes variances and correlations
-of simulated responses based on the model and compares them to the observed
-response variances and correlations from the data.
-This helps identify mismatches in the model's assumptions and works for both
-cross-sectional and longitudinal models.
+partners' responses are related. This check compares the observed response
+variances and partner correlations with those of responses simulated from the
+fitted model. This helps identify mismatches in the model's assumptions,
+especially when a less restricted model does not converge and so cannot be
+used for model comparison. It works for both cross-sectional and longitudinal
+models (for repeated occasions, supply \code{member} and \code{time}).
 }
 \section{Reading the plots}{
 
@@ -96,24 +98,7 @@ Histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95\% of simulations (no formal confidence
 intervals).
 The heading shows the dyad composition, its number of usable dyads, and the
-total across all compositions. The top row shows member SDs and partner
-correlation. The bottom row shows the same information using dyad averages
-and partner differences.
-
-An observed value far from most simulated values may indicate that the
-model does not reproduce that feature of the data well.
-Agreement does not establish that omitted dependence is negligible, especially
-with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{partner-dependence study}
-illustrates how sample size affects detection when residual partner
-correlation is omitted.
-
-Checking each composition can reveal differences hidden by pooling.
-Flags (observed values outside the middle 95\%, marked \code{*} when printed) can
-occur by chance, especially when checking several summaries.
-They invite investigation, not formal rejection of the model. The
-\href{https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html}{covariance-pooling study}
-illustrates detection and false alarms when checking each composition; 10 to
-29\% of correctly pooled models had at least one flag.
+total across all compositions.
 
 The top row compares:
 \itemize{
@@ -121,7 +106,8 @@ The top row compares:
 \item \strong{Partner correlation:} how strongly partners' responses are related.
 }
 
-The bottom row shows:
+The bottom row shows the same information using dyad averages and
+half-differences:
 \itemize{
 \item \strong{Dyad-average SD:} how much dyads differ in their average response.
 \item \strong{Half-difference SD or RMS:} each partner difference is divided by two.
@@ -135,10 +121,20 @@ greater variance for the first named role. Negative values indicate greater
 variance for the second.
 }
 
-These checks are particularly useful when a less restricted model does not
-converge and so cannot be used for model comparison. They show how well the
-simpler model
-reproduces the observed variances and partner correlations.
+An observed value far from most simulated values may indicate that the
+model does not reproduce that feature of the data well.
+Agreement does not establish that omitted dependence is negligible, especially
+with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{partner-dependence study}
+illustrates how sample size affects detection when residual partner
+correlation is omitted.
+
+Checking each composition can reveal differences hidden by pooling.
+Flags (observed values outside the middle 95\%, marked \code{*} when printed) can
+occur by chance, especially when checking several summaries.
+They invite investigation, not formal rejection of the model. The
+\href{https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html}{covariance-pooling study}
+illustrates detection and false alarms when checking each composition. In
+that study, 10 to 29\% of correctly pooled models had at least one flag.
 
 A flexible covariance model will usually reproduce features it estimated from
 the same data. Agreement alone therefore does not establish good fit.
@@ -146,15 +142,15 @@ For example, pooled summaries (\code{role = NULL}) of a Gaussian model with an
 unconstrained exchangeable covariance, as below, agree almost by construction.
 Use a suitable model comparison to formally test a specific covariance
 restriction when both models can be fitted (see \code{\link[=compare_nested_models]{compare_nested_models()}}).
-
-Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
 }
 
 \section{Repeated occasions}{
 
-With \code{member} and \code{time}, every dataset (observed and simulated) is split
-into two levels after centering. Each level is checked like
-cross-sectional data:
+With repeated occasions, partners can be similar in two ways: in their
+average responses, and in being above or below their own averages on the
+same occasions. A model should reproduce both. With \code{member} and \code{time},
+every dataset (observed and simulated) is split into two levels after any
+model-centring. Each level is checked like cross-sectional data:
 \itemize{
 \item \strong{Between:} each member's mean over all their fitted occasions, paired
 within the dyad. Each dyad counts once.
@@ -177,11 +173,11 @@ especially with few occasions (due to member means including occasion-level
 variance) or nonlinear links. Thus, both levels should be interpreted
 together.
 \item Check dependence across occasions (e.g., autocorrelation) separately.
-If the model omits a temporal dependence, within-person summaries may be
-incorrect, and these checks may not reveal it.
+If the model omits temporal dependence, its covariance estimates can be
+biased, and these checks may not reveal it.
 \item These checks can be misleading when the model includes lagged outcomes
 as predictors.
-\item Poorly estimated same-occasion effects can affect the within checks.
+\item Poorly estimated occasion-level random effects can affect the within checks.
 Check the fitted model's convergence and covariance estimates.
 }
 }
