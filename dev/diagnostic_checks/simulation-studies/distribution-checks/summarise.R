@@ -1,6 +1,6 @@
-# Failed checks retain their standard statistic rows with NA flags. Category rows
-# are conditional on the category being displayed in that dataset's outcome plot.
-summarise_distribution_study <- function(conditions, fits, statistics) {
+# Failed checks retain their standard statistic rows with NA flags. Zero counts and
+# ordinal category ranges count only where the package shows them.
+summarise_distribution_study <- function(conditions, fits, statistics, inference) {
   fit_counts <- fits |>
     dplyr::group_by(condition, reference) |>
     dplyr::summarise(
@@ -8,6 +8,9 @@ summarise_distribution_study <- function(conditions, fits, statistics) {
       # These come first because `usable` becomes a count below.
       median_dyad_sd = median(dyad_sd[usable], na.rm = TRUE),
       median_dispersion = median(dispersion[usable], na.rm = TRUE),
+      # Largest residual SD or NB2 size among fits with convergence or Hessian problems.
+      maximum_problem_dispersion = if (any(status == "fit_problem", na.rm = TRUE))
+        max(dispersion[status %in% "fit_problem"], na.rm = TRUE) else NA_real_,
       attempted = dplyr::n(), usable = sum(usable, na.rm = TRUE),
       with_warnings = sum(!is.na(warnings) & nzchar(warnings)),
       fit_errors = sum(status == "fit_error", na.rm = TRUE),
@@ -66,5 +69,30 @@ summarise_distribution_study <- function(conditions, fits, statistics) {
     dplyr::left_join(conditions, by = "condition") |>
     dplyr::relocate(dplyr::all_of(names(conditions)))
 
-  list(summary = summary, paired_comparison = paired_comparison, fit_summary = fit_summary)
+  # Actor and partner coverage over converged fits.
+  if (!nrow(inference)) inference <- data.frame(condition = integer(), term = character(),
+    truth = numeric(), estimate = numeric(), se = numeric(), covered = logical())
+  inference_summary <- inference |>
+    dplyr::group_by(condition, term) |>
+    dplyr::summarise(estimated = dplyr::n(), bias = mean(estimate - truth),
+      bias_mcse = stats::sd(estimate) / sqrt(estimated), empirical_sd = stats::sd(estimate),
+      mean_se = mean(se), se_ratio = mean_se / empirical_sd, coverage = mean(covered),
+      coverage_mcse = sqrt(coverage * (1 - coverage) / estimated), .groups = "drop") |>
+    dplyr::left_join(dplyr::select(fit_summary, condition, reference, attempted) |>
+      dplyr::filter(reference == "fitted") |> dplyr::select(-reference), by = "condition") |>
+    dplyr::left_join(conditions, by = "condition") |>
+    dplyr::relocate(dplyr::all_of(names(conditions)), attempted)
+
+  # A range with equal limits means at least 95% of simulated datasets gave the same value.
+  maximum_deviation_ties <- statistics |>
+    dplyr::filter(reference == "fitted", statistic == "maximum_deviation", role != "All",
+                  !is.na(flagged)) |>
+    dplyr::group_by(condition, view, role) |>
+    dplyr::summarise(checked = dplyr::n(), tied = sum(lower == upper),
+                     rate = tied / checked, .groups = "drop") |>
+    dplyr::left_join(conditions, by = "condition") |>
+    dplyr::relocate(dplyr::all_of(names(conditions)))
+
+  list(summary = summary, paired_comparison = paired_comparison, fit_summary = fit_summary,
+       inference = inference_summary, maximum_deviation_ties = maximum_deviation_ties)
 }

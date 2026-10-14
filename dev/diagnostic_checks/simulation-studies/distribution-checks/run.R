@@ -25,7 +25,10 @@ run_distribution_study <- function(repetitions = 500L, reference_draws = 1000L,
   # Prevent a resumed run from silently combining different generators or package code.
   source_files <- c(sort(list.files("R", "[.]R$", full.names = TRUE)),
     file.path(study_directory, "distribution-checks", c("helpers.R", "run.R")))
-  settings <- list(conditions = conditions, sources = tools::md5sum(source_files),
+  # Help text (roxygen lines) may change during the run.
+  sources <- vapply(source_files, function(file)
+    rlang::hash(grep("^#'", readLines(file), value = TRUE, invert = TRUE)), character(1))
+  settings <- list(conditions = conditions, sources = sources,
     R = as.character(getRversion()), glmmTMB = as.character(utils::packageVersion("glmmTMB")),
     TMB = as.character(utils::packageVersion("TMB")))
   settings_file <- file.path(output_directory, "settings.rds")
@@ -35,7 +38,7 @@ run_distribution_study <- function(repetitions = 500L, reference_draws = 1000L,
   } else {
     saveRDS(settings, settings_file)
     write.csv(conditions, file.path(output_directory, "conditions.csv"), row.names = FALSE)
-    write.csv(data.frame(file = names(settings$sources), md5 = unname(settings$sources)),
+    write.csv(data.frame(file = names(settings$sources), hash = unname(settings$sources)),
       file.path(output_directory, "source-hashes.csv"), row.names = FALSE)
     writeLines(c(paste("Commit:", system("git rev-parse HEAD", intern = TRUE)),
       paste("Uncommitted changes:", paste(system("git status --short", intern = TRUE), collapse = "; ")),
@@ -67,13 +70,14 @@ run_distribution_study <- function(repetitions = 500L, reference_draws = 1000L,
     completed <- readRDS(checkpoint)
     fits <- dplyr::bind_rows(lapply(completed, `[[`, "fits"))
     statistics <- dplyr::bind_rows(lapply(completed, `[[`, "statistics"))
+    inference <- dplyr::bind_rows(lapply(completed, `[[`, "inference"))
     summarise_distribution_study(conditions[conditions$condition %in% fits$condition, ],
-                                 fits, statistics)
+                                 fits, statistics, inference)
   })
-  report_tables <- list(
-    summary = dplyr::bind_rows(lapply(tables, `[[`, "summary")),
-    `paired-comparison` = dplyr::bind_rows(lapply(tables, `[[`, "paired_comparison")),
-    fits = dplyr::bind_rows(lapply(tables, `[[`, "fit_summary")))
+  collect <- function(part) dplyr::bind_rows(lapply(tables, `[[`, part))
+  report_tables <- list(summary = collect("summary"),
+    `paired-comparison` = collect("paired_comparison"), fits = collect("fit_summary"),
+    inference = collect("inference"), `maximum-deviation-ties` = collect("maximum_deviation_ties"))
   for (name in names(report_tables))
     write.csv(report_tables[[name]], file.path(output_directory, paste0(name, ".csv")), row.names = FALSE)
   fit_counts <- report_tables$fits[report_tables$fits$reference == "fitted", ]
@@ -82,11 +86,9 @@ run_distribution_study <- function(repetitions = 500L, reference_draws = 1000L,
   if (complete && repetitions == 500L && reference_draws == 1000L) {
     report_directory <- file.path(study_directory, "report-data/distribution-checks")
     dir.create(report_directory, recursive = TRUE, showWarnings = FALSE)
-    files <- c("conditions.csv", "summary.csv", "paired-comparison.csv", "fits.csv",
+    files <- c("conditions.csv", paste0(names(report_tables), ".csv"),
                "source-hashes.csv", "session-info.txt")
     stopifnot(all(file.copy(file.path(output_directory, files), report_directory, overwrite = TRUE)))
-    rmarkdown::render("vignettes/articles/distribution-checks.Rmd",
-      output_dir = normalizePath(output_directory), envir = new.env(), quiet = TRUE)
   }
   message(if (complete) "Complete" else "Partial", " study saved in ", output_directory)
   invisible(output_directory)
