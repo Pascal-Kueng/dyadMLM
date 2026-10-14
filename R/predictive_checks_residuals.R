@@ -124,22 +124,23 @@
 #' Global envelopes use extreme-rank-length ordering (Myllymäki et al., 2017).
 #'
 #' @references
-#' Hartig, F. (2026). DHARMa: Residual Diagnostics for Hierarchical (Multi-Level /
-#' Mixed) Regression Models. R package version 0.5.0.
-#' \doi{10.32614/CRAN.package.DHARMa}.
-#'
 #' Dunn, P. K., & Smyth, G. K. (1996). Randomized quantile residuals.
-#' *Journal of Computational and Graphical Statistics*, 5(3), 236--244.
-#' \doi{10.2307/1390802}.
+#' *Journal of Computational and Graphical Statistics, 5*(3), 236--244.
+#' \doi{10.2307/1390802}
+#'
+#' Hartig, F. (2026). *DHARMa: Residual diagnostics for hierarchical
+#' (multi-level/mixed) regression models* (Version 0.5.0) \[R package\].
+#' \doi{10.32614/CRAN.package.DHARMa}
 #'
 #' Myllymäki, M., Mrkvička, T., Grabarnik, P., Seijo, H., & Hahn, U. (2017).
 #' Global envelope tests for spatial processes. *Journal of the Royal
-#' Statistical Society: Series B*, 79(2), 381--404. \doi{10.1111/rssb.12172}.
+#' Statistical Society: Series B (Statistical Methodology), 79*(2), 381--404.
+#' \doi{10.1111/rssb.12172}
 #'
 #' Robins, J. M., van der Vaart, A., & Ventura, V. (2000). Asymptotic
 #' distribution of P values in composite null models. *Journal of the American
-#' Statistical Association*, 95(452), 1143--1156.
-#' \doi{10.1080/01621459.2000.10474310}.
+#' Statistical Association, 95*(452), 1143--1156.
+#' \doi{10.1080/01621459.2000.10474310}
 #'
 #' @seealso [check_dyad_outcomes()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)

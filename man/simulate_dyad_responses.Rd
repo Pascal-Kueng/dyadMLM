@@ -91,9 +91,9 @@ in the zero-inflation and dispersion models, if present.
 
 Fitted parameters and predictors, including any lagged responses, stay fixed.
 The model is not refitted, and uncertainty in parameter estimates is not
-included. This is a \emph{plug-in predictive reference} (Gelman et al., 1996,
-p. 797). If dyads are the only grouping factor, the simulations
-represent hypothetical new dyads under the same study design.
+included. This is a \emph{plug-in predictive reference} (Gelman et al., 1996).
+If dyads are the only grouping factor, the simulations represent
+hypothetical new dyads under the same study design.
 
 \code{predicted_response} contains predicted mean responses with random effects
 in the conditional and zero-inflation models set to zero. For zero-inflated
