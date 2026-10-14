@@ -19,68 +19,72 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, message = FALSE}
 library(dyadMLM)
+library(dplyr)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
 Dyadic samples often include people observed without their partner. Some
 have no partner (singles, widowed people). Others have a partner who did not
-take part. And in longitudinal studies, people can lose or gain a partner.
-This vignette shows how `prepare_dyad_data()` keeps all of them with
-`partner_exists`, and how to model them together with complete dyads.
+take part. In longitudinal studies, people can also lose or gain a partner.
+This vignette shows how to keep all of them in a dyadic multilevel model with
+the `partner_exists` argument of `prepare_dyad_data()`.
 
 It builds on the
-[Actor-Partner Interdependence Model vignette](apim.html), which introduces
-the exchangeable residual structure with shared and contrast terms
-([Modeling the residual random-effects structure](apim.html#exchangeable-residual-structure)).
+[Actor-Partner Interdependence Model vignette](apim.html), in particular its
+[exchangeable residual structure](apim.html#exchangeable-residual-structure)
+with a shared and a member-contrast term. The models use `glmmTMB`. For
+`brms`, see the backend note in `?recover_exchangeable_covariance`.
 
-> **Software.** These models use `glmmTMB`. Standard `brms` models with one
-> outcome variable do not currently support the exact Gaussian residual
-> covariance structures shown here.
+## Record whether a partner exists
 
-## Two kinds of people observed alone
+By default, `prepare_dyad_data()` stops when a dyad has only one person in
+the data, because it cannot tell whether that person's partner exists.
+`incomplete_dyads = "drop"` removes these people instead. In longitudinal
+data, a partner who has a row at some occasions is assumed to exist at all
+occasions of the dyad, with missing values where their row is missing.
 
-People observed alone need different handling, depending on whether a partner
-exists:
+`partner_exists` records whether a partner exists. It is `TRUE` or `FALSE`
+for everyone observed alone, or a column (or expression) with a value for
+each row. People observed alone get their own label (`.composition`) and
+indicator column (`.is_*`):
 
-- **No partner** (e.g., single or widowed): there is no partner value. We call
-  these people *singletons*. Their partner predictors are set to 0, and the
-  model gets a status term (two-part coding, below).
-- **Partner not in the data**: a partner exists but did not take part. Their
-  partner predictors are missing.
+| Situation | `partner_exists` | Label with `role` | Label without `role` | Partner predictors |
+|---|---|---|---|---|
+| Partner did not take part | `TRUE` | `<role>_x_missing` | `missing_partner` | missing (`NA`) |
+| No partner at any observed occasion (*singleton*) | `FALSE` | `singleton_<role>` | `singleton` | 0 |
+| Partner lost or gained during the study | `TRUE` while a partner exists | dyad label, e.g., `female_x_male` | `assumed_exchangeable` | 0 where no partner exists |
 
-`prepare_dyad_data()` tells them apart through `partner_exists`. In
-cross-sectional data, it gives each kind its own composition (`.composition`)
-and indicator column (`.is_*`):
+- A label stays the same across occasions. A person observed alone who had a
+  partner at some occasion is labeled as having a partner who did not take
+  part.
+- Base `partner_exists` on recorded status, such as relationship status or
+  widowhood, not on whether both people supplied data. A rule such as
+  `dplyr::n() == 2` mixes the two kinds of people observed alone.
+- Give each singleton their own `dyad` ID, never a shared ID or `NA`.
+- Where both members have a row at an occasion, their values must agree.
+  After a separation in which both keep taking part, both are `FALSE`.
 
-| Situation | `partner_exists` | With `role` | Without `role` |
-|---|---|---|---|
-| Both members observed | `TRUE` | e.g., `female_x_male` | `assumed_exchangeable` |
-| No partner (singleton) | `FALSE` | `singleton_<role>` | `singleton` |
-| Partner not in the data | `TRUE` | `<role>_x_missing` | `missing_partner` |
+## Partners who did not take part
 
-In longitudinal data, labels stay the same across occasions. For example, a
-couple keeps its composition after a separation or death. `partner_exists`
-then marks the occasions without a partner.
-
-Base `partner_exists` on recorded status, such as relationship status or
-widowhood, not on whether both people supplied data. A rule such as
-`dplyr::n() == 2` mixes the two kinds of people observed alone.
-
-## Partners not in the data
-
-This is the simpler case. The partner exists, so their values are simply
-missing, as for any other missing data. People whose partner did not take
-part (`<role>_x_missing`) keep their rows, so models can use their available
-outcomes [@knaflCrossSectionalFamilyDyads2009]. Models with partner predictors
-drop these rows (listwise deletion), while actor-only models keep them. Check
-`nobs()`, and compare results with and without these people, for example in an
-actor-only model. An appropriate dyadic imputation model can retain them
+Where a partner exists but has no row, their values are missing, like any
+other missing data. People whose partner did not take part keep their rows,
+so models can use their outcomes [@knaflCrossSectionalFamilyDyads2009].
+Models with partner predictors drop these rows (listwise deletion), while
+actor-only models keep them. In actor-only models, they can share a mean with
+dyad members, for example with `I(.is_male + .is_male_x_missing)`. Check
+`nobs()`, and compare results with and without these people, for example in
+an actor-only model. An appropriate dyadic imputation model can retain them
 under a plausible missing-at-random assumption.
 
-When reporting, count the rows left out only because the partner predictor is
-missing (here with placeholder column names):
+The same applies in longitudinal data. For example, with
+`partner_exists = TRUE`, a person whose partner never took part is labeled
+`missing_partner` and keeps their rows for actor-only models. Nothing is set
+to 0.
+
+When reporting, count the rows left out only because the partner predictor
+is missing (here with placeholder column names):
 
 ```{r report-missing-partners, eval = FALSE}
 left_out <- is.na(data$.x_gmc_partner) &
@@ -93,107 +97,122 @@ For example: "*n* rows from *m* people had missing partner predictors. They
 were retained for centering and excluded from models including those
 predictors."
 
-## Singletons and complete dyads in one model
+## Two-part partner predictors
 
-Complete dyads and singletons can share one model. This lets us estimate actor
-effects while accounting for dependence between partners. Estimation can be
+Where no partner exists, a partner value is not missing but undefined. To
+keep these rows, `prepare_dyad_data()` uses the two-part predictors of
+@dziakTwoPartPredictors2017 (Method 1), which also work with repeated
+observations [@henryTwoPartFatherChild2022]. After centering, partner
+predictors are set to 0 where no partner exists, and `.partner_exists`
+(1 or 0) marks these rows. `.partner_exists` is only created when the status
+varies.
+
+Include `.partner_exists` as a fixed effect, so that rows without a partner
+get their own mean. Otherwise, the zeros are treated as real partner values,
+which can bias the partner effects. Random effects cannot replace it. It can
+be left out only if fixed intercepts already separate the rows without a
+partner, for example singleton indicators when only singletons lack a partner.
+
+With centered actor and partner scores $x_A$ and $x_P$, the fixed means are:
+
+$$
+\mu =
+\begin{cases}
+\beta_0 + \beta_A x_A, & \text{without a partner}, \\
+\beta_0 + \beta_S + \beta_A x_A + \beta_P x_P,
+  & \text{with a partner}.
+\end{cases}
+$$
+
+The status coefficient $\beta_S$ compares people with and without a partner
+at equal actor scores, when the partner score equals its centering reference.
+It is not "the effect of having a partner". The partner slope applies to
+people with a partner. The actor slope is shared.
+
+## Cross-sectional data: singletons and complete dyads
+
+Complete dyads and singletons can share one model. Singletons then inform
+the shared effects, such as the actor slope, while complete dyads also inform
+the partner effect and the dependence between partners. Estimation can be
 less reliable with few complete dyads and many people observed alone
 [@duNumberDyadsEstimation2016].
 
-For this illustration, we simulate new closeness scores using the support
-scores in `dyads_cross`, with **one observation per person**. Each original
-composition (female–male, female–female, and male–male) provides 80 complete
-dyads and 40 singletons (`has_partner = 0`).
+For this example, we simulate closeness from the support scores in
+`dyads_cross`, with one observation per person. Each composition
+(female-male, female-female, and male-male) has 80 complete dyads and 40
+singletons (`has_partner = 0`). The simulated actor slope is 0.6 and the
+partner slope is 0.3. Singletons and dyad members of the same gender have the
+same residual variance.
 
-```{r create-dyad-solo-example, include = FALSE}
+```{r simulate-cross-sectional, include = FALSE}
 set.seed(20261001)
 solo_source <- dyads_cross |>
-  dplyr::group_by(coupleID) |>
-  dplyr::mutate(
+  group_by(coupleID) |>
+  mutate(
     source_composition = paste(sort(as.character(gender)), collapse = "_x_"),
     partner_support = rev(provided_support),
     shared_error = rnorm(1, sd = 0.6)
   ) |>
-  dplyr::ungroup()
+  ungroup()
 
 singleton_clusters <- solo_source |>
-  dplyr::distinct(coupleID, source_composition) |>
-  dplyr::group_by(source_composition) |>
-  dplyr::slice_sample(prop = 1 / 3) |>
-  dplyr::ungroup()
+  distinct(coupleID, source_composition) |>
+  group_by(source_composition) |>
+  slice_sample(prop = 1 / 3) |>
+  ungroup()
 
 removed_members <- solo_source |>
-  dplyr::semi_join(singleton_clusters, by = "coupleID") |>
-  dplyr::group_by(coupleID) |>
-  dplyr::slice_sample(n = 1) |>
-  dplyr::ungroup()
+  semi_join(singleton_clusters, by = "coupleID") |>
+  group_by(coupleID) |>
+  slice_sample(n = 1) |>
+  ungroup()
 
-dyad_solo_example <- solo_source |>
-  dplyr::anti_join(removed_members, by = "personID") |>
-  dplyr::mutate(
+cross_sample <- solo_source |>
+  anti_join(removed_members, by = "personID") |>
+  mutate(
     has_partner = as.integer(!coupleID %in% singleton_clusters$coupleID),
     closeness = 3 + 0.4 * (gender == "female") + 0.3 * has_partner +
       0.6 * (provided_support - 5) +
       0.3 * ifelse(has_partner == 1, partner_support - 5, 0) +
-      shared_error + rnorm(dplyr::n(), sd = ifelse(gender == "female", 0.8, 1))
-  ) |>
-  dplyr::select(
-    personID, coupleID, gender, source_composition,
-    has_partner, closeness, provided_support
+      shared_error + rnorm(n(), sd = ifelse(gender == "female", 0.8, 1))
   )
+
+select_columns <- function(data) {
+  select(data, personID, coupleID, gender, has_partner, closeness, provided_support)
+}
+mm_raw <- select_columns(filter(cross_sample, source_composition == "male_x_male"))
+fm_raw <- select_columns(filter(cross_sample, source_composition == "female_x_male"))
 ```
 
 ### Prepare the data
 
-`coupleID` identifies a complete dyad or one singleton. `personID` identifies
-a person. Give unrelated singletons different `coupleID` values, never a
-shared ID or `NA`.
-
-We use the male-male sample for exchangeable dyads and the female-male sample
-for distinguishable dyads. The female-female sample works the same way. We
-keep each singleton's original simulation group (`source_composition`) only to
-construct these examples. A singleton has no dyad composition.
+`mm_raw` holds the male-male sample. `coupleID` identifies a complete dyad or
+one singleton.
 
 ```{r prepare-dyads-and-singletons, message = FALSE}
-library(dplyr)
-
-prepare_sample <- function(composition) {
-  dyad_solo_example |>
-    filter(source_composition == composition) |>
-    prepare_dyad_data(
-      dyad = coupleID, member = personID, role = gender,
-      predictors = provided_support, add_apim_gmc_predictors = TRUE,
-      partner_exists = has_partner == 1, seed = 123
-    )
-}
-
-mm_data <- prepare_sample("male_x_male")
-fm_data <- prepare_sample("female_x_male")
+mm_data <- prepare_dyad_data(
+  mm_raw, dyad = coupleID, member = personID, role = gender,
+  predictors = provided_support, add_apim_gmc_predictors = TRUE,
+  partner_exists = has_partner == 1, seed = 123
+)
 mm_data
 ```
 
-The printed summary lists 80 male-male dyads and 40 singleton men. Singletons
-get their own indicator (`.is_singleton_male`) and no member contrast. The
-summary also suggests the two-part terms used below.
+The composition table lists 80 male-male dyads and 40 singleton men.
+Singletons get their own indicator (`.is_singleton_male`) and no member
+contrast (their `.member_contrast_arbitrary` is 0). The `gmc` columns are
+centered on everyone's support scores before the zeros are set. The print
+also suggests the fixed-effect terms for the two-part partner predictor.
 
-### Two-part partner predictors
+### Fit the model
 
-A partner score is undefined when no partner exists. To retain these rows,
-`prepare_dyad_data()` uses the two-part predictor of
-@dziakTwoPartPredictors2017 (Method 1). After centering, partner predictors
-are set to 0 where no partner existed, and `.partner_exists` (1 or 0) marks
-these rows. Include `.partner_exists` as a fixed effect, so that rows without a
-partner get their own mean, unless fixed intercepts already separate these
-rows. Otherwise, the zeros are treated as real partner values.
+With `family = gaussian()` and `dispformula = ~ 0`, the random effects
+represent the residual covariance, as in the APIM vignette. Each row then
+needs a random-effects term that covers it. Here, the shared and
+member-contrast terms cover dyad members, and `.is_singleton_male` gives
+singletons their own residual variance:
 
-The `gmc` columns are centered on the mean of everyone's support scores
-before the zeros are set. With `family = gaussian()` and `dispformula = ~ 0`,
-the random-effects terms represent the residual covariance (see the
-[APIM vignette](apim.html#exchangeable-residual-structure)). Here, singletons
-get their own residual variance, and dyad members get the exchangeable
-structure:
-
-```{r dyad-solo-partner-effects, eval = has_glmmTMB}
+```{r dyad-solo-separate, eval = has_glmmTMB}
 mm_separate <- glmmTMB::glmmTMB(
   closeness ~ 1 + .partner_exists +
     .provided_support_gmc_actor + .provided_support_gmc_partner +
@@ -205,59 +224,39 @@ mm_separate <- glmmTMB::glmmTMB(
 )
 
 nobs(mm_separate)
+glmmTMB::fixef(mm_separate)$cond
 ```
 
-All 200 people remain in the fit: 160 dyad members and 40 singletons. Here,
+All 200 people remain in the fit: 160 dyad members and 40 singletons. The
+slopes can be compared with the simulated 0.6 and 0.3. Here,
 `1 + .partner_exists` is the same as `0 + .is_exchangeable + .is_singleton_male`,
-because all singletons have no partner.
+because every dyad member has a partner and no singleton has one.
 
-With $x_A$ and $x_P$ denoting centered scores, the fixed means are:
+Slopes are shared unless the model separates them. To let the actor slope
+differ by partner status, add `.partner_exists:.provided_support_gmc_actor`.
+In models with role-specific slopes, such as `.is_male:x`, singletons share
+their role's slope through `I(.is_male + .is_singleton_male):x`.
 
-$$
-\mu =
-\begin{cases}
-\beta_0 + \beta_A x_A, & \text{without a partner}, \\
-\beta_0 + \beta_H + \beta_A x_A + \beta_P x_P,
-  & \text{with a partner}.
-\end{cases}
-$$
+### Residual variance of singletons: own or pooled
 
-The status coefficient $\beta_H$ compares people with and without a partner
-at equal actor support, when partner support equals the centering reference.
-It is not "the effect of
-having a partner". The partner slope applies to people with a partner. The
-actor slope is shared.
-
-### Residual variances: separate or shared
-
-The models in this section differ in whether singletons and dyad members have
-equal **residual variances**: the variation left after accounting for the
-fixed effects. Separate random-effects terms are independent. Matrix diagonals
-are variances, and their square roots are SDs. We omit the negligible residual
-variance retained by `glmmTMB` from the matrices.
-
-#### Exchangeable dyads: separate singleton variance
-
-The model above pools the two members' variances but estimates a separate
-singleton variance. Let $a$ and $b$ be the **variances**, not SDs, of the
-shared and contrast terms:
+Let $a$ and $b$ be the variances of the shared and member-contrast terms. The
+residual covariance of dyad members and the residual variance of singletons
+are:
 
 $$
 R_{\mathrm{dyad}} =
 \begin{pmatrix}a+b & a-b \\ a-b & a+b\end{pmatrix},
-\qquad R_{\mathrm{singleton}} = [\tau^2].
+\qquad R_{\mathrm{singleton}} =
+\begin{cases}
+[\tau^2], & \text{own variance (model above)}, \\
+[a+b], & \text{pooled}.
+\end{cases}
 $$
 
-Dyad-member SDs are $\sqrt{a+b}$ and their correlation is $(a-b)/(a+b)$. The
-singleton SD is $\tau$. The partner covariance can be positive or negative.
-Use this when singletons may be more or less variable than dyad members.
+To pool, add the singleton indicator to **both** terms, so that both variance
+components apply to everyone:
 
-#### Exchangeable dyads: pool all member variances
-
-To share the variance, add the singleton indicator to **both** exchangeable
-terms, so both variance components contribute to everyone:
-
-```{r dyad-solo-exchangeable-pooled, eval = has_glmmTMB}
+```{r dyad-solo-pooled, eval = has_glmmTMB}
 mm_pooled <- glmmTMB::glmmTMB(
   closeness ~ 1 + .partner_exists +
     .provided_support_gmc_actor + .provided_support_gmc_partner +
@@ -270,60 +269,31 @@ mm_pooled <- glmmTMB::glmmTMB(
 recover_exchangeable_covariance(mm_pooled)
 ```
 
-$$
-R_{\mathrm{dyad}} =
-\begin{pmatrix}a+b & a-b \\ a-b & a+b\end{pmatrix},
-\qquad R_{\mathrm{singleton}} = [a+b].
-$$
-
-Everyone now has residual SD $\sqrt{a+b}$, so the recovered diagonal is also
-the singleton variance. Singletons inform this pooled variance. Only complete
-dyads provide paired observations to identify $a-b$. Pooling can still change
-the estimated partner covariance and correlation through the shared
+In this model, everyone has residual variance $a+b$, so the recovered member
+variance also describes singletons. Only complete dyads identify the partner
+covariance $a-b$, but pooling can change its estimate through the shared
 parameters.
 
-**Do not add the singleton indicator to the shared term only.** This gives
-singletons variance $a$, while dyad members retain $a+b$, which is a
-different constraint.
+If the singleton indicator is added to the shared term only, singletons get
+variance $a$ while dyad members keep $a+b$, and `recover_exchangeable_covariance()` stops with an error. The
+same happens with the shared term `us(1 | coupleID)` of the APIM vignette and
+a plain contrast term. An intercept already covers every row, so with
+`(1 | coupleID)` add the singleton indicator to the contrast term only:
+`(0 + I(.member_contrast_arbitrary + .is_singleton_male) | coupleID)`. This
+gives the same model as `mm_pooled`, as long as all rows are male-male dyad
+members or singleton men.
 
-#### Distinguishable dyads: separate singleton variances
+For female-male dyads, each role has its own variance. Singletons can share
+the variance of their role. Fixed intercepts for each group already separate
+rows with and without a partner, so `.partner_exists` is not needed:
 
-For female-male dyads, allow singleton men and women to have different
-residual variances from their counterparts in dyads. Fixed intercepts for
-each group already separate rows with and without a partner here, so
-`.partner_exists` is not needed:
-
-```{r dyad-solo-distinguishable-separate, eval = has_glmmTMB}
-fm_separate <- glmmTMB::glmmTMB(
-  closeness ~ 0 + .is_male + .is_female +
-    .is_singleton_male + .is_singleton_female +
-    .provided_support_gmc_actor + .provided_support_gmc_partner +
-    (0 + .is_singleton_male | coupleID) +
-    (0 + .is_singleton_female | coupleID) +
-    (0 + .is_male + .is_female | coupleID),
-  family = gaussian(), dispformula = ~ 0,
-  data = fm_data
+```{r dyad-solo-distinguishable, eval = has_glmmTMB, message = FALSE}
+fm_data <- prepare_dyad_data(
+  fm_raw, dyad = coupleID, member = personID, role = gender,
+  predictors = provided_support, add_apim_gmc_predictors = TRUE,
+  partner_exists = has_partner == 1, seed = 123
 )
-```
 
-With dyad members ordered male, female:
-
-$$
-R_{\mathrm{dyad}} =
-\begin{pmatrix}v_M & c \\ c & v_F\end{pmatrix},
-\qquad R_{\mathrm{singleton},M} = [\tau_M^2],
-\qquad R_{\mathrm{singleton},F} = [\tau_F^2].
-$$
-
-All four variances are estimated separately. The partner correlation is
-$c / \sqrt{v_M v_F}$.
-
-#### Distinguishable dyads: pool variances by role
-
-If singleton men can share the male dyad-member variance, and likewise for
-women, add each singleton indicator to the indicator of their role:
-
-```{r dyad-solo-distinguishable-pooled, eval = has_glmmTMB}
 fm_pooled <- glmmTMB::glmmTMB(
   closeness ~ 0 + .is_male + .is_female +
     .is_singleton_male + .is_singleton_female +
@@ -335,142 +305,111 @@ fm_pooled <- glmmTMB::glmmTMB(
 )
 ```
 
-$$
-R_{\mathrm{dyad}} =
-\begin{pmatrix}v_M & c \\ c & v_F\end{pmatrix},
-\qquad R_{\mathrm{singleton},M} = [v_M],
-\qquad R_{\mathrm{singleton},F} = [v_F].
-$$
+For separate singleton variances, use
+`(0 + .is_singleton_male | coupleID) + (0 + .is_singleton_female | coupleID)`
+next to `(0 + .is_male + .is_female | coupleID)`. In both cases, the partner
+covariance comes from complete dyads only. Pooling does not create covariance
+between unrelated singletons.
 
-Each singleton helps estimate the residual variance for their role. Complete
-dyads provide the paired observations needed to estimate covariance $c$.
-Pooling does not create covariance between unrelated singletons.
-
-### Testing whether to pool
-
-Each pooled model is a restricted version of the separate one, so a
-likelihood-ratio test compares them. Test with the final fixed effects:
-predictors left out add unexplained variance to some groups only (here,
-partner support to dyad members).
+A pooled model is a restricted version of the separate one, so a
+likelihood-ratio test compares them. Test with the final fixed effects,
+because predictors left out add unexplained variance to some groups only
+(here, partner support to dyad members):
 
 ```{r dyad-solo-pooling-test, eval = has_glmmTMB}
-anova(mm_pooled, mm_separate)
-anova(fm_pooled, fm_separate)
+compare_nested_models(mm_pooled, mm_separate)
 ```
 
-The singletons here were simulated with the same residual variance as dyad
-members, so equal variances are plausible, and neither test rejects pooling.
-The next model builds on `mm_pooled`.
-The same works for pooling only some variances, for example only men's. A
-non-significant test does not show that the variances are equal. Use a pooled
-structure when equal residual variances are plausible on substantive grounds.
-With separate singleton variances, only shared fixed effects can
-still link singleton and dyad estimates.
+A non-significant test does not show that the variances are equal. Pool when
+equal residual variances are plausible on substantive grounds. With separate
+singleton variances, only the shared fixed effects link singleton and dyad
+estimates.
 
-### Sharing or separating means and slopes
+## Longitudinal data: losing or gaining a partner
 
-With one indicator per group, each group gets its own intercept. Singletons
-keep their own mean, through `.partner_exists` or their own intercept
-(two-part coding). In actor-only models, people whose partner did not take
-part can share a mean with dyad members, e.g. `I(.is_male + .is_male_x_missing)`.
-Slopes are shared by adding the indicators, also with singletons, e.g.
-`I(.is_male + .is_singleton_male):x`.
+Without `partner_exists`, a partner who has no row at an occasion is treated
+as existing, with missing values. After a death, the survivor's later rows
+then drop out of models with momentary partner predictors. With
+`partner_exists`, these rows are kept with two-part predictors.
 
-In the other direction, an interaction with `.partner_exists` allows the actor
-slope of singletons to differ from that of dyad members:
+With `time`, `prepare_dyad_data()` splits each predictor into a momentary
+deviation from the person's usual level (`cwp`) and the usual level itself
+(`cbp`), so that within-person changes and between-person differences get
+separate slopes [@curranDisaggregationWithinBetween2011]. See the
+[intensive longitudinal APIMs](apim.html#intensive-longitudinal-apims).
 
-```{r dyad-solo-separate-actor-effects, eval = has_glmmTMB}
-mm_by_status <- update(
-  mm_pooled, . ~ . + .partner_exists:.provided_support_gmc_actor
-)
+### Example: a partner dies
 
-estimates <- summary(mm_by_status)$coefficients$cond
-estimates[
-  c(".provided_support_gmc_actor", ".partner_exists:.provided_support_gmc_actor"),
-  c("Estimate", "Std. Error")
-]
-```
-
-The actor coefficient is the slope for singletons. Add the interaction
-coefficient to obtain the slope for dyad members. The interaction is about
-`r if (has_glmmTMB) round(abs(estimates[".partner_exists:.provided_support_gmc_actor", "z value"]), 1) else 2`
-standard errors from 0, although both generating actor slopes are 0.6. Such
-chance results are a reason to test only differences you planned to test.
-
-## Scenarios
-
-With `partner_exists`, `prepare_dyad_data()` prepares these cases directly.
-Two-part predictors also work with repeated observations
-[@henryTwoPartFatherChild2022]. Model within-person changes separately from
-between-person differences [@curranDisaggregationWithinBetween2011].
-
-Each scenario below shows the situation, the preparation, and a model. In
-the timelines, ● is a row with data, ○ is an occasion without a row while
-the partner exists, an empty cell has neither a row nor a partner, and the
-last line is `partner_exists`. Random effects are kept minimal here (see the
-sections above for exchangeable structures).
-
-### Singletons and partners who did not take part (cross-sectional)
-
-| Person | Partner's row | `partner_exists` |
-|---|---|---|
-| Couple member | ● | `TRUE` |
-| Singleton (no partner) | | `FALSE` |
-| Person whose partner did not answer | ○ | `TRUE` |
-
-```{r scenario-cross-sectional, eval = FALSE}
-prepared <- prepare_dyad_data(
-  survey, dyad = coupleID, member = personID, predictors = support,
-  add_apim_gmc_predictors = TRUE, partner_exists = partnered, seed = 1
-)
-
-glmmTMB::glmmTMB(
-  closeness ~ 0 + .is_exchangeable + .is_singleton +
-    .support_gmc_actor + .support_gmc_partner + (1 | coupleID),
-  data = prepared
-)
-```
-
-Singletons get 0 as partner predictor. The fixed intercepts (`.is_exchangeable`,
-`.is_singleton`) already represent partner status here, so `.partner_exists`
-is not needed, although the printed suggestion includes it. `(1 | coupleID)`
-pools all residual variances (see above). People whose
-partner did not answer have a missing partner predictor and drop out of this
-model.
-
-### Partners who never took part (diary)
-
-| day | 1 | 2 | 3 | 4 |
-|---|---|---|---|---|
-| Anna | ● | ● | ● | ● |
-| Ben (never took part) | ○ | ○ | ○ | ○ |
-| `partner_exists` | `TRUE` | `TRUE` | `TRUE` | `TRUE` |
-
-```{r scenario-partner-not-in-data, eval = FALSE}
-prepared <- prepare_dyad_data(
-  diary, dyad = coupleID, member = personID, time = day,
-  predictors = support, partner_exists = TRUE, seed = 1
-)
-```
-
-Nothing is set to 0. Anna is labeled `missing_partner` and keeps her rows for
-actor-only models. Models with partner predictors leave her out.
-
-### A partner dies (panel)
+Anna and Ben take part in a panel study. Ben dies after wave 3. In the
+timeline, ● is a row with data:
 
 | wave | 1 | 2 | 3 | 4 | 5 |
 |---|---|---|---|---|---|
 | Anna | ● | ● | ● | ● | ● |
 | Ben | ● | ● | ● | | |
-| `partner_exists` | `TRUE` | `TRUE` | `TRUE` | `FALSE` | `FALSE` |
+| `partnered` | `TRUE` | `TRUE` | `TRUE` | `FALSE` | `FALSE` |
 
-```{r scenario-death, eval = FALSE}
+If the data file has empty rows for Ben after his death, remove them.
+Otherwise, they count as occasions without a partner when Ben's share of
+occasions with a partner (`.partner_exists_cbp`) is computed.
+
+The simulated `panel` also contains a couple that stays together and a
+couple that separates after wave 3 (both keep taking part). `partnered`
+records relationship status:
+
+```{r simulate-panel, include = FALSE}
+set.seed(20261014)
+panel <- expand.grid(wave = 1:5, member = 1:2, coupleID = 1:3) |>
+  mutate(
+    personID = c("Cleo", "Dan", "Anna", "Ben", "Eva", "Finn")[
+      (coupleID - 1) * 2 + member
+    ],
+    partnered = !(coupleID %in% 2:3 & wave >= 4),
+    health = round(rnorm(n(), 5, 1), 1),
+    wellbeing = round(rnorm(n(), 5, 1), 1),
+    satisfaction = if_else(partnered, round(rnorm(n(), 4, 1), 1), NA_real_)
+  ) |>
+  filter(!(personID == "Ben" & wave >= 4)) |>
+  select(coupleID, personID, wave, partnered, health, satisfaction, wellbeing)
+```
+
+```{r prepare-panel}
 prepared <- prepare_dyad_data(
   panel, dyad = coupleID, member = personID, time = wave,
   predictors = health, lag1_predictors = health,
   partner_exists = partnered, seed = 1
 )
+```
 
+The message lists the suggested terms. Anna's rows show the coding of Ben's
+health:
+
+```{r panel-anna-rows}
+prepared |>
+  filter(personID == "Anna") |>
+  select(
+    wave, .partner_exists, .partner_exists_lag1,
+    .health_cwp_partner, .health_cwp_partner_lag1,
+    .health_cbp_partner_when_exists, .health_cbp_partner_after_exists
+  ) |>
+  knitr::kable(digits = 2)
+```
+
+- From wave 4, `.partner_exists` is 0, and Ben's momentary deviation
+  (`.health_cwp_partner`) is 0 in Anna's rows.
+- Ben's usual level moves from `_when_exists` to `_after_exists`. Setting it
+  to 0 would assume that it no longer relates to Anna's outcome. In its own
+  column, it gets its own slope.
+- At wave 4, the lagged value still holds Ben's wave-3 value. It pairs with
+  `.partner_exists_lag1`, which is 1 there.
+- `.partner_exists_cwp` and `.partner_exists_cbp` (not shown) split the
+  status into losing or gaining a partner (within person) and the share of
+  occasions with a partner (between persons). Use both instead of
+  `.partner_exists`.
+
+A model with the suggested terms (random effects kept minimal here):
+
+```{r panel-model, eval = FALSE}
 glmmTMB::glmmTMB(
   wellbeing ~ 1 + .partner_exists_cwp + .partner_exists_cbp +
     .partner_exists_lag1 +
@@ -482,156 +421,110 @@ glmmTMB::glmmTMB(
 )
 ```
 
-The fixed effects follow the terms that `prepare_dyad_data()` suggests for
-these data. From wave 4, Ben's momentary partner values in Anna's rows are 0.
-His usual level moves to `.health_cbp_partner_after_exists`, so its
-association with Anna's well-being after his death is estimated separately.
-At wave 4, the lagged value still holds his wave-3 value, paired with
-`.partner_exists_lag1`.
+The section "People observed without their partner" in
+`?prepare_dyad_data` explains how to interpret these coefficients.
 
-### A couple separates, both keep taking part
+### Separation, new relationships, and on-off relationships
 
 | wave | 1 | 2 | 3 | 4 | 5 |
 |---|---|---|---|---|---|
-| Anna | ● | ● | ● | ● | ● |
-| Ben | ● | ● | ● | ● | ● |
-| `partner_exists` | `TRUE` | `TRUE` | `TRUE` | `FALSE` | `FALSE` |
+| Separation (both keep taking part) | `TRUE` | `TRUE` | `TRUE` | `FALSE` | `FALSE` |
+| New relationship (partner joins at wave 3) | `FALSE` | `FALSE` | `TRUE` | `TRUE` | `TRUE` |
+| On-off relationship | `TRUE` | `FALSE` | `FALSE` | `TRUE` | `TRUE` |
 
-The preparation and model are the same as for a death. Both keep their rows.
-After the separation, the contemporaneous momentary partner predictors are 0.
-The former partner's usual level stays available in `_after_exists` and
-includes their occasions after the separation. At the first occasion after
-the separation, the lagged values still hold the former partner's values.
+- **Separation.** The preparation and model are as for a death, and both
+  keep their rows. The former partner's usual level includes their
+  occasions after the separation.
+- **New relationship.** Before the relationship, the partner's usual level
+  is in `_before_exists`. It can relate to the outcome through selection
+  (who ends up together). If the data also contain losses,
+  `.partner_before_exists` is added, so that occasions before a relationship
+  and after a loss get their own means.
+- **On-off relationship.** A partner who returns is treated as the same
+  partner, with a message. The gap counts as after a relationship
+  (`_after_exists`). A different partner is not supported. End the person's
+  data before the new relationship.
 
-### A relationship forms during the study
+Splitting the usual level into before and after needs a numeric `time`.
+Otherwise, it is not split, with a warning.
 
-| wave | 1 | 2 | 3 | 4 | 5 |
-|---|---|---|---|---|---|
-| Anna | ● | ● | ● | ● | ● |
-| Ben (joins with the relationship) | | | ● | ● | ● |
-| `partner_exists` | `FALSE` | `FALSE` | `TRUE` | `TRUE` | `TRUE` |
+## Actor variables that exist only with a partner
 
-```{r scenario-formation, eval = FALSE}
+Some of a person's own variables exist only with a partner, for example
+ratings of the partner or of the relationship. They are missing where no
+partner exists, so these rows drop out of models that use them.
+`prepare_dyad_data()` applies two-part coding to partner predictors only,
+but you can apply it to such actor variables after preparing the data.
+
+In cross-sectional data, or when the status never changes within a dyad,
+set the actor columns to 0 where `.partner_exists` is 0, for example with
+`if_else(.partner_exists == 0, 0, .x_gmc_actor)`. Use `dplyr::if_else()`,
+because multiplying by `.partner_exists` keeps missing values (`0 * NA` is
+`NA`).
+
+When the status changes, also split the actor's usual level by partner
+status, as `prepare_dyad_data()` does for partner predictors. In `panel`,
+`satisfaction` is a relationship rating that is missing where no partner
+exists:
+
+```{r actor-two-part, message = FALSE}
 prepared <- prepare_dyad_data(
   panel, dyad = coupleID, member = personID, time = wave,
-  predictors = health, partner_exists = partnered, seed = 1
-)
-
-glmmTMB::glmmTMB(
-  wellbeing ~ 1 + .partner_exists_cwp + .partner_exists_cbp +
-    .health_cwp_actor + .health_cbp_actor + .health_cwp_partner +
-    .health_cbp_partner_when_exists + .health_cbp_partner_before_exists +
-    (1 | coupleID / personID),
-  data = prepared
-)
-```
-
-Before the relationship, Ben's usual level is in
-`.health_cbp_partner_before_exists`. It can relate to Anna's outcome through
-selection (who ends up together). If the data also contain losses, add
-`.partner_before_exists` and `.health_cbp_partner_after_exists`, so that
-occasions before a relationship and after a loss get their own mean and
-slope.
-
-### An on-off relationship
-
-| wave | 1 | 2 | 3 | 4 | 5 |
-|---|---|---|---|---|---|
-| Anna | ● | ● | ● | ● | ● |
-| Ben | ● | ● | ● | ● | ● |
-| `partner_exists` | `TRUE` | `FALSE` | `FALSE` | `TRUE` | `TRUE` |
-
-`prepare_dyad_data()` treats Ben as the same partner returning and says so.
-The gap counts as "after a partnership" (`_after_exists`). A different, new
-partner is not supported: end the person's data before the new partnership.
-
-### Advanced: actor variables that only exist with a partner
-
-Some of a person's own variables also only exist when a partner exists, for
-example ratings of the partner or of the relationship. They are usually
-missing where no partner exists, so rows without a partner drop out of models
-that use them. `prepare_dyad_data()` does not yet apply two-part coding to
-such actor variables ([#86](https://github.com/Pascal-Kueng/dyadMLM/issues/86)), but you can do it yourself after preparing the
-data.
-
-Here, `satisfaction` is a daily relationship rating in a diary study,
-prepared with `partner_exists`. The person means behind its `cwp` and `cbp`
-columns come only from days with a partner, because the rating is missing on
-the other days. So only the zeros are missing:
-
-- The momentary part (`cwp`) is set to 0 where no partner exists.
-- The usual level (`cbp`) is split by partner status, as dyadMLM does for
-  partner usual levels when the status changes within a dyad. Each column
-  holds the usual level in its status and 0 elsewhere.
-
-`dplyr::if_else()` is needed, because multiplying by `.partner_exists` keeps
-missing values (`0 * NA` is `NA`).
-
-```{r actor-two-part-recipe, eval = FALSE}
-prepared <- prepare_dyad_data(
-  diary, dyad = coupleID, member = personID, time = day,
-  predictors = c(support, satisfaction), partner_exists = partnered, seed = 1
-)
-
-prepared <- prepared |>
+  predictors = c(health, satisfaction), lag1_predictors = satisfaction,
+  partner_exists = partnered, seed = 1
+) |>
   mutate(
-    # First day on which the couple had a partner (Inf if never).
+    # First wave with a partner in the couple (Inf if never).
     first_partnered = if (any(.partner_exists == 1)) {
-      min(day[.partner_exists == 1])
+      min(wave[.partner_exists == 1])
     } else {
       Inf
     },
     .by = coupleID
   ) |>
   mutate(
-    # Momentary part: 0 where no partner exists.
+    # Momentary part: 0 where no partner exists (at this or the previous wave).
     .satisfaction_cwp_actor = if_else(
       .partner_exists == 0, 0, .satisfaction_cwp_actor
+    ),
+    .satisfaction_cwp_actor_lag1 = if_else(
+      .partner_exists_lag1 %in% 0, 0, .satisfaction_cwp_actor_lag1
     ),
     # Usual level, split by partner status.
     .satisfaction_cbp_actor_when_exists = if_else(
       .partner_exists == 1, .satisfaction_cbp_actor, 0
     ),
     .satisfaction_cbp_actor_before_exists = if_else(
-      .partner_exists == 0 & day < first_partnered & is.finite(first_partnered),
+      .partner_exists == 0 & wave < first_partnered & is.finite(first_partnered),
       .satisfaction_cbp_actor, 0
     ),
     .satisfaction_cbp_actor_after_exists = if_else(
-      .partner_exists == 0 & day > first_partnered,
+      .partner_exists == 0 & wave > first_partnered,
       .satisfaction_cbp_actor, 0
     )
   )
-```
 
-Include these columns in place of `.satisfaction_cwp_actor` and
-`.satisfaction_cbp_actor`, together with the status terms that
-`prepare_dyad_data()` suggests. Drop a split column that is 0 everywhere (for
-example, `_before_exists` when no relationship begins during the study). In
-cross-sectional data, or when the status never changes within a dyad, only
-the zeros are needed: set the actor columns to 0 where `.partner_exists` is 0.
-If both
-occasions before a relationship and after a loss occur, also include
-`.partner_before_exists`.
-
-With lags (here `lag1_predictors = satisfaction` in `prepare_dyad_data()`),
-set lagged actor columns to 0 where no partner existed at the previous
-occasion. Use `.partner_exists_lag1` if it was created. Otherwise, use the
-couple's status at exactly the previous occasion (from either member), and
-keep missing values where neither member was observed then:
-
-```{r actor-two-part-lags, eval = FALSE}
-prepared <- prepared |>
-  mutate(
-    # The couple's status at the previous day, NA if nobody was observed then.
-    partnered_lag1 = partnered[match(day - 1, day)],
-    .by = coupleID
+prepared |>
+  filter(personID == "Anna") |>
+  select(
+    wave, satisfaction, .satisfaction_cwp_actor,
+    .satisfaction_cbp_actor_when_exists, .satisfaction_cbp_actor_after_exists
   ) |>
-  mutate(
-    .satisfaction_cwp_actor_lag1 = if_else(
-      partnered_lag1 %in% FALSE, 0, .satisfaction_cwp_actor_lag1
-    )
-  )
+  knitr::kable(digits = 2)
 ```
+
+Use the recoded `.satisfaction_cwp_actor` and `.satisfaction_cwp_actor_lag1`,
+and the split columns in place of `.satisfaction_cbp_actor`, together with
+the status terms that `prepare_dyad_data()` suggests. Leave out a split
+column that is 0 everywhere (here `_before_exists`, because no relationship
+begins in these data). Rows of couples or singletons without a partner at
+any occasion are 0 in all these columns, so they need their own fixed
+intercept, such as singleton indicators.
+
+`.partner_exists_lag1` is only created with lagged predictors and when the
+status differs from the previous occasion somewhere. Otherwise, compute the same status with
+`partner_exists_lag1 = .partner_exists[match(wave - 1, wave)]` and
+`.by = coupleID`.
 
 ## References
 
