@@ -149,6 +149,8 @@ Target vignette structure:
     preparation or reporting
   - binary, ordinal, and categorical outcomes deferred until complete examples
     are validated
+  - possible section on single-level models with couple-clustered standard
+    errors (see the version 0.3.0 scope)
 - `dev/vignettes/mixed-apim.Rmd`
   - development-only workflow, omitted from the public vignette index
   - cross-sectional and ILD APIMs with mixed dyad compositions
@@ -930,6 +932,41 @@ preparation, diagnostics, and interpretation contracts are stable.
   pkgdown index only when its supported scope is ready for normal package builds.
 - Keep nonlinear outcome-covariance decomposition outside the first generalized
   release unless a separate estimand and validation plan is completed.
+- Candidate section: single-level models with couple-clustered standard errors,
+  e.g., ordinal `MASS::polr()` or `ordinal::clm()` without random effects.
+  Exploratory simulations in October 2026 (10-80 complete dyads plus 100
+  singletons; scripts not kept) found:
+  - The prepared columns, including two-part coding for people observed alone,
+    are plain fixed-effect terms and work without random effects. Leaving out
+    `.partner_exists` biased the actor and partner slopes (true 0.5 and 0.4,
+    estimated about 0.43 and 0.37). Effects are population-averaged, so they
+    are smaller than those of models with random effects.
+  - Cluster on the dyad ID; each person observed alone is their own cluster.
+    Partner effects are informed almost only by complete dyads, so their
+    effective number of clusters is about the number of complete dyads.
+  - Tools (`clubSandwich` 0.7.0, `sandwich` 3.1.3, `glmmTMB` 1.1.15.2):
+    - `clubSandwich` has no methods for `polr` or `clm`. CR2 with Satterthwaite
+      df is only available for `lm` or `glm` versions of the model.
+    - `sandwich::vcovCL()` works, but only with CR0/CR1-type corrections.
+    - `sandwich::vcovBS(type = "jackknife")` had the best small-sample
+      coverage. It silently gives wrong standard errors when the model drops
+      rows (e.g., `missing_partner` rows), so fit on complete cases first.
+    - The built-in sandwich of `glmmTMB` fails for `ordinal()`.
+    - `multgee::ordLORgee()` works; `geepack::ordgee()` diverged silently.
+  - Coverage of the partner slope (500 replications, 10-22 complete dyads):
+    CR0 90-93%, jackknife about 94-96%. Cross-sectionally, model-based standard
+    errors did as well as CR0. In ILD, clustering was essential: model-based
+    standard errors covered the usual-level (CBP) slopes only 67-77% of the
+    time.
+  - Take the cluster vector from the data frame used for fitting. With a
+    formula defined outside a loop, `cluster = ~ coupleID` can fail, and a
+    misaligned vector gives wrong standard errors without an error.
+  - Patterns that do not carry over from the `glmmTMB` vignettes: `0 +` group
+    intercepts (in cumulative-link models the thresholds are the intercept),
+    and reading `.is_<role>` as a role main effect (it is 0 for people observed
+    alone). A separate latent scale for singletons
+    (`clm(scale = ~ .partner_exists)`) is not supported by `vcovCL()`; the
+    jackknife works.
 
 ## Proposed Version 0.3.1 Scope - Generalized Diagnostics
 
@@ -992,6 +1029,50 @@ them as one release commitment.
   established packages. Defer ILD/time-series imputation, missing structural
   identifiers or completely unobserved members, MNAR sensitivity models, and
   pooling nonlinear covariance summaries until separately validated.
+- People observed alone (`partner_exists`). Exploratory cross-sectional `mice`
+  simulations in October 2026 (scripts not kept) found:
+  - Singletons' partner values do not exist, so they are never imputed. Rows
+    for partners who do not exist must not be kept: `prepare_dyad_data()` then
+    silently turns the singleton into a complete dyad.
+  - Two imputation approaches were unbiased: imputing dyads (one row per dyad)
+    and singletons separately, or one `mice` model that skips the structural
+    cells (`where = FALSE`), uses partner variables only where a partner exists
+    (e.g., `I(ifelse(P == 1, x_partner, 0))`), and lets the partner status `P`
+    interact with own variables. Models that ignore status-specific relations
+    were biased. Treating the structural zeros as observed made imputations too
+    narrow (coverage about 85%). With status changes in ILD, only the
+    single-model approach is possible; it is untested with `2l` methods.
+  - To retain people whose partner did not take part, add a row for the absent
+    partner (own ID, role, outcome `NA`) and impute their predictors in a
+    dyad-level model. The absent partner's rows then drop out of models, but
+    the dyad is labelled complete: `.is_<role>_x_missing` disappears and
+    printed counts include people who did not take part. A later option to
+    mark rows as not participating could keep the label.
+  - In ILD, rows for occasions a partner missed are only added temporarily
+    during preparation, so users must add them before imputing.
+  - Reshape to one row per dyad by member position, not by role (reshaping by
+    role fails for same-sex dyads). Convert character columns to factors;
+    `mice` silently drops them from the imputation model.
+  - `partner_exists` and roles must be observed and identical across
+    imputations.
+  - Centering is recomputed in each imputation, so the `.partner_exists`
+    coefficient refers to a slightly different grand mean in each dataset.
+  - A fixed `seed` keeps `.member_contrast_*` identical across imputations.
+    This matters for reproducibility only; estimates do not depend on the
+    signs.
+- Pooling with cluster-robust standard errors: `mice::pool()` on
+  `with(imp, ...)` uses model-based standard errors and ignores clustering.
+  Pool the clustered covariance matrices instead, e.g., with
+  `mitml::testEstimates(qhat, uhat, df.com = ...)`, which accepts one
+  complete-data df per term. Choose that df by hand (see the effective number
+  of clusters in the version 0.3.0 scope).
+- Silent misuse to guard against or document: preparing stacked imputations
+  with `time = .imp` (the duplicate-row error suggests supplying `time`), and
+  imputing prepared columns (actor and partner copies then diverge). When the
+  workflow is documented, also sharpen the user docs: "imputed first" in
+  `prepare_dyad_data()` means before preparing; rows for missed occasions "do
+  not have to be added manually" for preparation but do for imputation; and the
+  imputation sentence in `vignettes/partner-exists.Rmd` should name the steps.
 
 ### Advanced diagnostics
 
