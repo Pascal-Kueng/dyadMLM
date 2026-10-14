@@ -37,6 +37,49 @@ study_theme <- theme_bw(base_size = 12) + theme(legend.position = "bottom")
 is_pilot <- any(cells$repetitions < 500 | cells$reference_draws < 1000)
 ```
 
+## Summary
+
+```{r summary-numbers}
+percent_range <- function(rate) paste0(paste(unique(round(100 * range(rate))), collapse = "–"), "%")
+null_rows <- primary_flags |>
+  filter(statistic == "partner_cor",
+    (truth_case == "zero_stable" & model == "no_stable_covariance" & level == "between") |
+    (truth_case == "zero_occasion" & model == "no_occasion_covariance" & level == "within")) |>
+  mutate(family = factor(part, names(family_labels), family_labels), dyads = factor(n_dyads))
+covariance_rows <- primary_flags |>
+  filter(part %in% c("gaussian", "poisson", "ordinal"), truth_case == "correlated",
+    model %in% names(model_labels), statistic == "partner_cor") |>
+  mutate(targeted = (model == "no_stable_covariance" & level == "between") |
+    (model == "no_occasion_covariance" & level == "within"),
+    family = factor(part, names(family_labels), family_labels),
+    restriction = factor(model, names(model_labels), model_labels))
+detection_rows <- covariance_rows |> filter(n_dyads == 200, n_occasions == 14, missing_share == 0)
+targeted_detection <- detection_rows |> filter(targeted)
+ar_unrestricted <- primary_figures |>
+  filter(part == "ar", model == "no_ar", ar_phi == 0.7, figure == "either")
+lag_figures <- primary_figures |> filter(startsWith(part, "lag_"), figure == "either")
+```
+
+The saved run targets `r unique(cells$repetitions)` datasets per setting and
+`r unique(cells$reference_draws)` reference simulations per fitted model, across
+`r nrow(cells)` settings. `r if (is_pilot) "**These are pilot results for checking the workflow. They do not establish calibration or detection rates.**" else "The results describe these simulated settings. They do not establish calibration for every supported model."`
+
+- **Correct restrictions rarely flag.** When a fitted covariance restriction was
+  true, the partner correlation it targets flagged in
+  `r percent_range(null_rows$rate)` of datasets.
+- **Omitted partner covariance shows at its level, given enough dyads.** It was
+  detected in at least `r scales::percent(min(targeted_detection$rate), accuracy = 1)`
+  of datasets with 200 dyads and 14 occasions, but in as few as
+  `r scales::percent(min(filter(covariance_rows, targeted, n_dyads == 50)$rate), accuracy = 1)`
+  with 50 dyads.
+- **Omitted autocorrelation is not detected.** A model without AR, but with
+  unrestricted covariances, flagged in
+  `r scales::percent(max(ar_unrestricted$rate), accuracy = 1)` of datasets despite
+  strong autocorrelation (φ = 0.7). Check autocorrelation separately.
+- **Lagged outcomes as predictors can make the checks misleading.** Flag rates
+  were `r percent_range(lag_figures$rate)`, depending on the family and on
+  model-centring.
+
 ## What the study checks
 
 [`check_partner_dependence(member = person, time = occasion)`](../reference/check_partner_dependence.html) compares the model's
@@ -49,10 +92,6 @@ The fitted models have two partner covariances: a stable one between partners'
 random intercepts, and a same-occasion one between their dyad-occasion random
 effects. Each omission should show at its targeted level: the between level for
 the stable covariance, and the within level for the same-occasion covariance.
-
-The saved run targets `r unique(cells$repetitions)` datasets per setting and
-`r unique(cells$reference_draws)` reference simulations per fitted model, across
-`r nrow(cells)` settings. `r if (is_pilot) "**These are pilot results for checking the workflow. They do not establish calibration or detection rates.**" else "The results describe these simulated settings. They do not establish calibration for every supported model."`
 
 A **row flag** means that one observed statistic lies outside the middle 95% of
 its simulated values. A **figure flag** means that at least one row flags. These
@@ -105,11 +144,6 @@ and full-model results remain in the saved tables. These true-restriction settin
 use complete data and 5 or 14 occasions.
 
 ```{r true-restrictions, fig.alt="Partner-correlation flag rates under true zero-covariance restrictions, by family, level, number of occasions and dyad count."}
-null_rows <- primary_flags |>
-  filter(statistic == "partner_cor",
-    (truth_case == "zero_stable" & model == "no_stable_covariance" & level == "between") |
-    (truth_case == "zero_occasion" & model == "no_occasion_covariance" & level == "within")) |>
-  mutate(family = factor(part, names(family_labels), family_labels), dyads = factor(n_dyads))
 ggplot(null_rows, aes(n_occasions, rate, colour = dyads, group = dyads)) +
   geom_hline(yintercept = 0.05, linetype = 2, colour = "grey55") +
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.5,
@@ -130,12 +164,6 @@ correlation row at **both** levels. A flag does not by itself locate the source
 of the mismatch.
 
 ```{r omitted-covariance, fig.alt="Partner-correlation flag rates at both levels when stable or occasion covariance is omitted, with 200 dyads and 14 complete occasions."}
-detection_rows <- primary_flags |>
-  filter(part %in% c("gaussian", "poisson", "ordinal"), truth_case == "correlated",
-    n_dyads == 200, n_occasions == 14, missing_share == 0,
-    model %in% names(model_labels), statistic == "partner_cor") |>
-  mutate(family = factor(part, names(family_labels), family_labels),
-    restriction = factor(model, names(model_labels), model_labels))
 ggplot(detection_rows, aes(rate, restriction)) +
   geom_segment(aes(x = lower, xend = upper, yend = restriction), colour = "#0072B2") +
   geom_point(colour = "#0072B2", size = 2.5) +
@@ -159,9 +187,6 @@ effect_sizes |>
 ```
 
 ```{r main-findings, results='asis'}
-targeted_detection <- detection_rows |>
-  filter((model == "no_stable_covariance" & level == "between") |
-    (model == "no_occasion_covariance" & level == "within"))
 if (!is_pilot) {
   null_figures <- primary_figures |>
     semi_join(null_rows, by = c("cell", "model", "response")) |> filter(figure == "either")
@@ -172,11 +197,6 @@ if (!is_pilot) {
     100 * min(null_figures$rate), 100 * max(null_figures$rate),
     100 * min(full_figures$rate), 100 * max(full_figures$rate),
     100 * min(gaussian_full$rate), 100 * max(gaussian_full$rate)))
-  covariance_rows <- primary_flags |>
-    filter(part %in% c("gaussian", "poisson", "ordinal"), truth_case == "correlated",
-      model %in% names(model_labels), statistic == "partner_cor") |>
-    mutate(targeted = (model == "no_stable_covariance" & level == "between") |
-      (model == "no_occasion_covariance" & level == "within"))
   small_stable <- covariance_rows |> filter(targeted, n_dyads == 50, level == "between")
   small_occasion <- covariance_rows |> filter(targeted, n_dyads == 50, level == "within")
   short_series <- small_occasion |> filter(part == "gaussian", n_occasions == 3) |>
@@ -216,8 +236,6 @@ ar_rows |>
 ```
 
 ```{r serial-dependence-finding, results='asis'}
-ar_unrestricted <- primary_figures |>
-  filter(part == "ar", model == "no_ar", ar_phi == 0.7, figure == "either")
 if (!is_pilot) {
   ar_changes <- ar_rows |> select(n_dyads, ar_phi, rate, mcse) |>
     tidyr::pivot_wider(names_from = ar_phi, values_from = c(rate, mcse)) |>
@@ -246,8 +264,7 @@ reflect this simulation limitation as well as fitting behavior. They are not
 false-alarm estimates for a clean null model.
 
 ```{r lag-sensitivity}
-primary_figures |>
-  filter(startsWith(part, "lag_"), figure == "either") |>
+lag_figures |>
   arrange(part, n_dyads, response) |>
   transmute(Family = family_labels[part], Dyads = n_dyads, Response = response,
     Checked = checked, `Any flag [95% interval]` = rate_interval(rate, lower, upper),
