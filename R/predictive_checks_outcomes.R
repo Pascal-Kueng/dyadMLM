@@ -1,28 +1,39 @@
 #' Check outcome distributions against model simulations
 #'
 #' `r lifecycle::badge("experimental")`
-#' Compare the observed outcome distribution and summaries (response SD, largest
-#' absolute deviation, number of zeros) with complete datasets from
-#' [simulate_dyad_responses()].
+#' A model should reproduce the distribution of the observed outcomes. This
+#' check compares the observed outcome distribution and summaries (response SD,
+#' largest absolute deviation, number of zeros) with complete datasets from
+#' [simulate_dyad_responses()]. This helps identify mismatches in the model's
+#' assumptions, such as the distribution family, dispersion, or zero inflation.
 #' For PIT residual patterns, also run [check_dyad_residuals()].
-#' To read the plots and follow up flags, see [plot.dyadMLM_outcome_check()].
+#' For guidance on how to read the plots, see [plot.dyadMLM_outcome_check()].
 #'
 #' @param simulations An object from [simulate_dyad_responses()]. Use 1,000 or
 #'   more simulated datasets for stable comparisons.
 #' @inheritParams check_dyad_residuals
 #'
 #' @return Invisibly returns a `dyadMLM_outcome_check` list with role-specific
-#'   summary matrices and outcome distributions in `compositions`. Matrix columns
-#'   are observed data followed by all simulated datasets. Save it with
-#'   `plot = FALSE` and draw it later with `plot(result)`, which also takes `ask`
-#'   and `panels`.
+#'   summary matrices and outcome distributions in `compositions`. Matrices have
+#'   one column per dataset (observed first, then all simulated). Optionally,
+#'   suppress plotting with `plot = FALSE` and draw the saved result later with
+#'   `plot(result)`, which also takes `ask` and `panels`.
 #'
 #' @inheritSection check_dyad_residuals Scope
 #'
 #' @seealso [check_dyad_residuals()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
+#' example_data <- prepare_dyad_data(
+#'   dyads_cross, dyad = coupleID, member = personID,
+#'   model_types = "none", seed = 123
+#' )
+#' # Exchangeable dyads: the two random-effect blocks represent the partners'
+#' # residual variances and covariance.
 #' model <- glmmTMB::glmmTMB(
-#'   closeness ~ gender + (1 | coupleID), data = dyads_cross
+#'   closeness ~ gender + provided_support +
+#'     us(1 | coupleID) + us(0 + .member_contrast_arbitrary | coupleID),
+#'   dispformula = ~ 0,
+#'   data = example_data
 #' )
 #' # Use at least 1,000 simulations when checking a model.
 #' simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
@@ -115,10 +126,11 @@ print.dyadMLM_outcome_check <- function(x, ...) print_check_overview(x, "outcome
 #' The remaining rows compare the response SD (standard deviation of outcome
 #' minus prediction), the largest absolute deviation from prediction, and, when
 #' the composition has simulated zeros (or observed zeros, for count and Tweedie
-#' families), the number of zeros. The SD includes random effects; it does not
-#' isolate the model's residual variance or dispersion parameter. For complete
-#' cross-sectional dyads with distinct roles, these SDs match the role SDs of
-#' [check_partner_dependence()] with its default `response = "model-centred"`.
+#' families), the number of zeros. The SD includes random effects, so it does
+#' not isolate the model's residual variance or dispersion parameter. For
+#' complete cross-sectional dyads with distinct roles, these SDs match the role
+#' SDs of [check_partner_dependence()] with its default
+#' `response = "model-centred"`.
 #' Ordinal summaries depend on the category scores `1, 2, ..., K`. Use a tall
 #' plotting window to keep all rows readable.
 #'
