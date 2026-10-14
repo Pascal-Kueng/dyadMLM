@@ -969,6 +969,52 @@ preparation, diagnostics, and interpretation contracts are stable.
     alone). A separate latent scale for singletons
     (`clm(scale = ~ .partner_exists)`) is not supported by `vcovCL()`; the
     jackknife works.
+- Suggested workflow for these models. Follow-up simulations in October 2026
+  used complete cross-sectional dyads; scripts not kept.
+  - Fit the model twice: with `glmmTMB` without random effects for the dyadMLM
+    checks, and with `glm()`, `MASS::glm.nb()` or `ordinal::clm()` for the
+    clustered standard errors. The estimates are identical. The checks already
+    run on such `glmmTMB` fits; pass `data =`, because the dyad ID is no longer
+    in the model frame.
+  - `glm` support in `simulate_dyad_responses()` is not needed. The checks read
+    only the simulations object. A prototype adapter (about 20-35 lines, plus a
+    class allowlist, because `geeglm` and `gam` inherit from `glm`) added
+    nothing a `glmmTMB` fit without random effects cannot do. Binary outcomes
+    are not supported by the checks for any backend.
+  - Standard errors (20-100 dyads, latent ICC about .23, actor, partner, and
+    dyad-level predictors; 1,000-2,000 replications per cell):
+    - CR0 covered 93-95% from about 50 dyads for binary and ordinal outcomes,
+      but as little as 89% with 20-30 dyads.
+    - CR1 (CR0 times G/(G-1)) with t on G-1 df was close to 95% from 20 dyads
+      for binary and from 30 for ordinal outcomes. This needs no `glm`.
+    - CR2 with Satterthwaite df was conservative for binary outcomes with
+      20-30 dyads (97-98%).
+    - For Poisson outcomes with dyad SD 1 on the log scale, all clustered
+      standard errors were too small (CR0 81% with 20 dyads, about 92% with
+      400). CR2 with Satterthwaite df or CR3 helped most with few dyads.
+    - With 20 dyads, logit slopes were biased about 17% away from zero
+      (median), whatever the standard errors.
+  - Checks on fits without random effects (100 and 400 dyads): role-specific
+    views of distinguishable dyads stayed calibrated. Pooled views flagged
+    correct models more often (both checks 11.0% vs 6.7% for the
+    random-intercept model, gaussian), and so did diaries (QQ envelope by role
+    8.3% vs 1.7%; 100 dyads, 10 occasions). Same-role compositions are shown
+    pooled and should behave alike (untested). The partner check flags these
+    fits by construction (73-100% of datasets), and a planned autocorrelation
+    check would too. For Poisson fits, flags in SDs and zeros show
+    overdispersion that clustered standard errors do not need, but may suggest
+    a negative binomial family.
+  - Pitfalls:
+    - `clubSandwich::vcovCR()` and `sandwich::vcovCL()` on `glmmTMB` fits
+      silently return standard errors that are far too small.
+    - `glmmTMB::vcovHC()` gives CR0 only and needs `cluster` as a factor. Its
+      `ordinal()` failure has a two-line upstream fix (prototyped; open
+      `glmmTMB` PRs #1350 and #1344 touch the same helpers).
+    - `compare_nested_models()` runs likelihood-ratio tests that ignore the
+      clustering; use clustered Wald tests instead.
+    - Clustered standard errors assume missingness unrelated to the observed
+      outcomes, whereas likelihood-based mixed models allow missingness that
+      depends on them (MAR).
 
 ## Proposed Version 0.3.1 Scope - Generalized Diagnostics
 
