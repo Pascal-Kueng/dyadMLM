@@ -98,9 +98,9 @@ the stable covariance, and the within level for the occasion covariance.
 A **row flag** means that one observed statistic (one row of the check's
 `summary`) lies outside the middle 95% of its simulated values. Each level has
 its own figure. A **figure flag** means that at least one row in that figure
-flags. These
-are descriptive checks. The 5% line is a benchmark for individual rows, not a
-promised rate or a figure-level threshold. Summaries freely estimated from the
+flags. These are descriptive checks. The dashed 5% line in the false-alarm
+figure is a benchmark for individual rows, not a promised rate or a figure-level
+threshold. Summaries freely estimated from the
 same data may flag much less often.
 
 <details>
@@ -150,7 +150,7 @@ Here the fitted covariance restriction is true. Each panel shows the partner
 correlation row at the targeted level: zero stable covariance at the
 between level, or zero occasion covariance at the within level. Rates for other
 rows remain in the saved tables. These true-restriction settings use complete
-data and 5 or 14 occasions.
+data and 5 or 14 occasions (only 14 for ordinal outcomes).
 
 ```{r true-restrictions, fig.alt="Partner-correlation flag rates under true zero-covariance restrictions, by family, level, number of occasions and dyad count."}
 ggplot(null_rows, aes(n_occasions, rate, colour = dyads, group = dyads)) +
@@ -286,8 +286,8 @@ lag_figures |>
   knitr::kable()
 ```
 
-Agreement in the Gaussian lagged-outcome case does not establish that keeping
-outcome-derived predictors fixed gives a valid simulation reference.
+Low model-centred flag rates in the Gaussian lagged-outcome case do not establish
+that keeping outcome-derived predictors fixed gives a valid simulation reference.
 
 ## Fitting and sensitivity checks
 
@@ -319,7 +319,8 @@ cat(sprintf("Flags use rank limits from the ordered simulated values, as `check_
   100 * max(abs(fit_comparison$all - fit_comparison$usable), na.rm = TRUE)))
 ```
 
-Parameter recovery is kept separate from check performance. The saved recovery
+Apart from the AR result above, parameter recovery is kept separate from check
+performance. The saved recovery
 table contains estimates only for correctly specified models, excluding the
 lagged-outcome sensitivity fits. This compact view gives the largest absolute
 bias across settings for fixed predictor effects and latent partner correlations.

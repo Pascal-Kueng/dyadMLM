@@ -26,7 +26,7 @@ helpers, and eventually model syntax explicit and reproducible.
   [`ild-nonindependence.md`](ild-nonindependence.md)
 - Data-preparation debugging scratch helpers:
   [`debug-data-preparation.R`](debug-data-preparation.R)
-- Cross-sectional partner-dependence checks:
+- Partner-dependence checks:
   [`diagnostic_checks/README.md`](diagnostic_checks/README.md)
 
 ## Current State
@@ -41,7 +41,7 @@ concept DOI, so future GitHub Releases are added to it as new versions
 automatically, and removed the duplicate native 0.2.0 archive under
 10.5281/zenodo.22047083. The official CRAN tarball remains attached to the
 GitHub Release. The package has returned to development as version 0.2.0.9000,
-with cross-sectional partner-dependence checks in development.
+with cross-sectional and repeated-occasion partner-dependence checks in development.
 
 The core data-preparation API is implemented and covered by tests, the README
 links to the pkgdown site, and GitHub Actions are configured for R CMD check,

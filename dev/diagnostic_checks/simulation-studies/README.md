@@ -126,8 +126,9 @@ Changed simulation code or settings require a new output directory.
 Results go to `results/ild-partner-dependence/<datasets>-datasets-<draws>-draws/`.
 Only a complete default run exports the six tables to
 `report-data/ild-partner-dependence/`: cells, statistic flags, figure flags, fit
-diagnostics, parameter recovery and response-scale effect sizes. Flags under both
-the rank limits and the earlier quantile limits are computed from saved counts.
+diagnostics, parameter recovery and response-scale effect sizes. Flags under the
+rank limits are computed from saved counts, and flags under the earlier quantile
+limits from saved limits.
 [serial-recovery.R](ild-partner-dependence/serial-recovery.R) rereads the saved
 checkpoints and writes `serial-recovery.csv`, the stable-correlation estimates of
 the model without AR at φ = 0.7:
