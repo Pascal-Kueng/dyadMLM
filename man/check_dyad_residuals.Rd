@@ -64,7 +64,7 @@ simulated datasets. Save it with \code{plot = FALSE} and draw it later with
 Check where each observed outcome falls among its simulated values (PIT
 residuals), using complete datasets from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
 For checks on the outcome scale, also run \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}.
-To read the plots and follow up flags, see \link[=dyad_check_plots]{the plot guide}.
+To read the plots and follow up flags, see \code{\link[=plot.dyadMLM_residual_check]{plot.dyadMLM_residual_check()}}.
 }
 \section{Scope}{
 

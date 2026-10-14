@@ -5,7 +5,7 @@
 #' absolute deviation, number of zeros) with complete datasets from
 #' [simulate_dyad_responses()].
 #' For PIT residual patterns, also run [check_dyad_residuals()].
-#' To read the plots and follow up flags, see [the plot guide][dyad_check_plots].
+#' To read the plots and follow up flags, see [plot.dyadMLM_outcome_check()].
 #'
 #' @param simulations An object from [simulate_dyad_responses()]. Use 1,000 or
 #'   more simulated datasets for stable comparisons.
@@ -96,7 +96,35 @@ check_dyad_outcomes <- function(simulations, dyad = NULL, role = NULL, member = 
 #' @export
 print.dyadMLM_outcome_check <- function(x, ...) print_check_overview(x, "outcome check")
 
-#' @rdname dyad_check_plots
+#' Read outcome check plots
+#'
+#' How to read the pages drawn by [check_dyad_outcomes()] and how to follow up
+#' flags. `plot()` redraws a check saved with `plot = FALSE`.
+#'
+#' @param x A result from [check_dyad_outcomes()].
+#' @inheritParams plot.dyadMLM_residual_check
+#' @return `x`, invisibly.
+#'
+#' @inheritSection plot.dyadMLM_residual_check Views and compositions
+#' @section Outcome check pages:
+#' The first row compares outcome distributions. Ordinal responses use bars for
+#' all defined categories, with separate 95% ranges per category, so one red
+#' point outside can occur by chance. Other outcomes show the proportion at or
+#' below each value (ECDF) for the observations and up to 30 simulated datasets.
+#'
+#' The remaining rows compare the response SD (standard deviation of outcome
+#' minus prediction), the largest absolute deviation from prediction, and, when
+#' the composition has simulated zeros (or observed zeros, for count and Tweedie
+#' families), the number of zeros. The SD includes random effects; it does not
+#' isolate the model's residual variance or dispersion parameter. For complete
+#' cross-sectional dyads with distinct roles, these SDs match the role SDs of
+#' [check_partner_dependence()] with its default `response = "model-centred"`.
+#' Ordinal summaries depend on the category scores `1, 2, ..., K`. Use a tall
+#' plotting window to keep all rows readable.
+#'
+#' @inheritSection plot.dyadMLM_residual_check Reading flags
+#' @seealso [check_dyad_outcomes()], [plot.dyadMLM_residual_check()]
+#' @keywords internal
 #' @export
 plot.dyadMLM_outcome_check <- function(x, ask = NULL, panels = TRUE, ...) {
   checks <- lapply(x$compositions, function(composition)

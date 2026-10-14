@@ -54,7 +54,7 @@ Compare the observed outcome distribution and summaries (response SD, largest
 absolute deviation, number of zeros) with complete datasets from
 \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
 For PIT residual patterns, also run \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
-To read the plots and follow up flags, see \link[=dyad_check_plots]{the plot guide}.
+To read the plots and follow up flags, see \code{\link[=plot.dyadMLM_outcome_check]{plot.dyadMLM_outcome_check()}}.
 }
 \section{Scope}{
 
