@@ -45,7 +45,7 @@ test_that("people observed alone get their own labels and indicators", {
       c("singleton_male", "singleton_female", "male_x_missing"),
       compositions$composition
     )],
-    c("singleton", "singleton", "partner_missing")
+    c("singleton", "singleton", "missing_partner")
   )
 })
 

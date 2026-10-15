@@ -591,7 +591,7 @@ test_that("validate_dyad_data rejects missing grouping values", {
       dyad = dyad_id,
       member = person_id
     ),
-    "give each person their own `dyad` ID",
+    "give each person their own `dyad` ID and record with `partner_exists`",
     fixed = TRUE
   )
 

@@ -172,7 +172,7 @@ test_that("partner_exists cannot be combined with DIM or DSM", {
     prepare(
       cross_sectional_data(), predictors = x, model_types = c("apim", "dim"), partner_exists = partnered
     ),
-    "`partner_exists` cannot be used with DIM or DSM columns yet. Use `model_types = \"apim\"`",
+    "`partner_exists` cannot be used with DIM or DSM columns. Use `model_types = \"apim\"`",
     fixed = TRUE
   )
 })

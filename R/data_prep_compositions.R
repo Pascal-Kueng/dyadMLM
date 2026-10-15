@@ -791,7 +791,7 @@ finalize_composition_columns <- function(
 #'   `role_name` may be `NULL`.
 #'
 #' @return One row per person observed alone: the dyad ID, the label, and the
-#'   dyad type (`"singleton"` or `"partner_missing"`).
+#'   dyad type (`"singleton"` or `"missing_partner"`).
 #' @keywords internal
 label_people_observed_alone <- function(data, group_name, member_name, role_name) {
   alone <- tibble::tibble(
@@ -820,7 +820,7 @@ label_people_observed_alone <- function(data, group_name, member_name, role_name
         .data$.dy_has_partner ~ paste0(.data$.dy_role, dyad_composition_sep, "missing"),
         TRUE ~ paste0("singleton_", .data$.dy_role)
       ),
-      "{dyad_type_col}" := dplyr::if_else(.data$.dy_has_partner, "partner_missing", "singleton")
+      "{dyad_type_col}" := dplyr::if_else(.data$.dy_has_partner, "missing_partner", "singleton")
     )
 
   # Different groups must not end up with the same label. For example, role

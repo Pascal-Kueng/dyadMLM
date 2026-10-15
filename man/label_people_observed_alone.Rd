@@ -14,7 +14,7 @@ label_people_observed_alone(data, group_name, member_name, role_name)
 }
 \value{
 One row per person observed alone: the dyad ID, the label, and the
-dyad type (\code{"singleton"} or \code{"partner_missing"}).
+dyad type (\code{"singleton"} or \code{"missing_partner"}).
 }
 \description{
 People observed alone (a dyad with only one person in the data) get their

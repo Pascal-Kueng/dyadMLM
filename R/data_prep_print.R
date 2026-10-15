@@ -23,11 +23,27 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
     "unavailable"
   }
 
+  current_dyad_compositions <- NULL
+  if (!is.null(meta$dyad_compositions) && nrow(meta$dyad_compositions) > 0) {
+    current_dyad_compositions <- dyad_compositions_with_current_counts(x)
+  }
+
+  # People observed alone are counted apart from dyads, if there are any.
+  is_alone <- current_dyad_compositions$dyad_type %in% dyad_alone_types
+  n_alone <- sum(current_dyad_compositions$n_dyads[is_alone])
+  dyad_fields <- paste0("Dyads: ", current_n_dyads)
+  if (n_alone > 0L) {
+    dyad_fields <- c(
+      paste0("Dyads: ", current_n_dyads - n_alone),
+      paste0("People observed alone: ", n_alone)
+    )
+  }
+
   cat(pillar::style_subtle(paste0("# ", title, "\n")))
   print_wrapped_comment_fields(
     fields = c(
       paste0("Rows: ", nrow(x)),
-      paste0("Dyads: ", current_n_dyads),
+      dyad_fields,
       paste0("Intensive longitudinal: ", ifelse(meta$longitudinal, "yes", "no"))
     ),
     sep = " | ",
@@ -85,10 +101,7 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
     }
   }
 
-  current_dyad_compositions <- NULL
   if (!is.null(meta$dyad_compositions) && nrow(meta$dyad_compositions) > 0) {
-    current_dyad_compositions <- dyad_compositions_with_current_counts(x)
-
     if (is.null(current_dyad_compositions)) {
       print_wrapped_comment_fields(
         label = "Dyad compositions",
@@ -126,7 +139,7 @@ print_partner_data <- function(x, meta, current_dyad_compositions) {
       dplyr::arrange(match(.data$dyad_type, dyad_alone_types))
     alone_parts <- c(
       singleton = "without a partner",
-      partner_missing = "with a partner not in the data"
+      missing_partner = "with a partner not in the data"
     )[alone_counts$dyad_type]
     if (nrow(alone_counts) > 0L) {
       lines <- paste0(
@@ -224,10 +237,10 @@ print_partner_data <- function(x, meta, current_dyad_compositions) {
   # The terms are not wrapped, so they can be pasted into a formula.
   if (!is.null(terms)) {
     cat(wrap_note("Two-part coding:", paste(
-      "Partner predictors are 0 where no partner existed.",
-      "Suggested fixed-effect terms (starting point, please revise and check",
-      "that this is what you need), unless fixed intercepts already separate",
-      "rows with and without a partner:"
+      "Partner predictors are 0 where no partner existed. The status terms",
+      "can only be left out if fixed intercepts already separate rows with",
+      "and without a partner. Suggested fixed-effect terms (starting point,",
+      "please revise and check that this is what you need):"
     )), format_two_part_terms(terms, prefix = "#     "), "#", sep = "\n")
   }
 
@@ -365,7 +378,7 @@ print_wrapped_comment_fields <- function(fields, label = NULL, sep = ", ", exden
     indent <- regmatches(line, regexpr("^ *", line))
     content <- substring(line, nchar(indent, type = "width") + 1L)
     content_width <- max(10L, wrap_width - nchar(indent, type = "width"))
-    wrapped <- strwrap(content, width = content_width)
+    wrapped <- strwrap(content, width = content_width + 1L)
     if (length(wrapped) == 0) {
       wrapped <- ""
     }

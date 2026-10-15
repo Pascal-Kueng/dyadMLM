@@ -33,7 +33,7 @@ dyad_partner_exists_col <- paste0(dyad_reserved_prefix, "partner_exists")
 dyad_partner_exists_lag1_col <- paste0(dyad_partner_exists_col, "_lag1")
 
 # Dyad types of people observed alone: no partner, or a partner not in the data.
-dyad_alone_types <- c("singleton", "partner_missing")
+dyad_alone_types <- c("singleton", "missing_partner")
 
 ############################################################################
 # HELPER FUNCTIONS

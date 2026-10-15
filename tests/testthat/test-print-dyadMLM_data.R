@@ -422,6 +422,8 @@ test_that("dyadMLM data print reports people observed alone and two-part coding"
     data, time = wave, predictors = x, temporal_decomposition = "none", partner_exists = alive
   ))
 
+  # The person observed alone is not counted as a dyad.
+  expect_printed(printed, "# Rows: 10 | Dyads: 2 | People observed alone: 1 |")
   expect_match(printed, "# singleton +singleton +1 person", all = FALSE)
   expect_printed(printed, "People observed alone: 1 without a partner.")
   # Without a partner: dyad 1 at wave 3 and dyad 3 at waves 1-2. With a partner
@@ -432,7 +434,11 @@ test_that("dyadMLM data print reports people observed alone and two-part coding"
   ))
   expect_printed(
     printed,
-    "Two-part coding: Partner predictors are 0 where no partner existed. Suggested fixed-effect terms"
+    paste(
+      "Two-part coding: Partner predictors are 0 where no partner existed.",
+      "The status terms can only be left out if fixed intercepts already separate",
+      "rows with and without a partner. Suggested fixed-effect terms"
+    )
   )
   expect_true("#     + .partner_exists  # a partner exists (1) or not (0)" %in% printed)
   # `partner_exists` already says which partners existed.
@@ -909,12 +915,18 @@ test_that("people observed alone are counted in the current data", {
   )
   prepared <- prepare_partner_data(data, predictors = x, partner_exists = partnered)
   printed <- capture_wide_print(prepared)
+  expect_printed(printed, "# Rows: 7 | Dyads: 2 | People observed alone: 3 |")
   expect_printed(printed, "People observed alone: 2 without a partner, 1 with a partner not in the data.")
   # Their indicators keep their full names under "Added columns".
   expect_printed(printed, "#   .is_singleton ")
 
   printed <- capture_wide_print(prepared[prepared$dyad_id != 4 & prepared$dyad_id != 5, ])
+  expect_printed(printed, "# Rows: 5 | Dyads: 2 | People observed alone: 1 |")
   expect_printed(printed, "People observed alone: 1 without a partner.")
+  expect_printed(
+    capture_wide_print(prepared[prepared$dyad_id <= 2, ]),
+    "# Rows: 4 | Dyads: 2 | Intensive longitudinal: no"
+  )
 
   # Terms that became constant are not suggested. With only partnered rows
   # left, no status varies, so there is no reminder.
