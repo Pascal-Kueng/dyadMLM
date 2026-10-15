@@ -6,11 +6,11 @@
 #' Data must be in long format. Cross-sectional dyadic data may contain at most
 #' one row per member within dyad. Intensive longitudinal dyadic data may
 #' contain at most one row per member and observed measurement occasion within
-#' dyad. Measured variables may contain missing values. Numeric `dyad`, `member`,
-#' `time`, and selected predictor columns must not contain infinite values.
-#' Structural completeness is assessed across all rows. A dyad with more than
-#' two members always causes an error. A dyad with only one person in the data
-#' (for example, someone whose partner did not take part, or single persons
+#' dyad. Measured variables may contain missing values. Numeric `dyad`,
+#' `member`, `time`, and selected predictor columns must not contain infinite
+#' values. Structural completeness is assessed across all rows. A dyad with more
+#' than two members always causes an error. A dyad with only one person in the
+#' data (for example, someone whose partner did not take part, or single persons
 #' studied alongside dyads) causes an error by default. To keep such dyads,
 #' supply `partner_exists`, which records whether the person has a partner who
 #' did not take part or has no partner (see the section "People observed
@@ -23,6 +23,12 @@
 #' before being combined, so labels do not depend on row or member order.
 #'
 #' @section People observed without their partner:
+#' A person can be observed without their partner because the partner did not
+#' take part (partner values are missing) or because no partner exists
+#' (partner values do not apply).
+#'
+#' ## A partner exists but has missing values
+#'
 #' In longitudinal data, both partners may have a row at every occasion, even
 #' if all of one partner's values are missing at some occasions (only the
 #' identifiers, such as `dyad`, `member`, and `time`, can never be missing).
@@ -43,16 +49,18 @@
 #'
 #' Using `print()` on the prepared data reports how many dyad-occasions have a
 #' row for only one member (where `dyadMLM` assumed the partner exists) and how
-#' many rows miss at least one partner predictor (both cases above).
+#' many rows have at least one missing partner predictor (both cases above).
 #'
-#' If truly no partner *existed* at some of these occasions (for example,
-#' before a relationship began or after a separation or death), or at all
+#' ## Recording partner status with `partner_exists`
+#'
+#' If truly no partner *existed* at some occasions (for example, before a
+#' relationship began or after a separation or death), or at all
 #' occasions (e.g., when individuals are studied alongside dyads), treating a
 #' partner's values as missing is not meaningful and can bias the model. This
 #' also applies to empty rows kept for a partner who no longer exists, as in
-#' some balanced panel files. In this case, use `partner_exists` to record
-#' whether a partner existed, which sets up two-part predictors (see
-#' `vignette("partner-exists")` for examples).
+#' some balanced panel files (remove these rows). In this case, use
+#' `partner_exists` to record whether a partner existed, which sets up
+#' two-part predictors (see `vignette("partner-exists")` for examples).
 #'
 #' Alternatively, to analyze only occasions at which both members were
 #' observed, remove the other occasions before preparing the data, for example:
@@ -76,33 +84,38 @@
 #'
 #' The label stays the same across occasions. `singleton` means no partner at
 #' any observed occasion. A person observed alone who had a partner at some
-#' occasions is labeled as having a partner not in the data. They have no
-#' member contrast and cannot be listed in `pool_compositions` or
-#' `set_exchangeable_compositions`. To
-#' let them share parameters with dyad members, add their indicators in the
-#' model formula, e.g. `I(.is_male_x_male + .is_singleton_male)` for a
-#' variance (in both exchangeable terms, see [recover_exchangeable_covariance()])
-#' or a slope. People without a partner keep their own mean (see
-#' two-part coding below).
+#' occasions is labeled as having a partner not in the data. People observed
+#' alone have no member contrast and cannot be listed in `pool_compositions`
+#' or `set_exchangeable_compositions`. To let them share parameters with dyad
+#' members, add their indicators in the model formula, e.g.,
+#' `I(.is_male_x_male + .is_singleton_male):x` for a slope. For a variance,
+#' add them in both the shared and the difference block (see
+#' [recover_exchangeable_covariance()]):
+#'
+#' ```r
+#' (0 + I(.is_male_x_male + .is_singleton_male) | coupleID) +
+#'   (0 + I(.member_contrast_male_x_male_arbitrary +
+#'          .is_singleton_male) | coupleID)
+#' ```
+#'
+#' For residuals at each occasion in intensive longitudinal data, group the
+#' same pair by occasion, e.g., `coupleID:diaryday`. People without a partner
+#' keep their own mean (see "Two-part coding" below).
+#'
+#' ## Two-part coding
 #'
 #' Where no partner existed, numeric partner predictors are set to 0 after
-#' centering, and `.partner_exists` (1 or 0) marks these rows. The status
-#' columns are only added when the status varies (`.partner_exists_lag1` only
-#' with lagged predictors and where the previous status differs from the
-#' current one somewhere). This is two-part coding. **`.partner_exists` (or its two parts, see below) must be included
-#' as a fixed effect.** Otherwise,
-#' the zeros are treated as real partner values, which can bias the partner
-#' effects. Random effects cannot replace it. It can only be left out if fixed
-#' intercepts already separate all rows without a partner, for example
-#' singleton indicators when no dyad has occasions without a partner.
+#' centering, and `.partner_exists` (1 or 0) marks these rows. This is two-part
+#' coding. The status columns are only added when the status varies.
+#' **`.partner_exists` (or its two parts, see below) must be included as a
+#' fixed effect.** Otherwise, the zeros are treated as real partner values,
+#' which can bias the partner effects. Random effects cannot replace it. It can
+#' only be left out if fixed intercepts already separate all rows without a
+#' partner, for example singleton indicators when no dyad has occasions without
+#' a partner. Non-numeric partner predictors cannot be set to 0, so they stop
+#' with an error.
 #'
-#' Lagged partner predictors follow the status at the previous occasion and
-#' pair with `.partner_exists_lag1`. Where known, this column differs from
-#' `.partner_exists` only at the first occasion after a partner is lost or
-#' gained. If no such occasion remains in the model data, it duplicates
-#' `.partner_exists` and can be left out. It stays one column, so its
-#' within-person and between-person associations are combined. Non-numeric
-#' partner predictors cannot be set to 0, so they stop with an error.
+#' ## Changes in partner status
 #'
 #' When the status changes over time within a dyad in longitudinal data, the
 #' following columns are added:
@@ -117,13 +130,12 @@
 #'   later), when both occasions before a relationship and after a loss occur
 #'   (needs a numeric `time`). It lets their means differ (e.g., being single
 #'   versus being widowed).
-#' * With `temporal_decomposition = "2l"`, the partner's usual level is split.
-#'   It still exists after a loss. Setting it to 0
-#'   there would assume that it no longer relates to the outcome. If that is
-#'   wrong, its slope while a partner exists can be biased too. So each
-#'   `.{pred}_cbp_partner` is replaced by one column per partner status, each
-#'   0 outside its status (columns for statuses that do not occur are not
-#'   created):
+#' * With `temporal_decomposition = "2l"`, the partner's usual level (`cbp`) is
+#'   split. It still exists after a loss. Setting it to 0 there would assume
+#'   that it no longer relates to the outcome. If that is wrong, its slope
+#'   while a partner exists can be biased too. So each `.{pred}_cbp_partner` is
+#'   replaced by one column per partner status, each 0 outside its status
+#'   (columns for statuses that do not occur are not created):
 #'
 #' | Partner status at the occasion | Column |
 #' |---|---|
@@ -131,31 +143,41 @@
 #' | No partner yet, but one later | `.{pred}_cbp_partner_before_exists` |
 #' | No partner, but one earlier | `.{pred}_cbp_partner_after_exists` |
 #'
-#' Include all of them. The new names show that these columns are not
-#' constant within a person. A usual level that applies but is unknown is
-#' `NA`. People without a partner at any observed occasion have 0 in all of
-#' them and need their own fixed intercepts (e.g., singleton indicators).
-#' Complete dyads without a partner at any occasion (e.g., separated before the
-#' first occasion) need one too, which you create yourself. To
-#' assume one slope for all statuses, use `I()` around their sum. To assume no
-#' association without a partner, use `_when_exists` alone. "Before" and
-#' "after" need a numeric `time`. Otherwise, the usual level is not split, with
-#' a warning.
+#' Include all of them. The suffixes show that these columns are not constant
+#' within a person. A usual level that applies but is unknown is `NA`.
+#' Singletons have 0 in all of them and need their own fixed intercepts (e.g.,
+#' singleton indicators). Complete dyads without a partner at any occasion
+#' (e.g., separated before the first occasion) need one too, which you create
+#' yourself. To assume one slope for all statuses, use `I()` around their sum.
+#' To assume no association without a partner, use `_when_exists` alone.
+#' "Before" and "after" need a numeric `time`. Otherwise, the usual level is
+#' not split, with a warning.
+#'
+#' Lagged partner predictors follow the status at the previous occasion and
+#' pair with `.partner_exists_lag1` (added only with lagged predictors and
+#' where the previous status differs from the current one somewhere). Where
+#' known, this column differs from `.partner_exists` only at the first
+#' occasion after a partner is lost or gained. If no such occasion remains in
+#' the model data, it duplicates `.partner_exists` and can be left out. It
+#' stays one column, so its within-person and between-person associations are
+#' combined.
+#'
+#' ## Actor variables that exist only with a partner
 #'
 #' Variables that only exist when a partner exists (e.g., ratings of the
 #' partner or the relationship) are usually missing where no partner exists.
-#' Rows without a partner then drop out of models that use them. dyadMLM does
-#' not yet apply two-part coding to such actor variables (#86), but you can do
-#' it yourself after preparing the data. Set their actor columns to 0 where
+#' Rows without a partner then drop out of models that use them. `dyadMLM`
+#' does not apply two-part coding to such actor variables, but you can do it
+#' yourself after preparing the data. Set their actor columns to 0 where
 #' `.partner_exists` is 0 with `dplyr::if_else()` (multiplying keeps `NA`,
 #' since `0 * NA` is `NA`), and include the status terms as for partner
 #' predictors. Where `.partner_exists` or `.partner_exists_lag1` was not
-#' created (the status did not vary), use the recorded status at the same or
-#' previous occasion (see `vignette("partner-exists")`). In
+#' created, use the recorded status at the same or previous occasion. In
 #' longitudinal data with status changes, also split their usual level
-#' (`cbp`) by partner status (see `vignette("partner-exists")`).
+#' (`cbp`) by partner status. See `vignette("partner-exists")` for examples.
 #'
-#' When interpreting results:
+#' ## Interpreting results
+#'
 #' * `.partner_exists` compares rows with and without a partner at partner
 #'   predictors of 0. It is not "the effect of having a partner", and it mixes
 #'   change over time with differences between people.
@@ -163,9 +185,9 @@
 #'   `cwp`, the average person's usual level for `cbp`, the grand mean for
 #'   `gmc`, and the scale's 0 for raw values. Prefer centered components.
 #' * Raw and `gmc` partner values contain the partner's usual level too.
-#'   Setting them to 0 makes the same assumption for that part, and they
-#'   cannot be split. In longitudinal data, prefer the `cwp` and split `cbp`
-#'   columns.
+#'   Setting them to 0 assumes that this part does not relate to the outcome
+#'   where no partner exists, and they cannot be split. In longitudinal data,
+#'   prefer the `cwp` and split `cbp` columns.
 #' * When the status changes within a person, partner `cwp` values no longer
 #'   average 0 within that person.
 #' * After a separation in which the former partner keeps taking part, their
@@ -173,9 +195,11 @@
 #' * At the first occasion after a separation, lagged partner predictors still
 #'   hold the former partner's value from the previous occasion, by design.
 #'
+#' ## Limits
+#'
 #' Each person belongs to one dyad. If `partner_exists` returns to `TRUE` after
 #' `FALSE`, this is treated as the same partner returning. A new partner is not
-#' supported. `partner_exists` cannot yet be combined with DIM or DSM columns.
+#' supported. `partner_exists` cannot be combined with DIM or DSM columns.
 #'
 #' @param data A data frame or tibble. Data must be in long format. For
 #' cross-sectional dyadic data, each observed member of each dyad has one row.
@@ -185,11 +209,11 @@
 #' @param member Column identifying a person or the member within dyad.
 #' @param role Optional column identifying a stable member role, such as gender.
 #'   Non-missing values must be consistent within each `dyad` x `member` and
-#'   must not contain `_x_`. In repeated-measures data, an observed role is
-#'   propagated to missing rows for the same member within a dyad.
-#'   `missing_role` controls dyads in which a member has no non-missing role on
-#'   any row. If no role is supplied, all dyads are treated as the same type of
-#'   exchangeable dyads.
+#'   must not contain `_x_` (or be `"missing"` when `partner_exists` is
+#'   supplied). In repeated-measures data, an observed role is propagated to
+#'   missing rows for the same member within a dyad. `missing_role` controls
+#'   dyads in which a member has no non-missing role on any row. If no role is
+#'   supplied, all dyads are treated as the same type of exchangeable dyads.
 #' @param time Optional column identifying time or measurement order of repeated
 #' measures.
 #' @param predictors Optional variables to use for temporal predictor
@@ -199,7 +223,7 @@
 #'   integer-valued numeric measurement index. Lagging respects the dyad and
 #'   member structure, matches observations at exactly `time - 1`, and does not
 #'   bridge missing occasions. Eligible raw, within-person, and APIM GMC
-#'   variants are lagged; stable between-person variants are not.
+#'   variants are lagged, but stable between-person variants are not.
 #' @param model_types Model-ready column families to construct. Can contain one
 #'   or more of `"apim"`, `"dim"`, and `"dsm"`. `"apim"` creates
 #'   actor and partner predictors. `"dim"` creates dyad-mean and
@@ -231,12 +255,12 @@
 #'   same contemporaneous predictor in one model because they are linearly
 #'   dependent.
 #' @param set_exchangeable_compositions Optionally specify dyad compositions
-#'   to treat as exchangeable, when their roles would otherwise imply distinguishability.
-#'   Requires `role`. Compositions that are already
+#'   to treat as exchangeable, when their roles would otherwise imply
+#'   distinguishability. Requires `role`. Compositions that are already
 #'   exchangeable should not be listed. Each composition must be supplied as one
-#'   string, using `_x_`, `-`, `_`, or whitespace (` `) between the two role labels,
-#'   for example `"female_x_male"`, `"female-male"`, `"female_male"`, or
-#'   `"female male"`, in arbitrary order.
+#'   string, using `_x_`, `-`, `_`, or whitespace (` `) between the two role
+#'   labels, for example `"female_x_male"`, `"female-male"`, `"female_male"`,
+#'   or `"female male"`, in arbitrary order.
 #'   To set multiple compositions, use a character vector of such strings.
 #'   Unlike `include_arbitrary_member_contrast`, this reclassifies the selected
 #'   compositions as exchangeable and changes their composition-role coding and
@@ -245,7 +269,8 @@
 #' @param keep_compositions Optional observed dyad compositions to keep
 #'   before exchangeability overrides and pooling. Requires `role`. Composition
 #'   references use the same format as `set_exchangeable_compositions`. `NULL`
-#'   keeps all observed compositions.
+#'   keeps all observed compositions. People observed alone are kept only if
+#'   their labels are listed (e.g., `"singleton_male"`).
 #' @param pool_compositions Optionally pool exchangeable dyad compositions
 #'   into a shared final composition label. Must be a named list where each name
 #'   is the final composition label and each value is a character vector of
@@ -267,8 +292,10 @@
 #'   is applied. `"error"` stops with an error and `"drop"` removes the entire
 #'   dyad. Conflicting non-missing roles always cause an error. Ignored when no
 #'   `role` column is supplied.
-#' @param partner_exists Optional. Decides how people (or occasions of
-#'   people) observed without a partner are prepared. The options are:
+#' @param partner_exists Optional. For people observed without their partner
+#'   (at some or all occasions), partner values are missing if the partner did
+#'   not take part, but do not apply if no partner exists. `partner_exists`
+#'   records which is the case. The options are:
 #'   * `NULL` (default): people observed alone (across all occasions) cause an
 #'     error with `incomplete_dyads = "error"` (default), or are removed with
 #'     `incomplete_dyads = "drop"`. In longitudinal data, a partner who
@@ -276,8 +303,8 @@
 #'     and to be just not observed at the others. These occasions are kept.
 #'   * `TRUE` or `FALSE`: is ignored for complete dyads and describes
 #'     **everyone** observed alone. `TRUE` means that everyone's partner exists
-#'     but did not take part. This is appropriate if the sample includes only
-#'     persistent dyads. `FALSE` means that all people observed alone have no
+#'     but did not take part. This is appropriate if everyone has a partner at
+#'     all occasions. `FALSE` means that all people observed alone have no
 #'     partner. This is appropriate if everyone observed alone is an individual
 #'     studied alone (not having an unobserved partner), and thus modeling them
 #'     as half a dyad is inappropriate. Occasions at which a partner in a
@@ -303,8 +330,7 @@
 #'   If `NULL`, the current R session's RNG state is used.
 #' @param short_colnames Whether to use shorter composition-dependent generated
 #'   column names when the final data contain one composition of dyads. The
-#'   default `TRUE`
-#'   omits the redundant composition label from `.is_*` and
+#'   default `TRUE` omits the redundant composition label from `.is_*` and
 #'   `.member_contrast_*` names. `FALSE` always retains composition-qualified
 #'   names. Other generated column names are unaffected.
 #' @param include_arbitrary_member_contrast Whether to also generate arbitrary
@@ -321,8 +347,9 @@
 #'   after filtering. Lagged variants use the same mean. Mixed non-numeric
 #'   predictors remain raw and are listed in one warning. In longitudinal data,
 #'   the mean is observation-weighted. Requires `"apim"` in `model_types`, at
-#'   least one numeric predictor, and resolved `temporal_decomposition = "none"`.
-#'   Do not use raw and GMC variants together in a model with an intercept.
+#'   least one numeric predictor, and resolved
+#'   `temporal_decomposition = "none"`. Do not use raw and GMC variants
+#'   together in a model with an intercept.
 #'
 #' @return The original data as a tibble with class `dyadMLM_data`,
 #'   `.composition` and `.composition_role` factor columns,
@@ -334,9 +361,14 @@
 #'   contains structural metadata, `dyad_compositions`, and
 #'   predictor metadata such as `temporal_decompositions`, `lag1_predictors`,
 #'   `apim_predictors`, and `dim_predictors`, as well as `dsm_predictors` and
-#'   `dsm_role_order` when applicable. The `generated_columns` table records each
-#'   package-generated column retained in the returned data. Modifying prepared
-#'   data does not automatically regenerate package-generated columns.
+#'   `dsm_role_order` when applicable. The `generated_columns` table records
+#'   each package-generated column retained in the returned data. Modifying
+#'   prepared data does not automatically regenerate package-generated columns.
+#'
+#' @references Yaremych, H. E., Preacher, K. J., & Hedeker, D. (2023).
+#'   Centering categorical predictors in multilevel models: Best practices and
+#'   interpretation. *Psychological Methods, 28*(3), 613-630.
+#'   \doi{10.1037/met0000434}.
 #'
 #' @seealso The vignette [People Observed Without Their Partner](https://pascal-kueng.github.io/dyadMLM/articles/partner-exists.html)
 #'   shows models combining dyads and people observed alone.

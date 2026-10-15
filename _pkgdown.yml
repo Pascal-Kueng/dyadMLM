@@ -56,7 +56,7 @@ articles:
   contents:
   - getting-started
 - title: Model-specific preparation
-  desc: Details for specific dyadic model parameterizations.
+  desc: Details for specific dyadic models and samples.
   contents:
   - apim
   - partner-exists
