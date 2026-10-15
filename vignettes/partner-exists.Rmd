@@ -46,8 +46,9 @@ data, a partner who has a row at some occasions is assumed to exist at all
 occasions of the dyad, with missing values where their row is missing.
 
 `partner_exists` records whether a partner exists. It is `TRUE` or `FALSE`
-for everyone observed alone, or a column (or expression) with a value for
-each row. People observed alone get their own label (`.composition`) and
+for everyone observed alone (the only person of their dyad in the data,
+across all occasions), or a column (or expression) with a value for each
+row. People observed alone get their own label (`.composition`) and
 indicator column (`.is_*`):
 
 | Situation | `partner_exists` | Label with `role` | Label without `role` | Partner predictors |
@@ -448,7 +449,7 @@ The section "People observed without their partner" in
 - **On-off relationship.** A partner who returns is treated as the same
   partner, with a message. The gap counts as after a relationship
   (`_after_exists`). A different partner is not supported. End the person's
-  data before the new relationship.
+  data before the relationship with the different partner.
 
 Splitting the usual level into before and after needs a numeric `time`.
 Otherwise, it is not split, with a warning.

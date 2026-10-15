@@ -314,8 +314,8 @@ add them in both the shared and the difference block (see
 }\if{html}{\out{</div>}}
 
 For residuals at each occasion in intensive longitudinal data, group the
-same pair by occasion, e.g., \code{coupleID:diaryday}. People without a partner
-keep their own mean (see "Two-part coding" below).
+same two terms by occasion, e.g., \code{coupleID:diaryday}. People without a
+partner keep their own mean (see "Two-part coding" below).
 }
 
 \subsection{Two-part coding}{
@@ -409,8 +409,9 @@ change over time with differences between people.
 Setting them to 0 assumes that this part does not relate to the outcome
 where no partner exists, and they cannot be split. In longitudinal data,
 prefer the \code{cwp} and split \code{cbp} columns.
-\item When the status changes within a person, partner \code{cwp} values no longer
-average 0 within that person.
+\item When the status changes within a person, partner \code{cwp} values may no
+longer average 0 within that person (e.g., when the former partner keeps
+taking part).
 \item After a separation in which the former partner keeps taking part, their
 usual level includes their occasions after the separation.
 \item At the first occasion after a separation, lagged partner predictors still
