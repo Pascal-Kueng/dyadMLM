@@ -883,6 +883,10 @@ test_that("partner data print relies on dyadMLM's own status columns", {
   expect_no_match(printed, "Rows with at least", fixed = TRUE)
   expect_printed(printed, "Two-part coding: Partner predictors are 0")
 
+  # Parts with a count of 0 are left out.
+  printed <- capture_wide_print(prepare(separated[-4, ], predictors = x, partner_exists = together))
+  expect_printed(printed, "Dyad-occasions with a row for only one member: 1 of 4 (1 without a partner).")
+
   # People observed alone are not counted as dyad-occasions.
   alone <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),

@@ -177,11 +177,13 @@ print_partner_data <- function(x, meta, current_dyad_compositions) {
       detail <- if (!has_partner_exists) {
         " (the partner is assumed to exist, with missing values)"
       } else if (has_status_column) {
-        paste0(
-          " (", format_count(sum(!one_member$has_partner)), " without a partner, ",
-          format_count(sum(one_member$has_partner)),
-          " with a partner who has missing values)"
-        )
+        # Parts with a count of 0 are left out.
+        n_parts <- c(sum(!one_member$has_partner), sum(one_member$has_partner))
+        parts <- c("without a partner", "with a partner who has missing values")
+        paste0(" (", paste(
+          format_count(n_parts[n_parts > 0L]), parts[n_parts > 0L],
+          collapse = ", "
+        ), ")")
       }
       lines <- c(lines, paste0(
         "Dyad-occasions with a row for only one member: ",
