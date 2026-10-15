@@ -440,7 +440,7 @@ We reuse `apim_simulations` with
 and
 [`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html).
 The residual check uses PIT residuals, which rank each outcome from 0 (low)
-to 1 (high) among its simulated values; the outcome check compares outcome
+to 1 (high) among its simulated values. The outcome check compares outcome
 distributions and summaries.
 We check by gender, although the restricted model treats partners as
 exchangeable, because opposite role differences can cancel when all
@@ -491,7 +491,7 @@ estimate larger, and both standard errors smaller. Women provide slightly more
 support than men here, so omitting their difference in mean closeness shifted
 both effects. Checking this model again (not shown) still flags men's PIT
 quartiles across predicted outcomes, which suggests further
-gender differences; the distinguishable APIM shows no flags. The
+gender differences. The distinguishable APIM shows no flags. The
 [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
 shows how often these panels flag correct and mismatched models.
 
