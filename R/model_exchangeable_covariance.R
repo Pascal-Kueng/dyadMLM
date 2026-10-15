@@ -183,7 +183,7 @@
 #' group, and `residual_group` identifies dyads in cross-sectional data or
 #' dyad-occasions in longitudinal data. This direct specification applies when
 #' one covariance structure is sufficient. Separate composition-specific
-#' `unstr()` structures for mixed dyad types are not currently supported in a
+#' `unstr()` structures for mixed dyad types are not supported in a
 #' standard single-response `brms` model. For Gaussian mixed-dyad residual
 #' covariance, use `glmmTMB`. Shared/difference blocks remain relevant for
 #' higher-level random effects and can represent latent link-scale covariance

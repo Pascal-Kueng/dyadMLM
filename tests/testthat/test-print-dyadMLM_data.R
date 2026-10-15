@@ -887,6 +887,21 @@ test_that("partner data print relies on dyadMLM's own status columns", {
   printed <- capture_wide_print(prepare(separated[-4, ], predictors = x, partner_exists = together))
   expect_printed(printed, "Dyad-occasions with a row for only one member: 1 of 4 (1 without a partner).")
 
+  # Counts of different widths are not padded. Person 2 takes part at wave 1
+  # only and no partner exists at wave 12.
+  widths <- tibble::tibble(
+    dyad_id = c(rep(1, 13), 2, 2),
+    person_id = c(rep(1, 12), 2, 3, 4),
+    wave = c(1:12, 1, 1, 1),
+    together = c(rep(TRUE, 11), FALSE, TRUE, TRUE, TRUE),
+    x = 1:15
+  )
+  printed <- capture_wide_print(prepare(widths, predictors = x, partner_exists = together))
+  expect_printed(printed, paste0(
+    "Dyad-occasions with a row for only one member: 11 of 13 ",
+    "(1 without a partner, 10 with a partner who has missing values)."
+  ))
+
   # People observed alone are not counted as dyad-occasions.
   alone <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),

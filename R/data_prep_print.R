@@ -122,7 +122,7 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
 # one member, rows missing any partner predictor, and reminders on how to model
 # them. `current_dyad_compositions` counts the dyads still in `x`.
 print_partner_data <- function(x, meta, current_dyad_compositions) {
-  format_count <- function(n) format(n, big.mark = ",")
+  format_count <- function(n) format(n, big.mark = ",", trim = TRUE)
   has_partner_exists <- !is.null(meta$partner_exists)
   # Generated columns still in the data. Input columns with the same names,
   # such as `.partner_exists`, are not used.
