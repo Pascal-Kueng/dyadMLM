@@ -85,6 +85,7 @@ exchangeability
 frac
 glmmTMB
 grey
+hms
 ij
 labelled
 mathrm
@@ -107,6 +108,7 @@ uncentered
 uncentred
 undecomposed
 unpooled
+vctrs
 vdots
 walkthrough
 widehat

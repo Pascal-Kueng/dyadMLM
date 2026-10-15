@@ -7,7 +7,8 @@
   counts. Both use the output from `simulate_dyad_responses()`. PIT follows
   Florian Hartig's DHARMa approach and Dunn and Smyth's (1996) randomized
   quantile residuals, but its simulations and reference distributions account
-  for dyadic and temporal non-independence. DHARMa is not required. A
+  for the dyadic and temporal dependence the model includes. DHARMa is not
+  required. A
   [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
   evaluates sensitivity and false-positive flags.
 

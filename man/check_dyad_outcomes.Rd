@@ -19,12 +19,16 @@ check_dyad_outcomes(
 \item{simulations}{An object from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Use 1,000 or
 more simulated datasets for stable comparisons.}
 
-\item{dyad, role, member}{Column names, with or without quotes, identifying
-dyads, roles, and members within dyads. Looked up in the fitted model frame
-or \code{data}. With \code{role = NULL}, all observations are pooled. Otherwise supply
-\code{dyad}; also supply \code{member} for repeated observations, where each member
-must keep the same \code{role}. Each composition (pair of partners' roles, such
-as female-male) is then checked separately.}
+\item{dyad}{Dyad ID column, with or without quotes. Required when \code{role} is
+supplied.}
+
+\item{role}{Role column, with or without quotes, such as gender. \code{NULL}
+(default) pools all observations. Otherwise, each composition (pair of
+partners' roles, such as female-male) is checked separately. Each member
+must keep the same role.}
+
+\item{member}{Person ID column, with or without quotes. Required with \code{role}
+when dyads have repeated observations.}
 
 \item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
 If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
@@ -37,48 +41,63 @@ and \code{FALSE} draws without pausing. File devices never pause.}
 composition, with one column per role or a pooled column. If \code{FALSE}, draw
 each check and role separately.}
 
-\item{data}{The unchanged data used to fit the model. Supply it when required
-columns are absent from the model frame, or to identify compositions using
-partners whose responses were excluded during fitting.}
+\item{data}{The unchanged data used to fit the model. Supply it when the
+columns you name (such as \code{role}) are not in the model formulas. Also supply
+it when rows were excluded during fitting (e.g., for missing values).
+Otherwise, a person whose partner's rows were excluded has an unknown
+composition and is omitted.}
 }
 \value{
 Invisibly returns a \code{dyadMLM_outcome_check} list with role-specific
-summary matrices and outcome distributions in \code{compositions}. Matrix columns
-are observed data followed by all simulated datasets. Save it with
-\code{plot = FALSE} and draw it later with \code{plot(result)}, which also takes \code{ask}
-and \code{panels}.
+summary matrices and outcome distributions in \code{compositions}. Matrices have
+one column per dataset (observed first, then all simulated). Optionally,
+suppress plotting with \code{plot = FALSE} and draw the saved result later with
+\code{plot(result)}, which also takes \code{ask} and \code{panels}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Compare the observed outcome distribution and summaries (response SD, largest
-absolute deviation, number of zeros) with complete datasets from
-\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
+A model should reproduce the distribution of the observed outcomes. This
+check compares the observed outcome distribution and summaries (response SD,
+largest absolute deviation, number of zeros) with complete datasets from
+\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. This helps identify mismatches in the model's
+assumptions, such as the distribution family, dispersion, or zero inflation.
 For PIT residual patterns, also run \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
-To read the plots and follow up flags, see \code{\link[=plot.dyadMLM_outcome_check]{plot.dyadMLM_outcome_check()}}.
+For guidance on how to read the plots, see \code{\link[=plot.dyadMLM_outcome_check]{plot.dyadMLM_outcome_check()}}.
 }
 \section{Scope}{
 
 Complete simulated datasets keep the fitted partner and time dependence and
 any modeled differences in variability between roles. Unlike DHARMa's default
-(since version 0.5.0), simulations redraw all random effects: if held fixed,
-random effects that absorb all residual variation would reproduce the data
-almost exactly. Parameters stay fixed at their fitted values; parameter
-uncertainty is not included. These are descriptive checks, not significance tests, and
+(since version 0.5.0), simulations redraw all random effects. Dyadic models
+often fix the residual variance near zero (\code{dispformula = ~ 0}) and model the
+partners' residual variances and covariance as random effects. If held
+fixed, these random effects would reproduce the data almost exactly.
+Parameters stay fixed at their fitted values, so parameter uncertainty is not
+included. These are descriptive checks, not significance tests, and
 differ from DHARMa's plots and tests (see the
 \href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly}{distribution-checks article}).
 They do not directly assess serial correlation.
 
-The "Predicted outcome" axis sets random effects to zero (see
-\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}). Uses the families and fitted rows
-supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}; observations have equal weight. For
-cross-sectional data, check partner correlations with
+Predicted outcomes are mean predictions with random effects set to zero (see
+\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}). The checks use the same fitted rows and
+families as \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} and weight all observations equally.
+For cross-sectional data, check partner correlations with
 \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 
 \examples{
 \dontshow{if (requireNamespace("glmmTMB", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+example_data <- prepare_dyad_data(
+  dyads_cross, dyad = coupleID, member = personID,
+  model_types = "none", seed = 123
+)
+# Exchangeable dyads: the two random-effect blocks represent the partners'
+# residual variances and covariance.
 model <- glmmTMB::glmmTMB(
-  closeness ~ gender + (1 | coupleID), data = dyads_cross
+  closeness ~ gender + provided_support +
+    us(1 | coupleID) + us(0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~ 0,
+  data = example_data
 )
 # Use at least 1,000 simulations when checking a model.
 simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)

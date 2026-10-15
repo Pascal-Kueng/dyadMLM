@@ -1,55 +1,66 @@
 #' Check residual distributions and patterns
 #'
 #' `r lifecycle::badge("experimental")`
-#' Check where each observed outcome falls among its simulated values (PIT
-#' residuals), using complete datasets from [simulate_dyad_responses()].
+#' A model should reproduce how responses are distributed around its
+#' predictions. This check finds where each observed outcome falls among its
+#' simulated values (PIT residuals), using complete datasets from
+#' [simulate_dyad_responses()]. This helps identify mismatches in the model's
+#' assumptions, such as the distribution family, dispersion, or predictor
+#' effects.
 #' For checks on the outcome scale, also run [check_dyad_outcomes()].
-#' To read the plots and follow up flags, see [plot.dyadMLM_residual_check()].
+#' For guidance on how to read the plots, see [plot.dyadMLM_residual_check()].
 #'
-#' @param simulations An object from [simulate_dyad_responses()]. At least 200
-#'   datasets are required; 1,000 or more are recommended.
-#' @param predictors Optional quoted column names, e.g. `c("age", "stress")`, looked up
-#'   in the model frame or `data`. Pass predictors the model omits or may
-#'   misspecify, especially the partner's. `NULL` (default) omits additional
-#'   predictor pages. Missing or infinite values are omitted only from that
-#'   predictor's plots.
+#' @param simulations An object from [simulate_dyad_responses()] with at least
+#'   200 datasets (1,000 or more recommended).
+#' @param predictors Optional quoted column names, e.g. `c("age", "stress")`.
+#'   Each adds a page of PIT quartiles across that column, to show effects the
+#'   model omits or may misspecify, especially partner effects. Missing or
+#'   infinite values are left out of that page only. `NULL` (default) adds no
+#'   predictor pages.
 #' @param seed Seed for randomized PIT residuals. The caller's random-number
 #'   state is restored afterwards. With `NULL`, use and advance the caller's RNG.
 #' @inheritParams check_partner_dependence
 #' @param panels If `TRUE` (default), arrange checks in figures by
 #'   composition, with one column per role or a pooled column. If `FALSE`, draw
 #'   each check and role separately.
-#' @param dyad,role,member Column names, with or without quotes, identifying
-#'   dyads, roles, and members within dyads. Looked up in the fitted model frame
-#'   or `data`. With `role = NULL`, all observations are pooled. Otherwise supply
-#'   `dyad`; also supply `member` for repeated observations, where each member
-#'   must keep the same `role`. Each composition (pair of partners' roles, such
-#'   as female-male) is then checked separately.
-#' @param data The unchanged data used to fit the model. Supply it when required
-#'   columns are absent from the model frame, or to identify compositions using
-#'   partners whose responses were excluded during fitting.
+#' @param dyad Dyad ID column, with or without quotes. Required when `role` is
+#'   supplied.
+#' @param role Role column, with or without quotes, such as gender. `NULL`
+#'   (default) pools all observations. Otherwise, each composition (pair of
+#'   partners' roles, such as female-male) is checked separately. Each member
+#'   must keep the same role.
+#' @param member Person ID column, with or without quotes. Required with `role`
+#'   when dyads have repeated observations.
+#' @param data The unchanged data used to fit the model. Supply it when the
+#'   columns you name (such as `role`) are not in the model formulas. Also supply
+#'   it when rows were excluded during fitting (e.g., for missing values).
+#'   Otherwise, a person whose partner's rows were excluded has an unknown
+#'   composition and is omitted.
 #'
 #' @return Invisibly returns a `dyadMLM_residual_check` list with the `pit` matrix
-#'   (after any centring) and calculated summaries in `compositions`. PIT rows
-#'   are fitted observations; columns are observed data followed by all
-#'   simulated datasets. Save it with `plot = FALSE` and draw it later with
-#'   `plot(result)`, which also takes `ask` and `panels`.
+#'   (after any centring) and calculated summaries in `compositions`. `pit` has
+#'   one row per fitted observation and one column per dataset (observed first,
+#'   then all simulated). Optionally, suppress plotting with `plot = FALSE` and
+#'   draw the saved result later with `plot(result)`, which also takes `ask` and
+#'   `panels`.
 #'
 #' @section Scope:
 #' Complete simulated datasets keep the fitted partner and time dependence and
 #' any modeled differences in variability between roles. Unlike DHARMa's default
-#' (since version 0.5.0), simulations redraw all random effects: if held fixed,
-#' random effects that absorb all residual variation would reproduce the data
-#' almost exactly. Parameters stay fixed at their fitted values; parameter
-#' uncertainty is not included. These are descriptive checks, not significance tests, and
+#' (since version 0.5.0), simulations redraw all random effects. Dyadic models
+#' often fix the residual variance near zero (`dispformula = ~ 0`) and model the
+#' partners' residual variances and covariance as random effects. If held
+#' fixed, these random effects would reproduce the data almost exactly.
+#' Parameters stay fixed at their fitted values, so parameter uncertainty is not
+#' included. These are descriptive checks, not significance tests, and
 #' differ from DHARMa's plots and tests (see the
 #' [distribution-checks article](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly)).
 #' They do not directly assess serial correlation.
 #'
-#' The "Predicted outcome" axis sets random effects to zero (see
-#' [simulate_dyad_responses()]). Uses the families and fitted rows
-#' supported by [simulate_dyad_responses()]; observations have equal weight. For
-#' cross-sectional data, check partner correlations with
+#' Predicted outcomes are mean predictions with random effects set to zero (see
+#' [simulate_dyad_responses()]). The checks use the same fitted rows and
+#' families as [simulate_dyad_responses()] and weight all observations equally.
+#' For cross-sectional data, check partner correlations with
 #' [check_partner_dependence()].
 #'
 #' @section Method and credit:
@@ -63,7 +74,7 @@
 #' where `U` is uniform between 0 and 1.
 #'
 #' When the model freely estimates an overall location (an intercept or separate
-#' role means; not ordinal models), PIT is centred automatically: each dataset's
+#' role means) and is not ordinal, PIT is centred automatically: each dataset's
 #' PIT is transformed to normal scores, centred on its median across all fitted
 #' rows, and transformed back. Panels then show residuals relative to this
 #' overall location, so QQ and mean PIT distance can show less of an overall
@@ -87,8 +98,17 @@
 #'
 #' @seealso [check_dyad_outcomes()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
+#' example_data <- prepare_dyad_data(
+#'   dyads_cross, dyad = coupleID, member = personID,
+#'   model_types = "none", seed = 123
+#' )
+#' # Exchangeable dyads: the two random-effect blocks represent the partners'
+#' # residual variances and covariance.
 #' model <- glmmTMB::glmmTMB(
-#'   closeness ~ gender + provided_support + (1 | coupleID), data = dyads_cross
+#'   closeness ~ gender + provided_support +
+#'     us(1 | coupleID) + us(0 + .member_contrast_arbitrary | coupleID),
+#'   dispformula = ~ 0,
+#'   data = example_data
 #' )
 #' # Use at least 1,000 simulations when checking a model.
 #' simulations <- simulate_dyad_responses(model, nsim = 200, seed = 123)
@@ -260,8 +280,8 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #'
 #' Predicted outcomes and numeric predictors with more than eight distinct values
 #' are grouped into up to eight bins per role, with at least about 20
-#' observations per bin; with four or more bins, quartiles are smoothed across
-#' neighboring bins. These are full-model residuals, not partial effects; bins
+#' observations per bin. With four or more bins, quartiles are smoothed across
+#' neighboring bins. These are full-model residuals, not partial effects. Bins
 #' and separate predictors can hide local patterns and interactions.
 #'
 #'
@@ -286,14 +306,14 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #' [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
 #' reports how often correct and mismatched models were flagged.
 #'
-#' With about 40 dyads, most mismatches studied were hard to detect; the absence
-#' of flags does not show a good fit. Panels suggest possible problems, not their
-#' cause. Neither a flag nor its absence shows whether estimates or standard
-#' errors are wrong: fit the model the pattern suggests and compare the
+#' With about 40 dyads, most mismatches studied were hard to detect, so the
+#' absence of flags does not show a good fit. Panels suggest possible problems,
+#' not their cause. Neither a flag nor its absence shows whether estimates or
+#' standard errors are wrong: fit the model the pattern suggests and compare the
 #' estimates and standard errors you report. Mismatches showed mainly in these
 #' panels of both checks:
 #' - Poisson fitted to overdispersed counts: mean PIT distance, number of zeros, QQ.
-#' - Extra zeros: QQ and PIT quartiles; the number of zeros less often.
+#' - Extra zeros: QQ and PIT quartiles (the number of zeros less often).
 #' - Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
 #' - Different role SDs: response SD and mean PIT distance, by role.
 #' - Spread rising with a predictor: largest absolute deviation, mean PIT distance, QQ.

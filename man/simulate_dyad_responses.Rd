@@ -56,8 +56,7 @@ Supports unweighted \code{glmmTMB} models with the following families:
 \item \code{glmmTMB::lognormal()}
 \item \code{glmmTMB::skewnormal()}
 \item \code{glmmTMB::t_family()} with more than two degrees of freedom
-\item \code{glmmTMB::ordinal()} (currently only available in the development version
-of \code{glmmTMB})
+\item \code{glmmTMB::ordinal()} (glmmTMB 1.1.15.2 or later)
 }
 
 Smooth terms (\code{s()}) are not supported: simulations would draw new curves.
@@ -85,10 +84,10 @@ and simulated responses must be finite.
 
 \section{Technical details}{
 
-Each simulation draws new random effects and then new responses from the
-fitted model. Random effects within each block are drawn together using
-their fitted variances and correlations. This also applies to random effects
-in the zero-inflation and dispersion models, if present.
+Each simulation draws new random effects, if the model has any, and then new
+responses from the fitted model. Random effects within each block are drawn
+together using their fitted variances and correlations. This also applies to
+random effects in the zero-inflation and dispersion models, if present.
 
 Fitted parameters and predictors, including any lagged responses, stay fixed.
 The model is not refitted, and uncertainty in parameter estimates is not

@@ -2,10 +2,8 @@ distribution_family_labels <- c(gaussian = "Gaussian", nbinom2 = "Negative binom
 distribution_scenario_order <- c("correct", "mean_small", "mean_large", "variance_small",
   "variance_large", "dispersion_small", "dispersion_large", "zeros_small", "zeros_large")
 distribution_panel_labels <- c(
-  qq = "PIT QQ envelope", histogram = "PIT histogram envelope",
-  outliers = "Outlier count", mean_distance = "Mean PIT distance",
+  qq = "PIT QQ envelope", mean_distance = "Mean PIT distance",
   predicted_quantiles = "PIT quartiles vs prediction",
-  predicted_distance = "PIT distance vs prediction",
   response_sd = "Response SD", maximum_deviation = "Largest deviation",
   zeros = "Number of zeros"
 )

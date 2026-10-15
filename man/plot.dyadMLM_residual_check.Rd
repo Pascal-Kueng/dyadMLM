@@ -44,8 +44,8 @@ studied by Robins et al. (2000) and in our simulations.
 
 Predicted outcomes and numeric predictors with more than eight distinct values
 are grouped into up to eight bins per role, with at least about 20
-observations per bin; with four or more bins, quartiles are smoothed across
-neighboring bins. These are full-model residuals, not partial effects; bins
+observations per bin. With four or more bins, quartiles are smoothed across
+neighboring bins. These are full-model residuals, not partial effects. Bins
 and separate predictors can hide local patterns and interactions.
 }
 
@@ -73,15 +73,15 @@ for a consistent pattern, not any single flag. The
 \href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html}{simulation study}
 reports how often correct and mismatched models were flagged.
 
-With about 40 dyads, most mismatches studied were hard to detect; the absence
-of flags does not show a good fit. Panels suggest possible problems, not their
-cause. Neither a flag nor its absence shows whether estimates or standard
-errors are wrong: fit the model the pattern suggests and compare the
+With about 40 dyads, most mismatches studied were hard to detect, so the
+absence of flags does not show a good fit. Panels suggest possible problems,
+not their cause. Neither a flag nor its absence shows whether estimates or
+standard errors are wrong: fit the model the pattern suggests and compare the
 estimates and standard errors you report. Mismatches showed mainly in these
 panels of both checks:
 \itemize{
 \item Poisson fitted to overdispersed counts: mean PIT distance, number of zeros, QQ.
-\item Extra zeros: QQ and PIT quartiles; the number of zeros less often.
+\item Extra zeros: QQ and PIT quartiles (the number of zeros less often).
 \item Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
 \item Different role SDs: response SD and mean PIT distance, by role.
 \item Spread rising with a predictor: largest absolute deviation, mean PIT distance, QQ.

@@ -18,21 +18,25 @@ check_dyad_residuals(
 )
 }
 \arguments{
-\item{simulations}{An object from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. At least 200
-datasets are required; 1,000 or more are recommended.}
+\item{simulations}{An object from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} with at least
+200 datasets (1,000 or more recommended).}
 
-\item{dyad, role, member}{Column names, with or without quotes, identifying
-dyads, roles, and members within dyads. Looked up in the fitted model frame
-or \code{data}. With \code{role = NULL}, all observations are pooled. Otherwise supply
-\code{dyad}; also supply \code{member} for repeated observations, where each member
-must keep the same \code{role}. Each composition (pair of partners' roles, such
-as female-male) is then checked separately.}
+\item{dyad}{Dyad ID column, with or without quotes. Required when \code{role} is
+supplied.}
 
-\item{predictors}{Optional quoted column names, e.g. \code{c("age", "stress")}, looked up
-in the model frame or \code{data}. Pass predictors the model omits or may
-misspecify, especially the partner's. \code{NULL} (default) omits additional
-predictor pages. Missing or infinite values are omitted only from that
-predictor's plots.}
+\item{role}{Role column, with or without quotes, such as gender. \code{NULL}
+(default) pools all observations. Otherwise, each composition (pair of
+partners' roles, such as female-male) is checked separately. Each member
+must keep the same role.}
+
+\item{member}{Person ID column, with or without quotes. Required with \code{role}
+when dyads have repeated observations.}
+
+\item{predictors}{Optional quoted column names, e.g. \code{c("age", "stress")}.
+Each adds a page of PIT quartiles across that column, to show effects the
+model omits or may misspecify, especially partner effects. Missing or
+infinite values are left out of that page only. \code{NULL} (default) adds no
+predictor pages.}
 
 \item{seed}{Seed for randomized PIT residuals. The caller's random-number
 state is restored afterwards. With \code{NULL}, use and advance the caller's RNG.}
@@ -48,40 +52,49 @@ and \code{FALSE} draws without pausing. File devices never pause.}
 composition, with one column per role or a pooled column. If \code{FALSE}, draw
 each check and role separately.}
 
-\item{data}{The unchanged data used to fit the model. Supply it when required
-columns are absent from the model frame, or to identify compositions using
-partners whose responses were excluded during fitting.}
+\item{data}{The unchanged data used to fit the model. Supply it when the
+columns you name (such as \code{role}) are not in the model formulas. Also supply
+it when rows were excluded during fitting (e.g., for missing values).
+Otherwise, a person whose partner's rows were excluded has an unknown
+composition and is omitted.}
 }
 \value{
 Invisibly returns a \code{dyadMLM_residual_check} list with the \code{pit} matrix
-(after any centring) and calculated summaries in \code{compositions}. PIT rows
-are fitted observations; columns are observed data followed by all
-simulated datasets. Save it with \code{plot = FALSE} and draw it later with
-\code{plot(result)}, which also takes \code{ask} and \code{panels}.
+(after any centring) and calculated summaries in \code{compositions}. \code{pit} has
+one row per fitted observation and one column per dataset (observed first,
+then all simulated). Optionally, suppress plotting with \code{plot = FALSE} and
+draw the saved result later with \code{plot(result)}, which also takes \code{ask} and
+\code{panels}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Check where each observed outcome falls among its simulated values (PIT
-residuals), using complete datasets from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
+A model should reproduce how responses are distributed around its
+predictions. This check finds where each observed outcome falls among its
+simulated values (PIT residuals), using complete datasets from
+\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. This helps identify mismatches in the model's
+assumptions, such as the distribution family, dispersion, or predictor
+effects.
 For checks on the outcome scale, also run \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}.
-To read the plots and follow up flags, see \code{\link[=plot.dyadMLM_residual_check]{plot.dyadMLM_residual_check()}}.
+For guidance on how to read the plots, see \code{\link[=plot.dyadMLM_residual_check]{plot.dyadMLM_residual_check()}}.
 }
 \section{Scope}{
 
 Complete simulated datasets keep the fitted partner and time dependence and
 any modeled differences in variability between roles. Unlike DHARMa's default
-(since version 0.5.0), simulations redraw all random effects: if held fixed,
-random effects that absorb all residual variation would reproduce the data
-almost exactly. Parameters stay fixed at their fitted values; parameter
-uncertainty is not included. These are descriptive checks, not significance tests, and
+(since version 0.5.0), simulations redraw all random effects. Dyadic models
+often fix the residual variance near zero (\code{dispformula = ~ 0}) and model the
+partners' residual variances and covariance as random effects. If held
+fixed, these random effects would reproduce the data almost exactly.
+Parameters stay fixed at their fitted values, so parameter uncertainty is not
+included. These are descriptive checks, not significance tests, and
 differ from DHARMa's plots and tests (see the
 \href{https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly}{distribution-checks article}).
 They do not directly assess serial correlation.
 
-The "Predicted outcome" axis sets random effects to zero (see
-\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}). Uses the families and fitted rows
-supported by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}; observations have equal weight. For
-cross-sectional data, check partner correlations with
+Predicted outcomes are mean predictions with random effects set to zero (see
+\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}). The checks use the same fitted rows and
+families as \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} and weight all observations equally.
+For cross-sectional data, check partner correlations with
 \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 
@@ -97,7 +110,7 @@ breaking ties randomly. For rank \code{r} among \code{m} datasets, use \code{(r 
 where \code{U} is uniform between 0 and 1.
 
 When the model freely estimates an overall location (an intercept or separate
-role means; not ordinal models), PIT is centred automatically: each dataset's
+role means) and is not ordinal, PIT is centred automatically: each dataset's
 PIT is transformed to normal scores, centred on its median across all fitted
 rows, and transformed back. Panels then show residuals relative to this
 overall location, so QQ and mean PIT distance can show less of an overall
@@ -108,8 +121,17 @@ Global envelopes use extreme-rank-length ordering (Myllymäki et al., 2017).
 
 \examples{
 \dontshow{if (requireNamespace("glmmTMB", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+example_data <- prepare_dyad_data(
+  dyads_cross, dyad = coupleID, member = personID,
+  model_types = "none", seed = 123
+)
+# Exchangeable dyads: the two random-effect blocks represent the partners'
+# residual variances and covariance.
 model <- glmmTMB::glmmTMB(
-  closeness ~ gender + provided_support + (1 | coupleID), data = dyads_cross
+  closeness ~ gender + provided_support +
+    us(1 | coupleID) + us(0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~ 0,
+  data = example_data
 )
 # Use at least 1,000 simulations when checking a model.
 simulations <- simulate_dyad_responses(model, nsim = 200, seed = 123)
