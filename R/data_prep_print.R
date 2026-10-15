@@ -155,10 +155,15 @@ print_partner_data <- function(x, meta, current_dyad_compositions) {
     # Each member has at most one row per occasion (checked during
     # validation), so an occasion with only one row has only one member
     # observed. `duplicated()` finds these rows quickly, also in large data.
+    # People observed alone are reported above, so only dyads are counted.
+    alone <- current_dyad_compositions$composition[
+      current_dyad_compositions$dyad_type %in% dyad_alone_types
+    ]
+    dyads <- if (length(alone) > 0L) x[!x[[dyad_composition_col]] %in% alone, ] else x
     rows <- tibble::tibble(
-      occasion = paste(x[[meta$dyad]], x[[meta$time]], sep = "\r"),
+      occasion = paste(dyads[[meta$dyad]], dyads[[meta$time]], sep = "\r"),
       # Both members share one status per occasion.
-      has_partner = if (has_status_column) x$.partner_exists == 1 else NA
+      has_partner = if (has_status_column) dyads$.partner_exists == 1 else NA
     )
     rows$is_only_row <- !(duplicated(rows$occasion) |
       duplicated(rows$occasion, fromLast = TRUE))

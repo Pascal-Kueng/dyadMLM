@@ -426,11 +426,11 @@ test_that("dyadMLM data print reports people observed alone and two-part coding"
   expect_printed(printed, "# Rows: 10 | Dyads: 2 | People observed alone: 1 |")
   expect_match(printed, "# singleton +singleton +1 person", all = FALSE)
   expect_printed(printed, "People observed alone: 1 without a partner.")
-  # Without a partner: dyad 1 at wave 3 and dyad 3 at waves 1-2. With a partner
-  # who has missing values: dyad 1 at wave 2.
+  # Without a partner: dyad 1 at wave 3. With a partner who has missing values:
+  # dyad 1 at wave 2. The person observed alone (dyad 3) is not counted.
   expect_printed(printed, paste0(
-    "Dyad-occasions with a row for only one member: 4 of 7 ",
-    "(3 without a partner, 1 with a partner who has missing values)."
+    "Dyad-occasions with a row for only one member: 2 of 5 ",
+    "(1 without a partner, 1 with a partner who has missing values)."
   ))
   expect_printed(
     printed,
@@ -883,7 +883,7 @@ test_that("partner data print relies on dyadMLM's own status columns", {
   expect_no_match(printed, "Rows with at least", fixed = TRUE)
   expect_printed(printed, "Two-part coding: Partner predictors are 0")
 
-  # A constant FALSE status does not claim that partners exist.
+  # People observed alone are not counted as dyad-occasions.
   alone <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
     person_id = c(1, 1, 2, 2),
@@ -891,7 +891,13 @@ test_that("partner data print relies on dyadMLM's own status columns", {
     x = 1:4
   )
   printed <- capture_wide_print(prepare(alone, predictors = x, partner_exists = FALSE))
-  expect_printed(printed, "only one member: 4 of 4.")
+  expect_no_match(printed, "Dyad-occasions", fixed = TRUE)
+
+  # A constant FALSE status does not claim that partners exist.
+  never_together <- separated[-4, ]
+  never_together$together <- FALSE
+  printed <- capture_wide_print(prepare(never_together, predictors = x, partner_exists = together))
+  expect_printed(printed, "Dyad-occasions with a row for only one member: 1 of 4.")
   expect_no_match(printed, "assumed to exist", fixed = TRUE)
 })
 
