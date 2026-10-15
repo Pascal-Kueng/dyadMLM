@@ -18,7 +18,8 @@
 #'   infinite values are left out of that page only. `NULL` (default) adds no
 #'   predictor pages.
 #' @param seed Seed for randomized PIT residuals. The caller's random-number
-#'   state is restored afterwards. With `NULL`, use and advance the caller's RNG.
+#'   state is restored afterwards. With `NULL`, use and advance the caller's
+#'   random-number state.
 #' @inheritParams check_partner_dependence
 #' @param panels If `TRUE` (default), arrange checks in figures by
 #'   composition, with one column per role or a pooled column. If `FALSE`, draw
@@ -77,8 +78,8 @@
 #' role means) and is not ordinal, PIT is centred automatically: each dataset's
 #' PIT is transformed to normal scores, centred on its median across all fitted
 #' rows, and transformed back. Panels then show residuals relative to this
-#' overall location, so QQ and mean PIT distance can show less of an overall
-#' shift. This offsets part of the conservativeness caused by fitting.
+#' overall location, so all panels can show less of an overall shift. Centring
+#' also partly offsets how fitting makes departures look smaller.
 #'
 #' Global envelopes use extreme-rank-length ordering (Myllymäki et al., 2017).
 #'
@@ -288,9 +289,10 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #' @section Views and compositions:
 #' Start with everyone pooled (`role = NULL`), then also inspect meaningful
 #' roles, such as gender, even when the model treats partners as exchangeable:
-#' role-specific problems show only there. Use `predictors` to examine other
-#' measured characteristics. For separate QQ plots and summaries by a
-#' person-level categorical characteristic, use that variable as `role`.
+#' role-specific problems show only there. Use `predictors` of
+#' [check_dyad_residuals()] to examine other measured characteristics. For
+#' separate plots and summaries by a person-level categorical characteristic,
+#' use that variable as `role`.
 #'
 #' Each composition gets one pooled column for same-role partners, or separate
 #' columns for distinct roles. Supplying roles does not change the model's
@@ -309,14 +311,15 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #' With about 40 dyads, most mismatches studied were hard to detect, so the
 #' absence of flags does not show a good fit. Panels suggest possible problems,
 #' not their cause. Neither a flag nor its absence shows whether estimates or
-#' standard errors are wrong: fit the model the pattern suggests and compare the
-#' estimates and standard errors you report. Mismatches showed mainly in these
-#' panels of both checks:
+#' standard errors are wrong. After a flag, fit the model the pattern suggests
+#' and compare the estimates and standard errors you report. Mismatches showed
+#' mainly in these panels of both checks:
 #' - Poisson fitted to overdispersed counts: mean PIT distance, number of zeros, QQ.
 #' - Extra zeros: QQ and PIT quartiles (the number of zeros less often).
 #' - Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
 #' - Different role SDs: response SD and mean PIT distance, by role.
-#' - Spread rising with a predictor: largest absolute deviation, mean PIT distance, QQ.
+#' - Spread rising with a predictor: largest absolute deviation, mean PIT
+#'   distance, QQ, and PIT quartiles across that predictor.
 #' - Omitted partner effect: PIT quartiles across the partner's predictor
 #'   (supply it in `predictors` of [check_dyad_residuals()]).
 #'
@@ -385,7 +388,7 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
         plot_check_caption("The red curve should roughly follow the diagonal.\nAbove the diagonal: outcomes higher than simulated; below: lower.\nDepartures outside the blue global envelope suggest a distribution mismatch.")
       } else {
         plot_check_statistic(statistics$mean_distance, title, xlab = "Mean distance from PIT 0.5",
-          sub = "Mean of 2 * |PIT - 0.5|; red should usually lie between the dashed limits.\nBeyond right: more extreme residuals; left: more central residuals.\nLocation and spread errors can both affect this distance.")
+          sub = "Mean of 2 * |PIT - 0.5|. Red should usually lie between the dashed limits.\nBeyond right: more extreme residuals; left: more central residuals.\nLocation and spread errors can both affect this distance.")
       }
     }
     plot_check_role_panels(composition, c("qq", "mean_distance"),

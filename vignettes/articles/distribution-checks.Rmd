@@ -128,8 +128,8 @@ The study uses `r unique(conditions$repetitions)` datasets per condition and
   has a freely estimated overall location (not for ordinal models). It raised the residual check's flag rate by
   `r paste(centring_change(TRUE), collapse = "–")` percentage points under
   correct models and by up to `r centring_change(FALSE)[2]` under mismatches,
-  mainly omitted role means and extra zeros. Residuals then lose their overall
-  median shift, so single panels can flag less often. With NB2 size 1 fitted as
+  mainly omitted role means and extra zeros. But centred residuals lose any
+  overall median shift, so single panels can flag less often. With NB2 size 1 fitted as
   Poisson, the residual check flagged up to
   `r sprintf("%.0f", -100 * min(centring$centred_minus_uncentred))` percentage
   points less often (see [Effect of median centring](#effect-of-median-centring)).
@@ -279,6 +279,9 @@ correct model. With all observations pooled, this is `r correct_range("pooled")`
 <details>
 <summary>Any flags under correct models</summary>
 
+The table shows the main conditions. Correct ordinal, dyad SD 1.2, and
+six-occasion models are under
+[Additional designs and exclusions](#additional-designs-and-exclusions).
 The table counts any numerical flag within each check, or across both checks.
 The latter is a union within each dataset, not a sum of the two rates. Role-based
 rates count either role, and their additional comparisons can increase the rate.
@@ -414,7 +417,7 @@ means the estimates are biased. **Flagged** is the percentage of datasets with a
 flag in either check and either role, without and with actor and partner
 predictor pages.
 
-Three severe mismatches were added to distort inference. Omitting the partner
+Three severe mismatches distort inference. Omitting the partner
 effect biases the actor effect. A residual SD that rises with the actor predictor,
 exp(actor − 1), makes the actor SE too small, and Poisson fits to NB2 outcomes
 with size 1 make both SEs too small. These settings use 100 / 400 dyads and dyad
@@ -448,6 +451,13 @@ consequence_table <- function(selected) {
 consequence_table(conditions$condition[conditions$n_times == 1 & conditions$dyad_sd > .6])
 ```
 
+At 400 dyads in either role, a residual SD rising with the actor predictor
+flagged the largest absolute deviation in
+`r flag_rate("heteroscedastic", "maximum_deviation")` of datasets, mean PIT
+distance in `r flag_rate("heteroscedastic", "mean_distance")`, the PIT quartiles
+across the actor's predictor in `r flag_rate("heteroscedastic", "actor_quantiles")`,
+and the QQ envelope in `r flag_rate("heteroscedastic", "qq")`.
+
 The main mismatches, at 40 / 100 / 400 dyads:
 
 ```{r consequences-main}
@@ -471,8 +481,8 @@ At 400 dyads, the largest drop in a single panel's flag rate after centring is
 "`r distribution_panel_labels[[loss$statistic]]`" panel under
 "`r loss$scenario_label`" (`r ifelse(loss$view == "pooled", "pooled", "either role")`).
 There, the residual check's any flag rate is
-`r distribution_percent(loss_any[["fitted-uncentred"]])` without centring and
-`r distribution_percent(loss_any[["fitted-centred"]])` with it.
+`r percent(loss_any[["fitted-uncentred"]])` without centring and
+`r percent(loss_any[["fitted-centred"]])` with it.
 
 ## Additional designs and exclusions
 

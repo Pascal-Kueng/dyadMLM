@@ -53,9 +53,10 @@ and separate predictors can hide local patterns and interactions.
 
 Start with everyone pooled (\code{role = NULL}), then also inspect meaningful
 roles, such as gender, even when the model treats partners as exchangeable:
-role-specific problems show only there. Use \code{predictors} to examine other
-measured characteristics. For separate QQ plots and summaries by a
-person-level categorical characteristic, use that variable as \code{role}.
+role-specific problems show only there. Use \code{predictors} of
+\code{\link[=check_dyad_residuals]{check_dyad_residuals()}} to examine other measured characteristics. For
+separate plots and summaries by a person-level categorical characteristic,
+use that variable as \code{role}.
 
 Each composition gets one pooled column for same-role partners, or separate
 columns for distinct roles. Supplying roles does not change the model's
@@ -76,15 +77,16 @@ reports how often correct and mismatched models were flagged.
 With about 40 dyads, most mismatches studied were hard to detect, so the
 absence of flags does not show a good fit. Panels suggest possible problems,
 not their cause. Neither a flag nor its absence shows whether estimates or
-standard errors are wrong: fit the model the pattern suggests and compare the
-estimates and standard errors you report. Mismatches showed mainly in these
-panels of both checks:
+standard errors are wrong. After a flag, fit the model the pattern suggests
+and compare the estimates and standard errors you report. Mismatches showed
+mainly in these panels of both checks:
 \itemize{
 \item Poisson fitted to overdispersed counts: mean PIT distance, number of zeros, QQ.
 \item Extra zeros: QQ and PIT quartiles (the number of zeros less often).
 \item Omitted role means: QQ and PIT quartiles across predicted outcomes, by role.
 \item Different role SDs: response SD and mean PIT distance, by role.
-\item Spread rising with a predictor: largest absolute deviation, mean PIT distance, QQ.
+\item Spread rising with a predictor: largest absolute deviation, mean PIT
+distance, QQ, and PIT quartiles across that predictor.
 \item Omitted partner effect: PIT quartiles across the partner's predictor
 (supply it in \code{predictors} of \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}).
 }

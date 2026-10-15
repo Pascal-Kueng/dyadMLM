@@ -84,8 +84,9 @@
 #' one minus the zero-component probability (Brooks et al., 2017, Appendix A;
 #' \doi{10.32614/RJ-2017-066}).
 #'
-#' Partner-dependence checks (by default) and outcome-variability summaries
-#' subtract these same predictions from observed and simulated responses.
+#' Partner-dependence checks (by default) and the response SD and largest
+#' absolute deviation of [check_dyad_outcomes()] subtract these same predictions
+#' from observed and simulated responses.
 #' Both random effects and observation-level noise still
 #' contribute to response variance. With nonlinear links, setting random effects
 #' to zero generally differs from averaging predictions over them.

@@ -2,11 +2,12 @@
 
 * Changed the package license from MIT to GPL-3.
 
-* Added experimental `check_dyad_residuals()` for simulated PIT residuals and
-  `check_dyad_outcomes()` for response distributions, SDs, extremes, and zero
-  counts. Both use the output from `simulate_dyad_responses()`. PIT follows
-  Florian Hartig's DHARMa approach and Dunn and Smyth's (1996) randomized
-  quantile residuals, but its simulations and reference distributions account
+* Added experimental `check_dyad_residuals()` for simulated probability
+  integral transform (PIT) residuals and `check_dyad_outcomes()` for response
+  distributions, SDs, extremes, and zero counts. Both use the output from
+  `simulate_dyad_responses()`. The PIT residuals follow Florian Hartig's
+  DHARMa approach and Dunn and Smyth's (1996) randomized quantile residuals,
+  but the simulations and reference distributions account
   for the dyadic and temporal dependence the model includes. DHARMa is not
   required. A
   [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)

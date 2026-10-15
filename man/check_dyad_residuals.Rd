@@ -39,7 +39,8 @@ infinite values are left out of that page only. \code{NULL} (default) adds no
 predictor pages.}
 
 \item{seed}{Seed for randomized PIT residuals. The caller's random-number
-state is restored afterwards. With \code{NULL}, use and advance the caller's RNG.}
+state is restored afterwards. With \code{NULL}, use and advance the caller's
+random-number state.}
 
 \item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
 If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
@@ -113,8 +114,8 @@ When the model freely estimates an overall location (an intercept or separate
 role means) and is not ordinal, PIT is centred automatically: each dataset's
 PIT is transformed to normal scores, centred on its median across all fitted
 rows, and transformed back. Panels then show residuals relative to this
-overall location, so QQ and mean PIT distance can show less of an overall
-shift. This offsets part of the conservativeness caused by fitting.
+overall location, so all panels can show less of an overall shift. Centring
+also partly offsets how fitting makes departures look smaller.
 
 Global envelopes use extreme-rank-length ordering (Myllymäki et al., 2017).
 }

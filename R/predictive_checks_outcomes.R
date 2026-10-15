@@ -2,9 +2,9 @@
 #'
 #' `r lifecycle::badge("experimental")`
 #' A model should reproduce the distribution of the observed outcomes. This
-#' check compares the observed outcome distribution and summaries (response SD,
-#' largest absolute deviation, number of zeros) with complete datasets from
-#' [simulate_dyad_responses()]. This helps identify mismatches in the model's
+#' check compares the observed outcome distribution and summaries (response SD
+#' after subtracting predictions, largest absolute deviation from prediction,
+#' number of zeros) with complete datasets from [simulate_dyad_responses()]. This helps identify mismatches in the model's
 #' assumptions, such as the distribution family, dispersion, or zero inflation.
 #' For PIT residual patterns, also run [check_dyad_residuals()].
 #' For guidance on how to read the plots, see [plot.dyadMLM_outcome_check()].
@@ -122,6 +122,8 @@ print.dyadMLM_outcome_check <- function(x, ...) print_check_overview(x, "outcome
 #' all defined categories, with separate 95% ranges per category, so one red
 #' point outside can occur by chance. Other outcomes show the proportion at or
 #' below each value (ECDF) for the observations and up to 30 simulated datasets.
+#' These simulated curves are not an envelope, so short stretches of the
+#' observed curve outside them can occur by chance.
 #'
 #' The remaining rows compare the response SD (standard deviation of outcome
 #' minus prediction), the largest absolute deviation from prediction, and, when
@@ -180,8 +182,8 @@ plot_outcome_distribution <- function(distribution, role) {
     graphics::segments(positions, values$bounds[1, ], positions, values$bounds[2, ],
                        col = check_colours$simulated, lwd = 3)
     graphics::points(positions, values$observed, col = check_colours$observed, pch = 16, cex = .65)
-    plot_check_caption(paste("Red points should usually lie within their blue 95% ranges;",
-      "with several categories, one outside can occur by chance.",
+    plot_check_caption(paste("Red points should usually lie within their blue 95% ranges.",
+      "With several categories, one outside can occur by chance.",
       "Above: more observations in that category; below: fewer.", sep = "\n"))
   } else {
     graphics::plot(distribution$limits, c(0, 1), type = "n", main = "Outcome ECDF\n(distribution shape)",

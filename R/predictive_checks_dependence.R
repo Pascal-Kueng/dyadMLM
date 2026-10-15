@@ -169,6 +169,7 @@
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
 #'   Methods, 10*(2), 139--158. \doi{10.1037/1082-989X.10.2.139}
 #'
+#' @seealso [check_dyad_residuals()], [check_dyad_outcomes()]
 #' @export
 check_partner_dependence <- function(
   simulations,

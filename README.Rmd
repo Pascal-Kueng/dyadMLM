@@ -117,7 +117,9 @@ for data requirements and examples.
 
 Predictive checks compare residual and outcome distributions, variability,
 and partner dependence with simulations from the fitted model. Follow the
-function links above for supported models and interpretation. Simulation studies
+function links above for interpretation, and see
+[`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.html)
+for supported models. Simulation studies
 show how often the partner check detects
 [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),

@@ -203,3 +203,6 @@ Woody, E., & Sadler, P. (2005). Structural equation models for
 interchangeable dyads: Being the same makes a difference. \emph{Psychological
 Methods, 10}(2), 139--158. \doi{10.1037/1082-989X.10.2.139}
 }
+\seealso{
+\code{\link[=check_dyad_residuals]{check_dyad_residuals()}}, \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}
+}

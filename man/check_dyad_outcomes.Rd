@@ -57,9 +57,9 @@ suppress plotting with \code{plot = FALSE} and draw the saved result later with
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 A model should reproduce the distribution of the observed outcomes. This
-check compares the observed outcome distribution and summaries (response SD,
-largest absolute deviation, number of zeros) with complete datasets from
-\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. This helps identify mismatches in the model's
+check compares the observed outcome distribution and summaries (response SD
+after subtracting predictions, largest absolute deviation from prediction,
+number of zeros) with complete datasets from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. This helps identify mismatches in the model's
 assumptions, such as the distribution family, dispersion, or zero inflation.
 For PIT residual patterns, also run \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
 For guidance on how to read the plots, see \code{\link[=plot.dyadMLM_outcome_check]{plot.dyadMLM_outcome_check()}}.
