@@ -122,9 +122,9 @@ The study uses `r unique(conditions$repetitions)` datasets per condition and
   flagged in only `r distribution_percent(detected(400, "dispersion_small"))`.
   After a flag, fit the model the pattern suggests and compare the estimates and
   SEs you report.
-- **Centring adds a few false alarms and helps detect some mismatches.** Median
-  centring, which moves each dataset's PIT residuals so that their median is 0.5,
-  is applied automatically when the model has a freely estimated overall location
+- **Centring adds a few false alarms, helps detect some mismatches, and makes
+  others harder to detect.** Median centring, which moves each dataset's PIT
+  residuals so that their median is 0.5, is applied automatically when the model has a freely estimated overall location
   (not for ordinal models). It raised the residual check's flag rate by
   `r paste(centring_change(TRUE), collapse = "–")` percentage points under
   correct models and by up to `r centring_change(FALSE)[2]` under mismatches,
