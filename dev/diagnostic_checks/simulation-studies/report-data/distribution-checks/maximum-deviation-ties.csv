@@ -1,0 +1,133 @@
+"condition","family","scenario","scenario_label","role_mean","sd_ratio","zero_probability","nb_size","fit_family","n_dyads","n_times","dyad_sd","repetitions","reference_draws","view","role","checked","tied","rate"
+1,"gaussian","correct","Correct model",0,1,0,3,"gaussian",40,1,0.6,500,1000,"pooled","Pooled",500,0,0
+1,"gaussian","correct","Correct model",0,1,0,3,"gaussian",40,1,0.6,500,1000,"roles","A",500,0,0
+1,"gaussian","correct","Correct model",0,1,0,3,"gaussian",40,1,0.6,500,1000,"roles","B",500,0,0
+10,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",40,1,0.6,500,1000,"pooled","Pooled",500,0,0
+10,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",40,1,0.6,500,1000,"roles","A",500,0,0
+10,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",40,1,0.6,500,1000,"roles","B",500,0,0
+11,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+11,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",100,1,0.6,500,1000,"roles","A",500,0,0
+11,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",100,1,0.6,500,1000,"roles","B",500,0,0
+12,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+12,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",400,1,0.6,500,1000,"roles","A",500,0,0
+12,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",400,1,0.6,500,1000,"roles","B",500,0,0
+13,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",40,1,0.6,500,1000,"pooled","Pooled",500,0,0
+13,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",40,1,0.6,500,1000,"roles","A",500,0,0
+13,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",40,1,0.6,500,1000,"roles","B",500,0,0
+14,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+14,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",100,1,0.6,500,1000,"roles","A",500,0,0
+14,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",100,1,0.6,500,1000,"roles","B",500,0,0
+15,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+15,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",400,1,0.6,500,1000,"roles","A",500,0,0
+15,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",400,1,0.6,500,1000,"roles","B",500,0,0
+16,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",40,1,0.6,500,1000,"pooled","Pooled",500,0,0
+16,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",40,1,0.6,500,1000,"roles","A",500,0,0
+16,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",40,1,0.6,500,1000,"roles","B",500,0,0
+17,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+17,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,0.6,500,1000,"roles","A",500,0,0
+17,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,0.6,500,1000,"roles","B",500,0,0
+18,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+18,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,0.6,500,1000,"roles","A",500,0,0
+18,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,0.6,500,1000,"roles","B",500,0,0
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",40,1,0.6,500,1000,"pooled","Pooled",500,0,0
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",40,1,0.6,500,1000,"roles","A",500,0,0
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",40,1,0.6,500,1000,"roles","B",500,0,0
+2,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+2,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,0.6,500,1000,"roles","A",500,0,0
+2,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,0.6,500,1000,"roles","B",500,0,0
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",100,1,0.6,500,1000,"roles","A",500,0,0
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",100,1,0.6,500,1000,"roles","B",500,0,0
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",400,1,0.6,500,1000,"roles","A",500,0,0
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",400,1,0.6,500,1000,"roles","B",500,0,0
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",40,1,0.6,500,1000,"pooled","Pooled",500,0,0
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",40,1,0.6,500,1000,"roles","A",500,0,0
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",40,1,0.6,500,1000,"roles","B",500,0,0
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",100,1,0.6,500,1000,"roles","A",500,0,0
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",100,1,0.6,500,1000,"roles","B",500,0,0
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",400,1,0.6,500,1000,"roles","A",500,0,0
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",400,1,0.6,500,1000,"roles","B",500,0,0
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",40,1,0.6,500,1000,"pooled","Pooled",500,0,0
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",40,1,0.6,500,1000,"roles","A",500,0,0
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",40,1,0.6,500,1000,"roles","B",500,0,0
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",100,1,0.6,500,1000,"roles","A",500,0,0
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",100,1,0.6,500,1000,"roles","B",500,0,0
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",400,1,0.6,500,1000,"roles","A",500,0,0
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",400,1,0.6,500,1000,"roles","B",500,0,0
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",40,1,0.6,500,1000,"pooled","Pooled",500,0,0
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",40,1,0.6,500,1000,"roles","A",500,0,0
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",40,1,0.6,500,1000,"roles","B",500,0,0
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",100,1,0.6,500,1000,"roles","A",500,0,0
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",100,1,0.6,500,1000,"roles","B",500,0,0
+3,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+3,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,0.6,500,1000,"roles","A",500,0,0
+3,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,0.6,500,1000,"roles","B",500,0,0
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",400,1,0.6,500,1000,"roles","A",500,0,0
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",400,1,0.6,500,1000,"roles","B",500,0,0
+31,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,1.2,500,1000,"pooled","Pooled",500,0,0
+31,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,1.2,500,1000,"roles","A",500,0,0
+31,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,1.2,500,1000,"roles","B",500,0,0
+32,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,1.2,500,1000,"pooled","Pooled",500,0,0
+32,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,1.2,500,1000,"roles","A",500,0,0
+32,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,1.2,500,1000,"roles","B",500,0,0
+33,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,1.2,500,1000,"pooled","Pooled",500,0,0
+33,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,1.2,500,1000,"roles","A",500,0,0
+33,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,1.2,500,1000,"roles","B",500,0,0
+34,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,1.2,500,1000,"pooled","Pooled",500,0,0
+34,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,1.2,500,1000,"roles","A",500,0,0
+34,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,1.2,500,1000,"roles","B",500,0,0
+35,"gaussian","omitted_partner","Omitted partner effect",0,1,0,3,"gaussian",100,1,1.2,500,1000,"pooled","Pooled",500,0,0
+35,"gaussian","omitted_partner","Omitted partner effect",0,1,0,3,"gaussian",100,1,1.2,500,1000,"roles","A",500,0,0
+35,"gaussian","omitted_partner","Omitted partner effect",0,1,0,3,"gaussian",100,1,1.2,500,1000,"roles","B",500,0,0
+36,"gaussian","omitted_partner","Omitted partner effect",0,1,0,3,"gaussian",400,1,1.2,500,1000,"pooled","Pooled",500,0,0
+36,"gaussian","omitted_partner","Omitted partner effect",0,1,0,3,"gaussian",400,1,1.2,500,1000,"roles","A",500,0,0
+36,"gaussian","omitted_partner","Omitted partner effect",0,1,0,3,"gaussian",400,1,1.2,500,1000,"roles","B",500,0,0
+37,"gaussian","heteroscedastic","Residual SD rises with actor predictor",0,1,0,3,"gaussian",100,1,1.2,500,1000,"pooled","Pooled",500,0,0
+37,"gaussian","heteroscedastic","Residual SD rises with actor predictor",0,1,0,3,"gaussian",100,1,1.2,500,1000,"roles","A",500,0,0
+37,"gaussian","heteroscedastic","Residual SD rises with actor predictor",0,1,0,3,"gaussian",100,1,1.2,500,1000,"roles","B",500,0,0
+38,"gaussian","heteroscedastic","Residual SD rises with actor predictor",0,1,0,3,"gaussian",400,1,1.2,500,1000,"pooled","Pooled",500,0,0
+38,"gaussian","heteroscedastic","Residual SD rises with actor predictor",0,1,0,3,"gaussian",400,1,1.2,500,1000,"roles","A",500,0,0
+38,"gaussian","heteroscedastic","Residual SD rises with actor predictor",0,1,0,3,"gaussian",400,1,1.2,500,1000,"roles","B",500,0,0
+39,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson",0,1,0,1,"poisson",100,1,1.2,500,1000,"pooled","Pooled",500,0,0
+39,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson",0,1,0,1,"poisson",100,1,1.2,500,1000,"roles","A",500,0,0
+39,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson",0,1,0,1,"poisson",100,1,1.2,500,1000,"roles","B",500,0,0
+4,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",40,1,0.6,500,1000,"pooled","Pooled",500,0,0
+4,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",40,1,0.6,500,1000,"roles","A",500,0,0
+4,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",40,1,0.6,500,1000,"roles","B",500,0,0
+40,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson",0,1,0,1,"poisson",400,1,1.2,500,1000,"pooled","Pooled",500,0,0
+40,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson",0,1,0,1,"poisson",400,1,1.2,500,1000,"roles","A",500,0,0
+40,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson",0,1,0,1,"poisson",400,1,1.2,500,1000,"roles","B",500,0,0
+41,"ordinal","correct","Correct model",0,1,0,3,"ordinal",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+41,"ordinal","correct","Correct model",0,1,0,3,"ordinal",100,1,0.6,500,1000,"roles","A",500,0,0
+41,"ordinal","correct","Correct model",0,1,0,3,"ordinal",100,1,0.6,500,1000,"roles","B",500,0,0
+42,"ordinal","correct","Correct model",0,1,0,3,"ordinal",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+42,"ordinal","correct","Correct model",0,1,0,3,"ordinal",400,1,0.6,500,1000,"roles","A",500,0,0
+42,"ordinal","correct","Correct model",0,1,0,3,"ordinal",400,1,0.6,500,1000,"roles","B",500,0,0
+43,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,6,0.6,500,1000,"pooled","Pooled",483,0,0
+43,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,6,0.6,500,1000,"roles","A",483,0,0
+43,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,6,0.6,500,1000,"roles","B",483,0,0
+44,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",100,6,0.6,500,1000,"pooled","Pooled",498,0,0
+44,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",100,6,0.6,500,1000,"roles","A",498,0,0
+44,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",100,6,0.6,500,1000,"roles","B",498,0,0
+5,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+5,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",100,1,0.6,500,1000,"roles","A",500,0,0
+5,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",100,1,0.6,500,1000,"roles","B",500,0,0
+6,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+6,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",400,1,0.6,500,1000,"roles","A",500,0,0
+6,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",400,1,0.6,500,1000,"roles","B",500,0,0
+7,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",40,1,0.6,500,1000,"pooled","Pooled",500,0,0
+7,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",40,1,0.6,500,1000,"roles","A",500,0,0
+7,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",40,1,0.6,500,1000,"roles","B",500,0,0
+8,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",100,1,0.6,500,1000,"pooled","Pooled",500,0,0
+8,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",100,1,0.6,500,1000,"roles","A",500,0,0
+8,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",100,1,0.6,500,1000,"roles","B",500,0,0
+9,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",400,1,0.6,500,1000,"pooled","Pooled",500,0,0
+9,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",400,1,0.6,500,1000,"roles","A",500,0,0
+9,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",400,1,0.6,500,1000,"roles","B",500,0,0
