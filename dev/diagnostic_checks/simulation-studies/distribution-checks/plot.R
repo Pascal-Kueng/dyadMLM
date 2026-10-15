@@ -1,10 +1,14 @@
-distribution_family_labels <- c(gaussian = "Gaussian", nbinom2 = "Negative binomial")
+distribution_family_labels <- c(gaussian = "Gaussian", nbinom2 = "Negative binomial",
+  ordinal = "Ordinal")
 distribution_scenario_order <- c("correct", "mean_small", "mean_large", "variance_small",
-  "variance_large", "dispersion_small", "dispersion_large", "zeros_small", "zeros_large")
+  "variance_large", "dispersion_small", "dispersion_large", "zeros_small", "zeros_large",
+  "omitted_partner", "heteroscedastic", "dispersion_severe")
 distribution_panel_labels <- c(
   qq = "PIT QQ envelope", mean_distance = "Mean PIT distance",
   predicted_quantiles = "PIT quartiles vs prediction",
-  response_sd = "Response SD", maximum_deviation = "Largest deviation",
+  actor_quantiles = "PIT quartiles vs actor predictor",
+  partner_quantiles = "PIT quartiles vs partner predictor",
+  response_sd = "Response SD", maximum_deviation = "Largest absolute deviation",
   zeros = "Number of zeros"
 )
 
@@ -22,7 +26,7 @@ distribution_percent <- function(values) paste0(round(100 * values), "%")
 distribution_run_caption <- function(data) {
   attempted <- range(data$attempted)
   datasets <- if (diff(attempted) == 0) attempted[1] else paste(attempted, collapse = "–")
-  paste0(datasets, " datasets per shown condition; ", format(unique(data$reference_draws), big.mark = ","),
+  paste0(datasets, " datasets per shown condition, ", format(unique(data$reference_draws), big.mark = ","),
     " reference simulations per bank.\n")
 }
 
@@ -50,11 +54,11 @@ plot_distribution_panels <- function(summary) {
     ggplot2::scale_colour_manual(values = c("#777777", "#0072B2", "#D55E00")) +
     ggplot2::scale_x_continuous(limits = c(0, NA), breaks = seq(0, 1, .05), labels = distribution_percent) +
     ggplot2::labs(title = "Individual panels under a correct model",
-      subtitle = "All observations pooled; no additional predictor pages",
+      subtitle = "All observations pooled",
       x = "Datasets flagged (%)", y = NULL, colour = NULL,
       caption = paste0(distribution_run_caption(plot_data),
         "Bars: 95% Wilson intervals for Monte Carlo uncertainty. Dashed line: 5% benchmark.\n",
-        "Fitted references need not attain 5%; centring affects only PIT summaries.")) +
+        "Fitted references need not attain 5%. Centring affects only PIT summaries.")) +
     distribution_plot_theme()
 }
 
@@ -94,7 +98,7 @@ plot_distribution_detection <- function(summary, family_name) {
     ggplot2::scale_x_continuous(breaks = sort(unique(plot_data$n_dyads))) +
     ggplot2::scale_y_continuous(limits = c(0, 1), labels = distribution_percent) +
     ggplot2::labs(title = paste(distribution_family_labels[family_name], "model mismatches"),
-      subtitle = "At least one numerical panel flagged; residual checks use the default median centring",
+      subtitle = "At least one numerical panel flagged, without predictor pages",
       x = "Number of dyads", y = "Datasets flagged (%)", colour = NULL, linetype = NULL, shape = NULL,
       caption = paste0(distribution_run_caption(plot_data),
         "Bars: 95% Wilson intervals for Monte Carlo uncertainty. Rates use available checks.\n",
