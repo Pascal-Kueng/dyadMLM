@@ -263,7 +263,12 @@ mm_pooled <- glmmTMB::glmmTMB(
     (0 + I(.is_exchangeable + .is_singleton_male) | coupleID) +
     (0 + I(.member_contrast_arbitrary + .is_singleton_male) | coupleID),
   family = gaussian(), dispformula = ~ 0,
-  data = mm_data
+  data = mm_data,
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(
+    optimizer = stats::optim,
+    optArgs = list(method = "BFGS")
+  )
 )
 
 recover_exchangeable_covariance(mm_pooled)
