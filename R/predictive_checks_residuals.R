@@ -215,8 +215,27 @@ check_dyad_residuals <- function(simulations, dyad = NULL, role = NULL, member =
   attr(result, "dyadMLM") <- attr(simulations, "dyadMLM")
   class(result) <- c("dyadMLM_residual_check", "list")
   if (missing(role)) message_pooled_roles()
+  if (quartile_lines == "bins") suggest_qgam_lines(compositions)
   if (plot) graphics::plot(result, ask = ask, panels = panels)
   invisible(result)
+}
+
+# Points interactive users to qgam lines once per session. Only panels with
+# smoothed bins would change, so at least one is needed.
+suggest_qgam_lines <- function(compositions) {
+  # The hint would also be printed into rendered documents.
+  if (!rlang::is_interactive()) return(invisible())
+  # One TRUE or FALSE per panel: composition, then axis, then role.
+  smoothed <- unlist(lapply(compositions, function(composition)
+    lapply(composition$patterns, function(patterns_by_role)
+      lapply(patterns_by_role, `[[`, "smooth"))))
+  if (!any(smoothed)) return(invisible())
+  rlang::inform(c(
+    "PIT quartile lines use smoothed bins.",
+    i = paste("For a final model, `quartile_lines = \"qgam\"` fits DHARMa-style lines",
+              "that can show trends near the ends of an axis more clearly, but takes",
+              "much longer.")
+  ), .frequency = "once", .frequency_id = "dyadMLM_qgam_lines")
 }
 
 available_check_predictor <- function(x) {
@@ -283,26 +302,54 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows, quartile
        numeric = is.numeric(predictor), quantiles = quantiles)
 }
 
-# Fit the three PIT quartiles across `x` with qgam, as in DHARMa::testQuantiles().
-# Returns one matrix per quartile: `grid` points in rows, datasets in columns.
-# Calibrating qgam for every dataset would take far too long, so simulated
-# datasets reuse the tuning found for the observed data.
-qgam_quartiles <- function(values, x, grid) {
-  # mgcv's default basis size, but no more than the distinct values.
-  k <- min(length(unique(x)), 10)
-  lapply(c(.25, .5, .75), function(q) {
-    fit <- function(residuals, ...) {
-      utils::capture.output(model <- qgam::qgam(res ~ s(pred, k = k),
-        data = data.frame(res = residuals - q, pred = x), qu = q, ...))
-      model
-    }
-    observed <- fit(values[, 1])
-    vapply(seq_len(ncol(values)), function(dataset) {
-      model <- if (dataset == 1L) observed else fit(values[, dataset],
-        lsig = observed$calibr$lsig, err = observed$calibr$err, argGam = list(sp = observed$sp))
-      as.numeric(stats::predict(model, data.frame(pred = grid))) + q
+# Fit the three PIT quartiles across `axis` with qgam, as in
+# DHARMa::testQuantiles(). Returns one matrix per quartile, with `grid` points in
+# rows and datasets (columns of `pit`) in columns. Calibrating qgam for every
+# dataset would take far too long, so simulated datasets reuse the tuning found
+# for the observed data.
+qgam_quartiles <- function(pit, axis, grid) {
+  # mgcv's default basis size, but no more than the distinct axis values.
+  basis_size <- min(length(unique(axis)), 10)
+  number_of_fits <- 3 * ncol(pit)
+  fit_warnings <- character()
+  # Progress bars would also be printed into rendered documents, so show one
+  # only in interactive sessions.
+  progress_bar <- if (rlang::is_interactive())
+    cli::cli_progress_bar("Fitting qgam quartile lines", total = number_of_fits)
+
+  fit_quartile <- function(residuals, quartile, ...) {
+    if (!is.null(progress_bar)) cli::cli_progress_update(id = progress_bar)
+    # Store mgcv's warnings for one summary below, instead of one per fit.
+    withCallingHandlers(
+      # capture.output() hides the calibration steps that qgam prints.
+      utils::capture.output(model <- qgam::qgam(res ~ s(pred, k = basis_size),
+        data = data.frame(res = residuals - quartile, pred = axis), qu = quartile, ...)),
+      warning = function(w) {
+        fit_warnings <<- c(fit_warnings, conditionMessage(w))
+        invokeRestart("muffleWarning")
+      })
+    model
+  }
+
+  fitted_lines <- lapply(c(.25, .5, .75), function(quartile) {
+    observed_fit <- fit_quartile(pit[, 1], quartile)
+    vapply(seq_len(ncol(pit)), function(dataset) {
+      # Column 1 is the observed data. The others reuse its tuning.
+      fit <- if (dataset == 1L) observed_fit else fit_quartile(pit[, dataset], quartile,
+        lsig = observed_fit$calibr$lsig, err = observed_fit$calibr$err,
+        argGam = list(sp = observed_fit$sp))
+      # The fits use residuals minus the quartile, so add it back.
+      as.numeric(stats::predict(fit, data.frame(pred = grid))) + quartile
     }, numeric(length(grid)))
   })
+
+  if (length(fit_warnings)) {
+    warning_counts <- tibble::tibble(text = fit_warnings) |> dplyr::count(.data$text)
+    warning("qgam gave these warnings in one PIT quartile panel (", number_of_fits,
+            " fits):\n", paste0(warning_counts$n, " x ", warning_counts$text, collapse = "\n"),
+            call. = FALSE)
+  }
+  fitted_lines
 }
 
 #' @export
