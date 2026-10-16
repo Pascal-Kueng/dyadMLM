@@ -444,10 +444,12 @@ to 1 (high) among its simulated values. The outcome check compares outcome
 distributions and summaries.
 
 We check by gender (`role = gender`), even though the restricted model treats
-partners as exchangeable. Role differences the model misses can cancel out when
-all observations are pooled: if one role's outcomes are higher than simulated
-and the other's lower, a pooled check can look fine. Here, the pooled QQ plot
-(not shown) stays inside its envelope.
+partners as exchangeable. We do this because role differences the model misses
+can cancel out when all observations are pooled: if one role's outcomes are
+higher than simulated and the other's lower, a pooled check can look fine. Here,
+the pooled QQ plot (not shown) stays inside its envelope. Any other column that
+gives each member a fixed role, such as older and younger partner, can be
+checked the same way.
 
 With `predictors`, we add a page of PIT quartiles across the partner's provided
 support. If the model captures the partner effect, the quartiles stay near their
@@ -465,7 +467,7 @@ dyadMLM::check_dyad_residuals(
 )
 ```
 
-```{r check-outcomes-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 9, out.width = "100%", fig.alt = "Outcome checks for women and men: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Red marks observed values."}
+```{r check-outcomes-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 12, out.width = "100%", fig.alt = "Outcome checks for women and men: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Red marks observed values."}
 dyadMLM::check_dyad_outcomes(
   apim_simulations,
   dyad = coupleID,
@@ -482,24 +484,15 @@ predicted outcomes, as well as at high partner support. Mean PIT distance,
 response SDs, and largest absolute deviations stay within their limits. These
 panels mainly react to spread, so the model seems to reproduce how much
 closeness varies around its predictions. The pattern suggests that the model
-omits relevant gender differences, at least in mean closeness. Thus, we add
-gender-specific intercepts and compare the actor and partner estimates:
+omits relevant gender differences, at least in mean closeness.
 
-```{r compare-role-means-apim, eval = has_glmmTMB}
-apim_role_means_model <- update(
-  apim_exchangeable_model, . ~ . - 1 + .is_female + .is_male
-)
-actor_partner <- c(".provided_support_gmc_actor", ".provided_support_gmc_partner")
-summary(apim_exchangeable_model)$coefficients$cond[actor_partner, 1:2]
-summary(apim_role_means_model)$coefficients$cond[actor_partner, 1:2]
-```
-
-With gender-specific intercepts, the actor estimate is smaller, the partner
-estimate larger, and both standard errors smaller. Women provide slightly more
-support than men here, so omitting their difference in mean closeness shifted
-both effects. Rechecking this model (not shown) flags only men's PIT quartiles
-across predicted outcomes. The distinguishable APIM, which also lets actor and
-partner effects and residual variances differ by gender, shows no flags. The
+Adding gender-specific intercepts (`0 + .is_female + .is_male` instead of `1`)
+makes the actor estimate smaller and the partner estimate larger. Women provide
+slightly more support than men here, so the omitted gender difference in mean
+closeness had shifted both effects. Rechecking this model (not shown) flags only
+men's PIT quartiles across predicted outcomes. The distinguishable APIM, which
+also lets actor and partner effects and residual variances differ by gender,
+shows no flags. The
 [simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
 shows how often these panels flag correct and mismatched models.
 
