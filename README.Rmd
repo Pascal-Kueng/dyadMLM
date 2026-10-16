@@ -115,9 +115,9 @@ for data requirements and examples.
 | [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
-Predictive checks compare residual and outcome distributions, variability,
-and partner dependence with simulations from the fitted model. Follow the
-function links above for interpretation, and see
+Predictive checks compare the *observed* data with data simulated from the
+fitted model: outcome and residual distributions, variability, and partner
+dependence. See
 [`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.html)
 for supported models. Simulation studies
 show how often the partner check detects

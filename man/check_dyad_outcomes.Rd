@@ -16,8 +16,8 @@ check_dyad_outcomes(
 )
 }
 \arguments{
-\item{simulations}{An object from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Use 1,000 or
-more simulated datasets for stable comparisons.}
+\item{simulations}{An object from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. At least 1,000
+simulated datasets are recommended for stable comparisons.}
 
 \item{dyad}{Dyad ID column, with or without quotes. Required when \code{role} is
 supplied.}
@@ -62,7 +62,8 @@ after subtracting predictions, largest absolute deviation from prediction,
 number of zeros) with complete datasets from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
 This helps identify mismatches in the model's assumptions, such as the
 distribution family, dispersion, or zero inflation.
-For PIT residual patterns, also run \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}.
+For PIT residual patterns, also run \code{\link[=check_dyad_residuals]{check_dyad_residuals()}} with the same
+simulations.
 For guidance on how to read the plots, see \code{\link[=plot.dyadMLM_outcome_check]{plot.dyadMLM_outcome_check()}}.
 }
 \section{Scope}{
@@ -89,8 +90,11 @@ For cross-sectional data, check partner correlations with
 \examples{
 \dontshow{if (requireNamespace("glmmTMB", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 example_data <- prepare_dyad_data(
-  dyads_cross, dyad = coupleID, member = personID,
-  model_types = "none", seed = 123
+  dyads_cross,
+  dyad = coupleID,
+  member = personID,
+  model_types = "none",
+  seed = 123
 )
 # Exchangeable dyads: the two random-effect blocks represent the partners'
 # residual variances and covariance.
@@ -100,9 +104,17 @@ model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   data = example_data
 )
-# Use at least 1,000 simulations when checking a model.
-simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
-check_dyad_outcomes(simulations, dyad = coupleID, role = gender, ask = FALSE)
+simulations <- simulate_dyad_responses(
+  model,
+  nsim = 100, # Low for a quick example. Use at least 1,000.
+  seed = 123
+)
+check_dyad_outcomes(
+  simulations,
+  dyad = coupleID,
+  role = gender,
+  ask = FALSE
+)
 \dontshow{\}) # examplesIf}
 }
 \seealso{

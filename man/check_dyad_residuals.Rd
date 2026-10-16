@@ -19,7 +19,8 @@ check_dyad_residuals(
 }
 \arguments{
 \item{simulations}{An object from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} with at least
-200 datasets (1,000 or more recommended).}
+200 simulated datasets. At least 1,000 are recommended for stable
+comparisons.}
 
 \item{dyad}{Dyad ID column, with or without quotes. Required when \code{role} is
 supplied.}
@@ -75,7 +76,8 @@ simulated values (PIT residuals), using complete datasets from
 \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. This helps identify mismatches in the model's
 assumptions, such as the distribution family, dispersion, or predictor
 effects.
-For checks on the outcome scale, also run \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}.
+For checks on the outcome scale, also run \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}} with the
+same simulations.
 For guidance on how to read the plots, see \code{\link[=plot.dyadMLM_residual_check]{plot.dyadMLM_residual_check()}}.
 }
 \section{Scope}{
@@ -123,8 +125,11 @@ Global envelopes use extreme-rank-length ordering (Myllymäki et al., 2017).
 \examples{
 \dontshow{if (requireNamespace("glmmTMB", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 example_data <- prepare_dyad_data(
-  dyads_cross, dyad = coupleID, member = personID,
-  model_types = "none", seed = 123
+  dyads_cross,
+  dyad = coupleID,
+  member = personID,
+  model_types = "none",
+  seed = 123
 )
 # Exchangeable dyads: the two random-effect blocks represent the partners'
 # residual variances and covariance.
@@ -134,13 +139,25 @@ model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   data = example_data
 )
-# Use at least 1,000 simulations when checking a model.
-simulations <- simulate_dyad_responses(model, nsim = 200, seed = 123)
-check_dyad_residuals(simulations, dyad = coupleID, role = gender,
-                     predictors = "provided_support", ask = FALSE)
+simulations <- simulate_dyad_responses(
+  model,
+  nsim = 200, # Low for a quick example. Use at least 1,000.
+  seed = 123
+)
+check_dyad_residuals(
+  simulations,
+  dyad = coupleID,
+  role = gender,
+  predictors = "provided_support",
+  ask = FALSE
+)
 # Save a pooled check without drawing, then plot each figure separately.
-result <- check_dyad_residuals(simulations, role = NULL,
-                               predictors = "provided_support", plot = FALSE)
+result <- check_dyad_residuals(
+  simulations,
+  role = NULL,
+  predictors = "provided_support",
+  plot = FALSE
+)
 plot(result, panels = FALSE, ask = FALSE)
 \dontshow{\}) # examplesIf}
 }

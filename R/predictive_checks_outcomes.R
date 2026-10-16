@@ -7,11 +7,12 @@
 #' number of zeros) with complete datasets from [simulate_dyad_responses()].
 #' This helps identify mismatches in the model's assumptions, such as the
 #' distribution family, dispersion, or zero inflation.
-#' For PIT residual patterns, also run [check_dyad_residuals()].
+#' For PIT residual patterns, also run [check_dyad_residuals()] with the same
+#' simulations.
 #' For guidance on how to read the plots, see [plot.dyadMLM_outcome_check()].
 #'
-#' @param simulations An object from [simulate_dyad_responses()]. Use 1,000 or
-#'   more simulated datasets for stable comparisons.
+#' @param simulations An object from [simulate_dyad_responses()]. At least 1,000
+#'   simulated datasets are recommended for stable comparisons.
 #' @inheritParams check_dyad_residuals
 #'
 #' @return Invisibly returns a `dyadMLM_outcome_check` list with role-specific
@@ -25,8 +26,11 @@
 #' @seealso [check_dyad_residuals()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
 #' example_data <- prepare_dyad_data(
-#'   dyads_cross, dyad = coupleID, member = personID,
-#'   model_types = "none", seed = 123
+#'   dyads_cross,
+#'   dyad = coupleID,
+#'   member = personID,
+#'   model_types = "none",
+#'   seed = 123
 #' )
 #' # Exchangeable dyads: the two random-effect blocks represent the partners'
 #' # residual variances and covariance.
@@ -36,9 +40,17 @@
 #'   dispformula = ~ 0,
 #'   data = example_data
 #' )
-#' # Use at least 1,000 simulations when checking a model.
-#' simulations <- simulate_dyad_responses(model, nsim = 100, seed = 123)
-#' check_dyad_outcomes(simulations, dyad = coupleID, role = gender, ask = FALSE)
+#' simulations <- simulate_dyad_responses(
+#'   model,
+#'   nsim = 100, # Low for a quick example. Use at least 1,000.
+#'   seed = 123
+#' )
+#' check_dyad_outcomes(
+#'   simulations,
+#'   dyad = coupleID,
+#'   role = gender,
+#'   ask = FALSE
+#' )
 #' @export
 check_dyad_outcomes <- function(simulations, dyad = NULL, role = NULL, member = NULL,
                                 plot = TRUE, ask = NULL,

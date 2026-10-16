@@ -7,11 +7,13 @@
 #' [simulate_dyad_responses()]. This helps identify mismatches in the model's
 #' assumptions, such as the distribution family, dispersion, or predictor
 #' effects.
-#' For checks on the outcome scale, also run [check_dyad_outcomes()].
+#' For checks on the outcome scale, also run [check_dyad_outcomes()] with the
+#' same simulations.
 #' For guidance on how to read the plots, see [plot.dyadMLM_residual_check()].
 #'
 #' @param simulations An object from [simulate_dyad_responses()] with at least
-#'   200 datasets (1,000 or more recommended).
+#'   200 simulated datasets. At least 1,000 are recommended for stable
+#'   comparisons.
 #' @param predictors Optional quoted column names, e.g. `c("age", "stress")`.
 #'   Each adds a page of PIT quartiles across that column, to show effects the
 #'   model omits or may misspecify, especially partner effects. Missing or
@@ -100,8 +102,11 @@
 #' @seealso [check_dyad_outcomes()], [check_partner_dependence()]
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
 #' example_data <- prepare_dyad_data(
-#'   dyads_cross, dyad = coupleID, member = personID,
-#'   model_types = "none", seed = 123
+#'   dyads_cross,
+#'   dyad = coupleID,
+#'   member = personID,
+#'   model_types = "none",
+#'   seed = 123
 #' )
 #' # Exchangeable dyads: the two random-effect blocks represent the partners'
 #' # residual variances and covariance.
@@ -111,13 +116,25 @@
 #'   dispformula = ~ 0,
 #'   data = example_data
 #' )
-#' # Use at least 1,000 simulations when checking a model.
-#' simulations <- simulate_dyad_responses(model, nsim = 200, seed = 123)
-#' check_dyad_residuals(simulations, dyad = coupleID, role = gender,
-#'                      predictors = "provided_support", ask = FALSE)
+#' simulations <- simulate_dyad_responses(
+#'   model,
+#'   nsim = 200, # Low for a quick example. Use at least 1,000.
+#'   seed = 123
+#' )
+#' check_dyad_residuals(
+#'   simulations,
+#'   dyad = coupleID,
+#'   role = gender,
+#'   predictors = "provided_support",
+#'   ask = FALSE
+#' )
 #' # Save a pooled check without drawing, then plot each figure separately.
-#' result <- check_dyad_residuals(simulations, role = NULL,
-#'                                predictors = "provided_support", plot = FALSE)
+#' result <- check_dyad_residuals(
+#'   simulations,
+#'   role = NULL,
+#'   predictors = "provided_support",
+#'   plot = FALSE
+#' )
 #' plot(result, panels = FALSE, ask = FALSE)
 #' @export
 check_dyad_residuals <- function(simulations, dyad = NULL, role = NULL, member = NULL,
