@@ -4,8 +4,9 @@
 #' A model should reproduce the distribution of the observed outcomes. This
 #' check compares the observed outcome distribution and summaries (response SD
 #' after subtracting predictions, largest absolute deviation from prediction,
-#' number of zeros) with complete datasets from [simulate_dyad_responses()]. This helps identify mismatches in the model's
-#' assumptions, such as the distribution family, dispersion, or zero inflation.
+#' number of zeros) with complete datasets from [simulate_dyad_responses()].
+#' This helps identify mismatches in the model's assumptions, such as the
+#' distribution family, dispersion, or zero inflation.
 #' For PIT residual patterns, also run [check_dyad_residuals()].
 #' For guidance on how to read the plots, see [plot.dyadMLM_outcome_check()].
 #'
