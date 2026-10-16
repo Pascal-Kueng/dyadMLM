@@ -170,12 +170,9 @@ if (!is_pilot) {
   null_figures <- primary_figures |>
     semi_join(null_rows, by = c("cell", "model", "response")) |> filter(figure == "either")
   full_figures <- primary_figures |> filter(model == "correct", figure == "either")
-  gaussian_full <- full_figures |> filter(part == "gaussian")
-  cat(sprintf("Under true zero-covariance restrictions, the partner-correlation row at the targeted level flagged in **%.1f–%.1f%%** of datasets. A flag anywhere in either figure occurred in **%.1f–%.1f%%**. For full models, either-figure rates were **%.1f–%.1f%%** across families and **%.1f–%.1f%%** for Gaussian models.\n\n",
-    100 * min(null_rows$rate), 100 * max(null_rows$rate),
+  cat(sprintf("A flag anywhere in either figure occurred in %.1f–%.1f%% of these datasets, and in %.1f–%.1f%% for full models.\n\n",
     100 * min(null_figures$rate), 100 * max(null_figures$rate),
-    100 * min(full_figures$rate), 100 * max(full_figures$rate),
-    100 * min(gaussian_full$rate), 100 * max(gaussian_full$rate)))
+    100 * min(full_figures$rate), 100 * max(full_figures$rate)))
 }
 ```
 
@@ -211,18 +208,13 @@ effect_sizes |>
 
 ```{r main-findings, results='asis'}
 if (!is_pilot) {
-  small_stable <- covariance_rows |> filter(targeted, n_dyads == 50, level == "between")
-  small_occasion <- covariance_rows |> filter(targeted, n_dyads == 50, level == "within")
-  short_series <- small_occasion |> filter(part == "gaussian", n_occasions == 3) |>
+  short_series <- covariance_rows |>
+    filter(targeted, part == "gaussian", n_dyads == 50, n_occasions == 3, level == "within") |>
     arrange(missing_share)
-  cat(sprintf("With 200 dyads and 14 complete occasions, detection at the targeted level was **%.1f–%.1f%%**. At 50 dyads it was **%.1f–%.1f%%** for omitted stable covariance and **%.1f–%.1f%%** for omitted occasion covariance. In Gaussian data with 50 dyads and 3 occasions, occasion-covariance detection fell from **%.1f%%** with complete data to **%.1f%%** with 20%% missing member occasions.\n\n",
-    100 * min(targeted_detection$rate), 100 * max(targeted_detection$rate),
-    100 * min(small_stable$rate), 100 * max(small_stable$rate),
-    100 * min(small_occasion$rate), 100 * max(small_occasion$rate),
-    100 * short_series$rate[1], 100 * short_series$rate[2]))
   sd_rows <- primary_flags |> filter(part == "gaussian", model == "equal_occasion_variances",
     level == "within", statistic == "average_difference_cor")
-  cat(sprintf("The partner-correlation row at the other level flagged at most **%.1f%%** across these covariance-omission settings. That result concerns this row, not every statistic or possible mismatch. In the Gaussian settings, where the two roles' true occasion SDs differ by a factor of 1.5, incorrectly imposing equal occasion variances was detected by the within-level dyad-average/role-difference correlation in **%.1f–%.1f%%** of datasets.\n\n",
+  cat(sprintf("Missing occasions lowered detection: in Gaussian data with 50 dyads and 3 occasions, occasion-covariance detection fell from %.1f%% to %.1f%% with 20%% missing member occasions. The partner-correlation row at the other level flagged in at most %.1f%% of these datasets. In the Gaussian settings, where the two roles' true occasion SDs differ by a factor of 1.5, the within-level dyad-average/role-difference correlation detected incorrectly imposed equal occasion variances in %.1f–%.1f%% of datasets.\n\n",
+    100 * short_series$rate[1], 100 * short_series$rate[2],
     100 * max(covariance_rows$rate[!covariance_rows$targeted]),
     100 * min(sd_rows$rate), 100 * max(sd_rows$rate)))
 }
@@ -251,21 +243,14 @@ ar_rows |>
 
 ```{r serial-dependence-finding, results='asis'}
 if (!is_pilot) {
-  ar_changes <- ar_rows |> select(n_dyads, ar_phi, rate, mcse) |>
-    tidyr::pivot_wider(names_from = ar_phi, values_from = c(rate, mcse)) |>
-    mutate(change = .data[["rate_0.7"]] - rate_0,
-      change_mcse = sqrt(.data[["mcse_0.7"]]^2 + mcse_0^2))
-  cat(sprintf("From φ = 0 to φ = 0.7, row-flag rates rose by **%.1f and %.1f percentage points** at 50 and 200 dyads (Monte Carlo SEs **%.1f and %.1f**, independent settings): small and imprecise increases. The variance equality is true, so the mismatch is the omitted serial dependence.\n\n",
-    100 * ar_changes$change[1], 100 * ar_changes$change[2],
-    100 * ar_changes$change_mcse[1], 100 * ar_changes$change_mcse[2]))
+  cat("With φ = 0.7, this row flagged only slightly more often than with φ = 0. The variance equality is true, so the increase reflects the omitted serial dependence.\n\n")
   if (all(ar_unrestricted$rate == 0))
-    cat("The unrestricted covariance model without AR produced **no figure flags** at either sample size despite φ = 0.7. These summaries did not reveal the missing serial dependence. Autocorrelation needs a separate check.\n\n")
+    cat("The unrestricted covariance model without AR produced no figure flags at either sample size despite φ = 0.7. These summaries did not reveal the missing serial dependence. Autocorrelation needs a separate check.\n\n")
   if (file.exists(file.path(params$output_directory, "serial-recovery.csv"))) {
     serial_recovery <- read_results("serial-recovery.csv") |> left_join(cells, by = "cell") |>
       arrange(n_dyads)
-    cat(sprintf("Yet the unrestricted model without AR underestimated the stable partner correlation: **%.3f and %.3f** on average at 50 and 200 dyads, versus a true **%.2f** (Monte Carlo SEs **%.3f and %.3f**).\n\n",
-      serial_recovery$mean[1], serial_recovery$mean[2], serial_recovery$true_value[1],
-      serial_recovery$mcse[1], serial_recovery$mcse[2]))
+    cat(sprintf("Yet the unrestricted model without AR underestimated the stable partner correlation (%.2f on average, versus a true %.2f).\n\n",
+      mean(serial_recovery$mean), serial_recovery$true_value[1]))
   }
 }
 ```
@@ -314,7 +299,7 @@ fit_comparison <- flags |>
   filter(rule == "rank") |>
   select(cell, model, response, level, statistic, fits, rate) |>
   tidyr::pivot_wider(names_from = fits, values_from = rate)
-cat(sprintf("Flags use rank limits from the ordered simulated values, as `check_partner_dependence()` does. Interpolated quantiles would change per-row rates by at most **%.1f percentage points**. The largest difference between all available checks and usable fits was **%.1f percentage points**, among rows available in both subsets.\n\n",
+cat(sprintf("Flags use rank limits from the ordered simulated values, as `check_partner_dependence()` does. Interpolated quantiles would change per-row rates by at most %.1f percentage points. Including fits that failed the usability criteria changed per-row rates by at most %.1f percentage points.\n\n",
   100 * max(abs(rule_comparison$quantile - rule_comparison$rank), na.rm = TRUE),
   100 * max(abs(fit_comparison$all - fit_comparison$usable), na.rm = TRUE)))
 ```
