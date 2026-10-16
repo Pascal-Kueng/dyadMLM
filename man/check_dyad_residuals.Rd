@@ -14,7 +14,8 @@ check_dyad_residuals(
   plot = TRUE,
   ask = NULL,
   panels = TRUE,
-  data = NULL
+  data = NULL,
+  quartile_lines = c("bins", "qgam")
 )
 }
 \arguments{
@@ -59,6 +60,13 @@ columns you name (such as \code{role}) are not in the model formulas. Also suppl
 it when rows were excluded during fitting (e.g., for missing values).
 Otherwise, a person whose partner's rows were excluded has an unknown
 composition and is omitted.}
+
+\item{quartile_lines}{Quantile regression lines (\code{"qgam"}) can show trends
+near the ends of a numeric axis more clearly than smoothed bins (\code{"bins"},
+default). As in DHARMa, they are fitted with the qgam package on ranks of
+the axis values. Each dataset gets its own lines, so envelopes and flags
+work as with bins. \code{"qgam"} is much slower and may warn when fits do not
+converge.}
 }
 \value{
 Invisibly returns a \code{dyadMLM_residual_check} list with the \code{pit} matrix

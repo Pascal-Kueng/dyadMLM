@@ -45,8 +45,10 @@ studied by Robins et al. (2000) and in our simulations.
 Predicted outcomes and numeric predictors with more than eight distinct values
 are grouped into up to eight bins per role, with at least about 20
 observations per bin. With four or more bins, quartiles are smoothed across
-neighboring bins. These are full-model residuals, not partial effects. Bins
-and separate predictors can hide local patterns and interactions.
+neighboring bins. \code{quartile_lines = "qgam"} in \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}
+replaces these smoothed quartiles with qgam lines. These are full-model
+residuals, not partial effects. Bins and separate predictors can hide local
+patterns and interactions.
 }
 
 \section{Views and compositions}{

@@ -189,6 +189,24 @@ test_that("numeric predictors use each role's bins, smoothed when there are enou
   expect_equal(lengths(lapply(patterns, `[[`, "positions")), c(A = 1L, B = 1L))
 })
 
+test_that("qgam lines replace smoothed bins and are fitted on ranks", {
+  skip_if_not_installed("qgam")
+  # A skewed predictor and an observed PIT that rises with it.
+  n <- 100
+  predictor <- exp(seq(0, 5, length.out = n))
+  pit <- cbind(seq(.1, .9, length.out = n) + .1 * sin(seq_len(n)),
+               matrix(sin(seq_len(2 * n))^2, n))
+  pattern <- calculate_residual_pattern(pit, predictor, seq_len(n), list(seq_len(n)), "qgam")
+  # Evenly spaced ranks put the middle of the line at the predictor's median.
+  expect_equal(pattern$positions[c(1, 51, 101)], quantile(predictor, c(0, .5, 1)),
+               ignore_attr = TRUE)
+  expect_lt(pattern$quantiles[[2]]$observed[1], .3)
+  expect_gt(pattern$quantiles[[2]]$observed[101], .7)
+  # Without enough observations for smoothing, bins stay.
+  expect_identical(calculate_residual_pattern(pit, predictor, 1:60, list(1:60), "qgam"),
+                   calculate_residual_pattern(pit, predictor, 1:60, list(1:60), "bins"))
+})
+
 
 test_that("lone responses keep their composition, and empty roles still plot", {
   grDevices::pdf(NULL, width = 12, height = 10)
