@@ -227,7 +227,7 @@ For intensive longitudinal data, also supply `member` and `time`. The check
 then compares member means and same-occasion deviations from them separately.
 
 The same `simulations` can be reused with `check_dyad_residuals()` and `check_dyad_outcomes()`.
-Use the same `dyad`, `role`, and `data` arguments. The
+Use the same `dyad`, `role`, `member`, and `data` arguments. The
 [APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes)
 shows a worked example.
 
