@@ -100,7 +100,7 @@ Preparation options include selecting and pooling compositions, and treating sel
 compositions as exchangeable. APIM/DIM/DSM predictors can be centered, decomposed into 
 within-/between-person components, and lagged.
 
-Prepared data can be used with **glmmTMB**, **brms**, and other multilevel modelling
+Prepared data can be used with **glmmTMB**, **brms**, and other multilevel modeling
 packages that support the required model structure. See the
 [Getting Started vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html)
 for data requirements and examples.
@@ -111,10 +111,20 @@ for data requirements and examples.
 |---|---|---|
 | [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
-| [Model diagnostics: Check partner dependence<sup>*</sup>](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check partner dependence](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
-<sup>*</sup>Predictive checks assess whether a model reproduces the observed response variances and
-partner correlations.
+Predictive checks compare the *observed* data with data simulated from the
+fitted model: outcome and residual distributions, variability, and partner
+dependence. See
+[`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.html)
+for supported models. Simulation studies
+show how often the partner check detects
+[omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
+and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
+and how often the residual and outcome checks
+[flag correct and mismatched models](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html).
 
 ## Quick example
 
@@ -191,8 +201,7 @@ check_partner_dependence(
   dyad = coupleID,
   role = gender,
   # Supply the fitting data because gender is not in the model formula.
-  data = prepared_data,
-  panels = TRUE
+  data = prepared_data
 )
 ```
 
@@ -216,6 +225,11 @@ can help assess those restrictions).
 
 For intensive longitudinal data, also supply `member` and `time`. The check
 then compares member means and same-occasion deviations from them separately.
+
+The same `simulations` can be reused with `check_dyad_residuals()` and `check_dyad_outcomes()`.
+Use the same `dyad`, `role`, and `data` arguments. The
+[APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes)
+shows a worked example.
 
 ## Vignettes and examples
 

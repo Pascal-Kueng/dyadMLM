@@ -1,0 +1,56 @@
+"condition","family","scenario","scenario_label","role_mean","sd_ratio","zero_probability","nb_size","fit_family","n_dyads","n_times","dyad_sd","repetitions","reference_draws","reference","median_dyad_sd","median_dispersion","maximum_problem_dispersion","attempted","usable","with_warnings","fit_errors","fit_problems","check_errors","fit_seconds","check_seconds"
+1,"gaussian","correct","Correct model",0,1,0,3,"gaussian",40,1,0.6,500,1000,"fitted",0.561680204238292,0.980520164830565,NA,500,500,0,0,0,0,25.5019999999677,3170.09400000002
+1,"gaussian","correct","Correct model",0,1,0,3,"gaussian",40,1,0.6,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,1584.89900000001
+10,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",40,1,0.6,500,1000,"fitted",0.556857550202277,0.974918731612225,NA,500,500,0,0,0,0,27.2060000000056,3165.086
+11,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",100,1,0.6,500,1000,"fitted",0.588725503695277,0.991359811835483,NA,500,500,0,0,0,0,31.8249999999643,5684.86400000006
+12,"gaussian","variance_large","Role SD ratio: 1.50",0,1.5,0,3,"gaussian",400,1,0.6,500,1000,"fitted",0.595861990290276,0.999794263202366,NA,500,500,0,0,0,0,65.2179999999971,7413.56500000001
+13,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",40,1,0.6,500,1000,"fitted",0.552811745324473,0.986072133937077,NA,500,500,0,0,0,0,26.5639999999912,3163.39100000001
+14,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",100,1,0.6,500,1000,"fitted",0.584929561845995,0.993215389669968,NA,500,500,0,0,0,0,32.7089999999953,5622.96099999997
+15,"gaussian","variance_small","Role SD ratio: 1.25",0,1.25,0,3,"gaussian",400,1,0.6,500,1000,"fitted",0.597848415647029,0.998075755548133,NA,500,500,0,0,0,0,71.4330000000737,7973.44199999998
+16,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",40,1,0.6,500,1000,"fitted",0.573134574149248,3.48411633174757,NA,500,500,0,0,0,0,42.6679999998632,3235.34400000007
+16,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",40,1,0.6,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,1600.6279999999
+17,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,0.6,500,1000,"fitted",0.579787913564509,3.13742721602211,NA,500,500,0,0,0,0,117.049000000005,8506.86600000002
+17,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,0.6,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,4295.01500000001
+18,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,0.6,500,1000,"fitted",0.585019118460891,2.99843030582812,NA,500,500,0,0,0,0,349.64399999998,10404.777
+18,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,0.6,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,5279.55500000002
+19,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",40,1,0.6,500,1000,"fitted",0.695632313179472,1,NA,500,500,0,0,0,0,24.9589999999953,2698.91400000001
+2,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,0.6,500,1000,"fitted",0.589950186322559,0.991156010590144,NA,500,500,0,0,0,0,36.2379999999721,6287.66800000002
+2,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,0.6,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,3175.74100000002
+20,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",100,1,0.6,500,1000,"fitted",0.707982501372121,1,NA,500,500,0,0,0,0,37.5110000000241,5630.12399999998
+21,"nbinom2","dispersion_large","NB2 size 3 fitted as Poisson",0,1,0,3,"poisson",400,1,0.6,500,1000,"fitted",0.720437726529167,1,NA,500,500,0,0,0,0,73.7189999999755,7492.28799999996
+22,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",40,1,0.6,500,1000,"fitted",0.604050381685731,1,NA,500,500,0,0,0,0,29.9539999999688,3194.85800000001
+23,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",100,1,0.6,500,1000,"fitted",0.628342879143613,1,NA,500,500,0,0,0,0,37.2260000000206,5696.561
+24,"nbinom2","dispersion_small","NB2 size 10 fitted as Poisson",0,1,0,10,"poisson",400,1,0.6,500,1000,"fitted",0.634240214854218,1,NA,500,500,0,0,0,0,85.8429999999698,8254.63100000004
+25,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",40,1,0.6,500,1000,"fitted",0.000158322387895725,0.70382209143542,NA,500,500,0,0,0,0,39.3649999999398,2805.4989999999
+26,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",100,1,0.6,500,1000,"fitted",0.190803416570142,0.642108952909694,NA,500,500,0,0,0,0,75.2879999999677,5644.97300000002
+27,"nbinom2","zeros_large","Omitted zero inflation: 25%",0,1,0.25,3,"nbinom2",400,1,0.6,500,1000,"fitted",0.269957608144962,0.628952165783982,NA,500,500,0,0,0,0,277.435000000027,8186.26500000001
+28,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",40,1,0.6,500,1000,"fitted",0.44496794163016,1.46438185868598,NA,500,500,0,0,0,0,41.766999999898,3129.01099999995
+29,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",100,1,0.6,500,1000,"fitted",0.497000207534138,1.45238923918367,NA,500,500,0,0,0,0,71.8369999999777,5640.06200000003
+3,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,0.6,500,1000,"fitted",0.595682053363097,1.00076087522274,NA,500,500,0,0,0,0,70.9530000000195,8152.87100000003
+3,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,0.6,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,4110.974
+30,"nbinom2","zeros_small","Omitted zero inflation: 10%",0,1,0.1,3,"nbinom2",400,1,0.6,500,1000,"fitted",0.500221603702328,1.41304134146699,NA,500,500,0,0,0,0,234.97100000002,7453.06000000003
+31,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,1.2,500,1000,"fitted",1.17696787772701,0.984589011607722,NA,500,500,0,0,0,0,46.1289999999897,8575.56000000001
+31,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,1,1.2,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,4318.74600000001
+32,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,1.2,500,1000,"fitted",1.19152200228105,0.999575638153529,NA,500,500,0,0,0,0,80.6619999999901,10425.903
+32,"gaussian","correct","Correct model",0,1,0,3,"gaussian",400,1,1.2,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,5254.11199999999
+33,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,1.2,500,1000,"fitted",1.16574898231955,3.28940567866597,NA,500,500,0,0,0,0,110.924000000021,8516.70399999998
+33,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",100,1,1.2,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,4291.00200000001
+34,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,1.2,500,1000,"fitted",1.18500425444536,3.12865564551323,NA,500,500,0,0,0,0,339.748000000021,10502.349
+34,"nbinom2","correct","Correct model",0,1,0,3,"nbinom2",400,1,1.2,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,5296.30400000001
+35,"gaussian","omitted_partner","Omitted partner effect",0,1,0,3,"gaussian",100,1,1.2,500,1000,"fitted",1.22482881114556,1.00009816226997,NA,500,500,0,0,0,0,30.3269999999538,5955.36499999999
+36,"gaussian","omitted_partner","Omitted partner effect",0,1,0,3,"gaussian",400,1,1.2,500,1000,"fitted",1.23214058211651,1.00930063865767,NA,500,500,0,0,0,0,55.768,7441.45099999996
+37,"gaussian","heteroscedastic","Residual SD rises with actor predictor",0,1,0,3,"gaussian",100,1,1.2,500,1000,"fitted",1.19121831903696,0.898108389351446,NA,500,500,0,0,0,0,33.7589999999855,6303.91899999999
+38,"gaussian","heteroscedastic","Residual SD rises with actor predictor",0,1,0,3,"gaussian",400,1,1.2,500,1000,"fitted",1.1943974028949,0.957131511133856,NA,500,500,0,0,0,0,63.747999999985,8120.38200000008
+39,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson",0,1,0,1,"poisson",100,1,1.2,500,1000,"fitted",1.37547426687864,1,NA,500,500,0,0,0,0,35.1219999999958,5633.48599999998
+4,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",40,1,0.6,500,1000,"fitted",0.426757044360202,1.12458431202183,NA,500,500,0,0,0,0,23.9920000000347,2771.46600000007
+40,"nbinom2","dispersion_severe","NB2 size 1 fitted as Poisson",0,1,0,1,"poisson",400,1,1.2,500,1000,"fitted",1.39650282783396,1,NA,500,500,0,0,0,0,119.654999999998,11532.147
+41,"ordinal","correct","Correct model",0,1,0,3,"ordinal",100,1,0.6,500,1000,"fitted",0.985566032873526,1,NA,500,500,0,0,0,0,72.7949999999873,3412.10000000002
+42,"ordinal","correct","Correct model",0,1,0,3,"ordinal",400,1,0.6,500,1000,"fitted",0.982869477821973,1,NA,500,500,0,0,0,0,213.602000000004,4067.25
+43,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,6,0.6,500,1000,"fitted",0.593565788090577,0.792530371794122,0.00384743482903137,500,483,17,0,17,0,243.980000000018,10436.668
+43,"gaussian","correct","Correct model",0,1,0,3,"gaussian",100,6,0.6,500,1000,"known",NA,NA,NA,500,500,0,0,0,0,0,5461.81400000003
+44,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",100,6,0.6,500,1000,"fitted",0.557681521755219,0.838503882276346,0.941772696778986,500,498,2,0,2,0,260.966999999979,11868.227
+5,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",100,1,0.6,500,1000,"fitted",0.424831958159689,1.13715600526201,NA,500,500,0,0,0,0,33.5809999999619,5653.15600000012
+6,"gaussian","mean_large","Omitted role means: +/-0.4",0.4,1,0,3,"gaussian",400,1,0.6,500,1000,"fitted",0.433763505021437,1.14966754566493,NA,500,500,0,0,0,0,77.6969999999856,8133.99600000006
+7,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",40,1,0.6,500,1000,"fitted",0.532742233622396,1.01376775956736,NA,500,500,0,0,0,0,23.9099999999817,2763.77299999997
+8,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",100,1,0.6,500,1000,"fitted",0.558730966746955,1.03077436912056,NA,500,500,0,0,0,0,32.9200000000565,5642.82099999996
+9,"gaussian","mean_small","Omitted role means: +/-0.2",0.2,1,0,3,"gaussian",400,1,0.6,500,1000,"fitted",0.560196492480648,1.03669860427708,NA,500,500,0,0,0,0,65.1249999999636,7420.00899999999

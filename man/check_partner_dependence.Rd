@@ -93,7 +93,7 @@ models (for repeated occasions, supply \code{member} and \code{time}).
 }
 \section{Reading the plots}{
 
-Histograms show simulated summaries. Red lines mark observed values.
+Blue histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95\% of simulations (no formal confidence
 intervals).
 The heading shows the dyad composition, its number of usable dyads, and the
@@ -285,12 +285,11 @@ check_partner_dependence(
 \references{
 Woody, E., & Sadler, P. (2005). Structural equation models for
 interchangeable dyads: Being the same makes a difference. \emph{Psychological
-Methods, 10}(2), 139-158. \doi{10.1037/1082-989X.10.2.139}.
-
-Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
-assessment of model fitness via realized discrepancies. \emph{Statistica Sinica,
-6}, 733-807.
+Methods, 10}(2), 139--158. \doi{10.1037/1082-989X.10.2.139}
 
 Bakdash, J. Z., & Marusich, L. R. (2017). Repeated measures correlation.
-\emph{Frontiers in Psychology, 8}, 456. \doi{10.3389/fpsyg.2017.00456}.
+\emph{Frontiers in Psychology, 8}, 456. \doi{10.3389/fpsyg.2017.00456}
+}
+\seealso{
+\code{\link[=check_dyad_residuals]{check_dyad_residuals()}}, \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}
 }

@@ -1,3 +1,4 @@
+^\.git$
 ^dyadMLM\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
