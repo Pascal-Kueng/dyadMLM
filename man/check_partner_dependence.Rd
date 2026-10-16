@@ -78,7 +78,7 @@ compares each \code{observed} statistic with the middle 95\% of its simulations
 or roles and incomplete dyads are omitted with a warning. The object includes
 omission counts and settings, and can be saved and plotted later.
 With repeated occasions, \code{compositions} has a \code{level} column (\code{"between"}
-or \code{"within"}), and each label ends with its level. Within rows count the
+or \code{"within"}), and each label ends with its level. Within-level rows count the
 dyads that share at least one occasion.
 }
 \description{

@@ -222,7 +222,7 @@ if (!is_pilot) {
     100 * short_series$rate[1], 100 * short_series$rate[2]))
   sd_rows <- primary_flags |> filter(part == "gaussian", model == "equal_occasion_variances",
     level == "within", statistic == "average_difference_cor")
-  cat(sprintf("The partner-correlation row at the other level flagged at most **%.1f%%** across these covariance-omission settings. That result concerns this row, not every statistic or possible mismatch. In the Gaussian settings, where the two roles' true occasion SDs differ by a factor of 1.5, incorrectly imposing equal occasion variances was detected in **%.1f–%.1f%%** of datasets.\n\n",
+  cat(sprintf("The partner-correlation row at the other level flagged at most **%.1f%%** across these covariance-omission settings. That result concerns this row, not every statistic or possible mismatch. In the Gaussian settings, where the two roles' true occasion SDs differ by a factor of 1.5, incorrectly imposing equal occasion variances was detected by the within-level dyad-average/role-difference correlation in **%.1f–%.1f%%** of datasets.\n\n",
     100 * max(covariance_rows$rate[!covariance_rows$targeted]),
     100 * min(sd_rows$rate), 100 * max(sd_rows$rate)))
 }

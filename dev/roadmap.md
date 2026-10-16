@@ -822,7 +822,7 @@ package check, and green CI on the proposed commit.
 Build future ILD work on this foundation. Preserve the generalized and ILD
 prototype branches as references; port validated behavior selectively.
 
-## Proposed Version 0.2.2 Scope - ILD Partner Dependence
+## Version 0.2.2 Scope - ILD Partner Dependence
 
 Status: in development. `check_partner_dependence()` now takes `member` and
 `time` and checks member means and same-occasion deviations for all supported

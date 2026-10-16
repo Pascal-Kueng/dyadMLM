@@ -61,7 +61,7 @@
 #'   or roles and incomplete dyads are omitted with a warning. The object includes
 #'   omission counts and settings, and can be saved and plotted later.
 #'   With repeated occasions, `compositions` has a `level` column (`"between"`
-#'   or `"within"`), and each label ends with its level. Within rows count the
+#'   or `"within"`), and each label ends with its level. Within-level rows count the
 #'   dyads that share at least one occasion.
 #'
 #' @section Reading the plots:
