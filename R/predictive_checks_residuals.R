@@ -237,10 +237,10 @@ suggest_qgam_lines <- function(compositions) {
       lapply(patterns_by_role, `[[`, "smooth"))))
   if (!any(smoothed)) return(invisible())
   rlang::inform(c(
-    "PIT quartile lines use smoothed bins.",
-    i = paste("For a final model, `quartile_lines = \"qgam\"` fits DHARMa-style lines",
-              "that can show trends near the ends of an axis more clearly. It takes much",
-              "longer, and its envelopes are approximate.")
+    "PIT quartile lines use smoothed bins, which are fast for iterating on models.",
+    i = paste("For final candidate models, `quartile_lines = \"qgam\"` fits DHARMa-style",
+              "lines that can show trends near the ends of an axis more clearly. It takes",
+              "much longer, and its envelopes are approximate.")
   ), .frequency = "once", .frequency_id = "dyadMLM_qgam_lines")
 }
 
