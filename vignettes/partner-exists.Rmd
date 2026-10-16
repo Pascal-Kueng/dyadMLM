@@ -2,8 +2,9 @@
 title: "People Observed Without Their Partner"
 author: "Pascal Küng"
 description: >
-  Keep singles, people whose partner did not take part, and partners lost or
-  gained during a study in dyadic models, with two-part partner predictors.
+  In dyadic models, keep singles, people whose partner did not take part, and
+  people who lose or gain a partner during a study, with two-part partner
+  predictors where no partner exists.
 bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
