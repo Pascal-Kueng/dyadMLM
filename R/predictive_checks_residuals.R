@@ -297,9 +297,13 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows, quartile
     grid <- seq(min(ranks), max(ranks), length.out = 101)
     quartile_curves <- qgam_quartiles(pit[rows, , drop = FALSE], ranks, grid)
     limits <- c(0, 1)
-    # Ticks at the predictor's quartiles, labelled with its values there.
+    # Ticks at the predictor's quartiles, labelled with its values there. Two
+    # significant digits, or more where needed to tell different quartiles apart.
     ticks <- 0:4 / 4
-    labels <- signif(stats::quantile(predictor[rows], ticks, names = FALSE), 2)
+    values <- stats::quantile(predictor[rows], ticks, names = FALSE)
+    digits <- 2
+    while (length(unique(signif(values, digits))) < length(unique(values))) digits <- digits + 1
+    labels <- signif(values, digits)
   }
   # One envelope covers all three quartiles and positions in this panel.
   joint <- residual_curve_summary(do.call(rbind, quartile_curves))

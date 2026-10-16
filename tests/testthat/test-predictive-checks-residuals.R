@@ -201,6 +201,10 @@ test_that("qgam lines replace smoothed bins and are fitted on ranks", {
   expect_equal(range(pattern$positions), c(1 / n, 1))
   expect_equal(pattern$ticks, 0:4 / 4)
   expect_equal(pattern$labels, signif(quantile(predictor, 0:4 / 4, names = FALSE), 2))
+  # Close quartiles keep distinct labels.
+  narrow <- calculate_residual_pattern(pit, seq(1000, 1001, length.out = n), seq_len(n),
+                                       list(seq_len(n)), "qgam")
+  expect_length(unique(narrow$labels), 5)
   expect_lt(pattern$quantiles[[2]]$observed[1], .3)
   expect_gt(pattern$quantiles[[2]]$observed[101], .7)
   # Without enough observations for smoothing, bins stay.
