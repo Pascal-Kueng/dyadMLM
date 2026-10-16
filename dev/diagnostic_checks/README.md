@@ -47,6 +47,7 @@ From the repository root:
 devtools::test()
 source("dev/diagnostic_checks/check-additional-families.R")
 source("dev/diagnostic_checks/check-ordinal-family.R")
+source("dev/diagnostic_checks/validate-envelopes.R") # global envelopes against GET
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd")
 rmarkdown::render("dev/diagnostic_checks/partner-dependence-reference-validation.Rmd")
 pkgdown::build_article("articles/partner-dependence-simulation")

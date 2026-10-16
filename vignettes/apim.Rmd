@@ -410,8 +410,7 @@ dyadMLM::check_partner_dependence(
   dyad = coupleID,
   role = gender,
   # Supply the fitting data because gender is not in the model formula.
-  data = apim_distinguishable_data,
-  panels = TRUE
+  data = apim_distinguishable_data
 )
 ```
 
@@ -431,8 +430,88 @@ and correlations estimated from the same data. See the
 for details and interpretation. Simulation studies show how often the check
 detects [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often it raises false alarms. These checks currently support cross-sectional
+and how often it raises false alarms. This check currently supports cross-sectional
 dyads only.
+
+## Checking residuals and outcomes {#checking-residuals-and-outcomes}
+
+We reuse `apim_simulations` with
+[`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)
+and
+[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html).
+The residual check uses PIT residuals, which rank each outcome from 0 (low)
+to 1 (high) among its simulated values. The outcome check compares outcome
+distributions and summaries.
+
+We check by gender (`role = gender`), even though the restricted model treats
+partners as exchangeable. We do this because role differences the model misses
+can cancel out when all observations are pooled: if one role's outcomes are
+higher than simulated and the other's lower, a pooled check can look fine. Here,
+the pooled QQ plot (not shown) stays inside its envelope. Any other column that
+gives each member a fixed role, such as older and younger partner, can be
+checked the same way.
+
+With `predictors`, we add a page of PIT quartiles across the partner's provided
+support. If the model captures the partner effect, the quartiles stay near their
+dashed lines at 0.25, 0.5, and 0.75 for all levels of partner support. With a
+missing or misspecified partner effect, they move away from these lines as
+partner support changes.
+
+```{r check-residuals-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution for women and men: uniform QQ plots with blue envelopes in the top row and mean PIT distance histograms in the bottom row. Red marks observed values.", "Residual patterns for women and men: PIT quartiles across predicted outcomes with blue envelopes. Red curves show observed values.", "Residual patterns for women and men: PIT quartiles across the partner's provided support with blue envelopes. Red curves show observed values.")}
+dyadMLM::check_dyad_residuals(
+  apim_simulations,
+  dyad = coupleID,
+  role = gender,
+  predictors = ".provided_support_gmc_partner",
+  data = apim_distinguishable_data
+)
+```
+
+```{r check-outcomes-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 12, out.width = "100%", fig.alt = "Outcome checks for women and men: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Red marks observed values."}
+dyadMLM::check_dyad_outcomes(
+  apim_simulations,
+  dyad = coupleID,
+  role = gender,
+  data = apim_distinguishable_data
+)
+```
+
+Look for flags (red curves outside their blue envelopes, or red lines outside
+their dashed limits) that form a pattern across plots. Here, women's observed
+closeness is higher than simulated and men's closeness is lower, in the QQ
+plots, the PIT quartiles, and the outcome ECDFs. For men, the gap grows at high
+predicted outcomes, as well as at high partner support. Mean PIT distance,
+response SDs, and largest absolute deviations stay within their limits. These
+panels mainly react to spread, so the model seems to reproduce how much
+closeness varies around its predictions. The pattern suggests that the model
+omits relevant gender differences, at least in mean closeness.
+
+Adding gender-specific intercepts (`0 + .is_female + .is_male` instead of `1`)
+makes the actor estimate smaller and the partner estimate larger. Women provide
+slightly more support than men here, so the omitted gender difference in mean
+closeness had shifted both effects. Rechecking this model (not shown) flags only
+men's PIT quartiles across predicted outcomes. The distinguishable APIM, which
+also lets actor and partner effects and residual variances differ by gender,
+shows no flags. The
+[simulation study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
+shows how often these panels flag correct and mismatched models.
+
+If you know [DHARMa](https://CRAN.R-project.org/package=DHARMa): the uniform QQ
+plot and the PIT quartiles across predicted outcomes use the same principle as
+its residual plots and are read the same way. Two things differ:
+
+1. Our simulations redraw all random effects. DHARMa's default (since version
+   0.5.0) holds them at their fitted values and redraws only the residual
+   variation. In APIMs fitted with `dispformula = ~ 0`, as here, the random
+   effects absorb all residual variation, so these simulations would reproduce
+   the data almost exactly. Redrawing all random effects also keeps partner
+   dependence in the reference.
+2. The blue envelopes are global envelopes [@myllymakiGlobalEnvelopeTests2017]
+   built from whole simulated datasets, which keep the fitted partner and time
+   dependence. They are an alternative to DHARMa's tests, which assume
+   independent residuals.
+
+See [why we do not use DHARMa directly](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html#why-not-use-dharma-directly).
 
 
 ## Intensive longitudinal APIMs

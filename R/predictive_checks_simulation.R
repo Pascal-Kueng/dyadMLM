@@ -2,9 +2,9 @@
 #'
 #' `r lifecycle::badge("experimental")`
 #' Generates new response datasets for the same observations and predictors.
-#' Reuse them with [check_partner_dependence()] to check whether a fitted
-#' model reproduces features of the observed data. For a complete example
-#' see [check_partner_dependence()].
+#' Reuse them with [check_partner_dependence()], [check_dyad_residuals()], or
+#' [check_dyad_outcomes()] to check whether a fitted model reproduces features of
+#' the observed data. For a complete example see [check_partner_dependence()].
 #'
 #' @param model A fitted `glmmTMB` model.
 #' @param nsim Number of complete response datasets to simulate. Default: 1000.
@@ -13,7 +13,7 @@
 #'   after the function returns, or when it stops after an error.
 #'
 #' @return A `dyadMLM_response_simulations` object for use with
-#'   [check_partner_dependence()].
+#'   [check_partner_dependence()], [check_dyad_residuals()], and [check_dyad_outcomes()].
 #'
 #' The result keeps all components in fitted-row order (after missing-data
 #' exclusions):
@@ -42,8 +42,7 @@
 #' - `glmmTMB::lognormal()`
 #' - `glmmTMB::skewnormal()`
 #' - `glmmTMB::t_family()` with more than two degrees of freedom
-#' - `glmmTMB::ordinal()` (currently only available in the development version
-#'   of `glmmTMB`)
+#' - `glmmTMB::ordinal()` (glmmTMB 1.1.15.2 or later)
 #'
 #' Smooth terms (`s()`) are not supported: simulations would draw new curves.
 #' Fixed-effect splines such as `splines::ns()` are supported.
@@ -54,9 +53,13 @@
 #' response components each fit well.
 #'
 #' Ordinal checks use category scores `1, 2, ..., K` in their fitted order,
-#' matching [glmmTMB's predictions][glmmTMB::family_glmmTMB]. The plots compare
-#' variation and partner correlation in these scores. The scores do not measure
+#' matching [glmmTMB's predictions][glmmTMB::family_glmmTMB]. The checks compare
+#' observed and simulated scores. The scores do not measure
 #' distances on an underlying continuous scale.
+#' Because each dyad contains only two people, glmmTMB tends to underestimate
+#' the dyad variance in ordinal models. Simulations then show less partner
+#' dependence than the data, so the partner check can flag a correct ordinal
+#' model, especially with many dyads.
 #'
 #' The model's fitted link is used for prediction and simulation. Predictions
 #' and simulated responses must be finite.
@@ -64,15 +67,16 @@
 #' [check_partner_dependence()] currently requires cross-sectional dyads.
 #'
 #' @section Technical details:
-#' Each simulation draws new random effects and then new responses from the
-#' fitted model. Random effects within each block are drawn together using
-#' their fitted variances and correlations. This also applies to random effects
-#' in the zero-inflation and dispersion models, if present.
+#' Each simulation draws new random effects, if the model has any, and then new
+#' responses from the fitted model. Random effects within each block are drawn
+#' together using their fitted variances and correlations. This also applies to
+#' random effects in the zero-inflation and dispersion models, if present.
 #'
 #' Fitted parameters and predictors, including any lagged responses, stay fixed.
 #' The model is not refitted, and uncertainty in parameter estimates is not
-#' included. This is a *plug-in predictive reference*. If dyads are the only grouping factor, the simulations
-#' represent hypothetical new dyads under the same study design.
+#' included. This is a *plug-in predictive reference* (Gelman et al., 1996).
+#' If dyads are the only grouping factor, the simulations represent
+#' hypothetical new dyads under the same study design.
 #'
 #' `predicted_response` contains predicted mean responses with random effects
 #' in the conditional and zero-inflation models set to zero. For zero-inflated
@@ -80,10 +84,16 @@
 #' one minus the zero-component probability (Brooks et al., 2017, Appendix A;
 #' \doi{10.32614/RJ-2017-066}).
 #'
-#' By default, later checks subtract these same predictions from observed and
-#' simulated responses. Both random effects and observation-level noise still
+#' Partner-dependence checks (by default) and the response SD and largest
+#' absolute deviation of [check_dyad_outcomes()] subtract these same predictions
+#' from observed and simulated responses.
+#' Both random effects and observation-level noise still
 #' contribute to response variance. With nonlinear links, setting random effects
 #' to zero generally differs from averaging predictions over them.
+#'
+#' @references Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior
+#'   predictive assessment of model fitness via realized discrepancies.
+#'   *Statistica Sinica, 6*(4), 733--807.
 #'
 #' @export
 simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
@@ -136,8 +146,7 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     observed <- as.numeric(observed)
     rlang::inform(paste0(
       "Ordinal categories are scored 1, 2, ..., K in both observed and ",
-      "simulated data. The plots show whether the model reproduces ",
-      "variation and partner correlation in these scores."
+      "simulated data. The checks compare observed and simulated scores."
     ), .frequency = "once", .frequency_id = "dyadMLM_ordinal_scores")
   }
   if (!is.numeric(observed) || !is.null(dim(observed)) ||
@@ -151,6 +160,20 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   has_zero_inflation <- ncol(zero_inflation_model_matrix) > 0L ||
     (utils::packageVersion("glmmTMB") >= "1.1.15.1" &&
        ncol(glmmTMB::getME(model, "Zzi")) > 0L)
+
+  conditional_design <- as.matrix(stats::model.matrix(model, component = "cond"))
+  coefficient_map <- model$obj$env$map[["beta"]]
+  if (!is.null(coefficient_map)) {
+    # Tied coefficients move together; fixed coefficients contribute no change.
+    free_groups <- outer(as.integer(coefficient_map),
+                         seq_len(nlevels(coefficient_map)), "==")
+    conditional_design <- conditional_design %*% (free_groups & !is.na(free_groups))
+  }
+  # Recognise a free overall location in any coding, including separate role means.
+  # Ordinal threshold centring has not yet been validated here.
+  free_conditional_intercept <- family$family != "ordinal" &&
+    ncol(conditional_design) > 0L &&
+    qr(conditional_design)$rank == qr(cbind(conditional_design, 1))$rank
 
   # newdata = NULL prevents na.exclude from padding omitted rows back in.
   predicted <- as.numeric(stats::predict(
@@ -214,13 +237,15 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     model_frame = frame
   )
 
+  has_random_effects <- any(lengths(lapply(model$modelInfo$reTrms, `[[`, "cnms")) > 0L)
   attr(out, "dyadMLM") <- list(
     backend = "glmmTMB",
     family = family$family,
     link = family$link,
     reference = "plug-in predictive",
-    random_effects = "new",
+    random_effects = if (has_random_effects) "new" else "no",
     parameter_uncertainty = "excluded",
+    free_conditional_intercept = free_conditional_intercept,
     seed = seed
   )
 

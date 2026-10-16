@@ -17,7 +17,7 @@ after the function returns, or when it stops after an error.}
 }
 \value{
 A \code{dyadMLM_response_simulations} object for use with
-\code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+\code{\link[=check_partner_dependence]{check_partner_dependence()}}, \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}, and \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}.
 
 The result keeps all components in fitted-row order (after missing-data
 exclusions):
@@ -36,9 +36,9 @@ the seed.
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Generates new response datasets for the same observations and predictors.
-Reuse them with \code{\link[=check_partner_dependence]{check_partner_dependence()}} to check whether a fitted
-model reproduces features of the observed data. For a complete example
-see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+Reuse them with \code{\link[=check_partner_dependence]{check_partner_dependence()}}, \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}, or
+\code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}} to check whether a fitted model reproduces features of
+the observed data. For a complete example see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 \section{Supported models}{
 
@@ -56,8 +56,7 @@ Supports unweighted \code{glmmTMB} models with the following families:
 \item \code{glmmTMB::lognormal()}
 \item \code{glmmTMB::skewnormal()}
 \item \code{glmmTMB::t_family()} with more than two degrees of freedom
-\item \code{glmmTMB::ordinal()} (currently only available in the development version
-of \code{glmmTMB})
+\item \code{glmmTMB::ordinal()} (glmmTMB 1.1.15.2 or later)
 }
 
 Smooth terms (\code{s()}) are not supported: simulations would draw new curves.
@@ -69,9 +68,13 @@ component separately. Good agreement does not establish that the zero and
 response components each fit well.
 
 Ordinal checks use category scores \verb{1, 2, ..., K} in their fitted order,
-matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The plots compare
-variation and partner correlation in these scores. The scores do not measure
+matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The checks compare
+observed and simulated scores. The scores do not measure
 distances on an underlying continuous scale.
+Because each dyad contains only two people, glmmTMB tends to underestimate
+the dyad variance in ordinal models. Simulations then show less partner
+dependence than the data, so the partner check can flag a correct ordinal
+model, especially with many dyads.
 
 The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.
@@ -81,15 +84,16 @@ and simulated responses must be finite.
 
 \section{Technical details}{
 
-Each simulation draws new random effects and then new responses from the
-fitted model. Random effects within each block are drawn together using
-their fitted variances and correlations. This also applies to random effects
-in the zero-inflation and dispersion models, if present.
+Each simulation draws new random effects, if the model has any, and then new
+responses from the fitted model. Random effects within each block are drawn
+together using their fitted variances and correlations. This also applies to
+random effects in the zero-inflation and dispersion models, if present.
 
 Fitted parameters and predictors, including any lagged responses, stay fixed.
 The model is not refitted, and uncertainty in parameter estimates is not
-included. This is a \emph{plug-in predictive reference}. If dyads are the only grouping factor, the simulations
-represent hypothetical new dyads under the same study design.
+included. This is a \emph{plug-in predictive reference} (Gelman et al., 1996).
+If dyads are the only grouping factor, the simulations represent
+hypothetical new dyads under the same study design.
 
 \code{predicted_response} contains predicted mean responses with random effects
 in the conditional and zero-inflation models set to zero. For zero-inflated
@@ -97,9 +101,16 @@ and hurdle models, this is the conditional response mean multiplied by
 one minus the zero-component probability (Brooks et al., 2017, Appendix A;
 \doi{10.32614/RJ-2017-066}).
 
-By default, later checks subtract these same predictions from observed and
-simulated responses. Both random effects and observation-level noise still
+Partner-dependence checks (by default) and the response SD and largest
+absolute deviation of \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}} subtract these same predictions
+from observed and simulated responses.
+Both random effects and observation-level noise still
 contribute to response variance. With nonlinear links, setting random effects
 to zero generally differs from averaging predictions over them.
 }
 
+\references{
+Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior
+predictive assessment of model fitness via realized discrepancies.
+\emph{Statistica Sinica, 6}(4), 733--807.
+}

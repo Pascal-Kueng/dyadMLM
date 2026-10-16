@@ -10,6 +10,7 @@ Public report sources stay in `vignettes/articles/`.
 | [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [mixed-apim-recovery](mixed-apim-recovery/README.md) | Fixed-effect and covariance recovery for mixed-composition Gaussian APIMs | [Recovery report](../../../vignettes/articles/mixed-apim-recovery.Rmd) |
+| [distribution-checks](distribution-checks/run.R) | Residual and outcome flags, pooled versus role checks, and paired PIT centring | [Report](../../../vignettes/articles/distribution-checks.Rmd) |
 | [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
 [Shared family generators](shared/family-margins.R) are used by both family studies.
@@ -37,6 +38,83 @@ from exported tables without refitting. New diagnostics may require refitting;
 changes to the study design require a new run. Failed fits remain recorded and
 are excluded from check rates. Reference simulations keep fitted parameters fixed.
 Reported rate intervals are 95% Wilson intervals.
+
+## Residual and outcome checks
+
+One run covers 44 conditions with 500 datasets and 1,000 reference simulations
+per dataset:
+
+- Main conditions at 40, 100, and 400 dyads with dyad SD 0.6. Gaussian: correct
+  specification, two omitted role mean differences, and two role SD ratios.
+  Counts: correct NB2 models, two amounts of NB2 overdispersion fitted as
+  Poisson, and two omitted zero-inflation probabilities.
+- Correct Gaussian and NB2 models with dyad SD 1.2 at 100 and 400 dyads, and
+  three severe mismatches with the same dyad SD and sample sizes: an omitted
+  partner effect, a residual SD of exp(actor predictor - 1), and NB2 size 1
+  fitted as Poisson.
+- Correct five-category ordinal models at 100 and 400 dyads: the Gaussian
+  model's predictors and dyad effect, without intercept, scaled by pi/sqrt(3),
+  plus standard logistic noise, cut at -3.05, -1.23, 1.23, and 3.05 (about
+  10/20/40/20/10%).
+- Gaussian longitudinal data with 100 dyads, six occasions, and person-specific
+  AR(1) processes, with a correct model or omitted role means of +/-0.2.
+
+All fitted models keep actor and partner effects and a shared dyad intercept,
+apart from the omitted partner effect. Each fit records the actor and partner
+estimates, SEs, and 95% Wald coverage. Every dataset is checked pooled (with
+`dyad`) and by role, both with actor and partner predictor pages. The default
+residual check and the same check without centring share their data, fitted
+model, simulation bank, and PIT seed. Ordinal PIT residuals are never centred,
+so ordinal models have no uncentred copy. Outcome checks reuse the same bank.
+Correct Gaussian and NB2 models also use a separate known-parameter reference,
+evaluated regardless of fitting success.
+
+Rates describe individual panels and two unions of numerical flags: `any`
+without and `any_pages` with the predictor pages, for each check and both
+checks, pooled or in either role. The unions have no promised 5% false-alarm
+rate. Ordinal category ranges (`category_any`) are reported separately and
+never enter a union. The ECDF display has no numerical flag rule.
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/check.R
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 FLEXIBLAS_NUM_THREADS=1 \
+  Rscript dev/diagnostic_checks/simulation-studies/distribution-checks/run.R 500 1000 9 run
+```
+
+Arguments are datasets per condition, reference simulations, workers, and `run`
+or `summarise`. An optional fifth argument selects comma-separated condition
+numbers, in the order they start. Starting the slowest conditions first (43,
+18, 34, 32, 44, ...) shortens the run. Without the thread limits, the
+longitudinal AR(1) fits can stall. Dataset seeds are 1,210,000,000 + 100,000 x
+condition + dataset; simulation, known-parameter, and PIT seeds add 10,000,000,
+20,000,000, and 30,000,000. Seeds do not depend on workers or selection.
+Checkpoints save every five datasets under
+`results/distribution-checks/<settings>/`; rerun the same command to resume.
+Changed generators or package code (roxygen lines excepted) or software
+versions require archiving the old run before restarting. The full run takes
+about 100 CPU hours, or about 11 hours with nine workers.
+
+For a short workflow check, use `3 1000 8 run`. This is a pilot, not evidence of
+precise flag rates. `summarise` updates tables without fitting.
+Only a complete 500-by-1,000 run exports public tables to
+`report-data/distribution-checks/`: conditions, summary, paired comparison,
+fits, inference, largest-deviation ties, source hashes, and session information.
+The session information is written before glmmTMB loads, so it omits glmmTMB and
+TMB. This run used glmmTMB 1.1.15 from GitHub (commit `93c77471`, with
+`ordinal()`) and TMB 1.9.25.
+
+Saved checkpoints contain per-dataset flags, scalar limits, seeds, warnings,
+errors, fitting diagnostics, and actor and partner estimates, without fitted
+models or simulation matrices. Rates exclude failed fits and checks without
+retry; unavailable statistics do not count as agreement. Longitudinal
+conditions evaluate these marginal checks under time dependence, not their
+ability to detect serial-correlation errors.
+
+Earlier runs recorded panels that the package no longer shows (the PIT
+histogram, outlier count, count category bars, and PIT distance patterns).
+Their scripts and tables are in the history of PR #77: the main study and its
+add-on at commit `0ceacd4c`, and a confirmation run at commit `fc2276ff`. The
+current panels were chosen from those runs. This run uses new seeds.
 
 ## Gaussian covariance pooling
 
@@ -145,6 +223,7 @@ After changing text or plots, rebuild from the compact tables without simulation
 ```r
 pkgdown::build_article("articles/partner-dependence-simulation")
 pkgdown::build_article("articles/covariance-pooling")
+pkgdown::build_article("articles/distribution-checks")
 ```
 
 After updating saved family-comparison results, first refresh its exported tables:
