@@ -13,8 +13,15 @@
   supply `member` and `time` to check member means and same-occasion
   deviations separately.
 
+* Fixed an internal vctrs error in `prepare_dyad_data()` when no member rows
+  are missing and the data contain, for example, an `hms` column while the hms
+  package is not loaded.
+
 * Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.
+
+* `prepare_dyad_data()` now gives a clear error when `data` is supplied
+  twice, for example through the pipe and as an argument.
 
 # dyadMLM 0.2.0
 

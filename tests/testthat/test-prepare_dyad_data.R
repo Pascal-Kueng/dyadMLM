@@ -170,6 +170,35 @@ test_that("prepare_dyad_data rejects unsupported model types", {
   )
 })
 
+test_that("prepare_dyad_data explains a data frame supplied twice", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = c(1, 2, 3, 4)
+  )
+
+  # The extra data frame fills the first free argument after `data`.
+  expect_error(
+    data |> prepare_dyad_data(data, dyad = dyad_id, member = person_id),
+    "`role` received a data frame instead of column names.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    dplyr::mutate(data, y = x) |>
+      prepare_dyad_data(
+        data = data,
+        dyad = dyad_id,
+        member = person_id,
+        role = NULL,
+        time = NULL,
+        predictors = x
+      ),
+    "`lag1_predictors` received a data frame instead of column names.",
+    fixed = TRUE
+  )
+})
+
 test_that("prepare_dyad_data validates short_colnames", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
