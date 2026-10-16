@@ -15,7 +15,8 @@
 
 * Added `quartile_lines = "qgam"` to `check_dyad_residuals()` to fit the PIT
   quartile lines with the qgam package, as DHARMa does. These lines can show
-  trends near the ends of a numeric axis more clearly, but take much longer.
+  trends near the ends of a numeric axis more clearly, but take much longer,
+  and their envelopes are approximate.
 
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),

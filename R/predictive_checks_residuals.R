@@ -41,10 +41,12 @@
 #'   composition and is omitted.
 #' @param quartile_lines Quantile regression lines (`"qgam"`) can show trends
 #'   near the ends of a numeric axis more clearly than smoothed bins (`"bins"`,
-#'   default). As in DHARMa, they are fitted with the qgam package on ranks of
-#'   the axis values. Each dataset gets its own lines, so envelopes and flags
-#'   work as with bins. `"qgam"` is much slower and may warn when fits do not
-#'   converge.
+#'   default). As in DHARMa, they are fitted with the qgam package (Fasiolo et
+#'   al., 2021) on ranks of the axis values. Each dataset gets its own lines.
+#'   Tuning qgam for every dataset would take far too long, so simulated
+#'   datasets reuse the tuning chosen for the observed data. The 95% coverage
+#'   of the qgam envelopes is therefore approximate. `"qgam"` is much slower
+#'   and may warn when fits do not converge.
 #'
 #' @return Invisibly returns a `dyadMLM_residual_check` list with the `pit` matrix
 #'   (after any centring) and calculated summaries in `compositions`. `pit` has
@@ -95,6 +97,10 @@
 #' Dunn, P. K., & Smyth, G. K. (1996). Randomized quantile residuals.
 #' *Journal of Computational and Graphical Statistics, 5*(3), 236--244.
 #' \doi{10.2307/1390802}
+#'
+#' Fasiolo, M., Wood, S. N., Zaffran, M., Nedellec, R., & Goude, Y. (2021).
+#' qgam: Bayesian nonparametric quantile regression modeling in R. *Journal of
+#' Statistical Software, 100*(9), 1--31. \doi{10.18637/jss.v100.i09}
 #'
 #' Hartig, F. (2026). *DHARMa: Residual diagnostics for hierarchical
 #' (multi-level/mixed) regression models* (Version 0.5.0) \[R package\].
@@ -233,8 +239,8 @@ suggest_qgam_lines <- function(compositions) {
   rlang::inform(c(
     "PIT quartile lines use smoothed bins.",
     i = paste("For a final model, `quartile_lines = \"qgam\"` fits DHARMa-style lines",
-              "that can show trends near the ends of an axis more clearly, but takes",
-              "much longer.")
+              "that can show trends near the ends of an axis more clearly. It takes much",
+              "longer, and its envelopes are approximate.")
   ), .frequency = "once", .frequency_id = "dyadMLM_qgam_lines")
 }
 
@@ -306,7 +312,8 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows, quartile
 # DHARMa::testQuantiles(). Returns one matrix per quartile, with `grid` points in
 # rows and datasets (columns of `pit`) in columns. Calibrating qgam for every
 # dataset would take far too long, so simulated datasets reuse the tuning found
-# for the observed data.
+# for the observed data. The observed lines are then tuned differently from the
+# simulated ones, which makes the envelopes approximate (see the help).
 qgam_quartiles <- function(pit, axis, grid) {
   # mgcv's default basis size, but no more than the distinct axis values.
   basis_size <- min(length(unique(axis)), 10)
@@ -386,9 +393,11 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #' are grouped into up to eight bins per role, with at least about 20
 #' observations per bin. With four or more bins, quartiles are smoothed across
 #' neighboring bins. `quartile_lines = "qgam"` in [check_dyad_residuals()]
-#' replaces these smoothed quartiles with qgam lines. These are full-model
-#' residuals, not partial effects. Bins and separate predictors can hide local
-#' patterns and interactions.
+#' replaces these smoothed quartiles with qgam lines. Because simulated datasets
+#' reuse the qgam tuning of the observed data, the 95% coverage of these
+#' envelopes is approximate. These are full-model residuals, not partial
+#' effects. Bins and separate predictors can hide local patterns and
+#' interactions.
 #'
 #'
 #' @section Views and compositions:

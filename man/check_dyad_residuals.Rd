@@ -63,10 +63,12 @@ composition and is omitted.}
 
 \item{quartile_lines}{Quantile regression lines (\code{"qgam"}) can show trends
 near the ends of a numeric axis more clearly than smoothed bins (\code{"bins"},
-default). As in DHARMa, they are fitted with the qgam package on ranks of
-the axis values. Each dataset gets its own lines, so envelopes and flags
-work as with bins. \code{"qgam"} is much slower and may warn when fits do not
-converge.}
+default). As in DHARMa, they are fitted with the qgam package (Fasiolo et
+al., 2021) on ranks of the axis values. Each dataset gets its own lines.
+Tuning qgam for every dataset would take far too long, so simulated
+datasets reuse the tuning chosen for the observed data. The 95\% coverage
+of the qgam envelopes is therefore approximate. \code{"qgam"} is much slower
+and may warn when fits do not converge.}
 }
 \value{
 Invisibly returns a \code{dyadMLM_residual_check} list with the \code{pit} matrix
@@ -173,6 +175,10 @@ plot(result, panels = FALSE, ask = FALSE)
 Dunn, P. K., & Smyth, G. K. (1996). Randomized quantile residuals.
 \emph{Journal of Computational and Graphical Statistics, 5}(3), 236--244.
 \doi{10.2307/1390802}
+
+Fasiolo, M., Wood, S. N., Zaffran, M., Nedellec, R., & Goude, Y. (2021).
+qgam: Bayesian nonparametric quantile regression modeling in R. \emph{Journal of
+Statistical Software, 100}(9), 1--31. \doi{10.18637/jss.v100.i09}
 
 Hartig, F. (2026). \emph{DHARMa: Residual diagnostics for hierarchical
 (multi-level/mixed) regression models} (Version 0.5.0) [R package].
