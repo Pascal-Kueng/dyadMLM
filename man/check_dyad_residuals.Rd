@@ -64,7 +64,8 @@ composition and is omitted.}
 \item{quartile_lines}{Quantile regression lines (\code{"qgam"}) can show trends
 near the ends of a numeric axis more clearly than smoothed bins (\code{"bins"},
 default). As in DHARMa, they are fitted with the qgam package (Fasiolo et
-al., 2021) on ranks of the axis values. Each dataset gets its own lines.
+al., 2021) and drawn on ranks of the axis values. Each dataset gets its
+own lines.
 Tuning qgam for every dataset would take far too long, so simulated
 datasets reuse the tuning chosen for the observed data. The 95\% coverage
 of the qgam envelopes is therefore approximate. \code{"qgam"} is much slower

@@ -197,14 +197,21 @@ test_that("qgam lines replace smoothed bins and are fitted on ranks", {
   pit <- cbind(seq(.1, .9, length.out = n) + .1 * sin(seq_len(n)),
                matrix(sin(seq_len(2 * n))^2, n))
   pattern <- calculate_residual_pattern(pit, predictor, seq_len(n), list(seq_len(n)), "qgam")
-  # Evenly spaced ranks put the middle of the line at the predictor's median.
-  expect_equal(pattern$positions[c(1, 51, 101)], quantile(predictor, c(0, .5, 1)),
-               ignore_attr = TRUE)
+  # Lines lie on ranks from 0 to 1, with ticks at the predictor's quartiles.
+  expect_equal(range(pattern$positions), c(1 / n, 1))
+  expect_equal(pattern$ticks, 0:4 / 4)
+  expect_equal(pattern$labels, signif(quantile(predictor, 0:4 / 4, names = FALSE), 2))
   expect_lt(pattern$quantiles[[2]]$observed[1], .3)
   expect_gt(pattern$quantiles[[2]]$observed[101], .7)
   # Without enough observations for smoothing, bins stay.
   expect_identical(calculate_residual_pattern(pit, predictor, 1:60, list(1:60), "qgam"),
                    calculate_residual_pattern(pit, predictor, 1:60, list(1:60), "bins"))
+  # A saved check with qgam lines draws its ranked axis.
+  result <- check_dyad_residuals(distribution_check_fixture(), role = NULL, plot = FALSE)
+  result$compositions[[1]]$patterns[[1]]$Pooled <- pattern
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(plot(result, ask = FALSE))
 })
 
 test_that("qgam warnings come as one summary per panel", {

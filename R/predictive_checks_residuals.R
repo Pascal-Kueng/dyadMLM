@@ -42,7 +42,8 @@
 #' @param quartile_lines Quantile regression lines (`"qgam"`) can show trends
 #'   near the ends of a numeric axis more clearly than smoothed bins (`"bins"`,
 #'   default). As in DHARMa, they are fitted with the qgam package (Fasiolo et
-#'   al., 2021) on ranks of the axis values. Each dataset gets its own lines.
+#'   al., 2021) and drawn on ranks of the axis values. Each dataset gets its
+#'   own lines.
 #'   Tuning qgam for every dataset would take far too long, so simulated
 #'   datasets reuse the tuning chosen for the observed data. The 95% coverage
 #'   of the qgam envelopes is therefore approximate. `"qgam"` is much slower
@@ -289,12 +290,16 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows, quartile
     values <- do.call(rbind, lapply(quartiles, function(group) group[i, ]))
     if (smooth) weights %*% values else values
   })
-  if (smooth && quartile_lines == "qgam") {
-    # As in DHARMa, fit on ranks. Then draw at the matching predictor values.
-    ranks <- rank(predictor[rows])
-    rank_grid <- seq(min(ranks), max(ranks), length.out = 101)
-    grid <- stats::approx(ranks, predictor[rows], rank_grid, ties = mean)$y
-    quartile_curves <- qgam_quartiles(pit[rows, , drop = FALSE], ranks, rank_grid)
+  ranked <- smooth && quartile_lines == "qgam"
+  if (ranked) {
+    # As in DHARMa, fit and draw on ranks scaled to 0--1.
+    ranks <- rank(predictor[rows]) / length(rows)
+    grid <- seq(min(ranks), max(ranks), length.out = 101)
+    quartile_curves <- qgam_quartiles(pit[rows, , drop = FALSE], ranks, grid)
+    limits <- c(0, 1)
+    # Ticks at the predictor's quartiles, labelled with its values there.
+    ticks <- 0:4 / 4
+    labels <- signif(stats::quantile(predictor[rows], ticks, names = FALSE), 2)
   }
   # One envelope covers all three quartiles and positions in this panel.
   joint <- residual_curve_summary(do.call(rbind, quartile_curves))
@@ -303,9 +308,11 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows, quartile
     indices <- seq_len(positions_per_curve) + (i - 1L) * positions_per_curve
     lapply(joint, `[`, indices)
   })
-  list(positions = if (smooth) grid else positions, labels = labels,
-       limits = limits + c(-padding, padding), binned = binned, smooth = smooth,
-       numeric = is.numeric(predictor), quantiles = quantiles)
+  pattern <- list(positions = if (smooth) grid else positions, labels = labels,
+                  limits = limits + c(-padding, padding), binned = binned, smooth = smooth,
+                  numeric = is.numeric(predictor), quantiles = quantiles)
+  if (ranked) pattern$ticks <- ticks
+  pattern
 }
 
 # Fit the three PIT quartiles across `axis` with qgam, as in
@@ -393,7 +400,8 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #' are grouped into up to eight bins per role, with at least about 20
 #' observations per bin. With four or more bins, quartiles are smoothed across
 #' neighboring bins. `quartile_lines = "qgam"` in [check_dyad_residuals()]
-#' replaces these smoothed quartiles with qgam lines. Because simulated datasets
+#' replaces these smoothed quartiles with qgam lines on a ranked axis, with
+#' ticks at the quartiles of the axis values. Because simulated datasets
 #' reuse the qgam tuning of the observed data, the 95% coverage of these
 #' envelopes is approximate. These are full-model residuals, not partial
 #' effects. Bins and separate predictors can hide local patterns and
@@ -472,10 +480,14 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
     title <- if (is.null(name)) "PIT quartiles\n(fit across predicted outcomes)"
       else paste0("PIT quartiles by ", name, "\n(fit across predictor values)")
     if (is.null(pattern)) return(plot_check_empty(title, "No available predictor values"))
+    # qgam lines lie on ranks, with ticks at the predictor's quartiles.
+    ranked <- !is.null(pattern$ticks)
     graphics::plot(pattern$positions, rep(.5, length(pattern$positions)), type = "n", ylim = c(0, 1),
-      xlim = pattern$limits, xaxt = if (pattern$binned) "s" else "n", yaxt = "n", main = title,
-      xlab = if (is.null(name)) "Predicted outcome" else name, ylab = "PIT quartiles")
+      xlim = pattern$limits, xaxt = if (pattern$binned && !ranked) "s" else "n", yaxt = "n",
+      main = title, ylab = "PIT quartiles",
+      xlab = paste0(if (is.null(name)) "Predicted outcome" else name, if (ranked) " (ranked)"))
     if (!pattern$binned) graphics::axis(1, pattern$positions, pattern$labels, cex.axis = .8)
+    if (ranked) graphics::axis(1, pattern$ticks, pattern$labels)
     graphics::axis(2, c(0, .25, .5, .75, 1))
     graphics::abline(h = c(.25, .5, .75), lty = 2, col = check_colours$reference)
     draw_quartiles(pattern$positions, pattern$quantiles, pattern$smooth,
