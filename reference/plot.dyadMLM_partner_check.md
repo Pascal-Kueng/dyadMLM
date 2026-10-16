@@ -20,8 +20,7 @@ plot(x, ask = NULL, panels = TRUE, ...)
 
   Whether to pause between figures on an interactive device. `NULL`
   (default) pauses when there is more than one figure, `TRUE` pauses and
-  `FALSE` draws without pausing. In panel mode, each composition is one
-  figure. File devices never pause.
+  `FALSE` draws without pausing. File devices never pause.
 
 - panels:
 
@@ -33,8 +32,7 @@ plot(x, ask = NULL, panels = TRUE, ...)
 
   Additional graphical arguments passed to
   [`graphics::plot()`](https://rdrr.io/r/graphics/plot.default.html).
-  `freq`, `xlim`, `ylim`, `main`, `sub`, and `xlab` are controlled by
-  this method.
+  `freq`, `xlim`, `main`, and `sub` are controlled by this method.
 
 ## Value
 

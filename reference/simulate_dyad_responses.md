@@ -2,7 +2,10 @@
 
 **\[experimental\]** Generates new response datasets for the same
 observations and predictors. Reuse them with
-[`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
+[`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md),
+[`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.md),
+or
+[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.md)
 to check whether a fitted model reproduces features of the observed
 data. For a complete example see
 [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md).
@@ -33,7 +36,10 @@ simulate_dyad_responses(model, nsim = 1000, seed = NULL)
 ## Value
 
 A `dyadMLM_response_simulations` object for use with
-[`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md).
+[`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md),
+[`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.md),
+and
+[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.md).
 
 The result keeps all components in fitted-row order (after missing-data
 exclusions):
@@ -86,7 +92,7 @@ Supports unweighted `glmmTMB` models with the following families:
   with more than two degrees of freedom
 
 - [`glmmTMB::ordinal()`](https://rdrr.io/pkg/glmmTMB/man/nbinom2.html)
-  (currently only available in the development version of `glmmTMB`)
+  (glmmTMB 1.1.15.2 or later)
 
 Smooth terms (`s()`) are not supported: simulations would draw new
 curves. Fixed-effect splines such as
@@ -99,9 +105,13 @@ and response components each fit well.
 
 Ordinal checks use category scores `1, 2, ..., K` in their fitted order,
 matching [glmmTMB's
-predictions](https://rdrr.io/pkg/glmmTMB/man/nbinom2.html). The plots
-compare variation and partner correlation in these scores. The scores do
-not measure distances on an underlying continuous scale.
+predictions](https://rdrr.io/pkg/glmmTMB/man/nbinom2.html). The checks
+compare observed and simulated scores. The scores do not measure
+distances on an underlying continuous scale. Because each dyad contains
+only two people, glmmTMB tends to underestimate the dyad variance in
+ordinal models. Simulations then show less partner dependence than the
+data, so the partner check can flag a correct ordinal model, especially
+with many dyads.
 
 The model's fitted link is used for prediction and simulation.
 Predictions and simulated responses must be finite.
@@ -111,16 +121,17 @@ currently requires cross-sectional dyads.
 
 ## Technical details
 
-Each simulation draws new random effects and then new responses from the
-fitted model. Random effects within each block are drawn together using
-their fitted variances and correlations. This also applies to random
-effects in the zero-inflation and dispersion models, if present.
+Each simulation draws new random effects, if the model has any, and then
+new responses from the fitted model. Random effects within each block
+are drawn together using their fitted variances and correlations. This
+also applies to random effects in the zero-inflation and dispersion
+models, if present.
 
 Fitted parameters and predictors, including any lagged responses, stay
 fixed. The model is not refitted, and uncertainty in parameter estimates
-is not included. This is a *plug-in predictive reference*. If dyads are
-the only grouping factor, the simulations represent hypothetical new
-dyads under the same study design.
+is not included. This is a *plug-in predictive reference* (Gelman et
+al., 1996). If dyads are the only grouping factor, the simulations
+represent hypothetical new dyads under the same study design.
 
 `predicted_response` contains predicted mean responses with random
 effects in the conditional and zero-inflation models set to zero. For
@@ -129,8 +140,16 @@ multiplied by one minus the zero-component probability (Brooks et al.,
 2017, Appendix A;
 [doi:10.32614/RJ-2017-066](https://doi.org/10.32614/RJ-2017-066) ).
 
-By default, later checks subtract these same predictions from observed
-and simulated responses. Both random effects and observation-level noise
-still contribute to response variance. With nonlinear links, setting
-random effects to zero generally differs from averaging predictions over
-them.
+Partner-dependence checks (by default) and the response SD and largest
+absolute deviation of
+[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.md)
+subtract these same predictions from observed and simulated responses.
+Both random effects and observation-level noise still contribute to
+response variance. With nonlinear links, setting random effects to zero
+generally differs from averaging predictions over them.
+
+## References
+
+Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
+assessment of model fitness via realized discrepancies. *Statistica
+Sinica, 6*(4), 733–807.

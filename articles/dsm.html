@@ -813,8 +813,7 @@ data.</p>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  <span class="co"># Supply the fitting data because gender is not in the model formula.</span></span>
-<span>  data <span class="op">=</span> <span class="va">cross_dsm_data</span>,</span>
-<span>  panels <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  data <span class="op">=</span> <span class="va">cross_dsm_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="dsm_files/figure-html/check-cross-dsm-1.svg" class="r-plt" alt="Six predictive-check histograms for the DSM. Member SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values." width="100%"></p>
 <p>The top row shows role-specific SDs and partner correlation. The
@@ -828,8 +827,12 @@ for variances and correlations estimated from the same data. See the <a href="ht
 help</a> for details and interpretation. Simulation studies show how
 often the check detects <a href="https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html">omitted
 partner dependence</a> and <a href="https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html">incorrect
-covariance pooling</a>, and how often it raises false alarms. These
-checks currently support cross-sectional dyads only.</p>
+covariance pooling</a>, and how often it raises false alarms. This check
+currently supports cross-sectional dyads only.</p>
+<p>The same <code>dsm_simulations</code> can be checked with <a href="https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html"><code>check_dyad_residuals()</code></a>
+and <a href="https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html"><code>check_dyad_outcomes()</code></a>,
+as shown in the <a href="apim.html#checking-residuals-and-outcomes">APIM
+vignette</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="intensive-longitudinal-dsm">Intensive longitudinal DSM<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-dsm"></a>

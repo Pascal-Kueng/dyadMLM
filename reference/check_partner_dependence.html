@@ -125,8 +125,7 @@ See <code><a href="simulate_dyad_responses.html">simulate_dyad_responses()</a></
 <dt id="arg-ask">ask<a class="anchor" aria-label="anchor" href="#arg-ask"></a></dt>
 <dd><p>Whether to pause between figures on an interactive device.
 <code>NULL</code> (default) pauses when there is more than one figure, <code>TRUE</code> pauses
-and <code>FALSE</code> draws without pausing. In panel mode, each composition is one
-figure. File devices never pause.</p></dd>
+and <code>FALSE</code> draws without pausing. File devices never pause.</p></dd>
 
 
 <dt id="arg-panels">panels<a class="anchor" aria-label="anchor" href="#arg-panels"></a></dt>
@@ -156,7 +155,7 @@ omission counts and settings, and can be saved and plotted later.</p>
     <h2 id="reading-the-plots">Reading the plots<a class="anchor" aria-label="anchor" href="#reading-the-plots"></a></h2>
 
 
-<p>Histograms show simulated summaries. Red lines mark observed values.
+<p>Blue histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95% of simulations (no formal confidence
 intervals).
 The heading shows the dyad composition, its number of usable dyads, and the
@@ -217,11 +216,11 @@ Woody and Sadler (2005).</p>
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Woody, E., &amp; Sadler, P. (2005). Structural equation models for
 interchangeable dyads: Being the same makes a difference. <em>Psychological
-Methods, 10</em>(2), 139-158. <a href="https://doi.org/10.1037/1082-989X.10.2.139" class="external-link">doi:10.1037/1082-989X.10.2.139</a>
-.</p>
-<p>Gelman, A., Meng, X.-L., &amp; Stern, H. S. (1996). Posterior predictive
-assessment of model fitness via realized discrepancies. <em>Statistica Sinica,
-6</em>, 733-807.</p>
+Methods, 10</em>(2), 139–158. <a href="https://doi.org/10.1037/1082-989X.10.2.139" class="external-link">doi:10.1037/1082-989X.10.2.139</a></p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="check_dyad_residuals.html">check_dyad_residuals()</a></code>, <code><a href="check_dyad_outcomes.html">check_dyad_outcomes()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -284,29 +283,29 @@ assessment of model fitness via realized discrepancies. <em>Statistica Sinica,
 <span class="r-out co"><span class="r-pr">#&gt;</span> Reference: 100 plug-in predictive datasets with new random effects</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> female - female: 120 of 360 usable dyads</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Observed      2.5%     97.5%    Statistic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.516     1.527     1.851 *  Common member SD (exchangeable)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0.593     0.507     0.691    Partner correlation (exchangeable)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.353     1.326     1.678    Dyad-average SD</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0.684     0.661     0.824    Half-difference RMS (about zero)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Observed     Lower     Upper    Statistic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.516     1.512     1.863    Common member SD (exchangeable)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.593     0.494     0.696    Partner correlation (exchangeable)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.353     1.313     1.706    Dyad-average SD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.684     0.656     0.833    Half-difference RMS (about zero)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> female - male: 120 of 360 usable dyads</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Observed      2.5%     97.5%    Statistic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.634     1.461     1.866    SD (female)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.280     1.477     1.873 *  SD (male)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0.556     0.516     0.697    Partner correlation (female and male)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.288     1.307     1.661 *  Dyad-average SD</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0.704     0.656     0.820    Half-difference SD (female minus male)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0.284    -0.165     0.182 *  Dyad-average/role-difference correlation (female minus male)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Observed     Lower     Upper    Statistic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.634     1.425     1.892    SD (female)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.280     1.415     1.919 *  SD (male)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.556     0.489     0.699    Partner correlation (female and male)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.288     1.290     1.694 *  Dyad-average SD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.704     0.644     0.830    Half-difference SD (female minus male)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.284    -0.190     0.196 *  Dyad-average/role-difference correlation (female minus male)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> male - male: 120 of 360 usable dyads</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Observed      2.5%     97.5%    Statistic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.204     1.484     1.863 *  Common member SD (exchangeable)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0.543     0.455     0.724    Partner correlation (exchangeable)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.058     1.301     1.714 *  Dyad-average SD</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0.576     0.653     0.859 *  Half-difference RMS (about zero)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Observed     Lower     Upper    Statistic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.204     1.462     1.891 *  Common member SD (exchangeable)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.543     0.429     0.728    Partner correlation (exchangeable)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.058     1.284     1.743 *  Dyad-average SD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.576     0.643     0.882 *  Half-difference RMS (about zero)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Outside the middle 95% of simulations (*): 7 of 14 observed statistics.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Outside the middle 95% of simulations (*): 6 of 14 observed statistics.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Some departures occur by chance; these are descriptive checks, not significance tests.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Use plot(x) to view the comparisons.</span>
 </code></pre></div>

@@ -6,6 +6,7 @@
 <url><loc>https://pascal-kueng.github.io/dyadMLM/articles/apim.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/articles/dim.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/articles/dsm.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/articles/index.html</loc></url>
@@ -20,6 +21,8 @@
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/assign_arbitrary_member_roles.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/canonical_composition.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/center_predictors.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyadMLM-package.html</loc></url>
@@ -34,7 +37,9 @@
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/index.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/infer_dyad_compositions.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/make_dyad_suffixes.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/plot.dyadMLM_outcome_check.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/plot.dyadMLM_partner_check.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/plot.dyadMLM_residual_check.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/print.dyadMLM_partner_check.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/print.dyadMLM_response_simulations.html</loc></url>

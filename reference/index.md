@@ -12,8 +12,8 @@
 
 ## Predictive diagnostics
 
-Experimental descriptive checks of how well a fitted model reproduces
-partner dependence.
+Experimental descriptive checks of response distributions and partner
+dependence.
 
 - [`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.md)
   **\[experimental\]** : Simulate response datasets for predictive
@@ -21,6 +21,11 @@ partner dependence.
 - [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
   **\[experimental\]** : Check whether a fitted model reproduces partner
   dependence
+- [`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.md)
+  **\[experimental\]** : Check residual distributions and patterns
+- [`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.md)
+  **\[experimental\]** : Check outcome distributions against model
+  simulations
 
 ## Example data
 

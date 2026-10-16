@@ -50,3 +50,9 @@ How often predictive checks detect mismatches and raise false alarms.
 
   Composition checks and model comparison when one covariance is pooled
   across dyad compositions.
+
+- [Residual and outcome distribution
+  checks](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.md):
+
+  Flags under correct models, detection of selected mismatches,
+  consequences for estimates, and the effect of PIT centring.

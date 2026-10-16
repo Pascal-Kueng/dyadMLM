@@ -646,8 +646,7 @@ dyadMLM::check_partner_dependence(
   dyad = coupleID,
   role = gender,
   # Supply the fitting data because gender is not in the model formula.
-  data = cross_dsm_data,
-  panels = TRUE
+  data = cross_dsm_data
 )
 ```
 
@@ -672,8 +671,15 @@ check detects [omitted partner
 dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance
 pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often it raises false alarms. These checks currently support
+and how often it raises false alarms. This check currently supports
 cross-sectional dyads only.
+
+The same `dsm_simulations` can be checked with
+[`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)
+and
+[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html),
+as shown in the [APIM
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes).
 
 ## Intensive longitudinal DSM
 

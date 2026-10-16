@@ -23,6 +23,11 @@ post-estimation tools.
   provide experimental predictive comparisons of response variances and
   partner correlations.
 
+- [`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.md)
+  and
+  [`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.md)
+  compare residual and outcome distributions using the same simulations.
+
 ## Example data
 
 See

@@ -67,8 +67,7 @@ check_partner_dependence(
 
   Whether to pause between figures on an interactive device. `NULL`
   (default) pauses when there is more than one figure, `TRUE` pauses and
-  `FALSE` draws without pausing. In panel mode, each composition is one
-  figure. File devices never pause.
+  `FALSE` draws without pausing. File devices never pause.
 
 - panels:
 
@@ -96,12 +95,12 @@ later.
 
 ## Reading the plots
 
-Histograms show simulated summaries. Red lines mark observed values.
-Dashed lines enclose the middle 95% of simulations (no formal confidence
-intervals). The heading shows the dyad composition, its number of usable
-dyads, and the total across all compositions. The top row shows member
-SDs and partner correlation. The bottom row shows the same information
-using dyad averages and partner differences.
+Blue histograms show simulated summaries. Red lines mark observed
+values. Dashed lines enclose the middle 95% of simulations (no formal
+confidence intervals). The heading shows the dyad composition, its
+number of usable dyads, and the total across all compositions. The top
+row shows member SDs and partner correlation. The bottom row shows the
+same information using dyad averages and partner differences.
 
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well. Agreement does
@@ -175,13 +174,13 @@ Woody and Sadler (2005).
 
 Woody, E., & Sadler, P. (2005). Structural equation models for
 interchangeable dyads: Being the same makes a difference. *Psychological
-Methods, 10*(2), 139-158.
+Methods, 10*(2), 139–158.
 [doi:10.1037/1082-989X.10.2.139](https://doi.org/10.1037/1082-989X.10.2.139)
-.
 
-Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
-assessment of model fitness via realized discrepancies. *Statistica
-Sinica, 6*, 733-807.
+## See also
+
+[`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.md),
+[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.md)
 
 ## Examples
 
@@ -244,29 +243,29 @@ print(check)
 #> Reference: 100 plug-in predictive datasets with new random effects
 #> 
 #> female - female: 120 of 360 usable dyads
-#>  Observed      2.5%     97.5%    Statistic
-#>     1.516     1.527     1.851 *  Common member SD (exchangeable)
-#>     0.593     0.507     0.691    Partner correlation (exchangeable)
-#>     1.353     1.326     1.678    Dyad-average SD
-#>     0.684     0.661     0.824    Half-difference RMS (about zero)
+#>  Observed     Lower     Upper    Statistic
+#>     1.516     1.512     1.863    Common member SD (exchangeable)
+#>     0.593     0.494     0.696    Partner correlation (exchangeable)
+#>     1.353     1.313     1.706    Dyad-average SD
+#>     0.684     0.656     0.833    Half-difference RMS (about zero)
 #> 
 #> female - male: 120 of 360 usable dyads
-#>  Observed      2.5%     97.5%    Statistic
-#>     1.634     1.461     1.866    SD (female)
-#>     1.280     1.477     1.873 *  SD (male)
-#>     0.556     0.516     0.697    Partner correlation (female and male)
-#>     1.288     1.307     1.661 *  Dyad-average SD
-#>     0.704     0.656     0.820    Half-difference SD (female minus male)
-#>     0.284    -0.165     0.182 *  Dyad-average/role-difference correlation (female minus male)
+#>  Observed     Lower     Upper    Statistic
+#>     1.634     1.425     1.892    SD (female)
+#>     1.280     1.415     1.919 *  SD (male)
+#>     0.556     0.489     0.699    Partner correlation (female and male)
+#>     1.288     1.290     1.694 *  Dyad-average SD
+#>     0.704     0.644     0.830    Half-difference SD (female minus male)
+#>     0.284    -0.190     0.196 *  Dyad-average/role-difference correlation (female minus male)
 #> 
 #> male - male: 120 of 360 usable dyads
-#>  Observed      2.5%     97.5%    Statistic
-#>     1.204     1.484     1.863 *  Common member SD (exchangeable)
-#>     0.543     0.455     0.724    Partner correlation (exchangeable)
-#>     1.058     1.301     1.714 *  Dyad-average SD
-#>     0.576     0.653     0.859 *  Half-difference RMS (about zero)
+#>  Observed     Lower     Upper    Statistic
+#>     1.204     1.462     1.891 *  Common member SD (exchangeable)
+#>     0.543     0.429     0.728    Partner correlation (exchangeable)
+#>     1.058     1.284     1.743 *  Dyad-average SD
+#>     0.576     0.643     0.882 *  Half-difference RMS (about zero)
 #> 
-#> Outside the middle 95% of simulations (*): 7 of 14 observed statistics.
+#> Outside the middle 95% of simulations (*): 6 of 14 observed statistics.
 #> Some departures occur by chance; these are descriptive checks, not significance tests.
 #> Use plot(x) to view the comparisons.
 ```

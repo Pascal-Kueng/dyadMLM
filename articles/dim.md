@@ -547,8 +547,7 @@ dyadMLM::check_partner_dependence(
   dyad = coupleID,
   role = gender,
   # Supply the fitting data because gender is not in the model formula.
-  data = cross_exchangeable_data,
-  panels = TRUE
+  data = cross_exchangeable_data
 )
 ```
 
@@ -573,8 +572,15 @@ check detects [omitted partner
 dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance
 pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often it raises false alarms. These checks currently support
+and how often it raises false alarms. This check currently supports
 cross-sectional dyads only.
+
+The same `dim_simulations` can be checked with
+[`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)
+and
+[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html),
+as shown in the [APIM
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes).
 
 ## Intensive Longitudinal DIM
 
@@ -754,7 +760,7 @@ summary(dim_ILD)
 #> .provided_support_cwp_dyad_mean        0.481722   0.034760   13.86  < 2e-16 ***
 #> .provided_support_cwp_within_dyad_dev -0.008331   0.035157   -0.24    0.813    
 #> .provided_support_cbp_dyad_mean        1.553466   0.096922   16.03  < 2e-16 ***
-#> .provided_support_cbp_within_dyad_dev  0.844496   0.118504    7.13 1.03e-12 ***
+#> .provided_support_cbp_within_dyad_dev  0.844495   0.118504    7.13 1.03e-12 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
