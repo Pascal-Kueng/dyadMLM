@@ -571,12 +571,12 @@ dyadMLM::check_dyad_residuals(
 )
 ```
 
-![Residual distribution for women and men: uniform QQ plots with blue
-envelopes in the top row and mean PIT distance histograms in the bottom
-row. Red marks observed
+![Residual distribution and pattern for women and men: uniform QQ plots
+with blue envelopes in the top row and PIT quartiles across predicted
+outcomes in the bottom row. Red marks observed
 values.](apim_files/figure-html/check-residuals-apim-1.png)![Residual
-patterns for women and men: PIT quartiles across predicted outcomes with
-blue envelopes. Red curves show observed
+spread for women and men: mean PIT distance histograms. Red marks
+observed
 values.](apim_files/figure-html/check-residuals-apim-2.png)![Residual
 patterns for women and men: PIT quartiles across the partner's provided
 support with blue envelopes. Red curves show observed
