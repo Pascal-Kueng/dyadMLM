@@ -457,7 +457,7 @@ dashed lines at 0.25, 0.5, and 0.75 for all levels of partner support. With a
 missing or misspecified partner effect, they move away from these lines as
 partner support changes.
 
-```{r check-residuals-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution for women and men: uniform QQ plots with blue envelopes in the top row and mean PIT distance histograms in the bottom row. Red marks observed values.", "Residual patterns for women and men: PIT quartiles across predicted outcomes with blue envelopes. Red curves show observed values.", "Residual patterns for women and men: PIT quartiles across the partner's provided support with blue envelopes. Red curves show observed values.")}
+```{r check-residuals-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution and pattern for women and men: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Red marks observed values.", "Residual spread for women and men: mean PIT distance histograms. Red marks observed values.", "Residual patterns for women and men: PIT quartiles across the partner's provided support with blue envelopes. Red curves show observed values.")}
 dyadMLM::check_dyad_residuals(
   apim_simulations,
   dyad = coupleID,

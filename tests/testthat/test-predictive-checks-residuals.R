@@ -176,6 +176,8 @@ test_that("numeric predictors use each role's bins on ranks, smoothed when there
   grid <- seq(1 / 180, 1, length.out = 101)
   expect_equal(patterns$B$positions, grid)
   expect_equal(patterns$B$labels, signif(quantile(rows_b, 0:4 / 4, names = FALSE), 2))
+  # Each observed PIT residual is kept as a point at its rank.
+  expect_equal(unname(patterns$B$points), cbind(seq_along(rows_b) / 180, result$pit[rows_b, 1]))
   grid_values <- approx(seq_along(rows_b) / 180, rows_b, grid)$y
   weights <- exp(-.5 * (outer(grid_values, centres, "-") / median(diff(centres)))^2)
   weights <- weights / rowSums(weights)
@@ -340,6 +342,75 @@ test_that("residual plots draw each role's saved curves and scalar summaries", {
   expect_identical(sub("\n.*", "", titles), rep(c("Uniform QQ", "PIT quartiles"), each = 2))
 })
 
+
+test_that("the first page pairs QQ with the predicted outcome, as in DHARMa", {
+  simulations <- distribution_check_fixture()
+  simulations$model_frame$X <- seq_len(12)
+  result <- check_dyad_residuals(simulations, role = NULL, predictors = "X", plot = FALSE)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  pages <- character()
+  local_mocked_bindings(plot_check_role_panels = function(composition, checks, title, ...)
+    pages <<- c(pages, paste(checks, collapse = " + ")))
+  plot(result, ask = FALSE)
+  expect_identical(pages, c("qq + quartiles", "mean_distance", "quartiles"))
+})
+
+test_that("categories get boxes inside their panel, binned axes get points", {
+  simulations <- distribution_check_fixture()
+  simulations$model_frame$group <- rep(c("a", "b", "c"), 4)
+  simulations$model_frame$few <- rep(c(0, 1e-8), 6)
+  result <- check_dyad_residuals(simulations, role = NULL, predictors = c("group", "few"),
+                                 plot = FALSE)
+  expect_null(result$compositions[[1]]$patterns[[2]]$Pooled$points)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  inside <- TRUE
+  widths <- integer()
+  original_rect <- graphics::rect
+  local_mocked_bindings(rect = function(xleft, ybottom, xright, ...) {
+    inside <<- inside && all(xleft >= graphics::par("usr")[1] & xright <= graphics::par("usr")[2])
+    widths <<- c(widths, length(xleft))
+    original_rect(xleft, ybottom, xright, ...)
+  }, .package = "graphics")
+  plot(result, ask = FALSE)
+  expect_true(inside)
+  # One red box per value: three groups, then two values.
+  expect_equal(sum(widths == 3), 1)
+  expect_equal(sum(widths == 2), 1)
+})
+
+test_that("each category quartile is drawn on its own envelope, not the median's", {
+  # Too little spread: the outer quartiles leave their own envelopes but stay
+  # inside the median's, so a shared band would hide both departures.
+  result <- check_dyad_residuals(distribution_check_fixture(), role = NULL, plot = FALSE)
+  quantiles <- Map(function(observed, lower, upper)
+    list(observed = observed, lower = lower, upper = upper),
+    c(.484, .498, .516), c(.157, .401, .644), c(.357, .608, .844))
+  result$compositions[[1]]$patterns[[1]]$Pooled <- list(positions = 1, labels = "A",
+    limits = c(.55, 1.45), binned = FALSE, smooth = FALSE, numeric = FALSE,
+    quantiles = quantiles)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  ranges <- markers <- NULL
+  original_segments <- graphics::segments
+  original_points <- graphics::points
+  local_mocked_bindings(segments = function(x0, y0, x1 = x0, y1 = y0, ...) {
+    if (identical(list(...)$col, check_colours$simulation_line))
+      ranges <<- rbind(ranges, c(x = x0, lower = y0, upper = y1))
+    original_segments(x0, y0, x1, y1, ...)
+  }, points = function(x, y, ...) {
+    markers <<- rbind(markers, c(x = x, y = y))
+    original_points(x, y, ...)
+  }, .package = "graphics")
+  plot(result, ask = FALSE)
+  # Each quartile's point shares the position of its own range, and only there.
+  expect_equal(nrow(ranges), 3)
+  expect_equal(markers[, "x"], ranges[, "x"])
+  expect_length(unique(ranges[, "x"]), 3)
+  outside <- markers[, "y"] < ranges[, "lower"] | markers[, "y"] > ranges[, "upper"]
+  expect_identical(unname(outside), c(TRUE, FALSE, TRUE))
+})
 
 test_that("each page repeats its composition heading", {
   simulations <- distribution_check_fixture()
