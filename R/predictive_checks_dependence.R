@@ -568,16 +568,9 @@ prepare_occasion_levels <- function(responses_by_dataset, dyad_ids, member_ids,
     stop("Each member must have the same role throughout the data.", call. = FALSE)
   }
 
-  # 1. Center: each member's mean in every dataset, and each response's deviation
-  #    from it. rowsum() adds up rows by group, so transpose to add up each
-  #    member's columns, ordered by member number.
-  usable_responses <- responses_by_dataset[, usable_rows$fitted_row, drop = FALSE]
-  member_sums <- t(rowsum(t(usable_responses), usable_rows$member_number))
-  member_means <- sweep(member_sums, 2, tabulate(usable_rows$member_number), "/")
-  deviations <- usable_responses - member_means[, usable_rows$member_number, drop = FALSE]
-
-  # 2a. Between: pair the partners' means like cross-sectional data. Members are
-  #     in member-number order, so pair positions are member numbers.
+  # 1. Between: pair the partners' means like cross-sectional data. This also
+  #    stops early when too few dyads are complete. Members are in member-number
+  #    order, so pair positions are member numbers.
   members <- usable_rows |>
     dplyr::slice_head(n = 1, by = "member_number") |>
     dplyr::arrange(.data$member_number)
@@ -585,9 +578,17 @@ prepare_occasion_levels <- function(responses_by_dataset, dyad_ids, member_ids,
     members$dyad, role_values = if (is.null(role_values)) NULL else members$role
   )
 
-  # 2b. Within: match the two members of each complete dyad on the occasions
-  #     both answered. Each pair keeps its dyad's composition and role order, so
-  #     a composition without shared occasions stays, with zero dyads.
+  # 2. Center: each member's mean in every dataset, and each response's deviation
+  #    from it. rowsum() adds up rows by group, so transpose to add up each
+  #    member's columns, ordered by member number.
+  usable_responses <- responses_by_dataset[, usable_rows$fitted_row, drop = FALSE]
+  member_sums <- t(rowsum(t(usable_responses), usable_rows$member_number))
+  member_means <- sweep(member_sums, 2, tabulate(usable_rows$member_number), "/")
+  deviations <- usable_responses - member_means[, usable_rows$member_number, drop = FALSE]
+
+  # 3. Within: match the two members of each complete dyad on the occasions
+  #    both answered. Each pair keeps its dyad's composition and role order, so
+  #    a composition without shared occasions stays, with zero dyads.
   deviation_columns <- usable_rows |>
     dplyr::mutate(deviation_column = dplyr::row_number()) |>
     dplyr::select("member_number", "occasion", "deviation_column")
@@ -605,7 +606,7 @@ prepare_occasion_levels <- function(responses_by_dataset, dyad_ids, member_ids,
     n_pairs = tabulate(dyads_sharing_an_occasion$composition_index, dplyr::n())
   )
 
-  # 3. Place the deviations after the member means, and the within compositions
+  # 4. Place the deviations after the member means, and the within compositions
   #    after the between ones.
   n_members <- nrow(members)
   n_compositions <- nrow(between$compositions)

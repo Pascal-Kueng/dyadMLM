@@ -254,6 +254,46 @@ test_that("the within level needs three dyads that share an occasion", {
                 fixed = TRUE)
 })
 
+test_that("the between level is checked when no partners share an occasion", {
+  simulations <- occasion_check_simulations()
+  # Every b partner responds on later occasions than their a partner.
+  later_rows <- simulations$model_frame$member == "b"
+  simulations$model_frame$time[later_rows] <- simulations$model_frame$time[later_rows] + 4L
+
+  expect_warning(
+    check <- check_occasions(simulations, role = NULL),
+    "Not checked (fewer than three complete pairs): All dyads (within) (n = 0).",
+    fixed = TRUE
+  )
+  expect_identical(check$compositions$n_pairs, c(4L, 0L))
+  expect_identical(unique(check$summary$composition), "All dyads (between)")
+})
+
+test_that("a composition without shared occasions stays at the within level", {
+  first <- occasion_check_simulations()
+  second <- occasion_check_simulations()
+  # Dyads 5 to 8 are same-role pairs whose partners never share an occasion.
+  second$model_frame$dyad <- second$model_frame$dyad + 4L
+  second$model_frame$role <- factor("a", levels = c("a", "b"))
+  later_rows <- second$model_frame$member == "b"
+  second$model_frame$time[later_rows] <- second$model_frame$time[later_rows] + 4L
+  simulations <- first
+  simulations$observed_response <- c(first$observed_response, second$observed_response)
+  simulations$predicted_response <- c(first$predicted_response, second$predicted_response)
+  simulations$simulated_responses <- cbind(first$simulated_responses,
+                                           second$simulated_responses)
+  simulations$model_frame <- rbind(first$model_frame, second$model_frame)
+
+  expect_warning(
+    check <- check_occasions(simulations, role = "role"),
+    "Not checked (fewer than three complete pairs): a - a (within) (n = 0).",
+    fixed = TRUE
+  )
+  expect_identical(check$compositions$label, c("a - a (between)", "a - b (between)",
+                                               "a - a (within)", "a - b (within)"))
+  expect_identical(check$compositions$n_pairs, c(4L, 4L, 0L, 4L))
+})
+
 test_that("printed and plotted headings name each level", {
   check <- check_occasions(occasion_check_simulations(), role = "role")
   expect_output(print(check), "a - b (between): 4 of 4 usable dyads", fixed = TRUE)
