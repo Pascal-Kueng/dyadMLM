@@ -26,7 +26,7 @@ helpers, and eventually model syntax explicit and reproducible.
   [`ild-nonindependence.md`](ild-nonindependence.md)
 - Data-preparation debugging scratch helpers:
   [`debug-data-preparation.R`](debug-data-preparation.R)
-- Cross-sectional partner-dependence checks:
+- Partner-dependence checks:
   [`diagnostic_checks/README.md`](diagnostic_checks/README.md)
 
 ## Current State
@@ -41,7 +41,7 @@ concept DOI, so future GitHub Releases are added to it as new versions
 automatically, and removed the duplicate native 0.2.0 archive under
 10.5281/zenodo.22047083. The official CRAN tarball remains attached to the
 GitHub Release. The package has returned to development as version 0.2.0.9000,
-with cross-sectional partner-dependence checks in development.
+with cross-sectional and repeated-occasion partner-dependence checks in development.
 
 The core data-preparation API is implemented and covered by tests, the README
 links to the pkgdown site, and GitHub Actions are configured for R CMD check,
@@ -799,7 +799,7 @@ another routine breaking CRAN update shortly afterward.
   automatically.
 
 The immediate diagnostic sequence after 0.2.0 is cross-sectional Gaussian and
-compatible non-Gaussian partner checks (0.2.1), then Gaussian ILD partner
+compatible non-Gaussian partner checks (0.2.1), then ILD partner
 dependence. Follow-up version assignments are provisional.
 Later milestones remain APIM covariance decomposition (0.2.5), generalized
 APIM workflows (0.3.0), broader generalized diagnostics (0.3.1), `glmmTMB`
@@ -822,10 +822,13 @@ package check, and green CI on the proposed commit.
 Build future ILD work on this foundation. Preserve the generalized and ILD
 prototype branches as references; port validated behavior selectively.
 
-## Proposed Version 0.2.2 Scope - Gaussian ILD Partner Dependence
+## Version 0.2.2 Scope - ILD Partner Dependence
 
-Status: proposed after the cross-sectional increments above. Extend the same
-`check_partner_dependence()` entry point with `member` and factor-valued `time`.
+Status: in development. `check_partner_dependence()` now takes `member` and
+`time` and checks member means and same-occasion deviations for all supported
+families ([plan](diagnostic_checks/ild-partner-dependence-plan.md)). Lagged
+statistics follow separately. A [validation study](../vignettes/articles/ild-partner-dependence.Rmd)
+covers the current check.
 
 - Recompute available-series member means and within-member deviations for
   the observed response and every complete simulated dataset.
@@ -837,9 +840,7 @@ Status: proposed after the cross-sectional increments above. Extend the same
   distinguishable dyads and label-invariant pooling for exchangeable dyads.
 - Make dyad versus edge weighting explicit; report contributing dyads, edges,
   defined simulations, and reasons for unsupported or undefined summaries.
-- Reuse the paired-moment and reference helpers. Require Gaussian identity-link
-  simulations inside the ILD path, independently of the constructor's broader
-  cross-sectional family support.
+- Reuse the paired-moment and reference helpers.
 - Validate hand calculations, member swaps, unbalanced schedules, exact gaps,
   fitted covariance structures, and the cross-sectional limit. An external time
   factor cannot restore an AR state already dropped during model fitting.

@@ -35,7 +35,9 @@ the seed.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Generates new response datasets for the same observations and predictors.
+If a model fits, data simulated from it should resemble the observed data.
+This function generates new response datasets for the same observations and
+predictors.
 Reuse them with \code{\link[=check_partner_dependence]{check_partner_dependence()}}, \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}, or
 \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}} to check whether a fitted model reproduces features of
 the observed data. For a complete example see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
@@ -78,8 +80,6 @@ model, especially with many dyads.
 
 The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.
-
-\code{\link[=check_partner_dependence]{check_partner_dependence()}} currently requires cross-sectional dyads.
 }
 
 \section{Technical details}{
@@ -92,8 +92,8 @@ random effects in the zero-inflation and dispersion models, if present.
 Fitted parameters and predictors, including any lagged responses, stay fixed.
 The model is not refitted, and uncertainty in parameter estimates is not
 included. This is a \emph{plug-in predictive reference} (Gelman et al., 1996).
-If dyads are the only grouping factor, the simulations represent
-hypothetical new dyads under the same study design.
+If all grouping factors are dyads or nested within dyads (such as dyad-days),
+the simulations represent hypothetical new dyads under the same study design.
 
 \code{predicted_response} contains predicted mean responses with random effects
 in the conditional and zero-inflation models set to zero. For zero-inflated

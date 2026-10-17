@@ -1,0 +1,294 @@
+---
+title: "Partner-dependence checks for longitudinal data"
+description: "False alarms, detection and fitting behavior for member-mean and same-occasion predictive checks."
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    self_contained: true
+params:
+  output_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/ild-partner-dependence"
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+  fig.width = 10, fig.height = 6, dpi = 180, fig.retina = 1, out.width = "100%")
+read_results <- function(filename) read.csv(file.path(params$output_directory, filename))
+cells <- read_results("cells.csv")
+flags <- read_results("flags.csv") |> left_join(cells, by = "cell")
+figures <- read_results("figures.csv") |> left_join(cells, by = "cell")
+fits <- read_results("fits.csv") |> left_join(cells, by = "cell")
+family_labels <- c(gaussian = "Gaussian", ar = "Gaussian + AR",
+  poisson = "Poisson", ordinal = "Ordinal", lag_gaussian = "Gaussian + lags",
+  lag_nbinom2 = "NB2 + lags")
+model_labels <- c(no_occasion_covariance = "Omit occasion covariance",
+  no_stable_covariance = "Omit stable covariance")
+primary_flags <- flags |> filter(fits == "usable", rule == "rank")
+primary_figures <- figures |> filter(fits == "usable", rule == "rank")
+rate_interval <- function(rate, lower, upper) {
+  sprintf("%.1f%% [%.1f, %.1f]", 100 * rate, 100 * lower, 100 * upper)
+}
+study_theme <- theme_bw(base_size = 12) + theme(legend.position = "bottom")
+is_pilot <- any(cells$repetitions < 500 | cells$reference_draws < 1000)
+```
+
+## Summary
+
+```{r summary-numbers}
+percent_range <- function(rate) paste0(paste(unique(round(100 * range(rate))), collapse = "–"), "%")
+null_rows <- primary_flags |>
+  filter(statistic == "partner_cor",
+    (truth_case == "zero_stable" & model == "no_stable_covariance" & level == "between") |
+    (truth_case == "zero_occasion" & model == "no_occasion_covariance" & level == "within")) |>
+  mutate(family = factor(part, names(family_labels), family_labels), dyads = factor(n_dyads))
+covariance_rows <- primary_flags |>
+  filter(part %in% c("gaussian", "poisson", "ordinal"), truth_case == "correlated",
+    model %in% names(model_labels), statistic == "partner_cor") |>
+  mutate(targeted = (model == "no_stable_covariance" & level == "between") |
+    (model == "no_occasion_covariance" & level == "within"),
+    family = factor(part, names(family_labels), family_labels),
+    restriction = factor(model, names(model_labels), model_labels))
+detection_rows <- covariance_rows |> filter(n_dyads == 200, n_occasions == 14, missing_share == 0)
+targeted_detection <- detection_rows |> filter(targeted)
+ar_unrestricted <- primary_figures |>
+  filter(part == "ar", model == "no_ar", ar_phi == 0.7, figure == "either")
+lag_figures <- primary_figures |> filter(startsWith(part, "lag_"), figure == "either")
+small_detection <- covariance_rows |> filter(targeted, n_dyads == 50) |>
+  slice_min(rate, n = 1, with_ties = FALSE)
+```
+
+The saved run targets `r unique(cells$repetitions)` datasets per setting and
+`r unique(cells$reference_draws)` reference simulations per fitted model, across
+`r nrow(cells)` settings. `r if (is_pilot) "**These are pilot results for checking the workflow. They do not establish calibration or detection rates.**" else "The results describe these simulated settings. They do not establish calibration for every supported model."`
+
+- **Correct restrictions rarely flag.** When a fitted covariance restriction was
+  true, the partner correlation it targets flagged in
+  `r percent_range(null_rows$rate)` of datasets.
+- **Omitted partner covariance shows at its level, given enough dyads.** It was
+  detected in at least `r scales::percent(min(targeted_detection$rate), accuracy = 1)`
+  of datasets with 200 dyads and 14 occasions, but in as few as
+  `r scales::percent(small_detection$rate, accuracy = 1)` with 50 dyads and
+  `r small_detection$n_occasions` occasions.
+- **Omitted autocorrelation is not detected.** A model without AR, but with
+  unrestricted covariances, flagged in
+  `r scales::percent(max(ar_unrestricted$rate), accuracy = 1)` of datasets despite
+  strong autocorrelation (φ = 0.7). Check autocorrelation separately.
+- **Lagged outcomes as predictors can make the checks misleading.** Flag rates
+  were `r percent_range(lag_figures$rate)`, depending on the family and on
+  model-centring.
+
+## What the study checks
+
+[`check_partner_dependence(member = person, time = occasion)`](../reference/check_partner_dependence.html) compares the model's
+simulations with the observed responses at two levels: **member means
+(between)** and **deviations from those means on shared occasions (within)**.
+This study asks how often these checks flag under correct covariance
+restrictions, and what they detect when a restriction is wrong.
+
+The fitted models have two partner covariances: a stable one between partners'
+random intercepts, and an occasion one between their dyad-occasion random
+effects. Each omission should show at its targeted level: the between level for
+the stable covariance, and the within level for the occasion covariance.
+
+A **row flag** means that one observed statistic (one row of the check's
+`summary`) lies outside the middle 95% of its simulated values. Each level has
+its own figure. A **figure flag** means that at least one row in that figure
+flags. These are descriptive checks. The dashed 5% line in the false-alarm
+figure is a benchmark for individual rows, not a promised rate or a figure-level
+threshold. Summaries freely estimated from the
+same data may flag much less often.
+
+<details>
+<summary>Design and interpretation</summary>
+
+All settings use female-male dyads and the generator's fixed-effect terms,
+including role intercepts and actor/partner predictors. Gaussian settings vary the
+number of dyads (50 or 200), occasions (3, 5 or 14), and missingness (0% or 20%).
+Poisson and ordinal settings use 50 or 200 dyads and 5 or 14 complete occasions.
+AR and lagged-outcome settings use 50 or 200 dyads and 14 complete occasions.
+Missing occasions are removed independently per member. A retained response
+still contributes to its member's mean when the partner is missing. Non-lagged
+actor/partner predictors are generated independently between partners at both levels.
+
+Gaussian and Poisson models either retain both covariance blocks (the full model)
+or set stable
+or occasion partner covariance to zero. Ordinal outcomes have four categories,
+a probit link and a shared dyad-occasion intercept instead of an unrestricted
+occasion block. Separate settings make each covariance restriction true.
+Additional Gaussian models impose equal occasion variances or omit AR(1)
+dependence. Lagged-outcome Gaussian and NB2 fits are practical sensitivity
+analyses: their predictors depend on earlier outcomes, so they are not clean
+calibration controls.
+
+Every reference simulation draws new random effects and responses, while keeping
+fitted parameters and predictor values fixed. Models are not refitted. Checks
+subtract the same fixed-effect predictions from observed and simulated responses
+(model-centring). The lagged-outcome table also shows raw checks, which skip
+this step.
+Each dataset then supplies its own member means. Nonlinear links and short
+series can let a misfit at one level affect summaries at the other.
+
+Plots and tables below use fits with optimizer convergence, a positive-definite
+Hessian and a finite log-likelihood. Gaussian models use BFGS, and other families
+use `nlminb`. Failed fits are not retried. The saved tables also report all available
+checks, including fits that fail those criteria, and preserve failures separately.
+
+The denominator of each rate is the number of datasets for which that check was
+available in the stated fit subset. Each table row counts one family's models
+across all settings. A single generated dataset may supply several fitted models.
+
+```{r fit-availability}
+fits |>
+  summarise(Attempted = sum(attempted), Usable = sum(usable),
+    `Optimizer failures` = sum(not_converged), `Hessian problems` = sum(not_positive_hessian),
+    `Fit errors` = sum(fit_errors), `Check errors` = sum(check_errors), .by = part) |>
+  mutate(Family = family_labels[part], .before = 1) |>
+  select(-part) |>
+  knitr::kable()
+```
+
+```{r rule-and-fit-sensitivity, results='asis'}
+rule_comparison <- flags |>
+  filter(fits == "usable") |>
+  select(cell, model, response, level, statistic, rule, rate) |>
+  tidyr::pivot_wider(names_from = rule, values_from = rate)
+fit_comparison <- flags |>
+  filter(rule == "rank") |>
+  select(cell, model, response, level, statistic, fits, rate) |>
+  tidyr::pivot_wider(names_from = fits, values_from = rate)
+cat(sprintf("Flags use rank limits from the ordered simulated values, as `check_partner_dependence()` does. Interpolated quantiles would change per-row rates by at most %.1f percentage points. Including fits that failed the usability criteria changed per-row rates by at most %.1f percentage points.\n\n",
+  100 * max(abs(rule_comparison$quantile - rule_comparison$rank), na.rm = TRUE),
+  100 * max(abs(fit_comparison$all - fit_comparison$usable), na.rm = TRUE)))
+```
+
+Error bars and brackets are 95% Wilson intervals for flag rates. Monte Carlo SEs
+describe uncertainty from the number of generated datasets. Neither measures
+uncertainty in an individual model's fitted parameters.
+
+</details>
+
+The [full tables](https://github.com/Pascal-Kueng/dyadMLM/tree/main/dev/diagnostic_checks/simulation-studies/report-data/ild-partner-dependence)
+retain all statistics, missingness settings, sample sizes,
+figure-level rates and Monte Carlo SEs. See the
+[study code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/ild-partner-dependence/run.R),
+[design](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/ild-partner-dependence-plan.md#7-validation-after-implementation-once)
+and [run instructions](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md#longitudinal-partner-dependence-checks).
+
+## False alarms under a true restriction
+
+Here the fitted covariance restriction is true. Each panel shows the partner
+correlation row at the targeted level: zero stable covariance at the
+between level, or zero occasion covariance at the within level. Rates for other
+rows remain in the saved tables. These true-restriction settings use complete
+data and 5 or 14 occasions (only 14 for ordinal outcomes).
+
+```{r true-restrictions, fig.alt="Partner-correlation flag rates under true zero-covariance restrictions, by family, level, number of occasions and dyad count."}
+ggplot(null_rows, aes(n_occasions, rate, colour = dyads, group = dyads)) +
+  geom_hline(yintercept = 0.05, linetype = 2, colour = "grey55") +
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.5,
+    position = position_dodge(width = 0.8)) +
+  geom_point(position = position_dodge(width = 0.8), size = 2.5) +
+  facet_grid(family ~ level) +
+  scale_x_continuous(breaks = c(5, 14)) +
+  scale_y_continuous(labels = scales::label_percent(), limits = c(0, NA)) +
+  scale_colour_manual(values = c("#0072B2", "#D55E00")) +
+  labs(x = "Occasions", y = "Datasets with a row flag", colour = "Dyads") + study_theme
+```
+
+```{r false-alarm-findings, results='asis'}
+if (!is_pilot) {
+  null_figures <- primary_figures |>
+    semi_join(null_rows, by = c("cell", "model", "response")) |> filter(figure == "either")
+  full_figures <- primary_figures |> filter(model == "correct", figure == "either")
+  cat(sprintf("A flag anywhere in either figure occurred in %.1f–%.1f%% of these datasets, and in %.1f–%.1f%% for full models.\n\n",
+    100 * min(null_figures$rate), 100 * max(null_figures$rate),
+    100 * min(full_figures$rate), 100 * max(full_figures$rate)))
+}
+```
+
+## Detection at both levels
+
+These panels use 200 dyads, 14 complete occasions and nonzero partner covariance
+at both levels. They show how omitting either covariance affects the partner
+correlation row at **both** levels. A flag does not by itself locate the source
+of the mismatch.
+
+```{r omitted-covariance, fig.alt="Partner-correlation flag rates at both levels when stable or occasion covariance is omitted, with 200 dyads and 14 complete occasions."}
+ggplot(detection_rows, aes(rate, restriction)) +
+  geom_segment(aes(x = lower, xend = upper, yend = restriction), colour = "#0072B2") +
+  geom_point(colour = "#0072B2", size = 2.5) +
+  facet_grid(family ~ level) +
+  scale_x_continuous(labels = scales::label_percent(), limits = c(0, 1)) +
+  labs(x = "Datasets with a row flag", y = NULL) + study_theme
+```
+
+```{r main-findings, results='asis'}
+if (!is_pilot) {
+  short_series <- covariance_rows |>
+    filter(targeted, part == "gaussian", n_dyads == 50, n_occasions == 3, level == "within") |>
+    arrange(missing_share)
+  sd_rows <- primary_flags |> filter(part == "gaussian", model == "equal_occasion_variances",
+    level == "within", statistic == "average_difference_cor")
+  cat(sprintf("Missing occasions lowered detection: in Gaussian data with 50 dyads and 3 occasions, occasion-covariance detection fell from %.1f%% to %.1f%% with 20%% missing member occasions. The partner-correlation row at the other level flagged in at most %.1f%% of these datasets. In the Gaussian settings, where the two roles' true occasion SDs differ by a factor of 1.5, the within-level dyad-average/role-difference correlation detected incorrectly imposed equal occasion variances in %.1f–%.1f%% of datasets.\n\n",
+    100 * short_series$rate[1], 100 * short_series$rate[2],
+    100 * max(covariance_rows$rate[!covariance_rows$targeted]),
+    100 * min(sd_rows$rate), 100 * max(sd_rows$rate)))
+}
+```
+
+## Serial dependence and lagged outcomes
+
+Omitted autocorrelation raises two questions: does it cause false alarms for
+other restrictions, and does the check reveal it? The generated data have AR(1)
+dependence (φ = 0.7) or none (φ = 0, the control), and the models in this
+section omit it. One model also imposes equal occasion variances for both roles,
+which is true here. The table shows the row that checks this restriction: the
+within-level dyad-average/role-difference correlation.
+
+```{r ar-restriction}
+ar_rows <- primary_flags |>
+  filter(part == "ar", model == "no_ar_equal_occasion_variances", level == "within",
+    statistic == "average_difference_cor") |>
+  arrange(n_dyads, ar_phi)
+ar_rows |>
+  transmute(Dyads = n_dyads, `AR coefficient` = ar_phi, Checked = checked,
+    `Flag rate [95% interval]` = rate_interval(rate, lower, upper),
+    `Monte Carlo SE (%)` = round(100 * mcse, 2)) |>
+  knitr::kable()
+```
+
+```{r serial-dependence-finding, results='asis'}
+if (!is_pilot) {
+  cat("With φ = 0.7, this row flagged only slightly more often than with φ = 0. The variance equality is true, so the increase reflects the omitted serial dependence.\n\n")
+  if (all(ar_unrestricted$rate == 0))
+    cat("The unrestricted covariance model without AR produced no figure flags at either sample size despite φ = 0.7. These summaries did not reveal the missing serial dependence. Autocorrelation needs a separate check.\n\n")
+  if (file.exists(file.path(params$output_directory, "serial-recovery.csv"))) {
+    serial_recovery <- read_results("serial-recovery.csv") |> left_join(cells, by = "cell") |>
+      arrange(n_dyads)
+    cat(sprintf("Yet the unrestricted model without AR underestimated the stable partner correlation (%.2f on average, versus a true %.2f).\n\n",
+      mean(serial_recovery$mean), serial_recovery$true_value[1]))
+  }
+}
+```
+
+These checks can be misleading when the model includes lagged outcomes as predictors.
+For these models, simulations keep the observed lag predictors fixed.
+The following table compares raw and model-centred checks using the same
+simulations. It reports a flag **anywhere in either figure**. High rates can
+reflect this simulation limitation as well as fitting behavior. They are not
+false-alarm estimates for a clean null model.
+
+```{r lag-sensitivity}
+lag_figures |>
+  arrange(part, n_dyads, response) |>
+  transmute(Family = family_labels[part], Dyads = n_dyads, Response = response,
+    Checked = checked, `Any flag [95% interval]` = rate_interval(rate, lower, upper),
+    `Monte Carlo SE (%)` = round(100 * mcse, 2)) |>
+  knitr::kable()
+```
+
+Low model-centred flag rates in the Gaussian lagged-outcome case do not establish
+that keeping outcome-derived predictors fixed gives a valid simulation reference.

@@ -8,6 +8,8 @@ check_partner_dependence(
   simulations,
   dyad,
   role = NULL,
+  member = NULL,
+  time = NULL,
   plot = TRUE,
   response = c("model-centred", "raw"),
   ask = NULL,
@@ -28,7 +30,18 @@ even for an exchangeable model to reveal variance or partner-correlation
 mismatches that pooling may hide. Each dyad composition (role pair, such as
 female-male) is checked separately,
 using exchangeable summaries for same-role pairs and role-specific
-summaries otherwise.}
+summaries otherwise. For repeated occasions, each member must keep the
+same role within their dyad. Rows with missing roles are omitted.}
+
+\item{member}{The column name identifying each member.
+Only needed for repeated occasions, ignored without a \code{time} argument.
+Looked up first in the fitted model frame, then in \code{data} if supplied.}
+
+\item{time}{The column name identifying each occasion. Only needed for
+repeated occasions. Requires \code{member} to be supplied. \code{time} must identify
+occasions that partners exactly share, such as the diary day. Every fitted
+row needs a known \code{member} and \code{time}.
+Looked up first in the fitted model frame, then in \code{data} if supplied.}
 
 \item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.
 If \code{FALSE}, \code{ask} and \code{panels} are ignored.}
@@ -51,7 +64,7 @@ two rows and up to three columns. If \code{FALSE}, draw each statistic separatel
 Graphics settings are restored afterwards.}
 
 \item{data}{Optional: the unchanged data frame used to fit the model. Supply
-it when \code{dyad} or \code{role} is not in the model formulas.}
+it when \code{dyad}, \code{role}, \code{member}, or \code{time} is not in the model formulas.}
 }
 \value{
 The comparison plots (shown by default) are the main output. The
@@ -61,17 +74,22 @@ composition. Compositions with fewer than three complete dyads are skipped
 and have \code{NULL} statistics. Each tibble has one observed row
 followed by one row per simulation, identified by \code{dataset}. \code{summary}
 compares each \code{observed} statistic with the middle 95\% of its simulations
-(\code{lower}, \code{upper}) and marks those \code{outside} it. The object includes
+(\code{lower}, \code{upper}) and marks those \code{outside} it. Rows with missing dyad IDs
+or roles and incomplete dyads are omitted with a warning. The object includes
 omission counts and settings, and can be saved and plotted later.
+With repeated occasions, \code{compositions} has a \code{level} column (\code{"between"}
+or \code{"within"}), and each label ends with its level. Within-level rows count the
+dyads that share at least one occasion.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 A dyadic model should reproduce how much responses vary and how strongly
-partners' responses are related. This check computes variances and correlations
-of simulated responses based on the model and compares them to the observed
-response variances and correlations from the data.
-This helps identify mismatches in the model's assumptions. The check
-currently supports cross-sectional dyads only (one response per partner).
+partners' responses are related. This check compares the observed response
+variances and partner correlations with those of responses simulated from the
+fitted model. This helps identify mismatches in the model's assumptions,
+especially when a less restricted model does not converge and so cannot be
+used for model comparison. It works for both cross-sectional and longitudinal
+models (for repeated occasions, supply \code{member} and \code{time}).
 }
 \section{Reading the plots}{
 
@@ -79,24 +97,7 @@ Blue histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95\% of simulations (no formal confidence
 intervals).
 The heading shows the dyad composition, its number of usable dyads, and the
-total across all compositions. The top row shows member SDs and partner
-correlation. The bottom row shows the same information using dyad averages
-and partner differences.
-
-An observed value far from most simulated values may indicate that the
-model does not reproduce that feature of the data well.
-Agreement does not establish that omitted dependence is negligible, especially
-with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{partner-dependence study}
-illustrates how sample size affects detection when residual partner
-correlation is omitted.
-
-Checking each composition can reveal differences hidden by pooling.
-Flags (observed values outside the middle 95\%, marked \code{*} when printed) can
-occur by chance, especially when checking several summaries.
-They invite investigation, not formal rejection of the model. The
-\href{https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html}{covariance-pooling study}
-illustrates detection and false alarms when checking each composition; 10 to
-29\% of correctly pooled models had at least one flag.
+total across all compositions.
 
 The top row compares:
 \itemize{
@@ -104,7 +105,8 @@ The top row compares:
 \item \strong{Partner correlation:} how strongly partners' responses are related.
 }
 
-The bottom row shows:
+The bottom row shows the same information using dyad averages and
+half-differences:
 \itemize{
 \item \strong{Dyad-average SD:} how much dyads differ in their average response.
 \item \strong{Half-difference SD or RMS:} each partner difference is divided by two.
@@ -118,10 +120,20 @@ greater variance for the first named role. Negative values indicate greater
 variance for the second.
 }
 
-These checks are particularly useful when a less restricted model does not
-converge and so cannot be used for model comparison. They show how well the
-simpler model
-reproduces the observed variances and partner correlations.
+An observed value far from most simulated values may indicate that the
+model does not reproduce that feature of the data well.
+Agreement does not establish that omitted dependence is negligible, especially
+with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{partner-dependence study}
+illustrates how sample size affects detection when residual partner
+correlation is omitted.
+
+Checking each composition can reveal differences hidden by pooling.
+Flags (observed values outside the middle 95\%, marked \code{*} when printed) can
+occur by chance, especially when checking several summaries.
+They invite investigation, not formal rejection of the model. The
+\href{https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html}{covariance-pooling study}
+illustrates detection and false alarms when checking each composition. In
+that study, 10 to 29\% of correctly pooled models had at least one flag.
 
 A flexible covariance model will usually reproduce features it estimated from
 the same data. Agreement alone therefore does not establish good fit.
@@ -129,8 +141,45 @@ For example, pooled summaries (\code{role = NULL}) of a Gaussian model with an
 unconstrained exchangeable covariance, as below, agree almost by construction.
 Use a suitable model comparison to formally test a specific covariance
 restriction when both models can be fitted (see \code{\link[=compare_nested_models]{compare_nested_models()}}).
+}
 
-Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
+\section{Repeated occasions}{
+
+With repeated occasions, partners can be similar in two ways: in their
+mean responses, and in being above or below their own means on the same
+occasions. A model should reproduce both. With \code{member} and \code{time},
+every dataset (observed and simulated) is split into two levels after any
+model-centring. Each level is checked like cross-sectional data:
+\itemize{
+\item \strong{Between:} each member's mean over all their fitted occasions, paired
+within the dyad. Each dyad counts once.
+\item \strong{Within:} each response minus its member's mean, paired with the
+partner's deviation on the same occasion. Each shared occasion counts once.
+}
+
+An occasion without the partner still counts in the member's mean.
+
+The within check is related to repeated-measures correlation
+(Bakdash & Marusich, 2017).
+
+The \href{https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html}{longitudinal study}
+examines detection and false alarms. With 50 dyads, the check often missed
+omitted partner covariance.
+
+Known limitations and caveats:
+\itemize{
+\item A misfit at one level can also impact the other level's summaries,
+especially with few occasions (due to member means including occasion-level
+variance) or nonlinear links. Thus, both levels should be interpreted
+together.
+\item Check dependence across occasions (e.g., autocorrelation) separately.
+If the model omits temporal dependence, its covariance estimates can be
+biased, and these checks may not reveal it.
+\item These checks can be misleading when the model includes lagged outcomes
+as predictors.
+\item Poorly estimated occasion-level random effects can affect the within checks.
+Check the fitted model's convergence and covariance estimates.
+}
 }
 
 \section{Technical details}{
@@ -174,6 +223,8 @@ simulations <- simulate_dyad_responses(
   seed = 123
 )
 
+# Check whether pooling fits the data. Each composition is checked
+# separately, with role-specific summaries for distinguishable compositions.
 check_partner_dependence(
   simulations,
   dyad = coupleID,
@@ -191,17 +242,53 @@ check <- check_partner_dependence(
   plot = FALSE
 )
 
-# Check how well the model reproduces variances and partner correlations
-# within each dyad composition.
 plot(check, ask = FALSE, panels = TRUE)
-# Composition checks flag differences that the pooled check misses.
 print(check)
+
+# For repeated occasions, also supply `member` and `time`.
+example_diary_data <- prepare_dyad_data(
+  dyads_ild[dyads_ild$coupleID <= 120, ], # Couples 1 to 120 are female-male.
+  dyad = coupleID,
+  member = personID,
+  role = gender,
+  time = diaryday,
+  model_types = "none",
+  seed = 123
+)
+
+diary_model <- glmmTMB::glmmTMB(
+  closeness ~ 0 + gender + gender:diaryday +
+
+    # Omit the correlation between partners' random intercepts on level 2
+    # with a diagonal covariance structure. This is sometimes done when a
+    # model does not otherwise converge cleanly.
+    diag(0 + gender | coupleID) +
+
+    # Keep the full structure for the level 1 residuals.
+    us(0 + gender | coupleID:diaryday),
+  dispformula = ~ 0,
+  data = example_diary_data
+)
+
+# The between level flags the omitted partner correlation.
+check_partner_dependence(
+  simulate_dyad_responses(diary_model, nsim = 100, seed = 123),
+  dyad = coupleID,
+  role = gender,
+  member = personID,
+  time = diaryday,
+  # Supply the fitting data because personID is not in the model formula.
+  data = example_diary_data
+)
 \dontshow{\}) # examplesIf}
 }
 \references{
 Woody, E., & Sadler, P. (2005). Structural equation models for
 interchangeable dyads: Being the same makes a difference. \emph{Psychological
 Methods, 10}(2), 139--158. \doi{10.1037/1082-989X.10.2.139}
+
+Bakdash, J. Z., & Marusich, L. R. (2017). Repeated measures correlation.
+\emph{Frontiers in Psychology, 8}, 456. \doi{10.3389/fpsyg.2017.00456}
 }
 \seealso{
 \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}, \code{\link[=check_dyad_outcomes]{check_dyad_outcomes()}}

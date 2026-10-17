@@ -83,8 +83,7 @@ They do not directly assess serial correlation.
 Predicted outcomes are mean predictions with random effects set to zero (see
 \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}). The checks use the same fitted rows and
 families as \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} and weight all observations equally.
-For cross-sectional data, check partner correlations with
-\code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+Check partner correlations with \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 
 \examples{
