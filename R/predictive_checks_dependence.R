@@ -276,24 +276,6 @@ check_partner_dependence <- function(
                                              data, allow_null = TRUE)
   occasion_ids <- resolve_fitted_row_argument(rlang::enquo(time), "time", fitted_model_frame,
                                               data, allow_null = TRUE)
-  has_repeated_occasions <- !is.null(occasion_ids)
-
-  # The pair table identifies both partners' positions in each dataset's responses.
-  if (has_repeated_occasions) {
-    # `member` is only needed, and only looked up, for repeated occasions.
-    member_ids <- resolve_fitted_row_argument(rlang::enquo(member), "member",
-                                              fitted_model_frame, data, allow_null = TRUE)
-    if (is.null(member_ids)) {
-      stop("`time` requires `member` to be supplied.", call. = FALSE)
-    }
-    partner_row_map <- prepare_occasion_pairs(dyad_ids, member_ids, occasion_ids, role_values)
-  } else {
-    partner_row_map <- prepare_partner_pairs(dyad_ids, role_values)
-  }
-  compositions <- partner_row_map$compositions
-  checked_composition_indices <- which(compositions$n_pairs >= 3L)
-  skipped_composition_indices <- which(compositions$n_pairs < 3L)
-  compositions$statistics <- vector("list", nrow(compositions))
   n_simulations <- nrow(simulations$simulated_responses)
 
   # Combine the observed and simulated response vectors into one large matrix.
@@ -303,20 +285,27 @@ check_partner_dependence <- function(
   if (response == "model-centred") {
     responses_by_dataset <- sweep(responses_by_dataset, 2, simulations$predicted_response, "-")
   }
-  if (has_repeated_occasions) {
-    # Split every dataset into member means and deviations from them. Both sit
-    # side by side, at the positions used by the occasion pair table.
-    member_occasions <- partner_row_map$member_occasions
-    occasion_responses <- responses_by_dataset[, member_occasions$fitted_row, drop = FALSE]
-    member_numbers <- member_occasions$member_number
-    # rowsum() adds up rows by group, so transpose to add up each member's
-    # columns. It sorts groups by member number, the order tabulate() counts in.
-    member_totals <- t(rowsum(t(occasion_responses), member_numbers))
-    member_means <- sweep(member_totals, 2, tabulate(member_numbers), "/")
-    deviations_from_member_means <- occasion_responses -
-      member_means[, member_numbers, drop = FALSE]
-    responses_by_dataset <- cbind(member_means, deviations_from_member_means)
+
+  # The pair table identifies both partners' positions in each dataset's responses.
+  if (is.null(occasion_ids)) {
+    partner_row_map <- prepare_partner_pairs(dyad_ids, role_values)
+  } else {
+    # `member` is only needed, and only looked up, for repeated occasions.
+    member_ids <- resolve_fitted_row_argument(rlang::enquo(member), "member",
+                                              fitted_model_frame, data, allow_null = TRUE)
+    if (is.null(member_ids)) {
+      stop("`time` requires `member` to be supplied.", call. = FALSE)
+    }
+    occasion_levels <- prepare_occasion_levels(
+      responses_by_dataset, dyad_ids, member_ids, occasion_ids, role_values
+    )
+    responses_by_dataset <- occasion_levels$responses_by_dataset
+    partner_row_map <- occasion_levels$partner_row_map
   }
+  compositions <- partner_row_map$compositions
+  checked_composition_indices <- which(compositions$n_pairs >= 3L)
+  skipped_composition_indices <- which(compositions$n_pairs < 3L)
+  compositions$statistics <- vector("list", nrow(compositions))
   dataset_labels <- c("observed", paste0("simulation_", seq_len(n_simulations)))
 
   # Collect diagnostics so each message covers all compositions.
@@ -531,11 +520,12 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
 }
 
 
-# Build the pair map for repeated occasions. Each dataset's responses are later
-# split into member means (positions 1 to the number of members), followed by
-# each usable fitted row's deviation from its member mean. Between pairs link
-# the partners' means; within pairs link their deviations on the same occasion.
-prepare_occasion_pairs <- function(dyad_ids, member_ids, occasion_ids, role_values = NULL) {
+# For repeated occasions, split every dataset into member means (between) and
+# each response's deviation from its member's mean (within), and pair partners
+# at each level. Both levels sit side by side in one matrix, so the check runs
+# once over both.
+prepare_occasion_levels <- function(responses_by_dataset, dyad_ids, member_ids,
+                                    occasion_ids, role_values = NULL) {
   # Treat missing factor labels as missing values too, as prepare_partner_pairs() does.
   is_missing <- function(values) is.na(values) | is.na(as.character(values))
   if (any(is_missing(member_ids) | is_missing(occasion_ids))) {
@@ -548,8 +538,7 @@ prepare_occasion_pairs <- function(dyad_ids, member_ids, occasion_ids, role_valu
   } else {
     is_missing(role_values) & !is_dyad_id_missing
   }
-
-  occasion_rows <- tibble::tibble(
+  rows <- tibble::tibble(
     fitted_row = seq_along(dyad_ids),
     dyad = dyad_ids,
     member = member_ids,
@@ -559,89 +548,96 @@ prepare_occasion_pairs <- function(dyad_ids, member_ids, occasion_ids, role_valu
   ) |>
     dplyr::filter(!is_dyad_id_missing)
 
-  # Check the structure before dropping missing roles, as prepare_partner_pairs()
-  # does, so repeated occasions or extra members cannot be hidden.
-  if (anyDuplicated(occasion_rows[c("dyad", "member", "occasion")]) > 0L) {
+  # Check the structure before dropping missing roles, so repeated occasions or
+  # extra members cannot be hidden.
+  if (anyDuplicated(rows[c("dyad", "member", "occasion")]) > 0L) {
     stop("Each member can have at most one fitted row per `time`.", call. = FALSE)
   }
-  members_per_dyad <- occasion_rows |>
-    dplyr::summarise(n_members = dplyr::n_distinct(.data$member), .by = "dyad")
-  if (any(members_per_dyad$n_members > 2L)) {
+  members_per_dyad <- dplyr::summarise(rows, n = dplyr::n_distinct(.data$member), .by = "dyad")
+  if (any(members_per_dyad$n > 2L)) {
     stop("Each dyad must have at most two members.", call. = FALSE)
   }
 
-  # Drop rows with missing roles and number the members in order of first appearance.
-  member_occasions <- occasion_rows |>
+  # Keep rows with known roles and number the members in order of first appearance.
+  usable_rows <- rows |>
     dplyr::filter(!.data$is_role_missing) |>
     dplyr::mutate(member_number = dplyr::cur_group_id(), .by = c("dyad", "member"))
-  member_roles <- member_occasions |>
-    dplyr::summarise(n_roles = dplyr::n_distinct(.data$role), .by = "member_number")
-  if (any(member_roles$n_roles > 1L)) {
+  roles_per_member <- dplyr::summarise(usable_rows, n = dplyr::n_distinct(.data$role),
+                                       .by = "member_number")
+  if (any(roles_per_member$n > 1L)) {
     stop("Each member must have the same role throughout the data.", call. = FALSE)
   }
 
-  # The between level pairs one row per member, like cross-sectional data.
-  # Sorted by member number, row i of `members` is member i.
-  # So the between pairs' partner rows are member numbers,
-  # which are also the positions of the member means.
-  members <- member_occasions |>
+  # 1. Center: each member's mean in every dataset, and each response's deviation
+  #    from it. rowsum() adds up rows by group, so transpose to add up each
+  #    member's columns, ordered by member number.
+  usable_responses <- responses_by_dataset[, usable_rows$fitted_row, drop = FALSE]
+  member_sums <- t(rowsum(t(usable_responses), usable_rows$member_number))
+  member_means <- sweep(member_sums, 2, tabulate(usable_rows$member_number), "/")
+  deviations <- usable_responses - member_means[, usable_rows$member_number, drop = FALSE]
+
+  # 2a. Between: pair the partners' means like cross-sectional data. Members are
+  #     in member-number order, so pair positions are member numbers.
+  members <- usable_rows |>
     dplyr::slice_head(n = 1, by = "member_number") |>
     dplyr::arrange(.data$member_number)
   between <- prepare_partner_pairs(
     members$dyad, role_values = if (is.null(role_values)) NULL else members$role
   )
-  n_members <- nrow(members)
-  n_compositions <- nrow(between$compositions)
 
-  # The deviations follow the member means, in the row order of `member_occasions`.
-  deviation_positions <- member_occasions |>
-    dplyr::mutate(deviation_position = n_members + dplyr::row_number()) |>
-    dplyr::select("member_number", "occasion", "deviation_position")
-  # The within level joins both partners' deviations on the same occasion, so
-  # each pair keeps its dyad's composition and role order. The suffixes tell
-  # the two partners' positions apart.
+  # 2b. Within: match the two members of each complete dyad on the occasions
+  #     both answered. Each pair keeps its dyad's composition and role order, so
+  #     a composition without shared occasions stays, with zero dyads.
+  deviation_columns <- usable_rows |>
+    dplyr::mutate(deviation_column = dplyr::row_number()) |>
+    dplyr::select("member_number", "occasion", "deviation_column")
   shared_occasions <- between$pairs |>
     dplyr::mutate(dyad_number = dplyr::row_number()) |>
-    dplyr::inner_join(deviation_positions, by = c(first_partner_row = "member_number")) |>
-    dplyr::inner_join(deviation_positions,
+    dplyr::inner_join(deviation_columns, by = c(first_partner_row = "member_number")) |>
+    dplyr::inner_join(deviation_columns,
                       by = c(second_partner_row = "member_number", "occasion"),
                       suffix = c("_first_partner", "_second_partner"))
-
-  # The within level counts dyads that share at least one occasion, keeping zeros.
-  dyads_sharing_an_occasion <- unique(shared_occasions[c("dyad_number", "composition_index")])
+  # Count dyads that share at least one occasion, so both levels report dyads.
+  dyads_sharing_an_occasion <- dplyr::distinct(shared_occasions, .data$dyad_number,
+                                               .data$composition_index)
   within_compositions <- dplyr::mutate(
     between$compositions,
-    n_pairs = tabulate(dyads_sharing_an_occasion$composition_index, n_compositions)
+    n_pairs = tabulate(dyads_sharing_an_occasion$composition_index, dplyr::n())
   )
 
-  # Within compositions follow the between ones, so their indices are shifted.
-  within_pairs <- shared_occasions |>
-    dplyr::mutate(composition_index = .data$composition_index + n_compositions) |>
-    dplyr::select("composition_index",
-                  first_partner_row = "deviation_position_first_partner",
-                  second_partner_row = "deviation_position_second_partner")
-  # Labels name the level, so messages, printouts, and plots show it.
+  # 3. Place the deviations after the member means, and the within compositions
+  #    after the between ones.
+  n_members <- nrow(members)
+  n_compositions <- nrow(between$compositions)
+  within_pairs <- dplyr::transmute(
+    shared_occasions,
+    composition_index = .data$composition_index + n_compositions,
+    first_partner_row = .data$deviation_column_first_partner + n_members,
+    second_partner_row = .data$deviation_column_second_partner + n_members
+  )
   compositions <- dplyr::bind_rows(
     between = between$compositions,
     within = within_compositions,
     .id = "level"
   ) |>
+    # Labels name the level, so messages, printouts, and plots show it.
     dplyr::mutate(label = paste0(.data$label, " (", .data$level, ")"))
 
-  # As prepare_partner_pairs() does, dyads that lost all rows to missing roles
+  # As in prepare_partner_pairs(), dyads that lost all rows to missing roles
   # also count as incomplete.
   complete_dyad_ids <- members$dyad[between$pairs$first_partner_row]
-  incomplete_dyad_ids <- unique(dyad_ids[!is_dyad_id_missing & !dyad_ids %in% complete_dyad_ids])
-
   return(list(
-    pairs = dplyr::bind_rows(between$pairs, within_pairs),
-    role_orders = rep(between$role_orders, 2L),
-    compositions = compositions,
-    member_occasions = member_occasions,
-    n_complete_dyads = between$n_complete_dyads,
-    incomplete_dyad_ids = incomplete_dyad_ids,
-    missing_dyad_rows = which(is_dyad_id_missing),
-    missing_role_rows = which(is_role_missing)
+    responses_by_dataset = cbind(member_means, deviations),
+    partner_row_map = list(
+      pairs = dplyr::bind_rows(between$pairs, within_pairs),
+      role_orders = rep(between$role_orders, 2L),
+      compositions = compositions,
+      n_complete_dyads = between$n_complete_dyads,
+      incomplete_dyad_ids = unique(dyad_ids[!is_dyad_id_missing &
+                                              !dyad_ids %in% complete_dyad_ids]),
+      missing_dyad_rows = which(is_dyad_id_missing),
+      missing_role_rows = which(is_role_missing)
+    )
   ))
 }
 
