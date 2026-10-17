@@ -28,9 +28,9 @@ flags. \code{plot()} redraws a check saved with \code{plot = FALSE}.
 }
 \section{Residual check pages}{
 
-For each composition, the first page shows uniform QQ and mean PIT distance.
-The second shows PIT quartiles against predicted outcomes. Each supplied
-predictor gets another page like the second.
+For each composition, the first page shows uniform QQ and PIT quartiles
+against predicted outcomes, like DHARMa's main plot. The second shows mean
+PIT distance. Each supplied predictor gets a page of PIT quartiles.
 
 PIT (probability integral transform) residuals rank each outcome from 0 (low)
 to 1 (high) relative to its own simulated values. A suitable model should
@@ -44,9 +44,20 @@ studied by Robins et al. (2000) and in our simulations.
 
 Predicted outcomes and numeric predictors with more than eight distinct values
 are grouped into up to eight bins per role, with at least about 20
-observations per bin. With four or more bins, quartiles are smoothed across
-neighboring bins. These are full-model residuals, not partial effects. Bins
-and separate predictors can hide local patterns and interactions.
+observations per bin. As in DHARMa, these axes show ranks. Tick labels give
+the original values at the minimum, quartiles and maximum. Grey points show
+the observed PIT residuals. With four or more bins, PIT quartiles are
+smoothed across neighboring bins, using distances on the original scale.
+\code{quartile_lines = "qgam"} in \code{\link[=check_dyad_residuals]{check_dyad_residuals()}} replaces these smoothed
+quartiles with qgam lines. Because simulated datasets reuse the qgam tuning
+of the observed data, the 95\% coverage of these envelopes is approximate.
+Categories, and predicted outcomes or numeric predictors with up to eight
+distinct values, get a box per value, as in DHARMa: a red box spans the
+observed 25th to 75th percentile, with the median in bold. Red points mark
+each observed quartile on its own blue range (25th left, median centre, 75th
+right). Flags come from these points, not from the box lines. All PIT
+quartile panels show full-model residuals, not partial effects. Bins and
+separate predictors can hide local patterns and interactions.
 }
 
 \section{Views and compositions}{
