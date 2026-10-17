@@ -210,7 +210,9 @@ calculation from the effects of estimating parameters.
 Every dataset is checked with all observations pooled and with the two roles
 separately, each with a page for the actor's and the partner's predictor.
 Residual panels include the QQ envelope, mean PIT distance, and the PIT quartiles
-across predicted outcomes and across each predictor. Outcome panels include the
+across predicted outcomes and across each predictor. The PIT quartiles use the
+default bins, so the study does not cover `quartile_lines = "qgam"`.
+Outcome panels include the
 response SD (after subtracting fixed-effect predictions), largest absolute
 deviation, number of zeros where available, and, for ordinal outcomes, the
 category ranges.
@@ -373,9 +375,10 @@ The main patterns, at 100 / 400 dyads in either role unless noted:
   size 3, compared with `r rates_at("nbinom2", "correct", "residual", "any")`
   under the correct model.
 - **Omitted zero inflation** shows most in the PIT QQ envelope and the PIT
-  quartiles across predicted outcomes (25% extra zeros:
-  `r rates_at("nbinom2", "zeros_large", "residual", "qq")` and
-  `r rates_at("nbinom2", "zeros_large", "residual", "predicted_quantiles")`). The number of zeros stays
+  quartiles (25% extra zeros:
+  `r rates_at("nbinom2", "zeros_large", "residual", "qq")` for QQ and
+  `r rates_at("nbinom2", "zeros_large", "residual", "predicted_quantiles")` across
+  predicted outcomes). The number of zeros stays
   weak (`r rates_at("nbinom2", "zeros_large", "outcome", "zeros")`) because a
   smaller fitted NB2 size absorbs the extra zeros (see below).
 

@@ -139,7 +139,7 @@ test_that("quartile offsets stay inside small-scale panels", {
 })
 
 
-test_that("numeric predictors use each role's bins, smoothed when there are enough", {
+test_that("numeric predictors use each role's bins on ranks, smoothed when there are enough", {
   n <- 240
   simulations <- distribution_check_fixture()
   simulations$model_frame <- simulations$model_frame[rep(1:12, rep(c(10, 30), 6)), ]
@@ -157,7 +157,9 @@ test_that("numeric predictors use each role's bins, smoothed when there are enou
   rows_a <- which(simulations$model_frame$role == "A")
   bins_a <- split(rows_a, cut(rows_a, quantile(rows_a, 0:3 / 3), include.lowest = TRUE))
   expect_false(patterns$A$smooth)
-  expect_equal(unname(patterns$A$positions), unname(vapply(bins_a, mean, 0)))
+  # Bins sit at their mean rank within the role, scaled to 0--1.
+  expect_equal(unname(patterns$A$positions),
+               unname(vapply(bins_a, function(rows) mean(match(rows, rows_a)), 0)) / 60)
   expect_equal(patterns$A$quantiles[[2]]$observed,
                vapply(bins_a, function(rows) median(result$pit[rows, 1]), 0), ignore_attr = TRUE)
   expect_true(patterns$B$smooth)
@@ -167,11 +169,17 @@ test_that("numeric predictors use each role's bins, smoothed when there are enou
   expect_true(all(quartiles >= 0 & quartiles <= 1 &
                     quartiles[, 1] <= quartiles[, 2] & quartiles[, 2] <= quartiles[, 3]))
   # Identical weights smooth every dataset's quartiles; envelopes come afterwards.
+  # The grid is even in ranks, but smoothing uses the predictor's values there.
   rows_b <- which(simulations$model_frame$role == "B")
   bins_b <- split(rows_b, cut(rows_b, quantile(rows_b, 0:8 / 8), include.lowest = TRUE))
   centres <- vapply(bins_b, mean, 0)
-  grid <- seq(min(rows_b), max(rows_b), length.out = 101)
-  weights <- exp(-.5 * (outer(grid, centres, "-") / median(diff(centres)))^2)
+  grid <- seq(1 / 180, 1, length.out = 101)
+  expect_equal(patterns$B$positions, grid)
+  expect_equal(patterns$B$labels, signif(quantile(rows_b, 0:4 / 4, names = FALSE), 2))
+  # Each observed PIT residual is kept as a point at its rank.
+  expect_equal(unname(patterns$B$points), cbind(seq_along(rows_b) / 180, result$pit[rows_b, 1]))
+  grid_values <- approx(seq_along(rows_b) / 180, rows_b, grid)$y
+  weights <- exp(-.5 * (outer(grid_values, centres, "-") / median(diff(centres)))^2)
   weights <- weights / rowSums(weights)
   smoothed <- lapply(c(.25, .5, .75), function(probability) weights %*% t(vapply(bins_b,
     function(rows) apply(result$pit[rows, ], 2, quantile, probs = probability),
@@ -187,6 +195,73 @@ test_that("numeric predictors use each role's bins, smoothed when there are enou
   patterns <- check_dyad_residuals(simulations, "dyad", "role", "member", predictors = "Dense",
                                    plot = FALSE)$compositions[[1]]$patterns[[2]]
   expect_equal(lengths(lapply(patterns, `[[`, "positions")), c(A = 1L, B = 1L))
+})
+
+test_that("binned axes label close quartiles distinctly and keep tied ones", {
+  pit <- matrix(sin(seq_len(300))^2, 100)
+  narrow <- calculate_residual_pattern(pit, 1000 + seq(0, 1, length.out = 100), seq_len(100),
+                                       list(seq_len(100)), "bins")
+  expect_length(unique(narrow$labels), 5)
+  # With ties, repeated quartiles keep the same label.
+  tied <- calculate_residual_pattern(pit, c(rep(0, 60), 1:40), seq_len(100),
+                                     list(seq_len(100)), "bins")
+  expect_equal(sum(tied$labels == 0), 3)
+})
+
+test_that("qgam lines replace smoothed bins and are fitted on ranks", {
+  skip_if_not_installed("qgam")
+  # A skewed predictor and an observed PIT that rises with it.
+  n <- 100
+  predictor <- exp(seq(0, 5, length.out = n))
+  pit <- cbind(seq(.1, .9, length.out = n) + .1 * sin(seq_len(n)),
+               matrix(sin(seq_len(2 * n))^2, n))
+  pattern <- calculate_residual_pattern(pit, predictor, seq_len(n), list(seq_len(n)), "qgam")
+  # Lines lie on ranks from 0 to 1, with ticks at the predictor's quartiles.
+  expect_equal(range(pattern$positions), c(1 / n, 1))
+  expect_equal(pattern$ticks, 0:4 / 4)
+  expect_equal(pattern$labels, signif(quantile(predictor, 0:4 / 4, names = FALSE), 2))
+  # Close quartiles keep distinct labels.
+  narrow <- calculate_residual_pattern(pit, seq(1000, 1001, length.out = n), seq_len(n),
+                                       list(seq_len(n)), "qgam")
+  expect_length(unique(narrow$labels), 5)
+  expect_lt(pattern$quantiles[[2]]$observed[1], .3)
+  expect_gt(pattern$quantiles[[2]]$observed[101], .7)
+  # Without enough observations for smoothing, bins stay.
+  expect_identical(calculate_residual_pattern(pit, predictor, 1:60, list(1:60), "qgam"),
+                   calculate_residual_pattern(pit, predictor, 1:60, list(1:60), "bins"))
+  # A saved check with qgam lines draws its ranked axis.
+  result <- check_dyad_residuals(distribution_check_fixture(), role = NULL, plot = FALSE)
+  result$compositions[[1]]$patterns[[1]]$Pooled <- pattern
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(plot(result, ask = FALSE))
+})
+
+test_that("qgam warnings come as one summary per panel", {
+  skip_if_not_installed("qgam")
+  # Let every fit warn, as mgcv does after a step failure.
+  real_qgam <- qgam::qgam
+  local_mocked_bindings(qgam = function(...) {
+    warning("Fitting terminated with step failure")
+    real_qgam(...)
+  }, .package = "qgam")
+  n <- 100
+  pit <- matrix(sin(seq_len(3 * n))^2, n)
+  # Three quartiles for three datasets give nine fits.
+  expect_warning(
+    calculate_residual_pattern(pit, seq_len(n), seq_len(n), list(seq_len(n)), "qgam"),
+    "panel \\(9 fits\\):\n9 x Fitting terminated with step failure")
+})
+
+test_that("interactive checks suggest qgam lines only when bins are smoothed", {
+  withr::local_options(rlang_interactive = TRUE, rlib_message_verbosity = "verbose")
+  # 120 observations give six bins of predicted outcomes, which are smoothed.
+  simulations <- subset_fixture(distribution_check_fixture(), rep(1:12, 10))
+  expect_message(check_dyad_residuals(simulations, role = NULL, plot = FALSE),
+                 "quartile_lines = \"qgam\"")
+  # 12 observations give too few bins for smoothing.
+  expect_no_message(check_dyad_residuals(distribution_check_fixture(), role = NULL,
+                                         plot = FALSE))
 })
 
 
@@ -267,6 +342,75 @@ test_that("residual plots draw each role's saved curves and scalar summaries", {
   expect_identical(sub("\n.*", "", titles), rep(c("Uniform QQ", "PIT quartiles"), each = 2))
 })
 
+
+test_that("the first page pairs QQ with the predicted outcome, as in DHARMa", {
+  simulations <- distribution_check_fixture()
+  simulations$model_frame$X <- seq_len(12)
+  result <- check_dyad_residuals(simulations, role = NULL, predictors = "X", plot = FALSE)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  pages <- character()
+  local_mocked_bindings(plot_check_role_panels = function(composition, checks, title, ...)
+    pages <<- c(pages, paste(checks, collapse = " + ")))
+  plot(result, ask = FALSE)
+  expect_identical(pages, c("qq + quartiles", "mean_distance", "quartiles"))
+})
+
+test_that("categories get boxes inside their panel, binned axes get points", {
+  simulations <- distribution_check_fixture()
+  simulations$model_frame$group <- rep(c("a", "b", "c"), 4)
+  simulations$model_frame$few <- rep(c(0, 1e-8), 6)
+  result <- check_dyad_residuals(simulations, role = NULL, predictors = c("group", "few"),
+                                 plot = FALSE)
+  expect_null(result$compositions[[1]]$patterns[[2]]$Pooled$points)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  inside <- TRUE
+  widths <- integer()
+  original_rect <- graphics::rect
+  local_mocked_bindings(rect = function(xleft, ybottom, xright, ...) {
+    inside <<- inside && all(xleft >= graphics::par("usr")[1] & xright <= graphics::par("usr")[2])
+    widths <<- c(widths, length(xleft))
+    original_rect(xleft, ybottom, xright, ...)
+  }, .package = "graphics")
+  plot(result, ask = FALSE)
+  expect_true(inside)
+  # One red box per value: three groups, then two values.
+  expect_equal(sum(widths == 3), 1)
+  expect_equal(sum(widths == 2), 1)
+})
+
+test_that("each category quartile is drawn on its own envelope, not the median's", {
+  # Too little spread: the outer quartiles leave their own envelopes but stay
+  # inside the median's, so a shared band would hide both departures.
+  result <- check_dyad_residuals(distribution_check_fixture(), role = NULL, plot = FALSE)
+  quantiles <- Map(function(observed, lower, upper)
+    list(observed = observed, lower = lower, upper = upper),
+    c(.484, .498, .516), c(.157, .401, .644), c(.357, .608, .844))
+  result$compositions[[1]]$patterns[[1]]$Pooled <- list(positions = 1, labels = "A",
+    limits = c(.55, 1.45), binned = FALSE, smooth = FALSE, numeric = FALSE,
+    quantiles = quantiles)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  ranges <- markers <- NULL
+  original_segments <- graphics::segments
+  original_points <- graphics::points
+  local_mocked_bindings(segments = function(x0, y0, x1 = x0, y1 = y0, ...) {
+    if (identical(list(...)$col, check_colours$simulation_line))
+      ranges <<- rbind(ranges, c(x = x0, lower = y0, upper = y1))
+    original_segments(x0, y0, x1, y1, ...)
+  }, points = function(x, y, ...) {
+    markers <<- rbind(markers, c(x = x, y = y))
+    original_points(x, y, ...)
+  }, .package = "graphics")
+  plot(result, ask = FALSE)
+  # Each quartile's point shares the position of its own range, and only there.
+  expect_equal(nrow(ranges), 3)
+  expect_equal(markers[, "x"], ranges[, "x"])
+  expect_length(unique(ranges[, "x"]), 3)
+  outside <- markers[, "y"] < ranges[, "lower"] | markers[, "y"] > ranges[, "upper"]
+  expect_identical(unname(outside), c(TRUE, FALSE, TRUE))
+})
 
 test_that("each page repeats its composition heading", {
   simulations <- distribution_check_fixture()
