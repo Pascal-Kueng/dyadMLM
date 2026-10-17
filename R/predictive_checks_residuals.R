@@ -408,10 +408,10 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #'
 #' Predicted outcomes and numeric predictors with more than eight distinct values
 #' are grouped into up to eight bins per role, with at least about 20
-#' observations per bin. As in DHARMa, these axes show ranks, with ticks at
-#' the quartiles of the axis values. With four or more bins, quartiles are
-#' smoothed across neighboring bins, using distances on the predictor's original
-#' scale. `quartile_lines = "qgam"` in
+#' observations per bin. As in DHARMa, these axes show ranks. Tick labels give
+#' the original values at the minimum, quartiles and maximum. With four or more
+#' bins, PIT quartiles are smoothed across neighboring bins, using distances on
+#' the original scale. `quartile_lines = "qgam"` in
 #' [check_dyad_residuals()] replaces these smoothed quartiles with qgam lines.
 #' Because simulated datasets reuse the qgam tuning of the observed data, the
 #' 95% coverage of these envelopes is approximate. These are full-model
