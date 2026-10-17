@@ -44,14 +44,15 @@ studied by Robins et al. (2000) and in our simulations.
 
 Predicted outcomes and numeric predictors with more than eight distinct values
 are grouped into up to eight bins per role, with at least about 20
-observations per bin. With four or more bins, quartiles are smoothed across
-neighboring bins. \code{quartile_lines = "qgam"} in \code{\link[=check_dyad_residuals]{check_dyad_residuals()}}
-replaces these smoothed quartiles with qgam lines on a ranked axis, with
-ticks at the quartiles of the axis values. Because simulated datasets
-reuse the qgam tuning of the observed data, the 95\% coverage of these
-envelopes is approximate. These are full-model residuals, not partial
-effects. Bins and separate predictors can hide local patterns and
-interactions.
+observations per bin. As in DHARMa, these axes show ranks, with ticks at
+the quartiles of the axis values. With four or more bins, quartiles are
+smoothed across neighboring bins, using distances on the predictor's original
+scale. \code{quartile_lines = "qgam"} in
+\code{\link[=check_dyad_residuals]{check_dyad_residuals()}} replaces these smoothed quartiles with qgam lines.
+Because simulated datasets reuse the qgam tuning of the observed data, the
+95\% coverage of these envelopes is approximate. These are full-model
+residuals, not partial effects. Bins and separate predictors can hide local
+patterns and interactions.
 }
 
 \section{Views and compositions}{

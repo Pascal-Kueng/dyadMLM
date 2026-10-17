@@ -139,7 +139,7 @@ test_that("quartile offsets stay inside small-scale panels", {
 })
 
 
-test_that("numeric predictors use each role's bins, smoothed when there are enough", {
+test_that("numeric predictors use each role's bins on ranks, smoothed when there are enough", {
   n <- 240
   simulations <- distribution_check_fixture()
   simulations$model_frame <- simulations$model_frame[rep(1:12, rep(c(10, 30), 6)), ]
@@ -157,7 +157,9 @@ test_that("numeric predictors use each role's bins, smoothed when there are enou
   rows_a <- which(simulations$model_frame$role == "A")
   bins_a <- split(rows_a, cut(rows_a, quantile(rows_a, 0:3 / 3), include.lowest = TRUE))
   expect_false(patterns$A$smooth)
-  expect_equal(unname(patterns$A$positions), unname(vapply(bins_a, mean, 0)))
+  # Bins sit at their mean rank within the role, scaled to 0--1.
+  expect_equal(unname(patterns$A$positions),
+               unname(vapply(bins_a, function(rows) mean(match(rows, rows_a)), 0)) / 60)
   expect_equal(patterns$A$quantiles[[2]]$observed,
                vapply(bins_a, function(rows) median(result$pit[rows, 1]), 0), ignore_attr = TRUE)
   expect_true(patterns$B$smooth)
@@ -167,11 +169,15 @@ test_that("numeric predictors use each role's bins, smoothed when there are enou
   expect_true(all(quartiles >= 0 & quartiles <= 1 &
                     quartiles[, 1] <= quartiles[, 2] & quartiles[, 2] <= quartiles[, 3]))
   # Identical weights smooth every dataset's quartiles; envelopes come afterwards.
+  # The grid is even in ranks, but smoothing uses the predictor's values there.
   rows_b <- which(simulations$model_frame$role == "B")
   bins_b <- split(rows_b, cut(rows_b, quantile(rows_b, 0:8 / 8), include.lowest = TRUE))
   centres <- vapply(bins_b, mean, 0)
-  grid <- seq(min(rows_b), max(rows_b), length.out = 101)
-  weights <- exp(-.5 * (outer(grid, centres, "-") / median(diff(centres)))^2)
+  grid <- seq(1 / 180, 1, length.out = 101)
+  expect_equal(patterns$B$positions, grid)
+  expect_equal(patterns$B$labels, signif(quantile(rows_b, 0:4 / 4, names = FALSE), 2))
+  grid_values <- approx(seq_along(rows_b) / 180, rows_b, grid)$y
+  weights <- exp(-.5 * (outer(grid_values, centres, "-") / median(diff(centres)))^2)
   weights <- weights / rowSums(weights)
   smoothed <- lapply(c(.25, .5, .75), function(probability) weights %*% t(vapply(bins_b,
     function(rows) apply(result$pit[rows, ], 2, quantile, probs = probability),
@@ -187,6 +193,17 @@ test_that("numeric predictors use each role's bins, smoothed when there are enou
   patterns <- check_dyad_residuals(simulations, "dyad", "role", "member", predictors = "Dense",
                                    plot = FALSE)$compositions[[1]]$patterns[[2]]
   expect_equal(lengths(lapply(patterns, `[[`, "positions")), c(A = 1L, B = 1L))
+})
+
+test_that("binned axes label close quartiles distinctly and keep tied ones", {
+  pit <- matrix(sin(seq_len(300))^2, 100)
+  narrow <- calculate_residual_pattern(pit, 1000 + seq(0, 1, length.out = 100), seq_len(100),
+                                       list(seq_len(100)), "bins")
+  expect_length(unique(narrow$labels), 5)
+  # With ties, repeated quartiles keep the same label.
+  tied <- calculate_residual_pattern(pit, c(rep(0, 60), 1:40), seq_len(100),
+                                     list(seq_len(100)), "bins")
+  expect_equal(sum(tied$labels == 0), 3)
 })
 
 test_that("qgam lines replace smoothed bins and are fitted on ranks", {

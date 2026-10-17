@@ -275,10 +275,28 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows, quartile
     if (!binned && length(positions) > 1) .2 * min(diff(positions)) else 0
   } else .45
   smooth <- binned && length(positions) >= 4
+  if (binned) {
+    # As in DHARMa, binned axes show ranks scaled to 0--1. Ticks at the
+    # predictor's quartiles are labelled with its values there.
+    ranks <- rank(predictor[rows]) / length(rows)
+    rank_positions <- vapply(rows_by_group, function(group_rows)
+      mean(ranks[match(group_rows, rows)]), numeric(1))
+    limits <- c(0, 1)
+    ticks <- 0:4 / 4
+    # Two significant digits, or more where needed to tell different quartiles apart.
+    tick_values <- stats::quantile(predictor[rows], ticks, names = FALSE)
+    digits <- 2
+    while (length(unique(signif(tick_values, digits))) < length(unique(tick_values)))
+      digits <- digits + 1
+    labels <- signif(tick_values, digits)
+  }
   if (smooth) {
-    grid <- seq(min(predictor[rows]), max(predictor[rows]), length.out = 101)
+    grid <- seq(min(ranks), max(ranks), length.out = 101)
+    # Smoothing stays on the predictor's scale, where sparse ends keep their own
+    # bins, so patterns at the ends of the axis are not averaged away.
+    grid_values <- stats::approx(ranks, predictor[rows], grid, ties = mean)$y
     # Fixed positive weights keep quartiles ordered and within 0--1.
-    log_weights <- -.5 * (outer(grid, positions, "-") / stats::median(diff(positions)))^2
+    log_weights <- -.5 * (outer(grid_values, positions, "-") / stats::median(diff(positions)))^2
     weights <- exp(log_weights - apply(log_weights, 1, max))
     weights <- weights / rowSums(weights)
   }
@@ -290,21 +308,9 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows, quartile
     values <- do.call(rbind, lapply(quartiles, function(group) group[i, ]))
     if (smooth) weights %*% values else values
   })
-  ranked <- smooth && quartile_lines == "qgam"
-  if (ranked) {
-    # As in DHARMa, fit and draw on ranks scaled to 0--1.
-    ranks <- rank(predictor[rows]) / length(rows)
-    grid <- seq(min(ranks), max(ranks), length.out = 101)
+  # As in DHARMa, qgam lines are fitted on the same ranks.
+  if (smooth && quartile_lines == "qgam")
     quartile_curves <- qgam_quartiles(pit[rows, , drop = FALSE], ranks, grid)
-    limits <- c(0, 1)
-    # Ticks at the predictor's quartiles, labelled with its values there. Two
-    # significant digits, or more where needed to tell different quartiles apart.
-    ticks <- 0:4 / 4
-    values <- stats::quantile(predictor[rows], ticks, names = FALSE)
-    digits <- 2
-    while (length(unique(signif(values, digits))) < length(unique(values))) digits <- digits + 1
-    labels <- signif(values, digits)
-  }
   # One envelope covers all three quartiles and positions in this panel.
   joint <- residual_curve_summary(do.call(rbind, quartile_curves))
   positions_per_curve <- nrow(quartile_curves[[1]])
@@ -312,10 +318,10 @@ calculate_residual_pattern <- function(pit, predictor, rows, role_rows, quartile
     indices <- seq_len(positions_per_curve) + (i - 1L) * positions_per_curve
     lapply(joint, `[`, indices)
   })
-  pattern <- list(positions = if (smooth) grid else positions, labels = labels,
-                  limits = limits + c(-padding, padding), binned = binned, smooth = smooth,
-                  numeric = is.numeric(predictor), quantiles = quantiles)
-  if (ranked) pattern$ticks <- ticks
+  pattern <- list(positions = if (smooth) grid else if (binned) rank_positions else positions,
+                  labels = labels, limits = limits + c(-padding, padding), binned = binned,
+                  smooth = smooth, numeric = is.numeric(predictor), quantiles = quantiles)
+  if (binned) pattern$ticks <- ticks
   pattern
 }
 
@@ -402,14 +408,15 @@ print.dyadMLM_residual_check <- function(x, ...) {
 #'
 #' Predicted outcomes and numeric predictors with more than eight distinct values
 #' are grouped into up to eight bins per role, with at least about 20
-#' observations per bin. With four or more bins, quartiles are smoothed across
-#' neighboring bins. `quartile_lines = "qgam"` in [check_dyad_residuals()]
-#' replaces these smoothed quartiles with qgam lines on a ranked axis, with
-#' ticks at the quartiles of the axis values. Because simulated datasets
-#' reuse the qgam tuning of the observed data, the 95% coverage of these
-#' envelopes is approximate. These are full-model residuals, not partial
-#' effects. Bins and separate predictors can hide local patterns and
-#' interactions.
+#' observations per bin. As in DHARMa, these axes show ranks, with ticks at
+#' the quartiles of the axis values. With four or more bins, quartiles are
+#' smoothed across neighboring bins, using distances on the predictor's original
+#' scale. `quartile_lines = "qgam"` in
+#' [check_dyad_residuals()] replaces these smoothed quartiles with qgam lines.
+#' Because simulated datasets reuse the qgam tuning of the observed data, the
+#' 95% coverage of these envelopes is approximate. These are full-model
+#' residuals, not partial effects. Bins and separate predictors can hide local
+#' patterns and interactions.
 #'
 #'
 #' @section Views and compositions:
@@ -484,7 +491,7 @@ plot.dyadMLM_residual_check <- function(x, ask = NULL, panels = TRUE, ...) {
     title <- if (is.null(name)) "PIT quartiles\n(fit across predicted outcomes)"
       else paste0("PIT quartiles by ", name, "\n(fit across predictor values)")
     if (is.null(pattern)) return(plot_check_empty(title, "No available predictor values"))
-    # qgam lines lie on ranks, with ticks at the predictor's quartiles.
+    # Binned axes show ranks, with ticks at the predictor's quartiles.
     ranked <- !is.null(pattern$ticks)
     graphics::plot(pattern$positions, rep(.5, length(pattern$positions)), type = "n", ylim = c(0, 1),
       xlim = pattern$limits, xaxt = if (pattern$binned && !ranked) "s" else "n", yaxt = "n",
