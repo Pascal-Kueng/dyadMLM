@@ -63,8 +63,8 @@ articles:
   desc: How often predictive checks detect mismatches and raise false alarms.
   contents:
   - articles/partner-dependence-simulation
-  - articles/covariance-pooling
   - articles/ild-partner-dependence
+  - articles/covariance-pooling
   - articles/distribution-checks
 
 reference:
