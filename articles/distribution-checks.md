@@ -9,23 +9,23 @@ simulations per dataset.
   panel flagged at most 7% of datasets under correct models, pooled or
   within one role, and at most 9% in either role (flagged in at least
   one role). In the settings studied, at least one flag appeared in
-  5–13% of datasets with all observations pooled, 12–27% in either role,
-  and 16–35% in either role with actor and partner predictor pages. So
+  5–13% of datasets with all observations pooled, 12–28% in either role,
+  and 16–36% in either role with actor and partner predictor pages. So
   look for a consistent pattern, not any single flag.
 - **Detection depends strongly on sample size.** With 40 dyads, most
   mismatches were hard to detect: apart from omitted role means of ±0.4
   (79%), mismatches were flagged in either role in 18–43% of datasets,
   against 16–19% under correct models. With 400 dyads, most were flagged
   in 84–100%. Mildly overdispersed counts (NB2 size 10) fitted as
-  Poisson were flagged in only 40%, and 10% extra zeros in 48%, against
-  20–27% under correct models.
+  Poisson were flagged in only 40%, and 10% extra zeros in 46%, against
+  21–28% under correct models.
 - **Each problem shows in a few panels**, listed in the help under
   [Reading
   flags](https://pascal-kueng.github.io/dyadMLM/reference/plot.dyadMLM_residual_check.html#reading-flags).
   At 400 dyads in either role, for example, 25% extra zeros flagged the
   QQ envelope in 76% of datasets but the number of zeros in 26%, and an
   omitted partner effect (dyad SD 1.2) flagged the PIT quartiles across
-  the partner’s predictor in 89% but the QQ envelope in 5%. Panels
+  the partner’s predictor in 88% but the QQ envelope in 5%. Panels
   suggest possible problems, not their cause.
 - **A flag, or its absence, does not show whether estimates or SEs are
   wrong.** Harm depended on the kind of mismatch. At 400 dyads, omitted
@@ -40,7 +40,7 @@ simulations per dataset.
   dataset’s PIT residuals so that their median is 0.5, is applied
   automatically when the model has a freely estimated overall location
   (not for ordinal models). It raised the residual check’s flag rate by
-  3–9 percentage points under correct models and by up to 32 under
+  3–10 percentage points under correct models and by up to 33 under
   mismatches, mainly omitted role means and extra zeros. But centred
   residuals lose any overall median shift, so single panels can flag
   less often. With NB2 size 1 fitted as Poisson, the residual check
@@ -134,9 +134,11 @@ Every dataset is checked with all observations pooled and with the two
 roles separately, each with a page for the actor’s and the partner’s
 predictor. Residual panels include the QQ envelope, mean PIT distance,
 and the PIT quartiles across predicted outcomes and across each
-predictor. Outcome panels include the response SD (after subtracting
-fixed-effect predictions), largest absolute deviation, number of zeros
-where available, and, for ordinal outcomes, the category ranges.
+predictor. The PIT quartiles use the default bins, so the study does not
+cover `quartile_lines = "qgam"`. Outcome panels include the response SD
+(after subtracting fixed-effect predictions), largest absolute
+deviation, number of zeros where available, and, for ordinal outcomes,
+the category ranges.
 
 Rates use available checks. Failed fits, convergence or Hessian
 problems, and failed checks are recorded and excluded without retry.
@@ -197,7 +199,7 @@ of zeros, and mean PIT distance flag in at most 2.8%, 0.0%, and 1.2% of
 datasets. The fitted model already matches these overall levels.
 
 Reading every numerical panel of both checks for both roles, without the
-predictor pages, at least one flag appears in 12–27% of datasets under
+predictor pages, at least one flag appears in 12–28% of datasets under
 every correct model. With all observations pooled, this is 5–13%.
 
 Any flags under correct models
@@ -219,36 +221,36 @@ denominator.
 | Gaussian | Correct model | 40 | Either role | Residuals | 11.4% (8.9–14.5), n = 500 | 16.2% (13.2–19.7), n = 500 |
 | Gaussian | Correct model | 40 | Either role | Outcomes | 6.4% (4.6–8.9), n = 500 | 6.4% (4.6–8.9), n = 500 |
 | Gaussian | Correct model | 40 | Either role | Both checks | 16.0% (13.0–19.5), n = 500 | 20.6% (17.3–24.4), n = 500 |
-| Gaussian | Correct model | 100 | Pooled | Residuals | 4.2% (2.8–6.3), n = 500 | 7.4% (5.4–10.0), n = 500 |
+| Gaussian | Correct model | 100 | Pooled | Residuals | 5.2% (3.6–7.5), n = 500 | 7.8% (5.8–10.5), n = 500 |
 | Gaussian | Correct model | 100 | Pooled | Outcomes | 2.6% (1.5–4.4), n = 500 | 2.6% (1.5–4.4), n = 500 |
-| Gaussian | Correct model | 100 | Pooled | Both checks | 6.6% (4.7–9.1), n = 500 | 9.6% (7.3–12.5), n = 500 |
-| Gaussian | Correct model | 100 | Either role | Residuals | 14.8% (12.0–18.2), n = 500 | 20.4% (17.1–24.2), n = 500 |
+| Gaussian | Correct model | 100 | Pooled | Both checks | 7.6% (5.6–10.3), n = 500 | 10.0% (7.7–12.9), n = 500 |
+| Gaussian | Correct model | 100 | Either role | Residuals | 15.0% (12.1–18.4), n = 500 | 19.8% (16.5–23.5), n = 500 |
 | Gaussian | Correct model | 100 | Either role | Outcomes | 6.2% (4.4–8.7), n = 500 | 6.2% (4.4–8.7), n = 500 |
-| Gaussian | Correct model | 100 | Either role | Both checks | 19.4% (16.2–23.1), n = 500 | 24.8% (21.2–28.8), n = 500 |
-| Gaussian | Correct model | 400 | Pooled | Residuals | 3.6% (2.3–5.6), n = 500 | 8.0% (5.9–10.7), n = 500 |
+| Gaussian | Correct model | 100 | Either role | Both checks | 19.6% (16.4–23.3), n = 500 | 24.2% (20.7–28.1), n = 500 |
+| Gaussian | Correct model | 400 | Pooled | Residuals | 3.8% (2.4–5.9), n = 500 | 8.8% (6.6–11.6), n = 500 |
 | Gaussian | Correct model | 400 | Pooled | Outcomes | 2.8% (1.7–4.6), n = 500 | 2.8% (1.7–4.6), n = 500 |
-| Gaussian | Correct model | 400 | Pooled | Both checks | 6.2% (4.4–8.7), n = 500 | 10.4% (8.0–13.4), n = 500 |
-| Gaussian | Correct model | 400 | Either role | Residuals | 11.4% (8.9–14.5), n = 500 | 19.2% (16.0–22.9), n = 500 |
+| Gaussian | Correct model | 400 | Pooled | Both checks | 6.4% (4.6–8.9), n = 500 | 11.2% (8.7–14.3), n = 500 |
+| Gaussian | Correct model | 400 | Either role | Residuals | 12.4% (9.8–15.6), n = 500 | 19.2% (16.0–22.9), n = 500 |
 | Gaussian | Correct model | 400 | Either role | Outcomes | 9.2% (7.0–12.1), n = 500 | 9.2% (7.0–12.1), n = 500 |
-| Gaussian | Correct model | 400 | Either role | Both checks | 19.6% (16.4–23.3), n = 500 | 27.2% (23.5–31.3), n = 500 |
-| Negative binomial | Correct model | 40 | Pooled | Residuals | 4.8% (3.2–7.0), n = 500 | 7.4% (5.4–10.0), n = 500 |
+| Gaussian | Correct model | 400 | Either role | Both checks | 20.6% (17.3–24.4), n = 500 | 27.2% (23.5–31.3), n = 500 |
+| Negative binomial | Correct model | 40 | Pooled | Residuals | 4.8% (3.2–7.0), n = 500 | 7.6% (5.6–10.3), n = 500 |
 | Negative binomial | Correct model | 40 | Pooled | Outcomes | 0.6% (0.2–1.7), n = 500 | 0.6% (0.2–1.7), n = 500 |
-| Negative binomial | Correct model | 40 | Pooled | Both checks | 5.2% (3.6–7.5), n = 500 | 7.8% (5.8–10.5), n = 500 |
+| Negative binomial | Correct model | 40 | Pooled | Both checks | 5.2% (3.6–7.5), n = 500 | 8.0% (5.9–10.7), n = 500 |
 | Negative binomial | Correct model | 40 | Either role | Residuals | 15.8% (12.9–19.3), n = 500 | 20.6% (17.3–24.4), n = 500 |
 | Negative binomial | Correct model | 40 | Either role | Outcomes | 4.6% (3.1–6.8), n = 500 | 4.6% (3.1–6.8), n = 500 |
 | Negative binomial | Correct model | 40 | Either role | Both checks | 18.8% (15.6–22.5), n = 500 | 23.6% (20.1–27.5), n = 500 |
-| Negative binomial | Correct model | 100 | Pooled | Residuals | 6.4% (4.6–8.9), n = 500 | 9.2% (7.0–12.1), n = 500 |
+| Negative binomial | Correct model | 100 | Pooled | Residuals | 6.4% (4.6–8.9), n = 500 | 9.8% (7.5–12.7), n = 500 |
 | Negative binomial | Correct model | 100 | Pooled | Outcomes | 2.0% (1.1–3.6), n = 500 | 2.0% (1.1–3.6), n = 500 |
-| Negative binomial | Correct model | 100 | Pooled | Both checks | 8.2% (6.1–10.9), n = 500 | 10.8% (8.4–13.8), n = 500 |
-| Negative binomial | Correct model | 100 | Either role | Residuals | 15.4% (12.5–18.8), n = 500 | 22.0% (18.6–25.8), n = 500 |
+| Negative binomial | Correct model | 100 | Pooled | Both checks | 8.2% (6.1–10.9), n = 500 | 11.4% (8.9–14.5), n = 500 |
+| Negative binomial | Correct model | 100 | Either role | Residuals | 15.4% (12.5–18.8), n = 500 | 22.8% (19.3–26.7), n = 500 |
 | Negative binomial | Correct model | 100 | Either role | Outcomes | 7.8% (5.8–10.5), n = 500 | 7.8% (5.8–10.5), n = 500 |
-| Negative binomial | Correct model | 100 | Either role | Both checks | 22.2% (18.8–26.0), n = 500 | 28.0% (24.2–32.1), n = 500 |
-| Negative binomial | Correct model | 400 | Pooled | Residuals | 7.6% (5.6–10.3), n = 500 | 12.2% (9.6–15.4), n = 500 |
+| Negative binomial | Correct model | 100 | Either role | Both checks | 22.2% (18.8–26.0), n = 500 | 28.8% (25.0–32.9), n = 500 |
+| Negative binomial | Correct model | 400 | Pooled | Residuals | 7.8% (5.8–10.5), n = 500 | 12.2% (9.6–15.4), n = 500 |
 | Negative binomial | Correct model | 400 | Pooled | Outcomes | 5.8% (4.1–8.2), n = 500 | 5.8% (4.1–8.2), n = 500 |
-| Negative binomial | Correct model | 400 | Pooled | Both checks | 13.0% (10.3–16.2), n = 500 | 17.2% (14.1–20.8), n = 500 |
-| Negative binomial | Correct model | 400 | Either role | Residuals | 16.4% (13.4–19.9), n = 500 | 26.2% (22.5–30.2), n = 500 |
+| Negative binomial | Correct model | 400 | Pooled | Both checks | 13.2% (10.5–16.4), n = 500 | 17.2% (14.1–20.8), n = 500 |
+| Negative binomial | Correct model | 400 | Either role | Residuals | 17.4% (14.3–21.0), n = 500 | 26.8% (23.1–30.8), n = 500 |
 | Negative binomial | Correct model | 400 | Either role | Outcomes | 12.4% (9.8–15.6), n = 500 | 12.4% (9.8–15.6), n = 500 |
-| Negative binomial | Correct model | 400 | Either role | Both checks | 26.8% (23.1–30.8), n = 500 | 35.0% (30.9–39.3), n = 500 |
+| Negative binomial | Correct model | 400 | Either role | Both checks | 27.6% (23.9–31.7), n = 500 | 35.8% (31.7–40.1), n = 500 |
 
 ## Detecting model mismatches
 
@@ -279,9 +281,9 @@ defaults. The correct-model column is the false-alarm baseline.
 |:---|:---|:---|:---|:---|:---|
 | PIT QQ envelope | 7 / 7 / 6 | 31 / 54 / 99 | 75 / 99 / 100 | 9 / 12 / 36 | 13 / 28 / 92 |
 | Mean PIT distance | 2 / 4 / 3 | 5 / 4 / 4 | 5 / 3 / 4 | 7 / 19 / 58 | 17 / 45 / 99 |
-| PIT quartiles vs prediction | 5 / 7 / 4 | 16 / 36 / 83 | 44 / 95 / 100 | 7 / 9 / 10 | 7 / 11 / 24 |
-| PIT quartiles vs actor predictor | 6 / 7 / 6 | 18 / 38 / 83 | 45 / 95 / 100 | 8 / 9 / 12 | 7 / 13 / 25 |
-| PIT quartiles vs partner predictor | 4 / 6 / 4 | 17 / 38 / 84 | 46 / 94 / 100 | 7 / 8 / 11 | 5 / 9 / 25 |
+| PIT quartiles vs prediction | 5 / 8 / 5 | 16 / 39 / 84 | 44 / 96 / 100 | 7 / 8 / 10 | 7 / 11 / 24 |
+| PIT quartiles vs actor predictor | 6 / 8 / 6 | 18 / 39 / 84 | 45 / 96 / 100 | 8 / 9 / 12 | 7 / 13 / 26 |
+| PIT quartiles vs partner predictor | 4 / 6 / 5 | 17 / 40 / 85 | 46 / 95 / 100 | 7 / 8 / 10 | 5 / 9 / 26 |
 | Response SD | 1 / 0 / 0 | 1 / 0 / 2 | 3 / 8 / 47 | 5 / 13 / 71 | 16 / 52 / 100 |
 | Largest absolute deviation | 6 / 6 / 9 | 6 / 7 / 8 | 4 / 6 / 8 | 11 / 15 / 24 | 19 / 36 / 54 |
 
@@ -291,9 +293,9 @@ Gaussian models {.table}
 |:---|:---|:---|:---|:---|:---|
 | PIT QQ envelope | 9 / 9 / 8 | 9 / 9 / 13 | 22 / 22 / 54 | 7 / 10 / 27 | 13 / 25 / 76 |
 | Mean PIT distance | 5 / 5 / 6 | 8 / 8 / 17 | 18 / 28 / 74 | 3 / 4 / 6 | 5 / 8 / 22 |
-| PIT quartiles vs prediction | 6 / 5 / 8 | 7 / 7 / 11 | 14 / 15 / 26 | 8 / 11 / 19 | 14 / 27 / 57 |
-| PIT quartiles vs actor predictor | 6 / 6 / 8 | 8 / 10 / 12 | 15 / 16 / 25 | 9 / 10 / 15 | 13 / 21 / 58 |
-| PIT quartiles vs partner predictor | 6 / 7 / 9 | 7 / 7 / 11 | 14 / 14 / 27 | 7 / 10 / 15 | 12 / 20 / 54 |
+| PIT quartiles vs prediction | 6 / 4 / 9 | 7 / 8 / 11 | 14 / 16 / 25 | 8 / 11 / 17 | 14 / 26 / 52 |
+| PIT quartiles vs actor predictor | 6 / 7 / 9 | 8 / 11 / 12 | 15 / 17 / 24 | 9 / 9 / 15 | 13 / 22 / 57 |
+| PIT quartiles vs partner predictor | 6 / 8 / 9 | 7 / 8 / 11 | 14 / 15 / 27 | 7 / 9 / 15 | 12 / 20 / 54 |
 | Response SD | 2 / 5 / 6 | 3 / 5 / 5 | 5 / 5 / 11 | 2 / 3 / 4 | 2 / 4 / 8 |
 | Largest absolute deviation | 3 / 6 / 9 | 3 / 6 / 7 | 5 / 5 / 9 | 3 / 5 / 6 | 5 / 6 / 12 |
 | Number of zeros | 2 / 2 / 3 | 2 / 3 / 9 | 7 / 13 / 56 | 1 / 2 / 17 | 2 / 6 / 26 |
@@ -305,19 +307,19 @@ The main patterns, at 100 / 400 dyads in either role unless noted:
 - **Omitted role means** show mainly in the role view of residual checks
   (±0.2: 61% / 99%). The pooled residual view and the outcome checks’
   numerical panels (not the ECDF) stay near their correct-model rates
-  (5% / 6% versus 4% / 4%, and 7% / 10% versus 6% / 9%). The exception
+  (5% / 6% versus 5% / 4%, and 7% / 10% versus 6% / 9%). The exception
   is the per-role response SD at ±0.4 (8% / 47%), which reacts to the
   inflated fitted residual SD.
 - **Role SD differences** show most in the per-role response SD and mean
   PIT distance (ratio 1.50: 52% / 100% and 45% / 99%).
 - **NB2 overdispersion fitted as Poisson** is partly absorbed by a
   larger fitted dyad SD (see below). Residual checks flag either role in
-  47% / 84% of datasets for size 3, compared with 15% / 16% under the
+  48% / 84% of datasets for size 3, compared with 15% / 17% under the
   correct model.
 - **Omitted zero inflation** shows most in the PIT QQ envelope and the
-  PIT quartiles across predicted outcomes (25% extra zeros: 25% / 76%
-  and 27% / 57%). The number of zeros stays weak (6% / 26%) because a
-  smaller fitted NB2 size absorbs the extra zeros (see below).
+  PIT quartiles (25% extra zeros: 25% / 76% for QQ and 26% / 52% across
+  predicted outcomes). The number of zeros stays weak (6% / 26%) because
+  a smaller fitted NB2 size absorbs the extra zeros (see below).
 
 What the fitted models estimate
 
@@ -352,38 +354,38 @@ rates.
 
 | Family | Setting | Actor coverage (%) | Partner coverage (%) | Actor SE ratio | Partner SE ratio | Flagged (%) | With pages (%) |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| Gaussian | Correct model | 93 / 95 | 94 / 94 | 0.96 / 1.02 | 0.96 / 0.96 | 19 / 23 | 26 / 27 |
-| Gaussian | Omitted partner effect | 79 / 43 | – / – | 1.00 / 0.94 | – / – | 25 / 52 | 51 / 92 |
-| Gaussian | Residual SD rises with actor predictor | 77 / 76 | 94 / 96 | 0.57 / 0.60 | 0.97 / 1.00 | 77 / 98 | 82 / 99 |
-| Negative binomial | Correct model | 94 / 94 | 96 / 95 | 0.99 / 0.95 | 1.03 / 0.97 | 19 / 22 | 26 / 29 |
-| Negative binomial | NB2 size 1 fitted as Poisson | 81 / 74 | 78 / 77 | 0.64 / 0.55 | 0.61 / 0.59 | 65 / 100 | 70 / 100 |
+| Gaussian | Correct model | 93 / 95 | 94 / 94 | 0.96 / 1.02 | 0.96 / 0.96 | 18 / 23 | 26 / 28 |
+| Gaussian | Omitted partner effect | 79 / 43 | – / – | 1.00 / 0.94 | – / – | 24 / 51 | 50 / 91 |
+| Gaussian | Residual SD rises with actor predictor | 77 / 76 | 94 / 96 | 0.57 / 0.60 | 0.97 / 1.00 | 76 / 98 | 81 / 99 |
+| Negative binomial | Correct model | 94 / 94 | 96 / 95 | 0.99 / 0.95 | 1.03 / 0.97 | 20 / 22 | 26 / 29 |
+| Negative binomial | NB2 size 1 fitted as Poisson | 81 / 74 | 78 / 77 | 0.64 / 0.55 | 0.61 / 0.59 | 64 / 100 | 70 / 100 |
 
 At 400 dyads in either role, a residual SD rising with the actor
 predictor flagged the largest absolute deviation in 98% of datasets,
 mean PIT distance in 77%, the PIT quartiles across the actor’s predictor
-in 56%, and the QQ envelope in 55%.
+in 54%, and the QQ envelope in 55%.
 
 The main mismatches, at 40 / 100 / 400 dyads:
 
 | Family | Setting | Actor coverage (%) | Partner coverage (%) | Actor SE ratio | Partner SE ratio | Flagged (%) | With pages (%) |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| Gaussian | Correct model | 93 / 94 / 95 | 95 / 95 / 95 | 0.98 / 1.00 / 1.00 | 0.99 / 1.03 / 1.04 | 16 / 19 / 20 | 21 / 25 / 27 |
-| Gaussian | Omitted role means: +/-0.2 | 93 / 96 / 93 | 95 / 95 / 96 | 0.93 / 1.03 / 0.94 | 0.97 / 1.02 / 0.97 | 40 / 63 / 99 | 48 / 71 / 100 |
-| Gaussian | Omitted role means: +/-0.4 | 95 / 93 / 96 | 96 / 96 / 95 | 0.96 / 0.97 / 1.02 | 1.04 / 1.02 / 1.00 | 79 / 99 / 100 | 85 / 100 / 100 |
+| Gaussian | Correct model | 93 / 94 / 95 | 95 / 95 / 95 | 0.98 / 1.00 / 1.00 | 0.99 / 1.03 / 1.04 | 16 / 20 / 21 | 21 / 24 / 27 |
+| Gaussian | Omitted role means: +/-0.2 | 93 / 96 / 93 | 95 / 95 / 96 | 0.93 / 1.03 / 0.94 | 0.97 / 1.02 / 0.97 | 40 / 64 / 99 | 48 / 73 / 100 |
+| Gaussian | Omitted role means: +/-0.4 | 95 / 93 / 96 | 96 / 96 / 95 | 0.96 / 0.97 / 1.02 | 1.04 / 1.02 / 1.00 | 79 / 100 / 100 | 85 / 100 / 100 |
 | Gaussian | Role SD ratio: 1.25 | 94 / 97 / 95 | 96 / 94 / 94 | 0.99 / 1.05 / 1.02 | 0.99 / 0.97 / 1.00 | 26 / 41 / 84 | 32 / 47 / 86 |
-| Gaussian | Role SD ratio: 1.50 | 96 / 95 / 95 | 94 / 94 / 95 | 1.03 / 1.02 / 1.00 | 0.95 / 0.94 / 0.97 | 43 / 78 / 100 | 45 / 79 / 100 |
-| Negative binomial | Correct model | 94 / 94 / 95 | 93 / 94 / 96 | 0.94 / 1.00 / 0.95 | 0.94 / 0.97 / 1.01 | 19 / 22 / 27 | 24 / 28 / 35 |
-| Negative binomial | NB2 size 10 fitted as Poisson | 91 / 91 / 92 | 92 / 91 / 93 | 0.89 / 0.93 / 0.87 | 0.88 / 0.87 / 0.91 | 22 / 26 / 40 | 28 / 32 / 49 |
-| Negative binomial | NB2 size 3 fitted as Poisson | 87 / 87 / 86 | 86 / 87 / 89 | 0.76 / 0.77 / 0.74 | 0.77 / 0.79 / 0.79 | 42 / 53 / 91 | 50 / 59 / 93 |
-| Negative binomial | Omitted zero inflation: 10% | 96 / 95 / 96 | 96 / 96 / 97 | 1.06 / 1.02 / 1.02 | 1.06 / 1.00 / 1.01 | 18 / 27 / 48 | 26 / 33 / 55 |
-| Negative binomial | Omitted zero inflation: 25% | 96 / 98 / 98 | 95 / 97 / 96 | 1.05 / 1.15 / 1.10 | 1.07 / 1.10 / 1.08 | 29 / 49 / 88 | 37 / 56 / 93 |
+| Gaussian | Role SD ratio: 1.50 | 96 / 95 / 95 | 94 / 94 / 95 | 1.03 / 1.02 / 1.00 | 0.95 / 0.94 / 0.97 | 43 / 77 / 100 | 45 / 79 / 100 |
+| Negative binomial | Correct model | 94 / 94 / 95 | 93 / 94 / 96 | 0.94 / 1.00 / 0.95 | 0.94 / 0.97 / 1.01 | 19 / 22 / 28 | 24 / 29 / 36 |
+| Negative binomial | NB2 size 10 fitted as Poisson | 91 / 91 / 92 | 92 / 91 / 93 | 0.89 / 0.93 / 0.87 | 0.88 / 0.87 / 0.91 | 22 / 26 / 40 | 28 / 34 / 50 |
+| Negative binomial | NB2 size 3 fitted as Poisson | 87 / 87 / 86 | 86 / 87 / 89 | 0.76 / 0.77 / 0.74 | 0.77 / 0.79 / 0.79 | 42 / 54 / 91 | 50 / 59 / 94 |
+| Negative binomial | Omitted zero inflation: 10% | 96 / 95 / 96 | 96 / 96 / 97 | 1.06 / 1.02 / 1.02 | 1.06 / 1.00 / 1.01 | 18 / 26 / 46 | 26 / 32 / 55 |
+| Negative binomial | Omitted zero inflation: 25% | 96 / 98 / 98 | 95 / 97 / 96 | 1.05 / 1.15 / 1.10 | 1.07 / 1.10 / 1.08 | 29 / 48 / 88 | 37 / 56 / 93 |
 
 ## Effect of median centring
 
 At 400 dyads, the largest drop in a single panel’s flag rate after
 centring is 65.4 percentage points, for the “PIT QQ envelope” panel
 under “NB2 size 1 fitted as Poisson” (pooled). There, the residual
-check’s any flag rate is 95.2% without centring and 76.6% with it.
+check’s any flag rate is 95.8% without centring and 76.6% with it.
 
 ## Additional designs and exclusions
 
@@ -393,57 +395,57 @@ covering all dependence structures.
 
 | Family | Setting | Dyads | View | Check | Any flag | With predictor pages |
 |:---|:---|---:|:---|:---|:---|:---|
-| Gaussian | Correct model, dyad SD 1.2 | 100 | Pooled | Residuals | 4.2% (2.8–6.3), n = 500 | 8.8% (6.6–11.6), n = 500 |
+| Gaussian | Correct model, dyad SD 1.2 | 100 | Pooled | Residuals | 4.4% (2.9–6.6), n = 500 | 8.8% (6.6–11.6), n = 500 |
 | Gaussian | Correct model, dyad SD 1.2 | 100 | Pooled | Outcomes | 2.4% (1.4–4.1), n = 500 | 2.4% (1.4–4.1), n = 500 |
-| Gaussian | Correct model, dyad SD 1.2 | 100 | Pooled | Both checks | 6.6% (4.7–9.1), n = 500 | 11.2% (8.7–14.3), n = 500 |
-| Gaussian | Correct model, dyad SD 1.2 | 100 | Either role | Residuals | 12.2% (9.6–15.4), n = 500 | 20.6% (17.3–24.4), n = 500 |
+| Gaussian | Correct model, dyad SD 1.2 | 100 | Pooled | Both checks | 6.8% (4.9–9.4), n = 500 | 11.2% (8.7–14.3), n = 500 |
+| Gaussian | Correct model, dyad SD 1.2 | 100 | Either role | Residuals | 12.0% (9.4–15.1), n = 500 | 20.2% (16.9–23.9), n = 500 |
 | Gaussian | Correct model, dyad SD 1.2 | 100 | Either role | Outcomes | 7.2% (5.2–9.8), n = 500 | 7.2% (5.2–9.8), n = 500 |
-| Gaussian | Correct model, dyad SD 1.2 | 100 | Either role | Both checks | 18.6% (15.4–22.2), n = 500 | 26.2% (22.5–30.2), n = 500 |
-| Gaussian | Correct model, dyad SD 1.2 | 400 | Pooled | Residuals | 4.4% (2.9–6.6), n = 500 | 7.8% (5.8–10.5), n = 500 |
+| Gaussian | Correct model, dyad SD 1.2 | 100 | Either role | Both checks | 18.4% (15.2–22.0), n = 500 | 25.8% (22.2–29.8), n = 500 |
+| Gaussian | Correct model, dyad SD 1.2 | 400 | Pooled | Residuals | 4.6% (3.1–6.8), n = 500 | 9.0% (6.8–11.8), n = 500 |
 | Gaussian | Correct model, dyad SD 1.2 | 400 | Pooled | Outcomes | 3.0% (1.8–4.9), n = 500 | 3.0% (1.8–4.9), n = 500 |
-| Gaussian | Correct model, dyad SD 1.2 | 400 | Pooled | Both checks | 7.2% (5.2–9.8), n = 500 | 10.6% (8.2–13.6), n = 500 |
-| Gaussian | Correct model, dyad SD 1.2 | 400 | Either role | Residuals | 14.6% (11.8–18.0), n = 500 | 20.2% (16.9–23.9), n = 500 |
+| Gaussian | Correct model, dyad SD 1.2 | 400 | Pooled | Both checks | 7.4% (5.4–10.0), n = 500 | 11.8% (9.3–14.9), n = 500 |
+| Gaussian | Correct model, dyad SD 1.2 | 400 | Either role | Residuals | 14.8% (12.0–18.2), n = 500 | 21.0% (17.7–24.8), n = 500 |
 | Gaussian | Correct model, dyad SD 1.2 | 400 | Either role | Outcomes | 8.2% (6.1–10.9), n = 500 | 8.2% (6.1–10.9), n = 500 |
-| Gaussian | Correct model, dyad SD 1.2 | 400 | Either role | Both checks | 22.6% (19.2–26.5), n = 500 | 27.4% (23.7–31.5), n = 500 |
-| Gaussian | Correct model, six occasions | 100 | Pooled | Residuals | 4.8% (3.2–7.0), n = 483 | 8.7% (6.5–11.5), n = 483 |
+| Gaussian | Correct model, dyad SD 1.2 | 400 | Either role | Both checks | 22.8% (19.3–26.7), n = 500 | 28.0% (24.2–32.1), n = 500 |
+| Gaussian | Correct model, six occasions | 100 | Pooled | Residuals | 4.8% (3.2–7.0), n = 483 | 9.5% (7.2–12.5), n = 483 |
 | Gaussian | Correct model, six occasions | 100 | Pooled | Outcomes | 2.9% (1.7–4.8), n = 483 | 2.9% (1.7–4.8), n = 483 |
-| Gaussian | Correct model, six occasions | 100 | Pooled | Both checks | 7.5% (5.4–10.1), n = 483 | 11.4% (8.9–14.5), n = 483 |
-| Gaussian | Correct model, six occasions | 100 | Either role | Residuals | 12.0% (9.4–15.2), n = 483 | 22.2% (18.7–26.1), n = 483 |
+| Gaussian | Correct model, six occasions | 100 | Pooled | Both checks | 7.5% (5.4–10.1), n = 483 | 12.2% (9.6–15.4), n = 483 |
+| Gaussian | Correct model, six occasions | 100 | Either role | Residuals | 12.8% (10.1–16.1), n = 483 | 23.4% (19.8–27.4), n = 483 |
 | Gaussian | Correct model, six occasions | 100 | Either role | Outcomes | 6.0% (4.2–8.5), n = 483 | 6.0% (4.2–8.5), n = 483 |
-| Gaussian | Correct model, six occasions | 100 | Either role | Both checks | 17.8% (14.7–21.5), n = 483 | 26.3% (22.6–30.4), n = 483 |
-| Gaussian | Omitted role means: +/-0.2, six occasions | 100 | Pooled | Residuals | 3.4% (2.1–5.4), n = 498 | 7.8% (5.8–10.5), n = 498 |
+| Gaussian | Correct model, six occasions | 100 | Either role | Both checks | 18.6% (15.4–22.3), n = 483 | 27.5% (23.7–31.7), n = 483 |
+| Gaussian | Omitted role means: +/-0.2, six occasions | 100 | Pooled | Residuals | 3.8% (2.5–5.9), n = 498 | 8.6% (6.5–11.4), n = 498 |
 | Gaussian | Omitted role means: +/-0.2, six occasions | 100 | Pooled | Outcomes | 4.0% (2.6–6.1), n = 498 | 4.0% (2.6–6.1), n = 498 |
-| Gaussian | Omitted role means: +/-0.2, six occasions | 100 | Pooled | Both checks | 7.2% (5.3–9.8), n = 498 | 11.0% (8.6–14.1), n = 498 |
+| Gaussian | Omitted role means: +/-0.2, six occasions | 100 | Pooled | Both checks | 7.6% (5.6–10.3), n = 498 | 11.8% (9.3–15.0), n = 498 |
 | Gaussian | Omitted role means: +/-0.2, six occasions | 100 | Either role | Residuals | 99.8% (98.9–100.0), n = 498 | 100.0% (99.2–100.0), n = 498 |
 | Gaussian | Omitted role means: +/-0.2, six occasions | 100 | Either role | Outcomes | 7.6% (5.6–10.3), n = 498 | 7.6% (5.6–10.3), n = 498 |
 | Gaussian | Omitted role means: +/-0.2, six occasions | 100 | Either role | Both checks | 99.8% (98.9–100.0), n = 498 | 100.0% (99.2–100.0), n = 498 |
-| Negative binomial | Correct model, dyad SD 1.2 | 100 | Pooled | Residuals | 5.6% (3.9–8.0), n = 500 | 9.6% (7.3–12.5), n = 500 |
+| Negative binomial | Correct model, dyad SD 1.2 | 100 | Pooled | Residuals | 5.2% (3.6–7.5), n = 500 | 10.2% (7.8–13.2), n = 500 |
 | Negative binomial | Correct model, dyad SD 1.2 | 100 | Pooled | Outcomes | 2.2% (1.2–3.9), n = 500 | 2.2% (1.2–3.9), n = 500 |
-| Negative binomial | Correct model, dyad SD 1.2 | 100 | Pooled | Both checks | 7.6% (5.6–10.3), n = 500 | 11.2% (8.7–14.3), n = 500 |
-| Negative binomial | Correct model, dyad SD 1.2 | 100 | Either role | Residuals | 15.8% (12.9–19.3), n = 500 | 23.0% (19.5–26.9), n = 500 |
+| Negative binomial | Correct model, dyad SD 1.2 | 100 | Pooled | Both checks | 7.4% (5.4–10.0), n = 500 | 12.0% (9.4–15.1), n = 500 |
+| Negative binomial | Correct model, dyad SD 1.2 | 100 | Either role | Residuals | 16.2% (13.2–19.7), n = 500 | 23.0% (19.5–26.9), n = 500 |
 | Negative binomial | Correct model, dyad SD 1.2 | 100 | Either role | Outcomes | 5.0% (3.4–7.3), n = 500 | 5.0% (3.4–7.3), n = 500 |
-| Negative binomial | Correct model, dyad SD 1.2 | 100 | Either role | Both checks | 18.8% (15.6–22.5), n = 500 | 25.8% (22.2–29.8), n = 500 |
-| Negative binomial | Correct model, dyad SD 1.2 | 400 | Pooled | Residuals | 6.0% (4.2–8.4), n = 500 | 9.0% (6.8–11.8), n = 500 |
+| Negative binomial | Correct model, dyad SD 1.2 | 100 | Either role | Both checks | 19.6% (16.4–23.3), n = 500 | 26.0% (22.3–30.0), n = 500 |
+| Negative binomial | Correct model, dyad SD 1.2 | 400 | Pooled | Residuals | 6.8% (4.9–9.4), n = 500 | 9.6% (7.3–12.5), n = 500 |
 | Negative binomial | Correct model, dyad SD 1.2 | 400 | Pooled | Outcomes | 3.4% (2.1–5.4), n = 500 | 3.4% (2.1–5.4), n = 500 |
-| Negative binomial | Correct model, dyad SD 1.2 | 400 | Pooled | Both checks | 9.4% (7.1–12.3), n = 500 | 12.4% (9.8–15.6), n = 500 |
-| Negative binomial | Correct model, dyad SD 1.2 | 400 | Either role | Residuals | 15.0% (12.1–18.4), n = 500 | 24.0% (20.5–27.9), n = 500 |
+| Negative binomial | Correct model, dyad SD 1.2 | 400 | Pooled | Both checks | 10.2% (7.8–13.2), n = 500 | 13.0% (10.3–16.2), n = 500 |
+| Negative binomial | Correct model, dyad SD 1.2 | 400 | Either role | Residuals | 15.2% (12.3–18.6), n = 500 | 24.0% (20.5–27.9), n = 500 |
 | Negative binomial | Correct model, dyad SD 1.2 | 400 | Either role | Outcomes | 7.6% (5.6–10.3), n = 500 | 7.6% (5.6–10.3), n = 500 |
 | Negative binomial | Correct model, dyad SD 1.2 | 400 | Either role | Both checks | 21.8% (18.4–25.6), n = 500 | 29.4% (25.6–33.5), n = 500 |
-| Ordinal | Correct model | 100 | Pooled | Residuals | 2.0% (1.1–3.6), n = 500 | 3.0% (1.8–4.9), n = 500 |
+| Ordinal | Correct model | 100 | Pooled | Residuals | 2.2% (1.2–3.9), n = 500 | 2.8% (1.7–4.6), n = 500 |
 | Ordinal | Correct model | 100 | Pooled | Outcomes | 2.8% (1.7–4.6), n = 500 | 2.8% (1.7–4.6), n = 500 |
-| Ordinal | Correct model | 100 | Pooled | Both checks | 4.8% (3.2–7.0), n = 500 | 5.6% (3.9–8.0), n = 500 |
-| Ordinal | Correct model | 100 | Either role | Residuals | 6.2% (4.4–8.7), n = 500 | 10.0% (7.7–12.9), n = 500 |
+| Ordinal | Correct model | 100 | Pooled | Both checks | 5.0% (3.4–7.3), n = 500 | 5.6% (3.9–8.0), n = 500 |
+| Ordinal | Correct model | 100 | Either role | Residuals | 6.2% (4.4–8.7), n = 500 | 10.2% (7.8–13.2), n = 500 |
 | Ordinal | Correct model | 100 | Either role | Outcomes | 7.4% (5.4–10.0), n = 500 | 7.4% (5.4–10.0), n = 500 |
-| Ordinal | Correct model | 100 | Either role | Both checks | 12.4% (9.8–15.6), n = 500 | 15.6% (12.7–19.0), n = 500 |
-| Ordinal | Correct model | 400 | Pooled | Residuals | 1.4% (0.7–2.9), n = 500 | 1.8% (0.9–3.4), n = 500 |
+| Ordinal | Correct model | 100 | Either role | Both checks | 12.4% (9.8–15.6), n = 500 | 15.8% (12.9–19.3), n = 500 |
+| Ordinal | Correct model | 400 | Pooled | Residuals | 1.4% (0.7–2.9), n = 500 | 1.6% (0.8–3.1), n = 500 |
 | Ordinal | Correct model | 400 | Pooled | Outcomes | 3.6% (2.3–5.6), n = 500 | 3.6% (2.3–5.6), n = 500 |
-| Ordinal | Correct model | 400 | Pooled | Both checks | 5.0% (3.4–7.3), n = 500 | 5.4% (3.7–7.7), n = 500 |
-| Ordinal | Correct model | 400 | Either role | Residuals | 9.0% (6.8–11.8), n = 500 | 14.8% (12.0–18.2), n = 500 |
+| Ordinal | Correct model | 400 | Pooled | Both checks | 5.0% (3.4–7.3), n = 500 | 5.2% (3.6–7.5), n = 500 |
+| Ordinal | Correct model | 400 | Either role | Residuals | 9.0% (6.8–11.8), n = 500 | 14.6% (11.8–18.0), n = 500 |
 | Ordinal | Correct model | 400 | Either role | Outcomes | 8.2% (6.1–10.9), n = 500 | 8.2% (6.1–10.9), n = 500 |
 | Ordinal | Correct model | 400 | Either role | Both checks | 15.8% (12.9–19.3), n = 500 | 21.2% (17.8–25.0), n = 500 |
 
 At 100 dyads, the role view of residual checks flags omitted role means
-of ±0.2 in 100% of datasets with six occasions (correct model: 12%),
+of ±0.2 in 100% of datasets with six occasions (correct model: 13%),
 compared with 61% with one occasion. Six occasions give each role six
 times as many rows.
 

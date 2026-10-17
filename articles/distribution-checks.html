@@ -97,8 +97,8 @@ simulations per dataset.</p>
 up.</strong> Each panel flagged at most 7% of datasets under correct
 models, pooled or within one role, and at most 9% in either role
 (flagged in at least one role). In the settings studied, at least one
-flag appeared in 5–13% of datasets with all observations pooled, 12–27%
-in either role, and 16–35% in either role with actor and partner
+flag appeared in 5–13% of datasets with all observations pooled, 12–28%
+in either role, and 16–36% in either role with actor and partner
 predictor pages. So look for a consistent pattern, not any single
 flag.</li>
 <li>
@@ -107,15 +107,15 @@ dyads, most mismatches were hard to detect: apart from omitted role
 means of ±0.4 (79%), mismatches were flagged in either role in 18–43% of
 datasets, against 16–19% under correct models. With 400 dyads, most were
 flagged in 84–100%. Mildly overdispersed counts (NB2 size 10) fitted as
-Poisson were flagged in only 40%, and 10% extra zeros in 48%, against
-20–27% under correct models.</li>
+Poisson were flagged in only 40%, and 10% extra zeros in 46%, against
+21–28% under correct models.</li>
 <li>
 <strong>Each problem shows in a few panels</strong>, listed in the
 help under <a href="https://pascal-kueng.github.io/dyadMLM/reference/plot.dyadMLM_residual_check.html#reading-flags">Reading
 flags</a>. At 400 dyads in either role, for example, 25% extra zeros
 flagged the QQ envelope in 76% of datasets but the number of zeros in
 26%, and an omitted partner effect (dyad SD 1.2) flagged the PIT
-quartiles across the partner’s predictor in 89% but the QQ envelope in
+quartiles across the partner’s predictor in 88% but the QQ envelope in
 5%. Panels suggest possible problems, not their cause.</li>
 <li>
 <strong>A flag, or its absence, does not show whether estimates or
@@ -132,8 +132,8 @@ mismatches, and makes others harder to detect.</strong> Median centring,
 which moves each dataset’s PIT residuals so that their median is 0.5, is
 applied automatically when the model has a freely estimated overall
 location (not for ordinal models). It raised the residual check’s flag
-rate by 3–9 percentage points under correct models and by up to 32 under
-mismatches, mainly omitted role means and extra zeros. But centred
+rate by 3–10 percentage points under correct models and by up to 33
+under mismatches, mainly omitted role means and extra zeros. But centred
 residuals lose any overall median shift, so single panels can flag less
 often. With NB2 size 1 fitted as Poisson, the residual check flagged up
 to 19 percentage points less often (see <a href="#effect-of-median-centring">Effect of median centring</a>).</li>
@@ -220,9 +220,11 @@ calculation from the effects of estimating parameters.</p>
 two roles separately, each with a page for the actor’s and the partner’s
 predictor. Residual panels include the QQ envelope, mean PIT distance,
 and the PIT quartiles across predicted outcomes and across each
-predictor. Outcome panels include the response SD (after subtracting
-fixed-effect predictions), largest absolute deviation, number of zeros
-where available, and, for ordinal outcomes, the category ranges.</p>
+predictor. The PIT quartiles use the default bins, so the study does not
+cover <code>quartile_lines = "qgam"</code>. Outcome panels include the
+response SD (after subtracting fixed-effect predictions), largest
+absolute deviation, number of zeros where available, and, for ordinal
+outcomes, the category ranges.</p>
 <p>Rates use available checks. Failed fits, convergence or Hessian
 problems, and failed checks are recorded and excluded without retry.
 Known-parameter and fitted-reference rates can therefore have different
@@ -498,7 +500,7 @@ number of zeros, and mean PIT distance flag in at most 2.8%, 0.0%, and
 1.2% of datasets. The fitted model already matches these overall
 levels.</p>
 <p>Reading every numerical panel of both checks for both roles, without
-the predictor pages, at least one flag appears in 12–27% of datasets
+the predictor pages, at least one flag appears in 12–28% of datasets
 under every correct model. With all observations pooled, this is
 5–13%.</p>
 <details><summary>
@@ -590,8 +592,8 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">100</td>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
-<td align="left">4.2% (2.8–6.3), n = 500</td>
-<td align="left">7.4% (5.4–10.0), n = 500</td>
+<td align="left">5.2% (3.6–7.5), n = 500</td>
+<td align="left">7.8% (5.8–10.5), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Gaussian</td>
@@ -608,8 +610,8 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">100</td>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
-<td align="left">6.6% (4.7–9.1), n = 500</td>
-<td align="left">9.6% (7.3–12.5), n = 500</td>
+<td align="left">7.6% (5.6–10.3), n = 500</td>
+<td align="left">10.0% (7.7–12.9), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Gaussian</td>
@@ -617,8 +619,8 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">100</td>
 <td align="left">Either role</td>
 <td align="left">Residuals</td>
-<td align="left">14.8% (12.0–18.2), n = 500</td>
-<td align="left">20.4% (17.1–24.2), n = 500</td>
+<td align="left">15.0% (12.1–18.4), n = 500</td>
+<td align="left">19.8% (16.5–23.5), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Gaussian</td>
@@ -635,8 +637,8 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">100</td>
 <td align="left">Either role</td>
 <td align="left">Both checks</td>
-<td align="left">19.4% (16.2–23.1), n = 500</td>
-<td align="left">24.8% (21.2–28.8), n = 500</td>
+<td align="left">19.6% (16.4–23.3), n = 500</td>
+<td align="left">24.2% (20.7–28.1), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Gaussian</td>
@@ -644,8 +646,8 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">400</td>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
-<td align="left">3.6% (2.3–5.6), n = 500</td>
-<td align="left">8.0% (5.9–10.7), n = 500</td>
+<td align="left">3.8% (2.4–5.9), n = 500</td>
+<td align="left">8.8% (6.6–11.6), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Gaussian</td>
@@ -662,8 +664,8 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">400</td>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
-<td align="left">6.2% (4.4–8.7), n = 500</td>
-<td align="left">10.4% (8.0–13.4), n = 500</td>
+<td align="left">6.4% (4.6–8.9), n = 500</td>
+<td align="left">11.2% (8.7–14.3), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Gaussian</td>
@@ -671,7 +673,7 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">400</td>
 <td align="left">Either role</td>
 <td align="left">Residuals</td>
-<td align="left">11.4% (8.9–14.5), n = 500</td>
+<td align="left">12.4% (9.8–15.6), n = 500</td>
 <td align="left">19.2% (16.0–22.9), n = 500</td>
 </tr>
 <tr class="odd">
@@ -689,7 +691,7 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">400</td>
 <td align="left">Either role</td>
 <td align="left">Both checks</td>
-<td align="left">19.6% (16.4–23.3), n = 500</td>
+<td align="left">20.6% (17.3–24.4), n = 500</td>
 <td align="left">27.2% (23.5–31.3), n = 500</td>
 </tr>
 <tr class="odd">
@@ -699,7 +701,7 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
 <td align="left">4.8% (3.2–7.0), n = 500</td>
-<td align="left">7.4% (5.4–10.0), n = 500</td>
+<td align="left">7.6% (5.6–10.3), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -717,7 +719,7 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
 <td align="left">5.2% (3.6–7.5), n = 500</td>
-<td align="left">7.8% (5.8–10.5), n = 500</td>
+<td align="left">8.0% (5.9–10.7), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -753,7 +755,7 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
 <td align="left">6.4% (4.6–8.9), n = 500</td>
-<td align="left">9.2% (7.0–12.1), n = 500</td>
+<td align="left">9.8% (7.5–12.7), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -771,7 +773,7 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
 <td align="left">8.2% (6.1–10.9), n = 500</td>
-<td align="left">10.8% (8.4–13.8), n = 500</td>
+<td align="left">11.4% (8.9–14.5), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -780,7 +782,7 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="left">Either role</td>
 <td align="left">Residuals</td>
 <td align="left">15.4% (12.5–18.8), n = 500</td>
-<td align="left">22.0% (18.6–25.8), n = 500</td>
+<td align="left">22.8% (19.3–26.7), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Negative binomial</td>
@@ -798,7 +800,7 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="left">Either role</td>
 <td align="left">Both checks</td>
 <td align="left">22.2% (18.8–26.0), n = 500</td>
-<td align="left">28.0% (24.2–32.1), n = 500</td>
+<td align="left">28.8% (25.0–32.9), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Negative binomial</td>
@@ -806,7 +808,7 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">400</td>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
-<td align="left">7.6% (5.6–10.3), n = 500</td>
+<td align="left">7.8% (5.8–10.5), n = 500</td>
 <td align="left">12.2% (9.6–15.4), n = 500</td>
 </tr>
 <tr class="even">
@@ -824,7 +826,7 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">400</td>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
-<td align="left">13.0% (10.3–16.2), n = 500</td>
+<td align="left">13.2% (10.5–16.4), n = 500</td>
 <td align="left">17.2% (14.1–20.8), n = 500</td>
 </tr>
 <tr class="even">
@@ -833,8 +835,8 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">400</td>
 <td align="left">Either role</td>
 <td align="left">Residuals</td>
-<td align="left">16.4% (13.4–19.9), n = 500</td>
-<td align="left">26.2% (22.5–30.2), n = 500</td>
+<td align="left">17.4% (14.3–21.0), n = 500</td>
+<td align="left">26.8% (23.1–30.8), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Negative binomial</td>
@@ -851,8 +853,8 @@ percentage, its 95% Wilson interval, and the denominator.</p>
 <td align="right">400</td>
 <td align="left">Either role</td>
 <td align="left">Both checks</td>
-<td align="left">26.8% (23.1–30.8), n = 500</td>
-<td align="left">35.0% (30.9–39.3), n = 500</td>
+<td align="left">27.6% (23.9–31.7), n = 500</td>
+<td align="left">35.8% (31.7–40.1), n = 500</td>
 </tr>
 </tbody>
 </table></details>
@@ -913,27 +915,27 @@ baseline.</p>
 </tr>
 <tr class="odd">
 <td align="left">PIT quartiles vs prediction</td>
-<td align="left">5 / 7 / 4</td>
-<td align="left">16 / 36 / 83</td>
-<td align="left">44 / 95 / 100</td>
-<td align="left">7 / 9 / 10</td>
+<td align="left">5 / 8 / 5</td>
+<td align="left">16 / 39 / 84</td>
+<td align="left">44 / 96 / 100</td>
+<td align="left">7 / 8 / 10</td>
 <td align="left">7 / 11 / 24</td>
 </tr>
 <tr class="even">
 <td align="left">PIT quartiles vs actor predictor</td>
-<td align="left">6 / 7 / 6</td>
-<td align="left">18 / 38 / 83</td>
-<td align="left">45 / 95 / 100</td>
+<td align="left">6 / 8 / 6</td>
+<td align="left">18 / 39 / 84</td>
+<td align="left">45 / 96 / 100</td>
 <td align="left">8 / 9 / 12</td>
-<td align="left">7 / 13 / 25</td>
+<td align="left">7 / 13 / 26</td>
 </tr>
 <tr class="odd">
 <td align="left">PIT quartiles vs partner predictor</td>
-<td align="left">4 / 6 / 4</td>
-<td align="left">17 / 38 / 84</td>
-<td align="left">46 / 94 / 100</td>
-<td align="left">7 / 8 / 11</td>
-<td align="left">5 / 9 / 25</td>
+<td align="left">4 / 6 / 5</td>
+<td align="left">17 / 40 / 85</td>
+<td align="left">46 / 95 / 100</td>
+<td align="left">7 / 8 / 10</td>
+<td align="left">5 / 9 / 26</td>
 </tr>
 <tr class="even">
 <td align="left">Response SD</td>
@@ -990,26 +992,26 @@ baseline.</p>
 </tr>
 <tr class="odd">
 <td align="left">PIT quartiles vs prediction</td>
-<td align="left">6 / 5 / 8</td>
-<td align="left">7 / 7 / 11</td>
-<td align="left">14 / 15 / 26</td>
-<td align="left">8 / 11 / 19</td>
-<td align="left">14 / 27 / 57</td>
+<td align="left">6 / 4 / 9</td>
+<td align="left">7 / 8 / 11</td>
+<td align="left">14 / 16 / 25</td>
+<td align="left">8 / 11 / 17</td>
+<td align="left">14 / 26 / 52</td>
 </tr>
 <tr class="even">
 <td align="left">PIT quartiles vs actor predictor</td>
-<td align="left">6 / 6 / 8</td>
-<td align="left">8 / 10 / 12</td>
-<td align="left">15 / 16 / 25</td>
-<td align="left">9 / 10 / 15</td>
-<td align="left">13 / 21 / 58</td>
+<td align="left">6 / 7 / 9</td>
+<td align="left">8 / 11 / 12</td>
+<td align="left">15 / 17 / 24</td>
+<td align="left">9 / 9 / 15</td>
+<td align="left">13 / 22 / 57</td>
 </tr>
 <tr class="odd">
 <td align="left">PIT quartiles vs partner predictor</td>
-<td align="left">6 / 7 / 9</td>
-<td align="left">7 / 7 / 11</td>
-<td align="left">14 / 14 / 27</td>
-<td align="left">7 / 10 / 15</td>
+<td align="left">6 / 8 / 9</td>
+<td align="left">7 / 8 / 11</td>
+<td align="left">14 / 15 / 27</td>
+<td align="left">7 / 9 / 15</td>
 <td align="left">12 / 20 / 54</td>
 </tr>
 <tr class="even">
@@ -1045,7 +1047,7 @@ noted:</p>
 <strong>Omitted role means</strong> show mainly in the role view of
 residual checks (±0.2: 61% / 99%). The pooled residual view and the
 outcome checks’ numerical panels (not the ECDF) stay near their
-correct-model rates (5% / 6% versus 4% / 4%, and 7% / 10% versus
+correct-model rates (5% / 6% versus 5% / 4%, and 7% / 10% versus
 6% / 9%). The exception is the per-role response SD at ±0.4 (8% / 47%),
 which reacts to the inflated fitted residual SD.</li>
 <li>
@@ -1055,12 +1057,12 @@ response SD and mean PIT distance (ratio 1.50: 52% / 100% and
 <li>
 <strong>NB2 overdispersion fitted as Poisson</strong> is partly
 absorbed by a larger fitted dyad SD (see below). Residual checks flag
-either role in 47% / 84% of datasets for size 3, compared with 15% / 16%
+either role in 48% / 84% of datasets for size 3, compared with 15% / 17%
 under the correct model.</li>
 <li>
 <strong>Omitted zero inflation</strong> shows most in the PIT QQ
-envelope and the PIT quartiles across predicted outcomes (25% extra
-zeros: 25% / 76% and 27% / 57%). The number of zeros stays weak
+envelope and the PIT quartiles (25% extra zeros: 25% / 76% for QQ and
+26% / 52% across predicted outcomes). The number of zeros stays weak
 (6% / 26%) because a smaller fitted NB2 size absorbs the extra zeros
 (see below).</li>
 </ul>
@@ -1123,8 +1125,8 @@ rates.</p>
 <td align="left">94 / 94</td>
 <td align="left">0.96 / 1.02</td>
 <td align="left">0.96 / 0.96</td>
-<td align="left">19 / 23</td>
-<td align="left">26 / 27</td>
+<td align="left">18 / 23</td>
+<td align="left">26 / 28</td>
 </tr>
 <tr class="even">
 <td align="left">Gaussian</td>
@@ -1133,8 +1135,8 @@ rates.</p>
 <td align="left">– / –</td>
 <td align="left">1.00 / 0.94</td>
 <td align="left">– / –</td>
-<td align="left">25 / 52</td>
-<td align="left">51 / 92</td>
+<td align="left">24 / 51</td>
+<td align="left">50 / 91</td>
 </tr>
 <tr class="odd">
 <td align="left">Gaussian</td>
@@ -1143,8 +1145,8 @@ rates.</p>
 <td align="left">94 / 96</td>
 <td align="left">0.57 / 0.60</td>
 <td align="left">0.97 / 1.00</td>
-<td align="left">77 / 98</td>
-<td align="left">82 / 99</td>
+<td align="left">76 / 98</td>
+<td align="left">81 / 99</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -1153,7 +1155,7 @@ rates.</p>
 <td align="left">96 / 95</td>
 <td align="left">0.99 / 0.95</td>
 <td align="left">1.03 / 0.97</td>
-<td align="left">19 / 22</td>
+<td align="left">20 / 22</td>
 <td align="left">26 / 29</td>
 </tr>
 <tr class="odd">
@@ -1163,7 +1165,7 @@ rates.</p>
 <td align="left">78 / 77</td>
 <td align="left">0.64 / 0.55</td>
 <td align="left">0.61 / 0.59</td>
-<td align="left">65 / 100</td>
+<td align="left">64 / 100</td>
 <td align="left">70 / 100</td>
 </tr>
 </tbody>
@@ -1171,7 +1173,7 @@ rates.</p>
 <p>At 400 dyads in either role, a residual SD rising with the actor
 predictor flagged the largest absolute deviation in 98% of datasets,
 mean PIT distance in 77%, the PIT quartiles across the actor’s predictor
-in 56%, and the QQ envelope in 55%.</p>
+in 54%, and the QQ envelope in 55%.</p>
 <p>The main mismatches, at 40 / 100 / 400 dyads:</p>
 <table class="table">
 <colgroup>
@@ -1202,8 +1204,8 @@ in 56%, and the QQ envelope in 55%.</p>
 <td align="left">95 / 95 / 95</td>
 <td align="left">0.98 / 1.00 / 1.00</td>
 <td align="left">0.99 / 1.03 / 1.04</td>
-<td align="left">16 / 19 / 20</td>
-<td align="left">21 / 25 / 27</td>
+<td align="left">16 / 20 / 21</td>
+<td align="left">21 / 24 / 27</td>
 </tr>
 <tr class="even">
 <td align="left">Gaussian</td>
@@ -1212,8 +1214,8 @@ in 56%, and the QQ envelope in 55%.</p>
 <td align="left">95 / 95 / 96</td>
 <td align="left">0.93 / 1.03 / 0.94</td>
 <td align="left">0.97 / 1.02 / 0.97</td>
-<td align="left">40 / 63 / 99</td>
-<td align="left">48 / 71 / 100</td>
+<td align="left">40 / 64 / 99</td>
+<td align="left">48 / 73 / 100</td>
 </tr>
 <tr class="odd">
 <td align="left">Gaussian</td>
@@ -1222,7 +1224,7 @@ in 56%, and the QQ envelope in 55%.</p>
 <td align="left">96 / 96 / 95</td>
 <td align="left">0.96 / 0.97 / 1.02</td>
 <td align="left">1.04 / 1.02 / 1.00</td>
-<td align="left">79 / 99 / 100</td>
+<td align="left">79 / 100 / 100</td>
 <td align="left">85 / 100 / 100</td>
 </tr>
 <tr class="even">
@@ -1242,7 +1244,7 @@ in 56%, and the QQ envelope in 55%.</p>
 <td align="left">94 / 94 / 95</td>
 <td align="left">1.03 / 1.02 / 1.00</td>
 <td align="left">0.95 / 0.94 / 0.97</td>
-<td align="left">43 / 78 / 100</td>
+<td align="left">43 / 77 / 100</td>
 <td align="left">45 / 79 / 100</td>
 </tr>
 <tr class="even">
@@ -1252,8 +1254,8 @@ in 56%, and the QQ envelope in 55%.</p>
 <td align="left">93 / 94 / 96</td>
 <td align="left">0.94 / 1.00 / 0.95</td>
 <td align="left">0.94 / 0.97 / 1.01</td>
-<td align="left">19 / 22 / 27</td>
-<td align="left">24 / 28 / 35</td>
+<td align="left">19 / 22 / 28</td>
+<td align="left">24 / 29 / 36</td>
 </tr>
 <tr class="odd">
 <td align="left">Negative binomial</td>
@@ -1263,7 +1265,7 @@ in 56%, and the QQ envelope in 55%.</p>
 <td align="left">0.89 / 0.93 / 0.87</td>
 <td align="left">0.88 / 0.87 / 0.91</td>
 <td align="left">22 / 26 / 40</td>
-<td align="left">28 / 32 / 49</td>
+<td align="left">28 / 34 / 50</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -1272,8 +1274,8 @@ in 56%, and the QQ envelope in 55%.</p>
 <td align="left">86 / 87 / 89</td>
 <td align="left">0.76 / 0.77 / 0.74</td>
 <td align="left">0.77 / 0.79 / 0.79</td>
-<td align="left">42 / 53 / 91</td>
-<td align="left">50 / 59 / 93</td>
+<td align="left">42 / 54 / 91</td>
+<td align="left">50 / 59 / 94</td>
 </tr>
 <tr class="odd">
 <td align="left">Negative binomial</td>
@@ -1282,8 +1284,8 @@ in 56%, and the QQ envelope in 55%.</p>
 <td align="left">96 / 96 / 97</td>
 <td align="left">1.06 / 1.02 / 1.02</td>
 <td align="left">1.06 / 1.00 / 1.01</td>
-<td align="left">18 / 27 / 48</td>
-<td align="left">26 / 33 / 55</td>
+<td align="left">18 / 26 / 46</td>
+<td align="left">26 / 32 / 55</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -1292,7 +1294,7 @@ in 56%, and the QQ envelope in 55%.</p>
 <td align="left">95 / 97 / 96</td>
 <td align="left">1.05 / 1.15 / 1.10</td>
 <td align="left">1.07 / 1.10 / 1.08</td>
-<td align="left">29 / 49 / 88</td>
+<td align="left">29 / 48 / 88</td>
 <td align="left">37 / 56 / 93</td>
 </tr>
 </tbody>
@@ -1304,7 +1306,7 @@ in 56%, and the QQ envelope in 55%.</p>
 <p>At 400 dyads, the largest drop in a single panel’s flag rate after
 centring is 65.4 percentage points, for the “PIT QQ envelope” panel
 under “NB2 size 1 fitted as Poisson” (pooled). There, the residual
-check’s any flag rate is 95.2% without centring and 76.6% with it.</p>
+check’s any flag rate is 95.8% without centring and 76.6% with it.</p>
 </div>
 <div class="section level2">
 <h2 id="additional-designs-and-exclusions">Additional designs and exclusions<a class="anchor" aria-label="anchor" href="#additional-designs-and-exclusions"></a>
@@ -1338,7 +1340,7 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
-<td align="left">4.2% (2.8–6.3), n = 500</td>
+<td align="left">4.4% (2.9–6.6), n = 500</td>
 <td align="left">8.8% (6.6–11.6), n = 500</td>
 </tr>
 <tr class="even">
@@ -1356,7 +1358,7 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
-<td align="left">6.6% (4.7–9.1), n = 500</td>
+<td align="left">6.8% (4.9–9.4), n = 500</td>
 <td align="left">11.2% (8.7–14.3), n = 500</td>
 </tr>
 <tr class="even">
@@ -1365,66 +1367,66 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Either role</td>
 <td align="left">Residuals</td>
-<td align="left">12.2% (9.6–15.4), n = 500</td>
-<td align="left">20.6% (17.3–24.4), n = 500</td>
-</tr>
-<tr class="odd">
-<td align="left">Gaussian</td>
-<td align="left">Correct model, dyad SD 1.2</td>
-<td align="right">100</td>
-<td align="left">Either role</td>
-<td align="left">Outcomes</td>
-<td align="left">7.2% (5.2–9.8), n = 500</td>
-<td align="left">7.2% (5.2–9.8), n = 500</td>
-</tr>
-<tr class="even">
-<td align="left">Gaussian</td>
-<td align="left">Correct model, dyad SD 1.2</td>
-<td align="right">100</td>
-<td align="left">Either role</td>
-<td align="left">Both checks</td>
-<td align="left">18.6% (15.4–22.2), n = 500</td>
-<td align="left">26.2% (22.5–30.2), n = 500</td>
-</tr>
-<tr class="odd">
-<td align="left">Gaussian</td>
-<td align="left">Correct model, dyad SD 1.2</td>
-<td align="right">400</td>
-<td align="left">Pooled</td>
-<td align="left">Residuals</td>
-<td align="left">4.4% (2.9–6.6), n = 500</td>
-<td align="left">7.8% (5.8–10.5), n = 500</td>
-</tr>
-<tr class="even">
-<td align="left">Gaussian</td>
-<td align="left">Correct model, dyad SD 1.2</td>
-<td align="right">400</td>
-<td align="left">Pooled</td>
-<td align="left">Outcomes</td>
-<td align="left">3.0% (1.8–4.9), n = 500</td>
-<td align="left">3.0% (1.8–4.9), n = 500</td>
-</tr>
-<tr class="odd">
-<td align="left">Gaussian</td>
-<td align="left">Correct model, dyad SD 1.2</td>
-<td align="right">400</td>
-<td align="left">Pooled</td>
-<td align="left">Both checks</td>
-<td align="left">7.2% (5.2–9.8), n = 500</td>
-<td align="left">10.6% (8.2–13.6), n = 500</td>
-</tr>
-<tr class="even">
-<td align="left">Gaussian</td>
-<td align="left">Correct model, dyad SD 1.2</td>
-<td align="right">400</td>
-<td align="left">Either role</td>
-<td align="left">Residuals</td>
-<td align="left">14.6% (11.8–18.0), n = 500</td>
+<td align="left">12.0% (9.4–15.1), n = 500</td>
 <td align="left">20.2% (16.9–23.9), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Gaussian</td>
 <td align="left">Correct model, dyad SD 1.2</td>
+<td align="right">100</td>
+<td align="left">Either role</td>
+<td align="left">Outcomes</td>
+<td align="left">7.2% (5.2–9.8), n = 500</td>
+<td align="left">7.2% (5.2–9.8), n = 500</td>
+</tr>
+<tr class="even">
+<td align="left">Gaussian</td>
+<td align="left">Correct model, dyad SD 1.2</td>
+<td align="right">100</td>
+<td align="left">Either role</td>
+<td align="left">Both checks</td>
+<td align="left">18.4% (15.2–22.0), n = 500</td>
+<td align="left">25.8% (22.2–29.8), n = 500</td>
+</tr>
+<tr class="odd">
+<td align="left">Gaussian</td>
+<td align="left">Correct model, dyad SD 1.2</td>
+<td align="right">400</td>
+<td align="left">Pooled</td>
+<td align="left">Residuals</td>
+<td align="left">4.6% (3.1–6.8), n = 500</td>
+<td align="left">9.0% (6.8–11.8), n = 500</td>
+</tr>
+<tr class="even">
+<td align="left">Gaussian</td>
+<td align="left">Correct model, dyad SD 1.2</td>
+<td align="right">400</td>
+<td align="left">Pooled</td>
+<td align="left">Outcomes</td>
+<td align="left">3.0% (1.8–4.9), n = 500</td>
+<td align="left">3.0% (1.8–4.9), n = 500</td>
+</tr>
+<tr class="odd">
+<td align="left">Gaussian</td>
+<td align="left">Correct model, dyad SD 1.2</td>
+<td align="right">400</td>
+<td align="left">Pooled</td>
+<td align="left">Both checks</td>
+<td align="left">7.4% (5.4–10.0), n = 500</td>
+<td align="left">11.8% (9.3–14.9), n = 500</td>
+</tr>
+<tr class="even">
+<td align="left">Gaussian</td>
+<td align="left">Correct model, dyad SD 1.2</td>
+<td align="right">400</td>
+<td align="left">Either role</td>
+<td align="left">Residuals</td>
+<td align="left">14.8% (12.0–18.2), n = 500</td>
+<td align="left">21.0% (17.7–24.8), n = 500</td>
+</tr>
+<tr class="odd">
+<td align="left">Gaussian</td>
+<td align="left">Correct model, dyad SD 1.2</td>
 <td align="right">400</td>
 <td align="left">Either role</td>
 <td align="left">Outcomes</td>
@@ -1437,8 +1439,8 @@ without covering all dependence structures.</p>
 <td align="right">400</td>
 <td align="left">Either role</td>
 <td align="left">Both checks</td>
-<td align="left">22.6% (19.2–26.5), n = 500</td>
-<td align="left">27.4% (23.7–31.5), n = 500</td>
+<td align="left">22.8% (19.3–26.7), n = 500</td>
+<td align="left">28.0% (24.2–32.1), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Gaussian</td>
@@ -1447,7 +1449,7 @@ without covering all dependence structures.</p>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
 <td align="left">4.8% (3.2–7.0), n = 483</td>
-<td align="left">8.7% (6.5–11.5), n = 483</td>
+<td align="left">9.5% (7.2–12.5), n = 483</td>
 </tr>
 <tr class="even">
 <td align="left">Gaussian</td>
@@ -1465,7 +1467,7 @@ without covering all dependence structures.</p>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
 <td align="left">7.5% (5.4–10.1), n = 483</td>
-<td align="left">11.4% (8.9–14.5), n = 483</td>
+<td align="left">12.2% (9.6–15.4), n = 483</td>
 </tr>
 <tr class="even">
 <td align="left">Gaussian</td>
@@ -1473,8 +1475,8 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Either role</td>
 <td align="left">Residuals</td>
-<td align="left">12.0% (9.4–15.2), n = 483</td>
-<td align="left">22.2% (18.7–26.1), n = 483</td>
+<td align="left">12.8% (10.1–16.1), n = 483</td>
+<td align="left">23.4% (19.8–27.4), n = 483</td>
 </tr>
 <tr class="odd">
 <td align="left">Gaussian</td>
@@ -1491,8 +1493,8 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Either role</td>
 <td align="left">Both checks</td>
-<td align="left">17.8% (14.7–21.5), n = 483</td>
-<td align="left">26.3% (22.6–30.4), n = 483</td>
+<td align="left">18.6% (15.4–22.3), n = 483</td>
+<td align="left">27.5% (23.7–31.7), n = 483</td>
 </tr>
 <tr class="odd">
 <td align="left">Gaussian</td>
@@ -1500,8 +1502,8 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
-<td align="left">3.4% (2.1–5.4), n = 498</td>
-<td align="left">7.8% (5.8–10.5), n = 498</td>
+<td align="left">3.8% (2.5–5.9), n = 498</td>
+<td align="left">8.6% (6.5–11.4), n = 498</td>
 </tr>
 <tr class="even">
 <td align="left">Gaussian</td>
@@ -1518,8 +1520,8 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
-<td align="left">7.2% (5.3–9.8), n = 498</td>
-<td align="left">11.0% (8.6–14.1), n = 498</td>
+<td align="left">7.6% (5.6–10.3), n = 498</td>
+<td align="left">11.8% (9.3–15.0), n = 498</td>
 </tr>
 <tr class="even">
 <td align="left">Gaussian</td>
@@ -1554,8 +1556,8 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
-<td align="left">5.6% (3.9–8.0), n = 500</td>
-<td align="left">9.6% (7.3–12.5), n = 500</td>
+<td align="left">5.2% (3.6–7.5), n = 500</td>
+<td align="left">10.2% (7.8–13.2), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -1572,8 +1574,8 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
-<td align="left">7.6% (5.6–10.3), n = 500</td>
-<td align="left">11.2% (8.7–14.3), n = 500</td>
+<td align="left">7.4% (5.4–10.0), n = 500</td>
+<td align="left">12.0% (9.4–15.1), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -1581,7 +1583,7 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Either role</td>
 <td align="left">Residuals</td>
-<td align="left">15.8% (12.9–19.3), n = 500</td>
+<td align="left">16.2% (13.2–19.7), n = 500</td>
 <td align="left">23.0% (19.5–26.9), n = 500</td>
 </tr>
 <tr class="odd">
@@ -1599,8 +1601,8 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Either role</td>
 <td align="left">Both checks</td>
-<td align="left">18.8% (15.6–22.5), n = 500</td>
-<td align="left">25.8% (22.2–29.8), n = 500</td>
+<td align="left">19.6% (16.4–23.3), n = 500</td>
+<td align="left">26.0% (22.3–30.0), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Negative binomial</td>
@@ -1608,8 +1610,8 @@ without covering all dependence structures.</p>
 <td align="right">400</td>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
-<td align="left">6.0% (4.2–8.4), n = 500</td>
-<td align="left">9.0% (6.8–11.8), n = 500</td>
+<td align="left">6.8% (4.9–9.4), n = 500</td>
+<td align="left">9.6% (7.3–12.5), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -1626,8 +1628,8 @@ without covering all dependence structures.</p>
 <td align="right">400</td>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
-<td align="left">9.4% (7.1–12.3), n = 500</td>
-<td align="left">12.4% (9.8–15.6), n = 500</td>
+<td align="left">10.2% (7.8–13.2), n = 500</td>
+<td align="left">13.0% (10.3–16.2), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
@@ -1635,7 +1637,7 @@ without covering all dependence structures.</p>
 <td align="right">400</td>
 <td align="left">Either role</td>
 <td align="left">Residuals</td>
-<td align="left">15.0% (12.1–18.4), n = 500</td>
+<td align="left">15.2% (12.3–18.6), n = 500</td>
 <td align="left">24.0% (20.5–27.9), n = 500</td>
 </tr>
 <tr class="odd">
@@ -1662,8 +1664,8 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
-<td align="left">2.0% (1.1–3.6), n = 500</td>
-<td align="left">3.0% (1.8–4.9), n = 500</td>
+<td align="left">2.2% (1.2–3.9), n = 500</td>
+<td align="left">2.8% (1.7–4.6), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Ordinal</td>
@@ -1680,7 +1682,7 @@ without covering all dependence structures.</p>
 <td align="right">100</td>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
-<td align="left">4.8% (3.2–7.0), n = 500</td>
+<td align="left">5.0% (3.4–7.3), n = 500</td>
 <td align="left">5.6% (3.9–8.0), n = 500</td>
 </tr>
 <tr class="even">
@@ -1690,7 +1692,7 @@ without covering all dependence structures.</p>
 <td align="left">Either role</td>
 <td align="left">Residuals</td>
 <td align="left">6.2% (4.4–8.7), n = 500</td>
-<td align="left">10.0% (7.7–12.9), n = 500</td>
+<td align="left">10.2% (7.8–13.2), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Ordinal</td>
@@ -1708,7 +1710,7 @@ without covering all dependence structures.</p>
 <td align="left">Either role</td>
 <td align="left">Both checks</td>
 <td align="left">12.4% (9.8–15.6), n = 500</td>
-<td align="left">15.6% (12.7–19.0), n = 500</td>
+<td align="left">15.8% (12.9–19.3), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Ordinal</td>
@@ -1717,7 +1719,7 @@ without covering all dependence structures.</p>
 <td align="left">Pooled</td>
 <td align="left">Residuals</td>
 <td align="left">1.4% (0.7–2.9), n = 500</td>
-<td align="left">1.8% (0.9–3.4), n = 500</td>
+<td align="left">1.6% (0.8–3.1), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Ordinal</td>
@@ -1735,7 +1737,7 @@ without covering all dependence structures.</p>
 <td align="left">Pooled</td>
 <td align="left">Both checks</td>
 <td align="left">5.0% (3.4–7.3), n = 500</td>
-<td align="left">5.4% (3.7–7.7), n = 500</td>
+<td align="left">5.2% (3.6–7.5), n = 500</td>
 </tr>
 <tr class="even">
 <td align="left">Ordinal</td>
@@ -1744,7 +1746,7 @@ without covering all dependence structures.</p>
 <td align="left">Either role</td>
 <td align="left">Residuals</td>
 <td align="left">9.0% (6.8–11.8), n = 500</td>
-<td align="left">14.8% (12.0–18.2), n = 500</td>
+<td align="left">14.6% (11.8–18.0), n = 500</td>
 </tr>
 <tr class="odd">
 <td align="left">Ordinal</td>
@@ -1768,7 +1770,7 @@ without covering all dependence structures.</p>
 </table>
 <p>At 100 dyads, the role view of residual checks flags omitted role
 means of ±0.2 in 100% of datasets with six occasions (correct model:
-12%), compared with 61% with one occasion. Six occasions give each role
+13%), compared with 61% with one occasion. Six occasions give each role
 six times as many rows.</p>
 <p>For correct ordinal models, at least one category fell outside its
 range in 0% / 0% of datasets pooled and 2% / 4% in either role (100 /
