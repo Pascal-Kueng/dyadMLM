@@ -89,7 +89,8 @@ For guidance on how to read the plots, see <code><a href="plot.dyadMLM_residual_
 <span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ask <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  panels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  quartile_lines <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bins"</span>, <span class="st">"qgam"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -158,6 +159,18 @@ it when rows were excluded during fitting (e.g., for missing values).
 Otherwise, a person whose partner's rows were excluded has an unknown
 composition and is omitted.</p></dd>
 
+
+<dt id="arg-quartile-lines">quartile_lines<a class="anchor" aria-label="anchor" href="#arg-quartile-lines"></a></dt>
+<dd><p>Quantile regression lines (<code>"qgam"</code>) can show trends
+near the ends of a numeric axis more clearly than smoothed bins (<code>"bins"</code>,
+default). As in DHARMa, they are fitted with the qgam package (Fasiolo et
+al., 2021) and drawn on ranks of the axis values. Each dataset gets its
+own lines.
+Tuning qgam for every dataset would take far too long, so simulated
+datasets reuse the tuning chosen for the observed data. The 95% coverage
+of the qgam envelopes is therefore approximate. <code>"qgam"</code> is much slower
+and may warn when fits do not converge.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -213,6 +226,9 @@ also partly offsets how fitting makes departures look smaller.</p>
     <p>Dunn, P. K., &amp; Smyth, G. K. (1996). Randomized quantile residuals.
 <em>Journal of Computational and Graphical Statistics, 5</em>(3), 236–244.
 <a href="https://doi.org/10.2307/1390802" class="external-link">doi:10.2307/1390802</a></p>
+<p>Fasiolo, M., Wood, S. N., Zaffran, M., Nedellec, R., &amp; Goude, Y. (2021).
+qgam: Bayesian nonparametric quantile regression modeling in R. <em>Journal of
+Statistical Software, 100</em>(9), 1–31. <a href="https://doi.org/10.18637/jss.v100.i09" class="external-link">doi:10.18637/jss.v100.i09</a></p>
 <p>Hartig, F. (2026). <em>DHARMa: Residual diagnostics for hierarchical
 (multi-level/mixed) regression models</em> (Version 0.5.0) [R package].
 <a href="https://doi.org/10.32614/CRAN.package.DHARMa" class="external-link">doi:10.32614/CRAN.package.DHARMa</a></p>

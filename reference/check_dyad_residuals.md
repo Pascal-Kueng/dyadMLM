@@ -25,7 +25,8 @@ check_dyad_residuals(
   plot = TRUE,
   ask = NULL,
   panels = TRUE,
-  data = NULL
+  data = NULL,
+  quartile_lines = c("bins", "qgam")
 )
 ```
 
@@ -94,6 +95,17 @@ check_dyad_residuals(
   Otherwise, a person whose partner's rows were excluded has an unknown
   composition and is omitted.
 
+- quartile_lines:
+
+  Quantile regression lines (`"qgam"`) can show trends near the ends of
+  a numeric axis more clearly than smoothed bins (`"bins"`, default). As
+  in DHARMa, they are fitted with the qgam package (Fasiolo et
+  al., 2021) and drawn on ranks of the axis values. Each dataset gets
+  its own lines. Tuning qgam for every dataset would take far too long,
+  so simulated datasets reuse the tuning chosen for the observed data.
+  The 95% coverage of the qgam envelopes is therefore approximate.
+  `"qgam"` is much slower and may warn when fits do not converge.
+
 ## Value
 
 Invisibly returns a `dyadMLM_residual_check` list with the `pit` matrix
@@ -154,6 +166,11 @@ Global envelopes use extreme-rank-length ordering (Myllymäki et al.,
 Dunn, P. K., & Smyth, G. K. (1996). Randomized quantile residuals.
 *Journal of Computational and Graphical Statistics, 5*(3), 236–244.
 [doi:10.2307/1390802](https://doi.org/10.2307/1390802)
+
+Fasiolo, M., Wood, S. N., Zaffran, M., Nedellec, R., & Goude, Y. (2021).
+qgam: Bayesian nonparametric quantile regression modeling in R. *Journal
+of Statistical Software, 100*(9), 1–31.
+[doi:10.18637/jss.v100.i09](https://doi.org/10.18637/jss.v100.i09)
 
 Hartig, F. (2026). *DHARMa: Residual diagnostics for hierarchical
 (multi-level/mixed) regression models* (Version 0.5.0) \[R package\].

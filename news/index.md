@@ -18,6 +18,12 @@
   study](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html)
   evaluates sensitivity and false-positive flags.
 
+- Added `quartile_lines = "qgam"` to
+  [`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.md)
+  to fit the PIT quartile lines with the qgam package, as DHARMa does.
+  These lines can show trends near the ends of a numeric axis more
+  clearly, but take much longer, and their envelopes are approximate.
+
 - Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),
   [\#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).
