@@ -22,4 +22,3 @@
 ^tmp$
 ^Rplots\.pdf$
 ^dyadMLM_.*\.tar\.gz$
-^\.claude$
