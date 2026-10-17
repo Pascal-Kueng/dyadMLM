@@ -136,6 +136,35 @@ unit. It rejects coding when no group contains both positions, and warns when
 only some groups are one-sided, which can result from fitted-row filtering.
 It also warns when stable member assignments cannot be verified across
 repeated rows without a member identifier.
+
+People observed alone (see \code{partner_exists} in \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}) can
+share the variance of an exchangeable composition. Add their indicator to
+both blocks, as a sum inside \code{I()}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{(0 + I(.is_male_x_male + .is_singleton_male) | coupleID) +
+  (0 + I(.member_contrast_male_x_male_arbitrary +
+         .is_singleton_male) | coupleID)
+}\if{html}{\out{</div>}}
+
+Automatic matching reads such a sum as the composition's indicator, also in
+interactions such as \code{I(.is_male_x_male + .is_singleton_male):time}. A
+person observed alone is then treated like one member of the dyad (1 in the
+shared block and +1 in the difference block). The recovered variances and
+covariances within a member then also describe them, as long as their
+indicator is added to this composition's blocks only. Covariances between
+partners describe dyad members only. If their indicator is added to several
+compositions, their variance is the sum of the member variances of these
+compositions.
+
+Recovery requires the same added indicators on all terms of a block, and in
+both blocks. Otherwise, recovery stops with an error, because these people
+would get only part of the dyad members' variance. A shared block without an
+indicator, such as \code{(1 | coupleID)}, already includes everyone. Then only the
+difference block needs the sum, with the indicators of everyone observed
+alone. The fitted summed columns are checked like the indicator columns. In
+\code{block_pairings}, give the plain indicator names as \code{difference_indicator}
+and \code{shared_indicator} (e.g., \code{.member_contrast_male_x_male_arbitrary}), not
+the sum.
 }
 \section{What omitted blocks and terms mean}{
 
@@ -181,7 +210,7 @@ Here,
 group, and \code{residual_group} identifies dyads in cross-sectional data or
 dyad-occasions in longitudinal data. This direct specification applies when
 one covariance structure is sufficient. Separate composition-specific
-\code{unstr()} structures for mixed dyad types are not currently supported in a
+\code{unstr()} structures for mixed dyad types are not supported in a
 standard single-response \code{brms} model. For Gaussian mixed-dyad residual
 covariance, use \code{glmmTMB}. Shared/difference blocks remain relevant for
 higher-level random effects and can represent latent link-scale covariance

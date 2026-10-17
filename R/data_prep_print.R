@@ -23,11 +23,27 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
     "unavailable"
   }
 
+  current_dyad_compositions <- NULL
+  if (!is.null(meta$dyad_compositions) && nrow(meta$dyad_compositions) > 0) {
+    current_dyad_compositions <- dyad_compositions_with_current_counts(x)
+  }
+
+  # People observed alone are counted apart from dyads, if there are any.
+  is_alone <- current_dyad_compositions$dyad_type %in% dyad_alone_types
+  n_alone <- sum(current_dyad_compositions$n_dyads[is_alone])
+  dyad_fields <- paste0("Dyads: ", current_n_dyads)
+  if (n_alone > 0L) {
+    dyad_fields <- c(
+      paste0("Dyads: ", current_n_dyads - n_alone),
+      paste0("People observed alone: ", n_alone)
+    )
+  }
+
   cat(pillar::style_subtle(paste0("# ", title, "\n")))
   print_wrapped_comment_fields(
     fields = c(
       paste0("Rows: ", nrow(x)),
-      paste0("Dyads: ", current_n_dyads),
+      dyad_fields,
       paste0("Intensive longitudinal: ", ifelse(meta$longitudinal, "yes", "no"))
     ),
     sep = " | ",
@@ -44,6 +60,9 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
   }
   if (!is.null(meta$time)) {
     structure_fields <- c(structure_fields, paste0("time = ", meta$time))
+  }
+  if (!is.null(meta$partner_exists)) {
+    structure_fields <- c(structure_fields, paste0("partner_exists = ", meta$partner_exists))
   }
 
   print_wrapped_comment_fields(
@@ -83,8 +102,6 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
   }
 
   if (!is.null(meta$dyad_compositions) && nrow(meta$dyad_compositions) > 0) {
-    current_dyad_compositions <- dyad_compositions_with_current_counts(x)
-
     if (is.null(current_dyad_compositions)) {
       print_wrapped_comment_fields(
         label = "Dyad compositions",
@@ -96,7 +113,145 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
       print_dyad_compositions(current_dyad_compositions)
     }
   }
+
+  print_partner_data(x, meta, current_dyad_compositions)
   invisible(NULL)
+}
+
+# Reports partner data: people observed alone, occasions with a row for only
+# one member, rows missing any partner predictor, and reminders on how to model
+# them. `current_dyad_compositions` counts the dyads still in `x`.
+print_partner_data <- function(x, meta, current_dyad_compositions) {
+  format_count <- function(n) format(n, big.mark = ",", trim = TRUE)
+  has_partner_exists <- !is.null(meta$partner_exists)
+  # Generated columns still in the data. Input columns with the same names,
+  # such as `.partner_exists`, are not used.
+  generated <- dyad_generated_columns(meta) |>
+    dplyr::filter(.data$column %in% names(x))
+  has_status_column <- ".partner_exists" %in% generated$column
+  lines <- character()
+
+  # People observed alone, by dyad type.
+  if (!is.null(current_dyad_compositions)) {
+    alone_counts <- current_dyad_compositions |>
+      dplyr::filter(.data$dyad_type %in% dyad_alone_types) |>
+      dplyr::summarise(n = sum(.data$n_dyads), .by = "dyad_type") |>
+      dplyr::arrange(match(.data$dyad_type, dyad_alone_types))
+    alone_parts <- c(
+      singleton = "without a partner",
+      missing_partner = "with a partner not in the data"
+    )[alone_counts$dyad_type]
+    if (nrow(alone_counts) > 0L) {
+      lines <- paste0(
+        "People observed alone: ",
+        paste(format_count(alone_counts$n), alone_parts, collapse = ", "), "."
+      )
+    }
+  }
+
+  n_one_member <- 0L
+  structural_columns <- c(meta$dyad, meta$member, meta$time)
+  if (isTRUE(meta$longitudinal) && all(structural_columns %in% names(x))) {
+    # Each member has at most one row per occasion (checked during
+    # validation), so an occasion with only one row has only one member
+    # observed. `duplicated()` finds these rows quickly, also in large data.
+    # People observed alone are reported above, so only dyads are counted.
+    alone <- current_dyad_compositions$composition[
+      current_dyad_compositions$dyad_type %in% dyad_alone_types
+    ]
+    dyads <- if (length(alone) > 0L) x[!x[[dyad_composition_col]] %in% alone, ] else x
+    rows <- tibble::tibble(
+      occasion = paste(dyads[[meta$dyad]], dyads[[meta$time]], sep = "\r"),
+      # Both members share one status per occasion.
+      has_partner = if (has_status_column) dyads$.partner_exists == 1 else NA
+    )
+    rows$is_only_row <- !(duplicated(rows$occasion) |
+      duplicated(rows$occasion, fromLast = TRUE))
+    one_member <- dplyr::filter(rows, .data$is_only_row)
+    n_one_member <- nrow(one_member)
+    n_occasions <- dplyr::n_distinct(rows$occasion)
+
+    if (n_one_member > 0L) {
+      # Without `partner_exists`, the partner is assumed to exist. Without the
+      # status column (the status did not vary), the count is shown alone.
+      detail <- if (!has_partner_exists) {
+        " (the partner is assumed to exist, with missing values)"
+      } else if (has_status_column) {
+        # Parts with a count of 0 are left out.
+        n_parts <- c(sum(!one_member$has_partner), sum(one_member$has_partner))
+        parts <- c("without a partner", "with a partner who has missing values")
+        paste0(" (", paste(
+          format_count(n_parts[n_parts > 0L]), parts[n_parts > 0L],
+          collapse = ", "
+        ), ")")
+      }
+      lines <- c(lines, paste0(
+        "Dyad-occasions with a row for only one member: ",
+        format_count(n_one_member), " of ", format_count(n_occasions), detail, "."
+      ))
+    }
+  }
+
+  # All contemporaneous partner columns, including usual levels split by
+  # partner status. Lagged columns are left out, because they are always
+  # missing at each person's first occasion.
+  partner_columns <- generated |>
+    dplyr::filter(
+      .data$column_role %in% c(
+        "partner", "partner_when_exists", "partner_before_exists", "partner_after_exists"
+      ),
+      .data$lag == 0L
+    ) |>
+    dplyr::pull("column")
+  n_missing <- sum(rowSums(is.na(x[partner_columns])) > 0L)
+  if (n_missing > 0L) {
+    lines <- c(lines, paste0(
+      "Rows with at least one missing partner predictor: ",
+      format_count(n_missing), " of ", format_count(nrow(x)), "."
+    ))
+  }
+
+  # Two-part coding: the terms to include, if partner predictors that were set
+  # to 0 are still in the data.
+  terms <- two_part_terms(meta, x)
+  if (length(lines) == 0L && is.null(terms)) {
+    return(invisible(NULL))
+  }
+
+  wrap <- function(text) {
+    strwrap(text, width = max(20L, getOption("width", 80L) - 4L), prefix = "#   ")
+  }
+  # Wraps a note and colors only its label (e.g., "Check:") red.
+  wrap_note <- function(label, text) {
+    note <- wrap(paste(label, text))
+    return(sub(label, pillar::style_neg(label), note, fixed = TRUE))
+  }
+
+  cat("# Partner data:\n")
+  if (length(lines) > 0L) {
+    cat(wrap(lines), "#", sep = "\n")
+  }
+
+  # Without `partner_exists`, partners without a row are assumed to exist.
+  if (n_one_member > 0L && !has_partner_exists) {
+    cat(wrap_note("Check:", paste(
+      "If no partner existed at some occasions, a different coding is",
+      "needed. Refer to \"People observed without their partner\" in",
+      "?prepare_dyad_data."
+    )), "#", sep = "\n")
+  }
+
+  # The terms are not wrapped, so they can be pasted into a formula.
+  if (!is.null(terms)) {
+    cat(wrap_note("Two-part coding:", paste(
+      "Partner predictors are 0 where no partner existed. The status terms",
+      "can only be left out if fixed intercepts already separate rows with",
+      "and without a partner. Suggested fixed-effect terms (starting point,",
+      "please revise and check that this is what you need):"
+    )), format_two_part_terms(terms, prefix = "#     "), "#", sep = "\n")
+  }
+
+  return(invisible(NULL))
 }
 
 print_dyad_compositions <- function(dyad_compositions) {
@@ -130,6 +285,9 @@ print_dyad_compositions <- function(dyad_compositions) {
 
   composition_n_dyads <- format(dyad_compositions$n_dyads, justify = "right")
   dyad_count_label <- ifelse(dyad_compositions$n_dyads == 1L, "dyad", "dyads")
+  # People observed alone are counted as people.
+  is_alone <- dyad_compositions$dyad_type %in% dyad_alone_types
+  dyad_count_label[is_alone] <- ifelse(dyad_compositions$n_dyads[is_alone] == 1L, "person", "people")
 
   for (i in seq_len(nrow(dyad_compositions))) {
     cat("#",
@@ -227,7 +385,7 @@ print_wrapped_comment_fields <- function(fields, label = NULL, sep = ", ", exden
     indent <- regmatches(line, regexpr("^ *", line))
     content <- substring(line, nchar(indent, type = "width") + 1L)
     content_width <- max(10L, wrap_width - nchar(indent, type = "width"))
-    wrapped <- strwrap(content, width = content_width)
+    wrapped <- strwrap(content, width = content_width + 1L)
     if (length(wrapped) == 0) {
       wrapped <- ""
     }
