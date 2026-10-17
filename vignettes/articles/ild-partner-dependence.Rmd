@@ -21,8 +21,6 @@ cells <- read_results("cells.csv")
 flags <- read_results("flags.csv") |> left_join(cells, by = "cell")
 figures <- read_results("figures.csv") |> left_join(cells, by = "cell")
 fits <- read_results("fits.csv") |> left_join(cells, by = "cell")
-recovery <- read_results("recovery.csv") |> left_join(cells, by = "cell")
-effect_sizes <- read_results("effect-sizes.csv") |> left_join(cells, by = "cell")
 family_labels <- c(gaussian = "Gaussian", ar = "Gaussian + AR",
   poisson = "Poisson", ordinal = "Ordinal", lag_gaussian = "Gaussian + lags",
   lag_nbinom2 = "NB2 + lags")
@@ -138,11 +136,46 @@ Hessian and a finite log-likelihood. Gaussian models use BFGS, and other familie
 use `nlminb`. Failed fits are not retried. The saved tables also report all available
 checks, including fits that fail those criteria, and preserve failures separately.
 
+The denominator of each rate is the number of datasets for which that check was
+available in the stated fit subset. Each table row counts one family's models
+across all settings. A single generated dataset may supply several fitted models.
+
+```{r fit-availability}
+fits |>
+  summarise(Attempted = sum(attempted), Usable = sum(usable),
+    `Optimizer failures` = sum(not_converged), `Hessian problems` = sum(not_positive_hessian),
+    `Fit errors` = sum(fit_errors), `Check errors` = sum(check_errors), .by = part) |>
+  mutate(Family = family_labels[part], .before = 1) |>
+  select(-part) |>
+  knitr::kable()
+```
+
+```{r rule-and-fit-sensitivity, results='asis'}
+rule_comparison <- flags |>
+  filter(fits == "usable") |>
+  select(cell, model, response, level, statistic, rule, rate) |>
+  tidyr::pivot_wider(names_from = rule, values_from = rate)
+fit_comparison <- flags |>
+  filter(rule == "rank") |>
+  select(cell, model, response, level, statistic, fits, rate) |>
+  tidyr::pivot_wider(names_from = fits, values_from = rate)
+cat(sprintf("Flags use rank limits from the ordered simulated values, as `check_partner_dependence()` does. Interpolated quantiles would change per-row rates by at most %.1f percentage points. Including fits that failed the usability criteria changed per-row rates by at most %.1f percentage points.\n\n",
+  100 * max(abs(rule_comparison$quantile - rule_comparison$rank), na.rm = TRUE),
+  100 * max(abs(fit_comparison$all - fit_comparison$usable), na.rm = TRUE)))
+```
+
 Error bars and brackets are 95% Wilson intervals for flag rates. Monte Carlo SEs
 describe uncertainty from the number of generated datasets. Neither measures
 uncertainty in an individual model's fitted parameters.
 
 </details>
+
+The [full tables](https://github.com/Pascal-Kueng/dyadMLM/tree/main/dev/diagnostic_checks/simulation-studies/report-data/ild-partner-dependence)
+retain all statistics, missingness settings, sample sizes,
+figure-level rates and Monte Carlo SEs. See the
+[study code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/ild-partner-dependence/run.R),
+[design](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/ild-partner-dependence-plan.md#7-validation-after-implementation-once)
+and [run instructions](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md#longitudinal-partner-dependence-checks).
 
 ## False alarms under a true restriction
 
@@ -190,20 +223,6 @@ ggplot(detection_rows, aes(rate, restriction)) +
   facet_grid(family ~ level) +
   scale_x_continuous(labels = scales::label_percent(), limits = c(0, 1)) +
   labs(x = "Datasets with a row flag", y = NULL) + study_theme
-```
-
-Response-scale correlations below describe the generated data after subtracting
-their true fixed-effect means. They help distinguish response-scale dependence
-from latent covariance parameters. These estimates use large complete samples.
-They are not fitted-model results.
-
-```{r response-effect-sizes}
-effect_sizes |>
-  filter(part %in% c("gaussian", "poisson", "ordinal"), truth_case == "correlated",
-    n_dyads == 200, n_occasions == 14, missing_share == 0) |>
-  transmute(Family = family_labels[part], Between = between_partner_cor,
-    Within = within_partner_cor) |>
-  knitr::kable(digits = 3)
 ```
 
 ```{r main-findings, results='asis'}
@@ -273,58 +292,3 @@ lag_figures |>
 
 Low model-centred flag rates in the Gaussian lagged-outcome case do not establish
 that keeping outcome-derived predictors fixed gives a valid simulation reference.
-
-## Fitting and sensitivity checks
-
-The denominator of each rate is the number of datasets for which that check was
-available in the stated fit subset. Each table row counts one family's models
-across all settings. A single generated dataset may supply several fitted models.
-
-```{r fit-availability}
-fits |>
-  summarise(Attempted = sum(attempted), Usable = sum(usable),
-    `Optimizer failures` = sum(not_converged), `Hessian problems` = sum(not_positive_hessian),
-    `Fit errors` = sum(fit_errors), `Check errors` = sum(check_errors), .by = part) |>
-  mutate(Family = family_labels[part], .before = 1) |>
-  select(-part) |>
-  knitr::kable()
-```
-
-```{r rule-and-fit-sensitivity, results='asis'}
-rule_comparison <- flags |>
-  filter(fits == "usable") |>
-  select(cell, model, response, level, statistic, rule, rate) |>
-  tidyr::pivot_wider(names_from = rule, values_from = rate)
-fit_comparison <- flags |>
-  filter(rule == "rank") |>
-  select(cell, model, response, level, statistic, fits, rate) |>
-  tidyr::pivot_wider(names_from = fits, values_from = rate)
-cat(sprintf("Flags use rank limits from the ordered simulated values, as `check_partner_dependence()` does. Interpolated quantiles would change per-row rates by at most %.1f percentage points. Including fits that failed the usability criteria changed per-row rates by at most %.1f percentage points.\n\n",
-  100 * max(abs(rule_comparison$quantile - rule_comparison$rank), na.rm = TRUE),
-  100 * max(abs(fit_comparison$all - fit_comparison$usable), na.rm = TRUE)))
-```
-
-Apart from the AR result above, parameter recovery is kept separate from check
-performance. The saved recovery
-table contains estimates only for correctly specified models, excluding the
-lagged-outcome sensitivity fits. This compact view gives the largest absolute
-bias across settings for fixed predictor effects and latent partner correlations.
-
-```{r parameter-recovery}
-parameter_labels <- c(x_actor = "Actor effect", x_partner = "Partner effect",
-  block1_cor = "Stable correlation", block2_cor = "Occasion correlation")
-recovery |>
-  filter(parameter %in% names(parameter_labels)) |>
-  summarise(`Largest absolute bias` = max(abs(bias)),
-    `Fewest usable estimates` = min(n), .by = c(part, parameter)) |>
-  transmute(Family = family_labels[part], Parameter = parameter_labels[parameter],
-    `Largest absolute bias`, `Fewest usable estimates`) |>
-  knitr::kable(digits = 3)
-```
-
-The [full tables](https://github.com/Pascal-Kueng/dyadMLM/tree/main/dev/diagnostic_checks/simulation-studies/report-data/ild-partner-dependence)
-retain all statistics, missingness settings, sample sizes,
-figure-level rates and Monte Carlo SEs. See the
-[study code](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/ild-partner-dependence/run.R),
-[design](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/ild-partner-dependence-plan.md#7-validation-after-implementation-once)
-and [run instructions](https://github.com/Pascal-Kueng/dyadMLM/blob/main/dev/diagnostic_checks/simulation-studies/README.md#longitudinal-partner-dependence-checks).
