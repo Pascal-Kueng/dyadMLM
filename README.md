@@ -202,6 +202,24 @@ model <- glmmTMB::glmmTMB(
 )
 ```
 
+Recover the member-level SDs and partner correlation:
+
+``` r
+covariance <- recover_exchangeable_covariance(model)
+
+print(covariance, representation = "sdcor")
+#> Recovered exchangeable member-level covariance
+#> 
+#> Pair `pair_1`
+#> Shared:     us(1 | coupleID)
+#> Difference: us(0 + .member_contrast_arbitrary | coupleID)
+#> 
+#> Standard deviations and correlations:
+#>                        1      2     
+#> 1 member1: (Intercept) 1.089  -0.039
+#> 2 member2: (Intercept) -0.039 1.089
+```
+
 Next, check whether the model reproduces the data.
 
 <details>

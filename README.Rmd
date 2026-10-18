@@ -166,6 +166,14 @@ model <- glmmTMB::glmmTMB(
 )
 ```
 
+Recover the member-level SDs and partner correlation:
+
+```{r cross-sectional-covariance}
+covariance <- recover_exchangeable_covariance(model)
+
+print(covariance, representation = "sdcor")
+```
+
 Next, check whether the model reproduces the data.
 
 ```{=html}
