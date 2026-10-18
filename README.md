@@ -187,7 +187,7 @@ model <- glmmTMB::glmmTMB(
 Next, check whether the model reproduces the data.
 
 <details>
-<summary>Complete model-checking workflow (click to expand): partner-dependence, residual, and outcome checks for two APIMs, and a model comparison</summary>
+<summary>Complete model-checking workflow (click to expand): partner-dependence, residual, and outcome checks, a distinguishable APIM, and a model comparison</summary>
 
 Simulate responses and check partner dependence, using gender to
 distinguish partners:
@@ -224,11 +224,11 @@ check_dyad_residuals(
 )
 ```
 
-<img src="man/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below." width="100%" /><img src="man/figures/README-exchangeable-residuals-2.png" alt="Mean PIT distance histograms for women and men under the exchangeable APIM. Both red lines lie within the dashed limits." width="100%" />
+<img src="man/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below." width="100%" />
 
 Women’s QQ curve and PIT median rise above their envelopes and men’s
 fall below, so women’s observed closeness is higher than simulated and
-men’s is lower. Both mean PIT distances lie within their limits.
+men’s is lower.
 
 ``` r
 check_dyad_outcomes(
@@ -268,53 +268,6 @@ model_distinguishable <- glmmTMB::glmmTMB(
 )
 ```
 
-Run the same checks on simulations from this model:
-
-``` r
-simulations_distinguishable <- simulate_dyad_responses(
-  model_distinguishable, seed = 123
-)
-
-check_partner_dependence(
-  simulations_distinguishable,
-  dyad = coupleID,
-  role = gender,
-  data = prepared_data
-)
-```
-
-<img src="man/figures/README-distinguishable-dependence-1.png" alt="Six predictive-check histograms for the distinguishable APIM, laid out as in the first figure. All red lines lie within the dashed limits." width="100%" />
-
-All red lines now lie within their dashed limits.
-
-``` r
-check_dyad_residuals(
-  simulations_distinguishable,
-  dyad = coupleID,
-  role = gender,
-  data = prepared_data
-)
-```
-
-<img src="man/figures/README-distinguishable-residuals-1.png" alt="Residual checks for women and men under the distinguishable APIM, laid out as for the exchangeable APIM. All red curves stay within the blue envelopes." width="100%" /><img src="man/figures/README-distinguishable-residuals-2.png" alt="Mean PIT distance histograms for women and men under the distinguishable APIM. Both red lines lie within the dashed limits." width="100%" />
-
-The QQ curves and PIT quartiles stay within their envelopes. The mean
-PIT distances lie within their limits.
-
-``` r
-check_dyad_outcomes(
-  simulations_distinguishable,
-  dyad = coupleID,
-  role = gender,
-  data = prepared_data
-)
-```
-
-<img src="man/figures/README-distinguishable-outcomes-1.png" alt="Outcome checks for women and men under the distinguishable APIM, laid out as for the exchangeable APIM. The observed ECDFs run among the simulated curves and all red lines lie within the dashed limits." width="100%" />
-
-The outcome ECDFs run among the simulated curves, and response SDs and
-largest deviations stay within their limits.
-
 These checks alone do not establish whether fixed effects should be
 pooled. Compare the two nested models with a likelihood-ratio test:
 
@@ -337,9 +290,9 @@ compare_nested_models(model, model_distinguishable)
 
 The test supports the distinguishable APIM (p \< 0.001).
 
-The [APIM
-vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)
-explains each step.
+Check the distinguishable model the same way, and see the [APIM
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-partner-dependence)
+for how to read the checks.
 
 </details>
 
