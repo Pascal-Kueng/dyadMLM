@@ -243,7 +243,7 @@ For illustration, the path diagram from the [APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitting-the-restricted-exchangeable-apim-with-glmmtmb)
 shows these estimates:
 
-<img src="man/figures/README-cross-sectional-diagram-1.png" alt="Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner effect 0.18, common residual SD 1.09, and residual correlation -0.04." width="100%" />
+<img src="man/figures/README-cross-sectional-diagram-1.svg" alt="Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner effect 0.18, common residual SD 1.09, and residual correlation -0.04." width="100%" />
 
 Next, check whether the model reproduces the data.
 
@@ -262,7 +262,7 @@ check_partner_dependence(
 )
 ```
 
-<img src="man/figures/README-cross-sectional-check-1.png" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
+<img src="man/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
 
 The function groups the six plots in one figure. Use `panels = FALSE` to
 show them separately.
@@ -296,7 +296,7 @@ check_dyad_residuals(
 )
 ```
 
-<img src="man/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below." width="100%" />
+<img src="man/figures/README-exchangeable-residuals-1.svg" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below." width="100%" />
 
 Women’s QQ curve and PIT median rise above their envelopes and men’s
 fall below, so women’s observed closeness is higher than simulated and
@@ -311,7 +311,7 @@ check_dyad_outcomes(
 )
 ```
 
-<img src="man/figures/README-exchangeable-outcomes-1.png" alt="Outcome checks for women and men under the exchangeable APIM: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Women's observed ECDF lies right of the simulated curves and men's left. The red lines in the histograms lie within the dashed limits." width="100%" />
+<img src="man/figures/README-exchangeable-outcomes-1.svg" alt="Outcome checks for women and men under the exchangeable APIM: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Women's observed ECDF lies right of the simulated curves and men's left. The red lines in the histograms lie within the dashed limits." width="100%" />
 
 The outcome ECDFs show the same issue, while response SDs and largest
 deviations stay within their simulated limits.

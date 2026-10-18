@@ -10,3 +10,8 @@
   color: var(--bs-link-hover-color);
   text-decoration: underline;
 }
+
+/* Keep check figures white in dark mode. Diagrams are still inverted. */
+[data-bs-theme="dark"] .no-invert-dark-mode img.r-plt {
+  filter: none;
+}
