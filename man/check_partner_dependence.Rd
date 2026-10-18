@@ -130,6 +130,7 @@ illustrates how sample size affects detection when residual partner
 correlation is omitted.
 
 Checking each composition can reveal differences hidden by pooling.
+With few dyads in a composition, the simulated ranges are wide, so its panels lack sensitivity.
 Flags (observed values outside the middle 95\%, marked \code{*} when printed) can
 occur by chance, especially when checking several summaries.
 They invite investigation, not formal rejection of the model. The
