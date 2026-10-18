@@ -224,9 +224,9 @@ check_dyad_residuals(
 )
 ```
 
-<img src="man/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's red curves rise above the envelopes and men's fall below." width="100%" /><img src="man/figures/README-exchangeable-residuals-2.png" alt="Mean PIT distance histograms for women and men under the exchangeable APIM. Both red lines lie within the dashed limits." width="100%" />
+<img src="man/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below." width="100%" /><img src="man/figures/README-exchangeable-residuals-2.png" alt="Mean PIT distance histograms for women and men under the exchangeable APIM. Both red lines lie within the dashed limits." width="100%" />
 
-Women’s QQ curve and PIT quartiles rise above their envelopes and men’s
+Women’s QQ curve and PIT median rise above their envelopes and men’s
 fall below, so women’s observed closeness is higher than simulated and
 men’s is lower. Both mean PIT distances lie within their limits.
 

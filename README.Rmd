@@ -186,7 +186,7 @@ It can be worthwhile to check plausible role distinctions even when fitting an
 exchangeable model, since a pooled check can hide differences between roles.
 Check the residuals and outcomes by gender too, reusing the same `simulations`:
 
-```{r exchangeable-residuals, fig.width = 10, fig.height = 8, fig.alt = c("Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's red curves rise above the envelopes and men's fall below.", "Mean PIT distance histograms for women and men under the exchangeable APIM. Both red lines lie within the dashed limits.")}
+```{r exchangeable-residuals, fig.width = 10, fig.height = 8, fig.alt = c("Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below.", "Mean PIT distance histograms for women and men under the exchangeable APIM. Both red lines lie within the dashed limits.")}
 check_dyad_residuals(
   simulations,
   dyad = coupleID,
@@ -195,9 +195,9 @@ check_dyad_residuals(
 )
 ```
 
-Women's QQ curve and PIT quartiles rise above their envelopes and men's fall
-below, so women's observed closeness is higher than simulated and men's is
-lower. Both mean PIT distances lie within their limits.
+Women's QQ curve and PIT median rise above their envelopes and men's fall below,
+so women's observed closeness is higher than simulated and men's is lower.
+Both mean PIT distances lie within their limits.
 
 ```{r exchangeable-outcomes, fig.width = 10, fig.height = 12, fig.alt = "Outcome checks for women and men under the exchangeable APIM: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Women's observed ECDF lies right of the simulated curves and men's left. The red lines in the histograms lie within the dashed limits."}
 check_dyad_outcomes(
