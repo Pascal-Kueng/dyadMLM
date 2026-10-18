@@ -184,6 +184,16 @@ model <- glmmTMB::glmmTMB(
 )
 ```
 
+Next, check whether the model reproduces the data.
+
+<details>
+
+<summary>
+
+Complete model-checking workflow (click to expand): partner-dependence,
+residual, and outcome checks for two APIMs, and a model comparison
+</summary>
+
 Simulate responses and check partner dependence, using gender to
 distinguish partners:
 
@@ -203,21 +213,12 @@ check_partner_dependence(
 
 Here, simulations produce weaker partner correlations and larger SDs of
 partner half-differences than observed (red lines), suggesting
-**misfit**. A distinguishable APIM fits these data better, as the full
-workflow below shows.
-
-<details>
-
-<summary>
-
-Full APIM workflow: residual check, distinguishable APIM, and model
-comparison
-</summary>
+**misfit**.
 
 It can be worthwhile to check plausible role distinctions even when
 fitting an exchangeable model, since a pooled check can hide differences
-between roles. Check the residuals by gender, reusing the same
-`simulations`:
+between roles. Check the residuals and outcomes by gender too, reusing
+the same `simulations`:
 
 ``` r
 check_dyad_residuals(
@@ -228,12 +229,25 @@ check_dyad_residuals(
 )
 ```
 
-<img src="man/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's red curves lie above the envelopes and men's below." width="100%" />
+<img src="man/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's red curves rise above the envelopes and men's fall below." width="100%" /><img src="man/figures/README-exchangeable-residuals-2.png" alt="Mean PIT distance histograms for women and men under the exchangeable APIM. Both red lines lie within the dashed limits." width="100%" />
 
-Women’s observed closeness is higher than simulated and men’s is lower,
-suggesting that the model misses gender differences.
-[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)
-shows the same pattern in the outcome distributions.
+Women’s QQ curve and PIT quartiles rise above their envelopes and men’s
+fall below, so women’s observed closeness is higher than simulated and
+men’s is lower. Both mean PIT distances lie within their limits.
+
+``` r
+check_dyad_outcomes(
+  simulations,
+  dyad = coupleID,
+  role = gender,
+  data = prepared_data
+)
+```
+
+<img src="man/figures/README-exchangeable-outcomes-1.png" alt="Outcome checks for women and men under the exchangeable APIM: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Women's observed ECDF lies right of the simulated curves and men's left. The red lines in the histograms lie within the dashed limits." width="100%" />
+
+The outcome ECDFs show the same shift, while response SDs and largest
+deviations stay within their limits.
 
 Fit the distinguishable APIM, which lets intercepts, actor and partner
 effects, and residual variances differ by gender:
@@ -259,7 +273,7 @@ model_distinguishable <- glmmTMB::glmmTMB(
 )
 ```
 
-Check partner dependence again:
+Run the same checks on simulations from this model:
 
 ``` r
 simulations_distinguishable <- simulate_dyad_responses(
@@ -274,10 +288,37 @@ check_partner_dependence(
 )
 ```
 
-<img src="man/figures/README-distinguishable-check-1.png" alt="Six predictive-check histograms for the distinguishable APIM, laid out as in the first figure. All red lines lie within the dashed limits." width="100%" />
+<img src="man/figures/README-distinguishable-dependence-1.png" alt="Six predictive-check histograms for the distinguishable APIM, laid out as in the first figure. All red lines lie within the dashed limits." width="100%" />
 
-The observed values now lie within the dashed limits. Residual and
-outcome checks (not shown) show no flags either.
+All red lines now lie within their dashed limits.
+
+``` r
+check_dyad_residuals(
+  simulations_distinguishable,
+  dyad = coupleID,
+  role = gender,
+  data = prepared_data
+)
+```
+
+<img src="man/figures/README-distinguishable-residuals-1.png" alt="Residual checks for women and men under the distinguishable APIM, laid out as for the exchangeable APIM. All red curves stay within the blue envelopes." width="100%" /><img src="man/figures/README-distinguishable-residuals-2.png" alt="Mean PIT distance histograms for women and men under the distinguishable APIM. Both red lines lie within the dashed limits." width="100%" />
+
+The QQ curves and PIT quartiles stay within their envelopes. The mean
+PIT distances lie within their limits.
+
+``` r
+check_dyad_outcomes(
+  simulations_distinguishable,
+  dyad = coupleID,
+  role = gender,
+  data = prepared_data
+)
+```
+
+<img src="man/figures/README-distinguishable-outcomes-1.png" alt="Outcome checks for women and men under the distinguishable APIM, laid out as for the exchangeable APIM. The observed ECDFs run among the simulated curves and all red lines lie within the dashed limits." width="100%" />
+
+The outcome ECDFs run among the simulated curves, and response SDs and
+largest deviations stay within their limits.
 
 These checks alone do not establish whether fixed effects should be
 pooled. Compare the two nested models with a likelihood-ratio test:
@@ -298,6 +339,8 @@ compare_nested_models(model, model_distinguishable)
 #> 
 #> Conclusion (5% level): The likelihood-ratio test provides evidence that `model_distinguishable` fits better than `model` (p < 0.001).
 ```
+
+The test supports the distinguishable APIM (p \< 0.001).
 
 The [APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)
