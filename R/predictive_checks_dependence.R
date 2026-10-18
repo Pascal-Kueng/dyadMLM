@@ -8,8 +8,7 @@
 #' variances and partner correlations with those of responses simulated from the
 #' fitted model. This helps identify mismatches in the model's assumptions.
 #' These checks are especially useful when a less restricted model does not converge and so cannot be
-#' used for model comparison. It works for both cross-sectional and longitudinal
-#' models (for repeated occasions, supply `member` and `time`).
+#' used for model comparison. For repeated occasions, supply `member` and `time`.
 #'
 #' @param simulations An object returned by [simulate_dyad_responses()].
 #' @param dyad The dyad column name. Looked up first
