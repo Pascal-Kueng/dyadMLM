@@ -86,7 +86,7 @@ compositions as exchangeable, centering predictors, and creating within-/between
 components and lagged predictors.
 
 Prepared data can be used with **glmmTMB**, **brms**, and other multilevel modeling
-packages. See the
+packages that support the required model structure. See the
 [Getting Started vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html)
 for data requirements and examples of data preparation workflows.
 
@@ -96,23 +96,24 @@ for data requirements and examples of data preparation workflows.
 |---|---|---|
 | [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
-| [Check partner dependence — cross-sectional](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)[^1] | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
-| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)[^1] | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
-| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)[^1] | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check partner dependence — cross-sectional](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)^1^ | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)^1^ | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)^1^ | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
-[^1]: Predictive checks compare the *observed* data and residuals with those simulated from the
-fitted model (similar to what the DHARMa package does). !TODO: link DHARMa?
+^1^ Predictive checks compare the *observed* data and residuals with those simulated from the
+fitted model (similar to what the [DHARMa](https://CRAN.R-project.org/package=DHARMa) package does).
 
 ## Quick example
 
 Using the simulated data bundled with dyadMLM, we select female–male dyads and, for
 illustration, fit an APIM that treats partners as exchangeable. We then check
-whether the assumptions of exchangeability is supported by checking, whether the
-observed partner dependence is replicated for both genders. We also test whether
-the model replicates other aspects of the data well, and whether the residuals 
+whether the exchangeability assumption is supported by checking whether the
+observed partner dependence is replicated for both genders. We also check whether
+the model replicates other aspects of the data well, and whether the residuals
 are distributed as expected.
 
-This example requires the development version of **dyadMLM**. 
+This example requires the development version of **dyadMLM**. It also uses
+**glmmTMB**.
 
 ```{r cross-sectional-prep}
 library(dyadMLM)
@@ -121,13 +122,13 @@ prepared_data <- prepare_dyad_data(
   dyads_cross,
   dyad = coupleID,
   member = personID,
-  
-  # by specifying a role and requesting the arbitrary contrast alongside it, 
+
+  # by specifying a role and requesting the arbitrary contrast alongside it,
   # we can fit both a distinguishable and an exchangeable model on the same
   # prepared data.
-  role = gender, 
+  role = gender,
   include_arbitrary_member_contrast = TRUE,
-  
+
   predictors = provided_support,
   model_types = "apim",
   keep_compositions = "female-male",
@@ -180,10 +181,9 @@ covariance <- recover_exchangeable_covariance(model)
 print(covariance, representation = "sdcor")
 ```
 
-Note that the random intercepts represent the residual variances for each partner. 
-Due to exchangeability constraints, both partners have equal variances, yet 
-we are still able to correctly recover the negative correlation between the partners' 
-residual variances. 
+Note that the random intercepts represent the residual variances for each partner.
+Due to exchangeability constraints, both partners have equal variances, yet
+the residual correlation between partners can still be negative.
 
 ```{r cross-sectional-diagram-values, include = FALSE}
 diagram_values <- .extract_apim_diagram_values(model, type = "exchangeable")
@@ -263,8 +263,8 @@ check_dyad_residuals(
 ```
 
 Women's QQ curve and PIT median rise above their envelopes and men's fall below,
-so women's observed closeness is higher than simulated and men's is lower than 
-simulated. 
+so women's observed closeness is higher than simulated and men's is lower than
+simulated.
 
 ```{r exchangeable-outcomes, fig.width = 10, fig.height = 12, fig.alt = "Outcome checks for women and men under the exchangeable APIM: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Women's observed ECDF lies right of the simulated curves and men's left. The red lines in the histograms lie within the dashed limits."}
 check_dyad_outcomes(
@@ -280,7 +280,7 @@ stay within their simulated limits.
 
 Together, these plots point to issues with the exchangeability assumption of the
 model. A next step is to fit a distinguishable APIM (shown in more detail in the
-[APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)). 
+[APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)).
 
 ```{r distinguishable-model}
 model_distinguishable <- glmmTMB::glmmTMB(
@@ -291,7 +291,7 @@ model_distinguishable <- glmmTMB::glmmTMB(
     # Gender-specific actor effects
     .is_female:.provided_support_gmc_actor +
     .is_male:.provided_support_gmc_actor +
-    
+
     # Gender-specific partner effects
     .is_female:.provided_support_gmc_partner +
     .is_male:.provided_support_gmc_partner +
@@ -313,9 +313,9 @@ compare_nested_models(model, model_distinguishable)
 ```
 
 The comparison favors the distinguishable model. As a next step, repeat the
-checks from above for this model. Refer to the 
+checks from above for this model. Refer to the
 [APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-partner-dependence)
-for further guidance. 
+for further guidance.
 
 </details>
 
