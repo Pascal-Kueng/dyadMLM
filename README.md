@@ -338,8 +338,7 @@ reference](https://pascal-kueng.github.io/dyadMLM/reference/index.html).
 | [Dyadic Score Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html) | DSM predictor-score and contrast construction, longitudinal models, and the relationship to the distinguishable APIM |
 
 The model-fitting examples use **glmmTMB**. Joint analysis of multiple
-dyad compositions is also supported with glmmTMB. A dedicated vignette
-is in preparation.
+dyad compositions is also supported with glmmTMB.
 
 For theoretical foundations and a practical walkthrough of dyadic data
 analysis, from data preparation and model fitting to interpretation and
