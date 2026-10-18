@@ -31,7 +31,8 @@
 #' @param role Role column, with or without quotes, such as gender. `NULL`
 #'   (default) pools all observations. Otherwise, each composition (pair of
 #'   partners' roles, such as female-male) is checked separately. Each member
-#'   must keep the same role.
+#'   must keep the same role. With few dyads in a composition, the simulated
+#'   ranges are wide, so its panels lack sensitivity.
 #' @param member Person ID column, with or without quotes. Required with `role`
 #'   when dyads have repeated observations.
 #' @param data The unchanged data used to fit the model. Supply it when the
