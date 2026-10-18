@@ -244,7 +244,7 @@ test_that("the within level needs three dyads that share an occasion", {
 
   expect_warning(
     check <- check_occasions(simulations, role = NULL),
-    "Not checked (fewer than three complete pairs): All dyads (within) (n = 2).",
+    "Not checked (fewer than three dyads): All dyads (within) (n = 2).",
     fixed = TRUE
   )
   expect_identical(check$compositions$n_pairs, c(4L, 2L))
@@ -262,7 +262,7 @@ test_that("the between level is checked when no partners share an occasion", {
 
   expect_warning(
     check <- check_occasions(simulations, role = NULL),
-    "Not checked (fewer than three complete pairs): All dyads (within) (n = 0).",
+    "Not checked (fewer than three dyads): All dyads (within) (n = 0).",
     fixed = TRUE
   )
   expect_identical(check$compositions$n_pairs, c(4L, 0L))
@@ -286,12 +286,40 @@ test_that("a composition without shared occasions stays at the within level", {
 
   expect_warning(
     check <- check_occasions(simulations, role = "role"),
-    "Not checked (fewer than three complete pairs): a - a (within) (n = 0).",
+    "Not checked (fewer than three dyads): a - a (within) (n = 0).",
     fixed = TRUE
   )
   expect_identical(check$compositions$label, c("a - a (between)", "a - b (between)",
                                                "a - a (within)", "a - b (within)"))
   expect_identical(check$compositions$n_pairs, c(4L, 4L, 0L, 4L))
+})
+
+test_that("a within composition without variation is skipped, not fatal", {
+  first <- occasion_check_simulations()
+  second <- keep_simulation_rows(occasion_check_simulations(),
+                                 occasion_check_simulations()$model_frame$time == 1L)
+  # Dyads 5 to 8 are same-role pairs who answered only one shared occasion, so
+  # their deviations from member means are all zero.
+  second$model_frame$dyad <- second$model_frame$dyad + 4L
+  second$model_frame$role <- factor("a", levels = c("a", "b"))
+  simulations <- first
+  simulations$observed_response <- c(first$observed_response, second$observed_response)
+  simulations$predicted_response <- c(first$predicted_response, second$predicted_response)
+  simulations$simulated_responses <- cbind(first$simulated_responses,
+                                           second$simulated_responses)
+  simulations$model_frame <- rbind(first$model_frame, second$model_frame)
+
+  expect_warning(
+    check <- check_occasions(simulations, role = "role"),
+    "Not checked (summaries undefined, e.g., one occasion per member): a - a (within).",
+    fixed = TRUE
+  )
+  expect_identical(check$compositions$n_pairs, c(4L, 4L, 4L, 4L))
+  expect_null(check$compositions$statistics[[3]])
+  expect_setequal(unique(check$summary$composition),
+                  c("a - a (between)", "a - b (between)", "a - b (within)"))
+  expect_output(print(check), "a - a (within): 4 of 8 usable dyads; not checked (summaries undefined)",
+                fixed = TRUE)
 })
 
 test_that("printed and plotted headings name each level", {

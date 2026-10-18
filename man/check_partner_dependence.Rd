@@ -79,7 +79,9 @@ or roles and incomplete dyads are omitted with a warning. The object includes
 omission counts and settings, and can be saved and plotted later.
 With repeated occasions, \code{compositions} has a \code{level} column (\code{"between"}
 or \code{"within"}), and each label ends with its level. Within-level rows count the
-dyads that share at least one occasion.
+dyads that share at least one occasion. Within-level compositions whose
+observed summaries are undefined (e.g., one occasion per member) are also
+skipped.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}

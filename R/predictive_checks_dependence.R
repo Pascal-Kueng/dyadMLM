@@ -62,7 +62,9 @@
 #'   omission counts and settings, and can be saved and plotted later.
 #'   With repeated occasions, `compositions` has a `level` column (`"between"`
 #'   or `"within"`), and each label ends with its level. Within-level rows count the
-#'   dyads that share at least one occasion.
+#'   dyads that share at least one occasion. Within-level compositions whose
+#'   observed summaries are undefined (e.g., one occasion per member) are also
+#'   skipped.
 #'
 #' @section Reading the plots:
 #' Blue histograms show simulated summaries. Red lines mark observed values.
@@ -339,6 +341,17 @@ check_partner_dependence <- function(
       n_defined_simulations = colSums(is.finite(simulated_statistics))
     )
   }
+  # A within composition can have undefined summaries, e.g. when every member has
+  # one occasion, so all deviations are zero. Skip it, so the between level and
+  # the other compositions are still checked.
+  undefined_within_indices <- Filter(function(composition_index) {
+    identical(compositions[["level"]][composition_index], "within") &&
+      !all(statistic_diagnostics_by_composition[[composition_index]]$observed_is_defined)
+  }, checked_composition_indices)
+  compositions$statistics[undefined_within_indices] <- list(NULL)
+  statistic_diagnostics_by_composition[undefined_within_indices] <- list(NULL)
+  checked_composition_indices <- setdiff(checked_composition_indices, undefined_within_indices)
+
   statistic_diagnostics <- dplyr::bind_rows(statistic_diagnostics_by_composition)
   statistic_descriptions <- statistic_diagnostics$description
 
@@ -412,10 +425,15 @@ check_partner_dependence <- function(
     warning("Omitted: ", paste(omission_details, collapse = "; "), ".", call. = FALSE)
   }
   if (length(skipped_composition_indices) > 0L) {
-    warning("Not checked (fewer than three complete pairs): ",
+    warning("Not checked (fewer than three dyads): ",
             paste0(compositions$label[skipped_composition_indices], " (n = ",
                    compositions$n_pairs[skipped_composition_indices], ")",
                    collapse = "; "), ".", call. = FALSE)
+  }
+  if (length(undefined_within_indices) > 0L) {
+    warning("Not checked (summaries undefined, e.g., one occasion per member): ",
+            paste(compositions$label[undefined_within_indices], collapse = "; "), ".",
+            call. = FALSE)
   }
   if (missing(role)) message_pooled_roles()
   if (plot) graphics::plot(check_result, ask = ask, panels = panels)
@@ -769,7 +787,8 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
     cat("\n", composition$label, ": ", composition$n_pairs, " of ", x$n_pairs,
         " usable dyads", sep = "")
     if (is.null(composition$statistics[[1]])) {
-      cat("; not checked (fewer than three complete pairs)\n")
+      reason <- if (composition$n_pairs < 3L) "fewer than three dyads" else "summaries undefined"
+      cat("; not checked (", reason, ")\n", sep = "")
       next
     }
     cat("\n")
@@ -856,7 +875,7 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
 #' @export
 plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
 
-  checked_composition_indices <- which(x$compositions$n_pairs >= 3L)
+  checked_composition_indices <- which(!vapply(x$compositions$statistics, is.null, logical(1)))
   local_check_paging(ask, panels, if (panels) length(checked_composition_indices) else
     sum(vapply(x$compositions$statistics[checked_composition_indices], ncol, integer(1)) - 1L))
 
