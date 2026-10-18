@@ -242,9 +242,6 @@ shows these estimates:
 
 Next, check whether the model reproduces the data.
 
-<details>
-<summary>Complete model-checking workflow (click to expand): partner-dependence, residual, and outcome checks, a distinguishable APIM, and a model comparison</summary>
-
 Simulate responses and check partner dependence, using gender to
 distinguish partners:
 
@@ -365,8 +362,6 @@ The comparison favors the distinguishable model. As a next step, repeat
 the checks from above for this model. Refer to the [APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-partner-dependence)
 for further guidance.
-
-</details>
 
 ## Vignettes and examples
 
