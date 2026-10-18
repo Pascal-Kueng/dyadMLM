@@ -170,7 +170,7 @@ model <- glmmTMB::glmmTMB(
 Inspect the fixed effects:
 
 ```{r cross-sectional-coefficients}
-coef(summary(model))$cond
+printCoefmat(coef(summary(model))$cond)
 ```
 
 Recover the member-level SDs and partner correlation:

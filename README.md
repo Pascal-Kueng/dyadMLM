@@ -205,13 +205,13 @@ model <- glmmTMB::glmmTMB(
 Inspect the fixed effects:
 
 ``` r
-coef(summary(model))$cond
-#>                               Estimate Std. Error   z value     Pr(>|z|)
-#> (Intercept)                   5.119168 0.06888984 74.309474 0.000000e+00
-#> .provided_support_gmc_actor   1.284590 0.09407722 13.654631 1.894470e-42
-#> .provided_support_gmc_partner 0.175526 0.09407722  1.865766 6.207417e-02
-#> attr(,"ddf")
-#> [1] "asymptotic"
+printCoefmat(coef(summary(model))$cond)
+#>                               Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)                   5.119168   0.068890 74.3095  < 2e-16 ***
+#> .provided_support_gmc_actor   1.284590   0.094077 13.6546  < 2e-16 ***
+#> .provided_support_gmc_partner 0.175526   0.094077  1.8658  0.06207 .  
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 Recover the member-level SDs and partner correlation:
