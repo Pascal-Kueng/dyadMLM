@@ -6,8 +6,8 @@
 #' A dyadic model should reproduce how much responses vary and how strongly
 #' partners' responses are related. This check compares the observed response
 #' variances and partner correlations with those of responses simulated from the
-#' fitted model. This helps identify mismatches in the model's assumptions,
-#' especially when a less restricted model does not converge and so cannot be
+#' fitted model. This helps identify mismatches in the model's assumptions.
+#' These checks are especially useful when a less restricted model does not converge and so cannot be
 #' used for model comparison. It works for both cross-sectional and longitudinal
 #' models (for repeated occasions, supply `member` and `time`).
 #'
