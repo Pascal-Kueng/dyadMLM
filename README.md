@@ -15,12 +15,48 @@ downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21481720-blue.svg)](https://doi.org/10.5281/zenodo.21481720)
 <!-- badges: end -->
 
+Dyadic data come from pairs of people, such as couples, parent–child
+pairs, or patients and their caregivers. Responses from the two partners
+are usually related, and multilevel models can account for this.
+
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
 generalized linear mixed-effects models.
 
 It provides functions for data preparation for various types of dyadic
 models and post-estimation tools for interpretation and checking of
 model assumptions.
+
+If you use `dyadMLM`, please [cite it](#citation).
+
+## Where to start
+
+| Vignette | Focus |
+|----|----|
+| [Getting Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
+| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.html) | Cross-sectional and longitudinal APIMs, distinguishability checks, covariance recovery, random slopes, and AR(1) |
+| [Dyad-Individual Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.html) | DIM predictor construction, longitudinal models, and an interactive demonstration of equivalence to the exchangeable APIM |
+| [Dyadic Score Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html) | DSM predictor-score and contrast construction, longitudinal models, and the relationship to the distinguishable APIM |
+
+Each model vignette has a section on intensive longitudinal data
+([APIM](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#intensive-longitudinal-apims),
+[DIM](https://pascal-kueng.github.io/dyadMLM/articles/dim.html#intensive-longitudinal-dim),
+[DSM](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html#intensive-longitudinal-dsm)),
+and Getting Started covers [multiple dyad
+compositions](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html#working-with-multiple-dyad-compositions).
+The model-fitting examples use **glmmTMB**.
+
+For theoretical foundations and a practical walkthrough of dyadic data
+analysis, from data preparation and model fitting to interpretation and
+diagnostics using `dyadMLM` with `glmmTMB`, see the [Dyadic Data
+Analysis Workshop](https://pascal-kueng.github.io/dyadMLM/workshop/).
+For Bayesian APIM and DIM workflows using `dyadMLM` and `brms`, refer to
+[Distinguishable and Exchangeable Dyads: Bayesian Multilevel
+Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/)
+([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
+[DOI](https://doi.org/10.5281/zenodo.17400655)).
+
+For an overview of the available functions, see the [function
+reference](https://pascal-kueng.github.io/dyadMLM/reference/index.html).
 
 ## Installation
 
@@ -42,84 +78,6 @@ install.packages(
   )
 )
 ```
-
-## Citation
-
-If you use `dyadMLM`, please cite the installed package version. Run:
-
-``` r
-citation("dyadMLM")
-```
-
-Or cite the package without specifying a version:
-
-Küng, P. (2026). *dyadMLM: Tools for dyadic multilevel models*
-\[Computer software\]. <https://doi.org/10.5281/zenodo.21481720>
-
-<details>
-
-<summary>
-
-BibTeX (without version)
-</summary>
-
-``` bibtex
-@Manual{dyadMLM,
-  title = {dyadMLM: Tools for dyadic multilevel models},
-  author = {Pascal Küng},
-  year = {2026},
-  doi = {10.5281/zenodo.21481720},
-}
-```
-
-</details>
-
-## Data preparation and validation
-
-[`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.html)
-validates dyadic data and creates model-ready columns for:
-
-- ✅ **Actor-Partner Interdependence Model (APIM):** distinguishable and
-  exchangeable dyads.
-- ✅ **Dyad-Individual Model (DIM):** exchangeable dyads.
-- ✅ **Dyadic Score Model (DSM):** distinguishable dyads.
-
-It supports cross-sectional and intensive longitudinal dyadic data
-(e.g., daily diary data). The package also supports datasets containing
-multiple dyad compositions.
-
-Preparation options include selecting and pooling compositions, treating
-selected compositions as exchangeable, centering predictors, and
-creating within-/between-person components and lagged predictors.
-
-Prepared data can be used with **glmmTMB**, **brms**, and other
-multilevel modeling packages that support the required model structure.
-See the [Getting Started
-vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html)
-for data requirements and examples.
-
-## Post-estimation tools
-
-| Tool | glmmTMB | brms |
-|----|----|----|
-| [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
-| [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
-| [Check partner dependence — cross-sectional](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
-| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
-| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
-
-Predictive checks compare the *observed* data with data simulated from
-the fitted model: outcome and residual distributions, variability, and
-partner dependence. See
-[`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.html)
-for supported models. Simulation studies show how often the partner
-check detects [omitted partner
-dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
-and [incorrect covariance
-pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often the residual and outcome checks [flag correct and
-mismatched
-models](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html).
 
 ## Quick example
 
@@ -221,24 +179,6 @@ model <- glmmTMB::glmmTMB(
 )
 ```
 
-Recover the member-level SDs and partner correlation:
-
-``` r
-covariance <- recover_exchangeable_covariance(model)
-
-print(covariance, representation = "sdcor")
-#> Recovered exchangeable member-level covariance
-#> 
-#> Pair `pair_1`
-#> Shared:     us(1 | coupleID)
-#> Difference: us(0 + .member_contrast_arbitrary | coupleID)
-#> 
-#> Standard deviations and correlations:
-#>                        1      2     
-#> 1 member1: (Intercept) 1.089  -0.039
-#> 2 member2: (Intercept) -0.039 1.089
-```
-
 Simulate responses and check partner dependence, using gender to
 distinguish partners:
 
@@ -254,60 +194,189 @@ check_partner_dependence(
 )
 ```
 
-<img src="man/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
-
-The function groups the six plots in one figure. Use `panels = FALSE` to
-show them separately.
+<img src="man/figures/README-cross-sectional-check-1.png" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
 
 Here, simulations produce weaker partner correlations and larger SDs of
 partner half-differences than observed (red lines), suggesting
-**misfit**.
+**misfit**. A distinguishable APIM fits these data better, as the full
+workflow below shows.
 
-A next step is to fit a distinguishable APIM, as shown in the [APIM
-vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
-Use
-[`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
-to compare the two nested models.
+<details>
 
-With mixed dyad compositions, each observed role pair gets its own
-figure. It can be worthwhile to check plausible role distinctions even
-when fitting an exchangeable model, since pooling can hide differences
-in variances or partner correlations. These checks alone do not
-establish whether fixed effects should be pooled ([nested model
-comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
-can help assess those restrictions).
+<summary>
 
-The same `simulations` can be reused with `check_dyad_residuals()` and
-`check_dyad_outcomes()`. Use the same `dyad`, `role`, and `data`
-arguments. The [APIM
-vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes)
-shows a worked example.
+Full APIM workflow: residual check, distinguishable APIM, and model
+comparison
+</summary>
 
-## Vignettes and examples
+It can be worthwhile to check plausible role distinctions even when
+fitting an exchangeable model, since a pooled check can hide differences
+between roles. Check the residuals by gender, reusing the same
+`simulations`:
 
-For an overview of the available functions, see the [function
-reference](https://pascal-kueng.github.io/dyadMLM/reference/index.html).
+``` r
+check_dyad_residuals(
+  simulations,
+  dyad = coupleID,
+  role = gender,
+  data = prepared_data
+)
+```
 
-| Vignette | Focus |
-|----|----|
-| [Getting Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
-| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.html) | Cross-sectional and longitudinal APIMs, distinguishability checks, covariance recovery, random slopes, and AR(1) |
-| [Dyad-Individual Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.html) | DIM predictor construction, longitudinal models, and an interactive demonstration of equivalence to the exchangeable APIM |
-| [Dyadic Score Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html) | DSM predictor-score and contrast construction, longitudinal models, and the relationship to the distinguishable APIM |
+<img src="man/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's red curves lie above the envelopes and men's below." width="100%" />
 
-The model-fitting examples use **glmmTMB**. Joint analysis of multiple
-dyad compositions is also supported with glmmTMB. A dedicated vignette
-is in preparation.
+Women’s observed closeness is higher than simulated and men’s is lower,
+suggesting that the model misses gender differences.
+[`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)
+shows the same pattern in the outcome distributions.
 
-For theoretical foundations and a practical walkthrough of dyadic data
-analysis, from data preparation and model fitting to interpretation and
-diagnostics using `dyadMLM` with `glmmTMB`, see the [Dyadic Data
-Analysis Workshop](https://pascal-kueng.github.io/dyadMLM/workshop/).
-For Bayesian APIM and DIM workflows using `dyadMLM` and `brms`, refer to
-[Distinguishable and Exchangeable Dyads: Bayesian Multilevel
-Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/)
-([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
-[DOI](https://doi.org/10.5281/zenodo.17400655)).
+Fit the distinguishable APIM, which lets intercepts, actor and partner
+effects, and residual variances differ by gender:
+
+``` r
+model_distinguishable <- glmmTMB::glmmTMB(
+  closeness ~
+    # Gender-specific intercepts
+    0 + .is_female + .is_male +
+
+    # Gender-specific actor and partner effects
+    .is_female:.provided_support_gmc_actor +
+    .is_male:.provided_support_gmc_actor +
+    .is_female:.provided_support_gmc_partner +
+    .is_male:.provided_support_gmc_partner +
+
+    # Gender-specific residual variances and their covariance
+    us(0 + .is_female + .is_male | coupleID),
+
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = prepared_data
+)
+```
+
+Check partner dependence again:
+
+``` r
+simulations_distinguishable <- simulate_dyad_responses(
+  model_distinguishable, seed = 123
+)
+
+check_partner_dependence(
+  simulations_distinguishable,
+  dyad = coupleID,
+  role = gender,
+  data = prepared_data
+)
+```
+
+<img src="man/figures/README-distinguishable-check-1.png" alt="Six predictive-check histograms for the distinguishable APIM, laid out as in the first figure. All red lines lie within the dashed limits." width="100%" />
+
+The observed values now lie within the dashed limits. Residual and
+outcome checks (not shown) show no flags either.
+
+These checks alone do not establish whether fixed effects should be
+pooled. Compare the two nested models with a likelihood-ratio test:
+
+``` r
+compare_nested_models(model, model_distinguishable)
+#> Likelihood-ratio test for nested models fitted to equivalent data
+#> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
+#> 
+#>                       Df    AIC    BIC  logLik deviance  Chisq Chi Df
+#> model                  5 731.67 749.07 -360.83   721.67              
+#> model_distinguishable  9 652.22 683.55 -317.11   634.22 87.448      4
+#>                       Pr(>Chisq)    
+#> model                               
+#> model_distinguishable  < 2.2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Conclusion (5% level): The likelihood-ratio test provides evidence that `model_distinguishable` fits better than `model` (p < 0.001).
+```
+
+The [APIM
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)
+explains each step.
+
+</details>
+
+## Data preparation and validation
+
+[`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.html)
+validates dyadic data and creates model-ready columns for:
+
+- ✅ **Actor-Partner Interdependence Model (APIM):** distinguishable and
+  exchangeable dyads.
+- ✅ **Dyad-Individual Model (DIM):** exchangeable dyads.
+- ✅ **Dyadic Score Model (DSM):** distinguishable dyads.
+
+It supports cross-sectional and intensive longitudinal dyadic data
+(e.g., daily diary data). The package also supports datasets containing
+multiple dyad compositions.
+
+Preparation options include selecting and pooling compositions, treating
+selected compositions as exchangeable, centering predictors, and
+creating within-/between-person components and lagged predictors.
+
+Prepared data can be used with **glmmTMB**, **brms**, and other
+multilevel modeling packages that support the required model structure.
+See the [Getting Started
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html)
+for data requirements and examples.
+
+## Post-estimation tools
+
+| Tool | glmmTMB | brms |
+|----|----|----|
+| [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
+| [Check partner dependence — cross-sectional](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html) | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+
+Predictive checks compare the *observed* data with data simulated from
+the fitted model: outcome and residual distributions, variability, and
+partner dependence. See
+[`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.html)
+for supported models. Simulation studies show how often the partner
+check detects [omitted partner
+dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
+and [incorrect covariance
+pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
+and how often the residual and outcome checks [flag correct and
+mismatched
+models](https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html).
+
+## Citation
+
+If you use `dyadMLM`, please cite the installed package version. Run:
+
+``` r
+citation("dyadMLM")
+```
+
+Or cite the package without specifying a version:
+
+Küng, P. (2026). *dyadMLM: Tools for dyadic multilevel models*
+\[Computer software\]. <https://doi.org/10.5281/zenodo.21481720>
+
+<details>
+
+<summary>
+
+BibTeX (without version)
+</summary>
+
+``` bibtex
+@Manual{dyadMLM,
+  title = {dyadMLM: Tools for dyadic multilevel models},
+  author = {Pascal Küng},
+  year = {2026},
+  doi = {10.5281/zenodo.21481720},
+}
+```
+
+</details>
 
 ## Questions and contributing
 
