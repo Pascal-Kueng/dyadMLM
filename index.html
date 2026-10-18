@@ -114,13 +114,13 @@
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="data-preparation-and-validation">Data preparation and validation<a class="anchor" aria-label="anchor" href="#data-preparation-and-validation"></a>
+<h2 id="data-preparation-and-validation-tools">Data preparation and validation tools<a class="anchor" aria-label="anchor" href="#data-preparation-and-validation-tools"></a>
 </h2>
 <p><a href="https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.html"><code>prepare_dyad_data()</code></a> validates dyadic data and creates model-ready columns for:</p>
 <ul>
-<li>✅ <strong><a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">Actor-Partner Interdependence Model (APIM)</a>:</strong> distinguishable and exchangeable dyads.</li>
-<li>✅ <strong><a href="https://pascal-kueng.github.io/dyadMLM/articles/dim.html">Dyad-Individual Model (DIM)</a>:</strong> exchangeable dyads.</li>
-<li>✅ <strong><a href="https://pascal-kueng.github.io/dyadMLM/articles/dsm.html">Dyadic Score Model (DSM)</a>:</strong> distinguishable dyads.</li>
+<li>✅ <strong>Actor-Partner Interdependence Model (APIM):</strong> distinguishable and exchangeable dyads (<a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">vignette</a>).</li>
+<li>✅ <strong>Dyad-Individual Model (DIM):</strong> exchangeable dyads (<a href="https://pascal-kueng.github.io/dyadMLM/articles/dim.html">vignette</a>).</li>
+<li>✅ <strong>Dyadic Score Model (DSM):</strong> distinguishable dyads (<a href="https://pascal-kueng.github.io/dyadMLM/articles/dsm.html">vignette</a>).</li>
 </ul>
 <p>It supports cross-sectional and intensive longitudinal dyadic data (e.g., daily diary data). The package also supports datasets containing multiple dyad compositions.</p>
 <p>Preparation options include selecting and pooling compositions, treating selected compositions as exchangeable, centering predictors, and creating within-/between-person components and lagged predictors.</p>
@@ -183,6 +183,7 @@
 <div class="section level2">
 <h2 id="quick-example">Quick example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
 </h2>
+<p>This is a brief cross-sectional example. For the full workflow, including intensive longitudinal versions of these models, see the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">APIM</a>, <a href="https://pascal-kueng.github.io/dyadMLM/articles/dim.html">DIM</a>, or <a href="https://pascal-kueng.github.io/dyadMLM/articles/dsm.html">DSM</a> vignette.</p>
 <p>Using the simulated data bundled with dyadMLM, we select female–male dyads and, for illustration, fit an APIM that treats partners as exchangeable. We then check whether the exchangeability assumption is supported by checking whether the observed partner dependence is replicated for both genders. We also check whether the model replicates other aspects of the data well, and whether the residuals are distributed as expected.</p>
 <p>This example requires the development version of <strong>dyadMLM</strong>. It also uses <strong>glmmTMB</strong>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">

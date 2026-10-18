@@ -37,20 +37,18 @@ install.packages(
 )
 ```
 
-## Data preparation and validation
+## Data preparation and validation tools
 
 [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.html)
 validates dyadic data and creates model-ready columns for:
 
-- ✅ **[Actor-Partner Interdependence Model
-  (APIM)](https://pascal-kueng.github.io/dyadMLM/articles/apim.html):**
-  distinguishable and exchangeable dyads.
-- ✅ **[Dyad-Individual Model
-  (DIM)](https://pascal-kueng.github.io/dyadMLM/articles/dim.html):**
-  exchangeable dyads.
-- ✅ **[Dyadic Score Model
-  (DSM)](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html):**
-  distinguishable dyads.
+- ✅ **Actor-Partner Interdependence Model (APIM):** distinguishable and
+  exchangeable dyads
+  ([vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)).
+- ✅ **Dyad-Individual Model (DIM):** exchangeable dyads
+  ([vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.html)).
+- ✅ **Dyadic Score Model (DSM):** distinguishable dyads
+  ([vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html)).
 
 It supports cross-sectional and intensive longitudinal dyadic data
 (e.g., daily diary data). The package also supports datasets containing
@@ -81,6 +79,13 @@ simulated from the fitted model (similar to what the
 [DHARMa](https://CRAN.R-project.org/package=DHARMa) package does).
 
 ## Quick example
+
+This is a brief cross-sectional example. For the full workflow,
+including intensive longitudinal versions of these models, see the
+[APIM](https://pascal-kueng.github.io/dyadMLM/articles/apim.html),
+[DIM](https://pascal-kueng.github.io/dyadMLM/articles/dim.html), or
+[DSM](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html)
+vignette.
 
 Using the simulated data bundled with dyadMLM, we select female–male
 dyads and, for illustration, fit an APIM that treats partners as
