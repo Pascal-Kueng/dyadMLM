@@ -240,6 +240,7 @@ Here, simulations produce weaker partner correlations and larger SDs of partner
 half-differences than observed (red lines), suggesting **misfit**.
 
 With mixed dyad compositions, each observed role pair gets its own figure.
+With few dyads in a composition, the simulated ranges are wide, so its panels lack sensitivity.
 It can be worthwhile to check plausible role distinctions even when fitting an
 exchangeable model, since pooling can hide differences in variances or partner
 correlations. These checks alone do not establish whether fixed effects should be
