@@ -181,9 +181,8 @@ covariance <- recover_exchangeable_covariance(model)
 print(covariance, representation = "sdcor")
 ```
 
-Note that the random intercepts represent the residual variances for each partner.
-Due to exchangeability constraints, both partners have equal variances, yet
-the residual correlation between partners can still be negative.
+Exchangeability gives both partners the same residual variance, while the
+correlation between partners is still estimated freely.
 
 ```{r cross-sectional-diagram-values, include = FALSE}
 diagram_values <- .extract_apim_diagram_values(model, type = "exchangeable")

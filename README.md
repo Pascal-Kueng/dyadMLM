@@ -231,10 +231,8 @@ print(covariance, representation = "sdcor")
 #> 2 member2: (Intercept) -0.039 1.089
 ```
 
-Note that the random intercepts represent the residual variances for
-each partner. Due to exchangeability constraints, both partners have
-equal variances, yet the residual correlation between partners can still
-be negative.
+Exchangeability gives both partners the same residual variance, while
+the correlation between partners is still estimated freely.
 
 For illustration, the path diagram from the [APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitting-the-restricted-exchangeable-apim-with-glmmtmb)
