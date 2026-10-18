@@ -298,9 +298,7 @@
 <p>For illustration, the path diagram from the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitting-the-restricted-exchangeable-apim-with-glmmtmb">APIM vignette</a> shows these estimates:</p>
 <p><img src="reference/figures/README-cross-sectional-diagram-1.png" alt="Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner effect 0.18, common residual SD 1.09, and residual correlation -0.04." width="100%"></p>
 <p>Next, check whether the model reproduces the data.</p>
-<details><summary>
-Complete model-checking workflow (click to expand): partner-dependence, residual, and outcome checks, a distinguishable APIM, and a model comparison
-</summary><p>Simulate responses and check partner dependence, using gender to distinguish partners:</p>
+<p>Simulate responses and check partner dependence, using gender to distinguish partners:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulations</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">model</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span></span>
@@ -373,7 +371,6 @@ Complete model-checking workflow (click to expand): partner-dependence, residual
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conclusion (5% level): The likelihood-ratio test provides evidence that `model_distinguishable` fits better than `model` (p &lt; 0.001).</span></span></code></pre></div>
 <p>The comparison favors the distinguishable model. As a next step, repeat the checks from above for this model. Refer to the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-partner-dependence">APIM vignette</a> for further guidance.</p>
-</details>
 </div>
 <div class="section level2">
 <h2 id="vignettes-and-examples">Vignettes and examples<a class="anchor" aria-label="anchor" href="#vignettes-and-examples"></a>

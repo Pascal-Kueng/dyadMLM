@@ -236,10 +236,6 @@ effect 0.18, common residual SD 1.09, and residual correlation
 
 Next, check whether the model reproduces the data.
 
-Complete model-checking workflow (click to expand): partner-dependence,
-residual, and outcome checks, a distinguishable APIM, and a model
-comparison
-
 Simulate responses and check partner dependence, using gender to
 distinguish partners:
 
