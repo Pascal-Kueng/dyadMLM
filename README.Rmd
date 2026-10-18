@@ -159,8 +159,10 @@ model <- glmmTMB::glmmTMB(
 
 Next, check whether the model reproduces the data.
 
+```{=html}
 <details>
 <summary>Complete model-checking workflow (click to expand): partner-dependence, residual, and outcome checks for two APIMs, and a model comparison</summary>
+```
 
 Simulate responses and check partner dependence, using gender to distinguish
 partners:
@@ -342,8 +344,10 @@ Or cite the package without specifying a version:
 
 `r citation_text`
 
+```{=html}
 <details>
 <summary>BibTeX (without version)</summary>
+```
 
 ```{r citation-bibtex, echo = FALSE, results = 'asis'}
 package_citation$key <- "dyadMLM"

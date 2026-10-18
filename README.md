@@ -187,12 +187,7 @@ model <- glmmTMB::glmmTMB(
 Next, check whether the model reproduces the data.
 
 <details>
-
-<summary>
-
-Complete model-checking workflow (click to expand): partner-dependence,
-residual, and outcome checks for two APIMs, and a model comparison
-</summary>
+<summary>Complete model-checking workflow (click to expand): partner-dependence, residual, and outcome checks for two APIMs, and a model comparison</summary>
 
 Simulate responses and check partner dependence, using gender to
 distinguish partners:
@@ -409,11 +404,7 @@ Küng, P. (2026). *dyadMLM: Tools for dyadic multilevel models*
 \[Computer software\]. <https://doi.org/10.5281/zenodo.21481720>
 
 <details>
-
-<summary>
-
-BibTeX (without version)
-</summary>
+<summary>BibTeX (without version)</summary>
 
 ``` bibtex
 @Manual{dyadMLM,
