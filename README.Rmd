@@ -13,6 +13,7 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+sys.source("vignettes/diagram-helpers.Rinc", envir = knitr::knit_global())
 ```
 
 ```{r citation-text, include = FALSE}
@@ -166,12 +167,46 @@ model <- glmmTMB::glmmTMB(
 )
 ```
 
+Inspect the fixed effects:
+
+```{r cross-sectional-coefficients}
+coef(summary(model))$cond
+```
+
 Recover the member-level SDs and partner correlation:
 
 ```{r cross-sectional-covariance}
 covariance <- recover_exchangeable_covariance(model)
 
 print(covariance, representation = "sdcor")
+```
+
+```{r cross-sectional-diagram-values, include = FALSE}
+diagram_values <- .extract_apim_diagram_values(model, type = "exchangeable")
+diagram_alt <- sprintf(
+  paste(
+    "Fitted exchangeable APIM. Intercept %.2f, actor effect %.2f, partner",
+    "effect %.2f, common residual SD %.2f, and residual correlation %.2f."
+  ),
+  diagram_values$estimates[["intercept"]],
+  diagram_values$estimates[["actor"]],
+  diagram_values$estimates[["partner"]],
+  diagram_values$residuals[["sd"]],
+  diagram_values$residuals[["correlation"]]
+)
+```
+
+For illustration, the path diagram from the
+[APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitting-the-restricted-exchangeable-apim-with-glmmtmb)
+shows these estimates:
+
+```{r cross-sectional-diagram, echo = FALSE, fig.width = 9, fig.height = 4.8, fig.alt = diagram_alt}
+draw_apim_diagram(
+  "exchangeable",
+  model = model,
+  labels = c(predictor = "Provided support", outcome = "Closeness"),
+  predictors_centered = TRUE
+)
 ```
 
 Next, check whether the model reproduces the data.

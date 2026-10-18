@@ -202,6 +202,18 @@ model <- glmmTMB::glmmTMB(
 )
 ```
 
+Inspect the fixed effects:
+
+``` r
+coef(summary(model))$cond
+#>                               Estimate Std. Error   z value     Pr(>|z|)
+#> (Intercept)                   5.119168 0.06888984 74.309474 0.000000e+00
+#> .provided_support_gmc_actor   1.284590 0.09407722 13.654631 1.894470e-42
+#> .provided_support_gmc_partner 0.175526 0.09407722  1.865766 6.207417e-02
+#> attr(,"ddf")
+#> [1] "asymptotic"
+```
+
 Recover the member-level SDs and partner correlation:
 
 ``` r
@@ -219,6 +231,12 @@ print(covariance, representation = "sdcor")
 #> 1 member1: (Intercept) 1.089  -0.039
 #> 2 member2: (Intercept) -0.039 1.089
 ```
+
+For illustration, the path diagram from the [APIM
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitting-the-restricted-exchangeable-apim-with-glmmtmb)
+shows these estimates:
+
+<img src="man/figures/README-cross-sectional-diagram-1.png" alt="Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner effect 0.18, common residual SD 1.09, and residual correlation -0.04." width="100%" />
 
 Next, check whether the model reproduces the data.
 
