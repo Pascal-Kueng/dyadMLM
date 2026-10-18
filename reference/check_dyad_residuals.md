@@ -49,7 +49,8 @@ check_dyad_residuals(
   Role column, with or without quotes, such as gender. `NULL` (default)
   pools all observations. Otherwise, each composition (pair of partners'
   roles, such as female-male) is checked separately. Each member must
-  keep the same role.
+  keep the same role. With few dyads in a composition, the simulated
+  ranges are wide, so its panels lack sensitivity.
 
 - member:
 

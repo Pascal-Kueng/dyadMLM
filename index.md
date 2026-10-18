@@ -271,10 +271,12 @@ partner half-differences than observed (red lines), suggesting
 **misfit**.
 
 With mixed dyad compositions, each observed role pair gets its own
-figure. It can be worthwhile to check plausible role distinctions even
-when fitting an exchangeable model, since pooling can hide differences
-in variances or partner correlations. These checks alone do not
-establish whether fixed effects should be pooled ([nested model
+figure. With few dyads in a composition, the simulated ranges are wide,
+so its panels lack sensitivity. It can be worthwhile to check plausible
+role distinctions even when fitting an exchangeable model, since pooling
+can hide differences in variances or partner correlations. These checks
+alone do not establish whether fixed effects should be pooled ([nested
+model
 comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
 can help assess those restrictions).
 
