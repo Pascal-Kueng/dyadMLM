@@ -79,19 +79,17 @@ or roles and incomplete dyads are omitted with a warning. The object includes
 omission counts and settings, and can be saved and plotted later.
 With repeated occasions, \code{compositions} has a \code{level} column (\code{"between"}
 or \code{"within"}), and each label ends with its level. Within-level rows count the
-dyads that share at least one occasion. Within-level compositions whose
-observed summaries are undefined (e.g., one occasion per member) are also
-skipped.
+dyads that share at least one occasion.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 A dyadic model should reproduce how much responses vary and how strongly
 partners' responses are related. This check compares the observed response
 variances and partner correlations with those of responses simulated from the
-fitted model. This helps identify mismatches in the model's assumptions,
-especially when a less restricted model does not converge and so cannot be
-used for model comparison. It works for both cross-sectional and longitudinal
-models (for repeated occasions, supply \code{member} and \code{time}).
+fitted model. This helps identify mismatches in the model's assumptions.
+This check is especially useful when a less restricted model does not
+converge and so cannot be used for model comparison. For repeated occasions,
+supply \code{member} and \code{time}.
 }
 \section{Reading the plots}{
 
@@ -124,19 +122,21 @@ variance for the second.
 
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.
-Agreement does not establish that omitted dependence is negligible, especially
-with few dyads. The \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{partner-dependence study}
+Even if simulated and observed values agree, this does not show that omitted
+dependence is negligible, especially with few dyads. The
+\href{https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html}{partner-dependence study}
 illustrates how sample size affects detection when residual partner
 correlation is omitted.
 
-Checking each composition can reveal differences hidden by pooling.
-With few dyads in a composition, the simulated ranges are wide, so its panels lack sensitivity.
+Checking each composition separately can reveal differences hidden by
+pooling. With few dyads in a composition, the simulated ranges are wide, so
+its panels lack sensitivity.
 Flags (observed values outside the middle 95\%, marked \code{*} when printed) can
 occur by chance, especially when checking several summaries.
-They invite investigation, not formal rejection of the model. The
+They are a starting point for further investigation, not necessarily a
+reason to reject the model. The
 \href{https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html}{covariance-pooling study}
-illustrates detection and false alarms when checking each composition. In
-that study, 10 to 29\% of correctly pooled models had at least one flag.
+illustrates detection and false alarms when checking each composition.
 
 A flexible covariance model will usually reproduce features it estimated from
 the same data. Agreement alone therefore does not establish good fit.
@@ -148,7 +148,7 @@ restriction when both models can be fitted (see \code{\link[=compare_nested_mode
 
 \section{Repeated occasions}{
 
-With repeated occasions, partners can be similar in two ways: in their
+With repeated occasions, partners can be related in two ways: in their
 mean responses, and in being above or below their own means on the same
 occasions. A model should reproduce both. With \code{member} and \code{time},
 every dataset (observed and simulated) is split into two levels after any
@@ -166,8 +166,8 @@ The within check is related to repeated-measures correlation
 (Bakdash & Marusich, 2017).
 
 The \href{https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html}{longitudinal study}
-examines detection and false alarms. With 50 dyads, the check often missed
-omitted partner covariance.
+examines detection and false alarms. With 50 or fewer dyads, the check often
+missed omitted partner covariance.
 
 Known limitations and caveats:
 \itemize{
@@ -180,8 +180,6 @@ If the model omits temporal dependence, its covariance estimates can be
 biased, and these checks may not reveal it.
 \item These checks can be misleading when the model includes lagged outcomes
 as predictors.
-\item Poorly estimated occasion-level random effects can affect the within checks.
-Check the fitted model's convergence and covariance estimates.
 }
 }
 
@@ -262,9 +260,9 @@ example_diary_data <- prepare_dyad_data(
 diary_model <- glmmTMB::glmmTMB(
   closeness ~ 0 + gender + gender:diaryday +
 
-    # Omit the correlation between partners' random intercepts on level 2
-    # with a diagonal covariance structure. This is sometimes done when a
-    # model does not otherwise converge cleanly.
+    # In this example, we omit the correlation between partners' random
+    # intercepts on level 2 with a diagonal covariance structure. This is
+    # sometimes done when a model does not otherwise converge cleanly.
     diag(0 + gender | coupleID) +
 
     # Keep the full structure for the level 1 residuals.
