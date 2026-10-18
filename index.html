@@ -94,6 +94,9 @@
 
 <p><code>dyadMLM</code> provides tools for dyadic multilevel modeling with linear and generalized linear mixed-effects models.</p>
 <p>It provides functions for data preparation for various types of dyadic models and post-estimation tools for interpretation and checking of model assumptions.</p>
+<p>If you use <code>dyadMLM</code>, please cite it as:</p>
+<p>Küng, P. (2026). <em>dyadMLM: Tools for dyadic multilevel models</em> [Computer software]. <a href="https://doi.org/10.5281/zenodo.21481720" class="external-link uri">https://doi.org/10.5281/zenodo.21481720</a></p>
+<p>To include the version you used, see <a href="#citation">Citation</a>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -111,35 +114,17 @@
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
-</h2>
-<p>If you use <code>dyadMLM</code>, please cite the installed package version. Run:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span></code></pre></div>
-<p>Or cite the package without specifying a version:</p>
-<p>Küng, P. (2026). <em>dyadMLM: Tools for dyadic multilevel models</em> [Computer software]. <a href="https://doi.org/10.5281/zenodo.21481720" class="external-link uri">https://doi.org/10.5281/zenodo.21481720</a></p>
-<details><summary>
-BibTeX (without version)
-</summary><div class="sourceCode" id="cb4"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">dyadMLM</span>,</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="dt">title</span> = {dyadMLM: Tools for dyadic multilevel models},</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="dt">author</span> = {Pascal Küng},</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="dt">year</span> = {2026},</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="dt">doi</span> = {10.5281/zenodo.21481720},</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>}</span></code></pre></div>
-</details>
-</div>
-<div class="section level2">
 <h2 id="data-preparation-and-validation">Data preparation and validation<a class="anchor" aria-label="anchor" href="#data-preparation-and-validation"></a>
 </h2>
 <p><a href="https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.html"><code>prepare_dyad_data()</code></a> validates dyadic data and creates model-ready columns for:</p>
 <ul>
-<li>✅ <strong>Actor-Partner Interdependence Model (APIM):</strong> distinguishable and exchangeable dyads.</li>
-<li>✅ <strong>Dyad-Individual Model (DIM):</strong> exchangeable dyads.</li>
-<li>✅ <strong>Dyadic Score Model (DSM):</strong> distinguishable dyads.</li>
+<li>✅ <strong><a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">Actor-Partner Interdependence Model (APIM)</a>:</strong> distinguishable and exchangeable dyads.</li>
+<li>✅ <strong><a href="https://pascal-kueng.github.io/dyadMLM/articles/dim.html">Dyad-Individual Model (DIM)</a>:</strong> exchangeable dyads.</li>
+<li>✅ <strong><a href="https://pascal-kueng.github.io/dyadMLM/articles/dsm.html">Dyadic Score Model (DSM)</a>:</strong> distinguishable dyads.</li>
 </ul>
 <p>It supports cross-sectional and intensive longitudinal dyadic data (e.g., daily diary data). The package also supports datasets containing multiple dyad compositions.</p>
 <p>Preparation options include selecting and pooling compositions, treating selected compositions as exchangeable, centering predictors, and creating within-/between-person components and lagged predictors.</p>
-<p>Prepared data can be used with <strong>glmmTMB</strong>, <strong>brms</strong>, and other multilevel modeling packages that support the required model structure. See the <a href="https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html">Getting Started vignette</a> for data requirements and examples.</p>
+<p>Prepared data can be used with <strong>glmmTMB</strong>, <strong>brms</strong>, and other multilevel modeling packages that support the required model structure. See the <a href="https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html">Getting Started vignette</a> for data requirements and examples of data preparation workflows.</p>
 </div>
 <div class="section level2">
 <h2 id="post-estimation-tools">Post-estimation tools<a class="anchor" aria-label="anchor" href="#post-estimation-tools"></a>
@@ -168,49 +153,60 @@ BibTeX (without version)
 <td>✅ Posterior summaries and draws</td>
 </tr>
 <tr>
-<td><a href="https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html">Check partner dependence — cross-sectional</a></td>
+<td>
+<a href="https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html">Check partner dependence — cross-sectional</a><sup>1</sup>
+</td>
 <td>✅ Experimental</td>
 <td>Not implemented · <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md" class="external-link">Contribute</a>
 </td>
 </tr>
 <tr>
-<td><a href="https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html">Check residuals</a></td>
+<td>
+<a href="https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html">Check residuals</a><sup>1</sup>
+</td>
 <td>✅ Experimental</td>
 <td>Not implemented · <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md" class="external-link">Contribute</a>
 </td>
 </tr>
 <tr>
-<td><a href="https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html">Check outcomes</a></td>
+<td>
+<a href="https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html">Check outcomes</a><sup>1</sup>
+</td>
 <td>✅ Experimental</td>
 <td>Not implemented · <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md" class="external-link">Contribute</a>
 </td>
 </tr>
 </tbody>
 </table>
-<p>Predictive checks compare the <em>observed</em> data with data simulated from the fitted model: outcome and residual distributions, variability, and partner dependence. See <a href="https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.html"><code>simulate_dyad_responses()</code></a> for supported models. Simulation studies show how often the partner check detects <a href="https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html">omitted partner dependence</a> and <a href="https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html">incorrect covariance pooling</a>, and how often the residual and outcome checks <a href="https://pascal-kueng.github.io/dyadMLM/articles/distribution-checks.html">flag correct and mismatched models</a>.</p>
+<p><sup>1</sup> Predictive checks compare the <em>observed</em> data and residuals with those simulated from the fitted model (similar to what the <a href="https://CRAN.R-project.org/package=DHARMa" class="external-link">DHARMa</a> package does).</p>
 </div>
 <div class="section level2">
 <h2 id="quick-example">Quick example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
 </h2>
-<p>Using the bundled simulated data, we select female–male dyads and, for illustration, fit an APIM that treats partners as exchangeable. We then check whether it reproduces gender-specific variation and partner dependence.</p>
+<p>Using the simulated data bundled with dyadMLM, we select female–male dyads and, for illustration, fit an APIM that treats partners as exchangeable. We then check whether the exchangeability assumption is supported by checking whether the observed partner dependence is replicated for both genders. We also check whether the model replicates other aspects of the data well, and whether the residuals are distributed as expected.</p>
 <p>This example requires the development version of <strong>dyadMLM</strong>. It also uses <strong>glmmTMB</strong>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">prepared_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
+<span></span>
+<span>  <span class="co"># by specifying a role and requesting the arbitrary contrast alongside it,</span></span>
+<span>  <span class="co"># we can fit both a distinguishable and an exchangeable model on the same</span></span>
+<span>  <span class="co"># prepared data.</span></span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  include_arbitrary_member_contrast <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span></span>
 <span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
 <span>  model_types <span class="op">=</span> <span class="st">"apim"</span>,</span>
 <span>  keep_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span>
 <span>  add_apim_gmc_predictors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  include_arbitrary_member_contrast <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This creates grand-mean-centred actor and partner predictors and a member contrast for the exchangeable model. Inspect the prepared data with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">prepared_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # dyadMLM data</span></span>
 <span><span class="co">#&gt; # Rows: 240 | Dyads: 120 | Intensive longitudinal: no</span></span>
@@ -255,7 +251,7 @@ BibTeX (without version)
 <span><span class="co">#&gt; #   .provided_support_partner &lt;dbl&gt;, .provided_support_gmc_actor &lt;dbl&gt;,</span></span>
 <span><span class="co">#&gt; #   .provided_support_gmc_partner &lt;dbl&gt;</span></span></code></pre></div>
 <p>Fit the exchangeable APIM:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
 <span>    <span class="co"># Pooled intercept</span></span>
@@ -274,8 +270,17 @@ BibTeX (without version)
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>Inspect the fixed effects:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/printCoefmat.html" class="external-link">printCoefmat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                               Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                   5.119168   0.068890 74.3095  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_gmc_actor   1.284590   0.094077 13.6546  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_gmc_partner 0.175526   0.094077  1.8658  0.06207 .  </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>Recover the member-level SDs and partner correlation:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">covariance</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">covariance</span>, representation <span class="op">=</span> <span class="st">"sdcor"</span><span class="op">)</span></span>
@@ -289,8 +294,14 @@ BibTeX (without version)
 <span><span class="co">#&gt;                        1      2     </span></span>
 <span><span class="co">#&gt; 1 member1: (Intercept) 1.089  -0.039</span></span>
 <span><span class="co">#&gt; 2 member2: (Intercept) -0.039 1.089</span></span></code></pre></div>
-<p>Simulate responses and check partner dependence, using gender to distinguish partners:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>Exchangeability gives both partners the same residual variance, while the correlation between partners is still estimated freely.</p>
+<p>For illustration, the path diagram from the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitting-the-restricted-exchangeable-apim-with-glmmtmb">APIM vignette</a> shows these estimates:</p>
+<p><img src="reference/figures/README-cross-sectional-diagram-1.png" alt="Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner effect 0.18, common residual SD 1.09, and residual correlation -0.04." width="100%"></p>
+<p>Next, check whether the model reproduces the data.</p>
+<details><summary>
+Complete model-checking workflow (click to expand): partner-dependence, residual, and outcome checks, a distinguishable APIM, and a model comparison
+</summary><p>Simulate responses and check partner dependence, using gender to distinguish partners:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulations</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">model</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
@@ -300,12 +311,69 @@ BibTeX (without version)
 <span>  <span class="co"># Supply the fitting data because gender is not in the model formula.</span></span>
 <span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%"></p>
+<p><img src="reference/figures/README-cross-sectional-check-1.png" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%"></p>
 <p>The function groups the six plots in one figure. Use <code>panels = FALSE</code> to show them separately.</p>
 <p>Here, simulations produce weaker partner correlations and larger SDs of partner half-differences than observed (red lines), suggesting <strong>misfit</strong>.</p>
-<p>A next step is to fit a distinguishable APIM, as shown in the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">APIM vignette</a>. Use <a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html"><code>compare_nested_models()</code></a> to compare the two nested models.</p>
 <p>With mixed dyad compositions, each observed role pair gets its own figure. It can be worthwhile to check plausible role distinctions even when fitting an exchangeable model, since pooling can hide differences in variances or partner correlations. These checks alone do not establish whether fixed effects should be pooled (<a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html">nested model comparisons</a> can help assess those restrictions).</p>
 <p>The same <code>simulations</code> can be reused with <code><a href="reference/check_dyad_residuals.html">check_dyad_residuals()</a></code> and <code><a href="reference/check_dyad_outcomes.html">check_dyad_outcomes()</a></code>. Use the same <code>dyad</code>, <code>role</code>, and <code>data</code> arguments. The <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes">APIM vignette</a> shows a worked example.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/check_dyad_residuals.html">check_dyad_residuals</a></span><span class="op">(</span></span>
+<span>  <span class="va">simulations</span>,</span>
+<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below." width="100%"></p>
+<p>Women’s QQ curve and PIT median rise above their envelopes and men’s fall below, so women’s observed closeness is higher than simulated and men’s is lower than simulated.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/check_dyad_outcomes.html">check_dyad_outcomes</a></span><span class="op">(</span></span>
+<span>  <span class="va">simulations</span>,</span>
+<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-exchangeable-outcomes-1.png" alt="Outcome checks for women and men under the exchangeable APIM: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Women's observed ECDF lies right of the simulated curves and men's left. The red lines in the histograms lie within the dashed limits." width="100%"></p>
+<p>The outcome ECDFs show the same issue, while response SDs and largest deviations stay within their simulated limits.</p>
+<p>Together, these plots point to issues with the exchangeability assumption of the model. A next step is to fit a distinguishable APIM (shown in more detail in the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">APIM vignette</a>).</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">model_distinguishable</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="va">closeness</span> <span class="op">~</span></span>
+<span>    <span class="co"># Gender-specific intercepts</span></span>
+<span>    <span class="fl">0</span> <span class="op">+</span> <span class="va">.is_female</span> <span class="op">+</span> <span class="va">.is_male</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Gender-specific actor effects</span></span>
+<span>    <span class="va">.is_female</span><span class="op">:</span><span class="va">.provided_support_gmc_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.is_male</span><span class="op">:</span><span class="va">.provided_support_gmc_actor</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Gender-specific partner effects</span></span>
+<span>    <span class="va">.is_female</span><span class="op">:</span><span class="va">.provided_support_gmc_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.is_male</span><span class="op">:</span><span class="va">.provided_support_gmc_partner</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Gender-specific residual variances and their covariance</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.is_female</span> <span class="op">+</span> <span class="va">.is_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span></span>
+<span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>, <span class="co"># Fix the additional Gaussian residual variance near zero</span></span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Use <a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html"><code>compare_nested_models()</code></a> to compare the two nested models.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/compare_nested_models.html">compare_nested_models</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">model_distinguishable</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Likelihood-ratio test for nested models fitted to equivalent data</span></span>
+<span><span class="co">#&gt; Assumes mathematical nesting and an appropriate chi-squared reference distribution.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                       Df    AIC    BIC  logLik deviance  Chisq Chi Df</span></span>
+<span><span class="co">#&gt; model                  5 731.67 749.07 -360.83   721.67              </span></span>
+<span><span class="co">#&gt; model_distinguishable  9 652.22 683.55 -317.11   634.22 87.448      4</span></span>
+<span><span class="co">#&gt;                       Pr(&gt;Chisq)    </span></span>
+<span><span class="co">#&gt; model                               </span></span>
+<span><span class="co">#&gt; model_distinguishable  &lt; 2.2e-16 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conclusion (5% level): The likelihood-ratio test provides evidence that `model_distinguishable` fits better than `model` (p &lt; 0.001).</span></span></code></pre></div>
+<p>The comparison favors the distinguishable model. As a next step, repeat the checks from above for this model. Refer to the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-partner-dependence">APIM vignette</a> for further guidance.</p>
+</details>
 </div>
 <div class="section level2">
 <h2 id="vignettes-and-examples">Vignettes and examples<a class="anchor" aria-label="anchor" href="#vignettes-and-examples"></a>
@@ -339,8 +407,26 @@ BibTeX (without version)
 </tr>
 </tbody>
 </table>
-<p>The model-fitting examples use <strong>glmmTMB</strong>. Joint analysis of multiple dyad compositions is also supported with glmmTMB. A dedicated vignette is in preparation.</p>
+<p>The model-fitting examples use <strong>glmmTMB</strong>. Joint analysis of multiple dyad compositions is also supported with glmmTMB.</p>
 <p>For theoretical foundations and a practical walkthrough of dyadic data analysis, from data preparation and model fitting to interpretation and diagnostics using <code>dyadMLM</code> with <code>glmmTMB</code>, see the <a href="https://pascal-kueng.github.io/dyadMLM/workshop/">Dyadic Data Analysis Workshop</a>. For Bayesian APIM and DIM workflows using <code>dyadMLM</code> and <code>brms</code>, refer to <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling</a> (<a href="https://github.com/Pascal-Kueng/05DyadicDataAnalysis" class="external-link">source</a>, <a href="https://doi.org/10.5281/zenodo.17400655" class="external-link">DOI</a>).</p>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>If you use <code>dyadMLM</code>, please cite the installed package version. Run:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span></code></pre></div>
+<p>Or cite the package without specifying a version:</p>
+<p>Küng, P. (2026). <em>dyadMLM: Tools for dyadic multilevel models</em> [Computer software]. <a href="https://doi.org/10.5281/zenodo.21481720" class="external-link uri">https://doi.org/10.5281/zenodo.21481720</a></p>
+<details><summary>
+BibTeX (without version)
+</summary><div class="sourceCode" id="cb14"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">dyadMLM</span>,</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="dt">title</span> = {dyadMLM: Tools for dyadic multilevel models},</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="dt">author</span> = {Pascal Küng},</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="dt">year</span> = {2026},</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="dt">doi</span> = {10.5281/zenodo.21481720},</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>}</span></code></pre></div>
+</details>
 </div>
 <div class="section level2">
 <h2 id="questions-and-contributing">Questions and contributing<a class="anchor" aria-label="anchor" href="#questions-and-contributing"></a>
