@@ -26,7 +26,12 @@ It provides functions for data preparation for various types of dyadic
 models and post-estimation tools for interpretation and checking of
 model assumptions.
 
-If you use `dyadMLM`, please [cite it](#citation).
+If you use `dyadMLM`, please cite it as:
+
+Küng, P. (2026). *dyadMLM: Tools for dyadic multilevel models*
+\[Computer software\]. <https://doi.org/10.5281/zenodo.21481720>
+
+To include the version you used, see [Citation](#citation).
 
 ## Where to start
 

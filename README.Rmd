@@ -15,6 +15,15 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r citation-text, include = FALSE}
+package_citation <- citation("dyadMLM")
+citation_text <- sub(" \\(Version [^)]+\\)", "", package_citation$textVersion)
+citation_text <- sub(
+  package_citation$title, paste0("*", package_citation$title, "*"),
+  citation_text, fixed = TRUE
+)
+```
+
 # dyadMLM: Tools for Dyadic Multilevel Models <img src="man/figures/logo.png" align="right" height="139" alt="dyadMLM package logo" />
 
 <!-- badges: start -->
@@ -36,7 +45,11 @@ It provides functions for data preparation for various types of
 dyadic models and post-estimation tools for interpretation and checking of model
 assumptions.
 
-If you use `dyadMLM`, please [cite it](#citation).
+If you use `dyadMLM`, please cite it as:
+
+`r citation_text`
+
+To include the version you used, see [Citation](#citation).
 
 ## Where to start
 
@@ -290,14 +303,7 @@ citation("dyadMLM")
 
 Or cite the package without specifying a version:
 
-```{r citation-text, echo = FALSE, results = 'asis'}
-package_citation <- citation("dyadMLM")
-citation_text <- sub(" \\(Version [^)]+\\)", "", package_citation$textVersion)
-cat(sub(
-  package_citation$title, paste0("*", package_citation$title, "*"),
-  citation_text, fixed = TRUE
-))
-```
+`r citation_text`
 
 <details>
 <summary>BibTeX (without version)</summary>
