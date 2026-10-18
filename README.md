@@ -277,9 +277,7 @@ can help assess those restrictions).
 
 For intensive longitudinal data, also supply `member` and `time`. The
 check then compares member means and same-occasion deviations from them
-separately. A [separate
-study](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html)
-covers this case.
+separately.
 
 The same `simulations` can be reused with `check_dyad_residuals()` and
 `check_dyad_outcomes()`. Use the same `dyad`, `role`, `member`, and
