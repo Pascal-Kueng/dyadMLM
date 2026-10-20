@@ -311,6 +311,7 @@ check_partner_dependence <- function(
 
   # Collect diagnostics so each message covers all compositions.
   statistic_diagnostics_by_composition <- vector("list", nrow(compositions))
+  undefined_within_indices <- integer(0)
   for (current_composition_index in checked_composition_indices) {
     composition_pair_rows <- partner_row_map$pairs |>
       dplyr::filter(.data$composition_index == current_composition_index)
@@ -327,11 +328,21 @@ check_partner_dependence <- function(
       )
     }
     composition_statistics <- do.call(rbind, statistics_by_dataset)
+    observed_statistics <- composition_statistics[1, ]
+
+    # A within composition can have undefined summaries, e.g. when every member
+    # has one occasion, so all deviations are zero. Skip it, so the between
+    # level and the other compositions are still checked.
+    if (identical(compositions[["level"]][current_composition_index], "within") &&
+        !all(is.finite(observed_statistics))) {
+      undefined_within_indices <- c(undefined_within_indices, current_composition_index)
+      next
+    }
+
     compositions$statistics[[current_composition_index]] <- composition_statistics |>
       tibble::as_tibble(.name_repair = "minimal") |>
       tibble::add_column(dataset = dataset_labels, .before = 1, .name_repair = "minimal") # .name_repair = "minimal" preserves the statistic names exactly, including duplicates that can arise when distinct roles have identical printed labels.
 
-    observed_statistics <- composition_statistics[1, ]
     simulated_statistics <- composition_statistics[-1, , drop = FALSE]
     statistic_diagnostics_by_composition[[current_composition_index]] <- tibble::tibble(
       description = paste(compositions$label[current_composition_index],
@@ -340,16 +351,6 @@ check_partner_dependence <- function(
       n_defined_simulations = colSums(is.finite(simulated_statistics))
     )
   }
-  # A within composition can have undefined summaries, e.g. when every member has
-  # one occasion, so all deviations are zero. Skip it, so the between level and
-  # the other compositions are still checked.
-  is_within_level <- if (is.null(compositions[["level"]])) FALSE else compositions$level == "within"
-  has_undefined_observed <- vapply(statistic_diagnostics_by_composition, function(diagnostics) {
-    !is.null(diagnostics) && !all(diagnostics$observed_is_defined)
-  }, logical(1))
-  undefined_within_indices <- which(is_within_level & has_undefined_observed)
-  compositions$statistics[undefined_within_indices] <- list(NULL)
-  statistic_diagnostics_by_composition[undefined_within_indices] <- list(NULL)
   checked_composition_indices <- setdiff(checked_composition_indices, undefined_within_indices)
 
   statistic_diagnostics <- dplyr::bind_rows(statistic_diagnostics_by_composition)
@@ -601,9 +602,11 @@ prepare_occasion_levels <- function(responses_by_dataset, dyad_ids, member_ids,
   #    dataset), then subtract the member's mean from each response.
   usable_responses <- responses_by_dataset[, usable_rows$fitted_row, drop = FALSE]
   columns_by_member <- split(usable_rows$deviation_column, usable_rows$member_number)
-  member_means <- vapply(columns_by_member, function(columns) {
-    rowMeans(usable_responses[, columns, drop = FALSE])
-  }, numeric(nrow(usable_responses)))
+  member_means <- matrix(NA_real_, nrow = nrow(usable_responses), ncol = nrow(members))
+  for (member_number in seq_len(nrow(members))) {
+    member_columns <- columns_by_member[[member_number]]
+    member_means[, member_number] <- rowMeans(usable_responses[, member_columns, drop = FALSE])
+  }
   deviations <- usable_responses - member_means[, usable_rows$member_number, drop = FALSE]
 
   # 3. Within: match the two members of each complete dyad on the occasions
@@ -878,7 +881,8 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
 #' @export
 plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
 
-  checked_composition_indices <- which(!vapply(x$compositions$statistics, is.null, logical(1)))
+  # Compositions without statistics were not checked.
+  checked_composition_indices <- which(lengths(x$compositions$statistics) > 0L)
   local_check_paging(ask, panels, if (panels) length(checked_composition_indices) else
     sum(vapply(x$compositions$statistics[checked_composition_indices], ncol, integer(1)) - 1L))
 
