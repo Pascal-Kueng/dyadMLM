@@ -747,6 +747,76 @@ test_that("compare_nested_models rejects unsuitable fitted models", {
   )
 })
 
+test_that("compare_nested_models rejects models fitted with priors", {
+  skip_if_not_installed("glmmTMB")
+
+  model_data <- comparison_female_male_cross_dyads
+  intercept_prior <- function(prior) {
+    data.frame(prior = prior, class = "fixef", coef = "(Intercept)")
+  }
+  restricted_model <- glmmTMB::glmmTMB(closeness ~ 1, data = model_data)
+  full_model <- glmmTMB::glmmTMB(closeness ~ gender, data = model_data)
+  prior_model <- glmmTMB::glmmTMB(
+    closeness ~ gender,
+    data = model_data,
+    priors = intercept_prior("normal(0,1)")
+  )
+  restricted_prior_model <- glmmTMB::glmmTMB(
+    closeness ~ 1,
+    data = model_data,
+    priors = intercept_prior("normal(0,1)")
+  )
+  restricted_other_prior_model <- glmmTMB::glmmTMB(
+    closeness ~ 1,
+    data = model_data,
+    priors = intercept_prior("normal(0,10)")
+  )
+
+  expect_error(
+    compare_nested_models(restricted_model, prior_model),
+    "`model2` model was fitted with priors"
+  )
+  expect_error(
+    compare_nested_models(prior_model, restricted_model),
+    "`model1` model was fitted with priors"
+  )
+  # Identical priors still give a maximum a posteriori fit.
+  expect_error(
+    compare_nested_models(restricted_prior_model, prior_model),
+    "`model1` model was fitted with priors"
+  )
+  expect_error(
+    compare_nested_models(restricted_other_prior_model, prior_model),
+    "`model1` model was fitted with priors"
+  )
+
+  # NULL and empty prior specifications fit without priors.
+  null_prior_model <- glmmTMB::glmmTMB(
+    closeness ~ gender,
+    data = model_data,
+    priors = NULL
+  )
+  empty_prior_model <- glmmTMB::glmmTMB(
+    closeness ~ gender,
+    data = model_data,
+    priors = data.frame(
+      prior = character(),
+      class = character(),
+      coef = character()
+    )
+  )
+  expected <- compare_nested_models(restricted_model, full_model)
+
+  expect_equal(
+    compare_nested_models(restricted_model, null_prior_model)$Chisq,
+    expected$Chisq
+  )
+  expect_equal(
+    compare_nested_models(restricted_model, empty_prior_model)$Chisq,
+    expected$Chisq
+  )
+})
+
 test_that("compare_nested_models checks weights and offsets", {
   skip_if_not_installed("glmmTMB")
 
