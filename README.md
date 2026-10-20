@@ -413,12 +413,7 @@ Or cite the package without specifying a version:
 Küng, P. (2026). *dyadMLM: Tools for dyadic multilevel models*
 \[Computer software\]. <https://doi.org/10.5281/zenodo.21481720>
 
-<details>
-
-<summary>
-
-BibTeX (without version)
-</summary>
+BibTeX (without version):
 
 ``` bibtex
 @Manual{dyadMLM,
@@ -428,8 +423,6 @@ BibTeX (without version)
   doi = {10.5281/zenodo.21481720},
 }
 ```
-
-</details>
 
 ## Questions and contributing
 

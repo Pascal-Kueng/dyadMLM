@@ -370,8 +370,7 @@ Or cite the package without specifying a version:
 
 `r citation_text`
 
-<details>
-<summary>BibTeX (without version)</summary>
+BibTeX (without version):
 
 ```{r citation-bibtex, echo = FALSE, results = 'asis'}
 package_citation$key <- "dyadMLM"
@@ -380,8 +379,6 @@ cat("```bibtex\n")
 print(toBibtex(package_citation))
 cat("```\n")
 ```
-
-</details>
 
 ## Questions and contributing
 
