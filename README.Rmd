@@ -8,8 +8,7 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  dev = "png",
-  dpi = 144,
+  dev = "svg",
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
@@ -207,13 +206,29 @@ For illustration, the path diagram from the
 [APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitting-the-restricted-exchangeable-apim-with-glmmtmb)
 shows these estimates:
 
-```{r cross-sectional-diagram, echo = FALSE, fig.width = 9, fig.height = 4.8, fig.alt = diagram_alt}
+```{r cross-sectional-diagram, echo = FALSE, fig.width = 9, fig.height = 4.8, dev.args = list(bg = "transparent"), fig.alt = diagram_alt}
 draw_apim_diagram(
   "exchangeable",
   model = model,
   labels = c(predictor = "Provided support", outcome = "Closeness"),
   predictors_centered = TRUE
 )
+```
+
+```{r cross-sectional-diagram-theme, include = FALSE}
+# Invert the diagram in dark mode, as the website does for vignette diagrams.
+diagram_file <- "man/figures/README-cross-sectional-diagram-1.svg"
+diagram_svg <- paste(readLines(diagram_file), collapse = "\n")
+dark_style <- paste0(
+  "<defs><filter id=\"dark-mode\" color-interpolation-filters=\"sRGB\">",
+  "<feColorMatrix type=\"matrix\" values=\"-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0\"/>",
+  "<feColorMatrix type=\"hueRotate\" values=\"180\"/></filter></defs>",
+  "<style>@media (prefers-color-scheme: dark) { #diagram { filter: url(#dark-mode); } }</style>",
+  "<g id=\"diagram\">"
+)
+diagram_svg <- sub("(<svg[^>]*>)", paste0("\\1", dark_style), diagram_svg)
+diagram_svg <- sub("</svg>\\s*$", "</g></svg>", diagram_svg)
+writeLines(diagram_svg, diagram_file)
 ```
 
 Next, check whether the model reproduces the data.

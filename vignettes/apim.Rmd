@@ -401,7 +401,9 @@ The model comparison tests the restrictions jointly. Predictive checks show
 whether the restricted model reproduces each role's variance and the partner
 correlation. We supply the original roles to examine their variances separately.
 
-```{r check-cross-apim, eval = has_glmmTMB, fig.width = 10, fig.height = 6.5, out.width = "100%", fig.alt = "Six predictive-check histograms. Member SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values."}
+::: {.no-invert-dark-mode}
+
+```{r check-cross-apim, dev.args = list(bg = "white"), eval = has_glmmTMB, fig.width = 10, fig.height = 6.5, out.width = "100%", fig.alt = "Six predictive-check histograms. Member SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values."}
 apim_simulations <- dyadMLM::simulate_dyad_responses(
   apim_exchangeable_model, seed = 123
 )
@@ -413,6 +415,8 @@ dyadMLM::check_partner_dependence(
   data = apim_distinguishable_data
 )
 ```
+
+:::
 
 The top row shows role-specific SDs and partner correlation. The bottom
 row shows the same information using dyad averages and half the differences
@@ -457,7 +461,9 @@ dashed lines at 0.25, 0.5, and 0.75 for all levels of partner support. With a
 missing or misspecified partner effect, they move away from these lines as
 partner support changes.
 
-```{r check-residuals-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution and pattern for women and men: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Red marks observed values.", "Residual spread for women and men: mean PIT distance histograms. Red marks observed values.", "Residual patterns for women and men: PIT quartiles across the partner's provided support with blue envelopes. Red curves show observed values.")}
+::: {.no-invert-dark-mode}
+
+```{r check-residuals-apim, dev.args = list(bg = "white"), eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution and pattern for women and men: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Red marks observed values.", "Residual spread for women and men: mean PIT distance histograms. Red marks observed values.", "Residual patterns for women and men: PIT quartiles across the partner's provided support with blue envelopes. Red curves show observed values.")}
 dyadMLM::check_dyad_residuals(
   apim_simulations,
   dyad = coupleID,
@@ -467,7 +473,11 @@ dyadMLM::check_dyad_residuals(
 )
 ```
 
-```{r check-outcomes-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 12, out.width = "100%", fig.alt = "Outcome checks for women and men: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Red marks observed values."}
+:::
+
+::: {.no-invert-dark-mode}
+
+```{r check-outcomes-apim, dev.args = list(bg = "white"), eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 12, out.width = "100%", fig.alt = "Outcome checks for women and men: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Red marks observed values."}
 dyadMLM::check_dyad_outcomes(
   apim_simulations,
   dyad = coupleID,
@@ -475,6 +485,8 @@ dyadMLM::check_dyad_outcomes(
   data = apim_distinguishable_data
 )
 ```
+
+:::
 
 Look for flags (red curves outside their blue envelopes, or red lines outside
 their dashed limits) that form a pattern across plots. Here, women's observed
