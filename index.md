@@ -237,7 +237,7 @@ shows these estimates:
 
 ![Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner
 effect 0.18, common residual SD 1.09, and residual correlation
--0.04.](reference/figures/README-cross-sectional-diagram-1.png)
+-0.04.](reference/figures/README-cross-sectional-diagram-1.svg)
 
 Next, check whether the model reproduces the data.
 
@@ -261,7 +261,7 @@ check_partner_dependence(
 correlation are in the top row; dyad-average and half-difference
 summaries are in the bottom row. Red lines mark observed values and
 dashed lines mark the middle 95 percent of
-simulations.](reference/figures/README-cross-sectional-check-1.png)
+simulations.](reference/figures/README-cross-sectional-check-1.svg)
 
 The function groups the six plots in one figure. Use `panels = FALSE` to
 show them separately.
@@ -302,7 +302,7 @@ check_dyad_residuals(
 QQ plots with blue envelopes in the top row and PIT quartiles across
 predicted outcomes in the bottom row. Women's QQ curve and PIT median
 rise above their envelopes and men's fall
-below.](reference/figures/README-exchangeable-residuals-1.png)
+below.](reference/figures/README-exchangeable-residuals-1.svg)
 
 Women’s QQ curve and PIT median rise above their envelopes and men’s
 fall below, so women’s observed closeness is higher than simulated and
@@ -322,7 +322,7 @@ check_dyad_outcomes(
 ECDFs in the top row, then histograms of the response SD and the largest
 absolute deviation. Women's observed ECDF lies right of the simulated
 curves and men's left. The red lines in the histograms lie within the
-dashed limits.](reference/figures/README-exchangeable-outcomes-1.png)
+dashed limits.](reference/figures/README-exchangeable-outcomes-1.svg)
 
 The outcome ECDFs show the same issue, while response SDs and largest
 deviations stay within their simulated limits.

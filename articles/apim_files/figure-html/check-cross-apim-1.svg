@@ -513,6 +513,7 @@
 <path clip-rule="nonzero" d="M 610 270.121094 L 612 270.121094 L 612 364.898438 L 610 364.898438 Z M 610 270.121094 "/>
 </clipPath>
 </defs>
+<rect x="-72" y="-46.8" width="864" height="561.6" fill="rgb(100%, 100%, 100%)" fill-opacity="1"/>
 <g fill="rgb(0%, 0%, 0%)" fill-opacity="1">
 <use xlink:href="#glyph-0-0" x="115.207031" y="67.268555"/>
 <use xlink:href="#glyph-0-1" x="120.207031" y="67.268555"/>

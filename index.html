@@ -297,7 +297,7 @@
 <span><span class="co">#&gt; 2 member2: (Intercept) -0.039 1.089</span></span></code></pre></div>
 <p>Exchangeability gives both partners the same residual variance, while the correlation between partners is still estimated freely.</p>
 <p>For illustration, the path diagram from the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitting-the-restricted-exchangeable-apim-with-glmmtmb">APIM vignette</a> shows these estimates:</p>
-<p><img src="reference/figures/README-cross-sectional-diagram-1.png" alt="Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner effect 0.18, common residual SD 1.09, and residual correlation -0.04." width="100%"></p>
+<p><img src="reference/figures/README-cross-sectional-diagram-1.svg" alt="Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner effect 0.18, common residual SD 1.09, and residual correlation -0.04." width="100%"></p>
 <p>Next, check whether the model reproduces the data.</p>
 <p>Simulate responses and check partner dependence, using gender to distinguish partners:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -310,7 +310,7 @@
 <span>  <span class="co"># Supply the fitting data because gender is not in the model formula.</span></span>
 <span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-cross-sectional-check-1.png" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%"></p>
+<p><img src="reference/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%"></p>
 <p>The function groups the six plots in one figure. Use <code>panels = FALSE</code> to show them separately.</p>
 <p>Here, simulations produce weaker partner correlations and larger SDs of partner half-differences than observed (red lines), suggesting <strong>misfit</strong>.</p>
 <p>With mixed dyad compositions, each observed role pair gets its own figure. With few dyads in a composition, the simulated ranges are wide, so its panels lack sensitivity. It can be worthwhile to check plausible role distinctions even when fitting an exchangeable model, since pooling can hide differences in variances or partner correlations. These checks alone do not establish whether fixed effects should be pooled (<a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html">nested model comparisons</a> can help assess those restrictions).</p>
@@ -322,7 +322,7 @@
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below." width="100%"></p>
+<p><img src="reference/figures/README-exchangeable-residuals-1.svg" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below." width="100%"></p>
 <p>Women’s QQ curve and PIT median rise above their envelopes and men’s fall below, so women’s observed closeness is higher than simulated and men’s is lower than simulated.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/check_dyad_outcomes.html">check_dyad_outcomes</a></span><span class="op">(</span></span>
@@ -331,7 +331,7 @@
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-exchangeable-outcomes-1.png" alt="Outcome checks for women and men under the exchangeable APIM: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Women's observed ECDF lies right of the simulated curves and men's left. The red lines in the histograms lie within the dashed limits." width="100%"></p>
+<p><img src="reference/figures/README-exchangeable-outcomes-1.svg" alt="Outcome checks for women and men under the exchangeable APIM: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Women's observed ECDF lies right of the simulated curves and men's left. The red lines in the histograms lie within the dashed limits." width="100%"></p>
 <p>The outcome ECDFs show the same issue, while response SDs and largest deviations stay within their simulated limits.</p>
 <p>Together, these plots point to issues with the exchangeability assumption of the model. A next step is to fit a distinguishable APIM (shown in more detail in the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">APIM vignette</a>).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
