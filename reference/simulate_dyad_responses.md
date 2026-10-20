@@ -1,7 +1,8 @@
 # Simulate response datasets for predictive checks
 
-**\[experimental\]** Generates new response datasets for the same
-observations and predictors. Reuse them with
+**\[experimental\]** If a model fits, data simulated from it should
+resemble the observed data. This function generates new response
+datasets for the same observations and predictors. Reuse them with
 [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md),
 [`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.md),
 or
@@ -116,9 +117,6 @@ with many dyads.
 The model's fitted link is used for prediction and simulation.
 Predictions and simulated responses must be finite.
 
-[`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
-currently requires cross-sectional dyads.
-
 ## Technical details
 
 Each simulation draws new random effects, if the model has any, and then
@@ -130,8 +128,9 @@ models, if present.
 Fitted parameters and predictors, including any lagged responses, stay
 fixed. The model is not refitted, and uncertainty in parameter estimates
 is not included. This is a *plug-in predictive reference* (Gelman et
-al., 1996). If dyads are the only grouping factor, the simulations
-represent hypothetical new dyads under the same study design.
+al., 1996). If all grouping factors are dyads or nested within dyads
+(such as dyad-days), the simulations represent hypothetical new dyads
+under the same study design.
 
 `predicted_response` contains predicted mean responses with random
 effects in the conditional and zero-inflation models set to zero. For

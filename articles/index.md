@@ -45,6 +45,12 @@ How often predictive checks detect mismatches and raise false alarms.
 
   Detection and false alarms across sample sizes and response families.
 
+- [Partner-dependence checks for longitudinal
+  data](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.md):
+
+  False alarms, detection and fitting behavior for member-mean and
+  same-occasion predictive checks.
+
 - [Covariance-pooling checks across outcome
   families](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.md):
 

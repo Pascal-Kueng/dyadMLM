@@ -348,7 +348,7 @@ conceptual diagram as such:</p>
 <img src="apim_files/figure-html/exchangeable-apim-member-diagram-1.svg" class="r-plt" alt="Two-panel path diagram for an exchangeable APIM with grand-mean-centered predictors. Both outcomes have the same intercept. For arbitrary member 1, X 1 is the actor predictor and X 2 is the partner predictor of Y 1. For arbitrary member 2, X 2 is the actor predictor and X 1 is the partner predictor of Y 2. Both panels use the same actor coefficient a and partner coefficient p, and their outcome residuals covary." width="100%"><p class="caption">
 Individual-level representation of the exchangeable cross-sectional APIM
 used for the long-format multilevel model. Both predictors use one
-pooled grand-mean reference. The members share the same intercept; each
+pooled grand-mean reference. The members share the same intercept. Each
 member’s own predictor has the shared actor effect, and the other
 member’s predictor has the shared partner effect. The two residual
 variances are equal and the residuals may covary.
@@ -524,7 +524,7 @@ likelihood-ratio test:</p>
 <span><span class="co">#&gt; Conclusion (5% level): The likelihood-ratio test provides evidence that `apim_distinguishable_model` fits better than `apim_exchangeable_model` (p &lt; 0.001).</span></span></code></pre></div>
 <p>The test provides evidence against all restrictions jointly, but it
 does not show which parameter differs. The helper also cannot determine
-whether the models are mathematically nested; that remains a modeling
+whether the models are mathematically nested. That remains a modeling
 requirement. The usual chi-squared reference distribution may be
 unreliable when a tested variance parameter lies on its boundary.</p>
 </div>
@@ -564,8 +564,10 @@ for variances and correlations estimated from the same data. See the <a href="ht
 help</a> for details and interpretation. Simulation studies show how
 often the check detects <a href="https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html">omitted
 partner dependence</a> and <a href="https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html">incorrect
-covariance pooling</a>, and how often it raises false alarms. This check
-currently supports cross-sectional dyads only.</p>
+covariance pooling</a>, and how often it raises false alarms. For
+intensive longitudinal data, also supply <code>member</code> and
+<code>time</code>. A <a href="https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html">separate
+study</a> covers this case.</p>
 </div>
 <div class="section level3">
 <h3 id="checking-residuals-and-outcomes">Checking residuals and outcomes<a class="anchor" aria-label="anchor" href="#checking-residuals-and-outcomes"></a>
@@ -803,7 +805,7 @@ so the concurrent and persistent components are visible together.</p>
 <p>The two AR standard deviations and correlations describe each role’s
 persistent component. They are not correlations of the complete residual
 and do not represent partner influence. The dyad-day block continues to
-describe the remaining same-day variation and partner covariance.</p>
+describe the remaining same-day variances and partner covariance.</p>
 </div>
 <div class="section level5">
 <h5 id="random-slopes">Random slopes<a class="anchor" aria-label="anchor" href="#random-slopes"></a>
@@ -1008,8 +1010,8 @@ term grouped by the member nested within the dyad:</p>
 <span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                0.67201             </span></span>
 <span><span class="co">#&gt;  coupleID.diaryday.1 .member_contrast_arbitrary 0.49488             </span></span>
 <span><span class="co">#&gt;  coupleID.personID   factor(diaryday)0          0.55221  0.598 (ar1)</span></span></code></pre></div>
-<p>The pooled AR parameters describe persistent within-member variation;
-the dyad-day blocks continue to describe same-day partner
+<p>The pooled AR parameters describe the persistent within-member
+component. The dyad-day blocks continue to describe same-day partner
 covariance.</p>
 <p>For the fitted AR model, we can recover the member-level covariance
 matrices for both the stable dyad effects and the same-occasion residual
@@ -1053,7 +1055,7 @@ dependence. The two matched block pairs are returned separately:</p>
 <p>The <code>cwp</code> terms estimate actor and partner associations
 for occasion-specific deviations from each member’s usual support. The
 <code>cbp</code> terms estimate actor and partner associations involving
-members’ usual support levels. These are concurrent associations; they
+members’ usual support levels. These are concurrent associations. They
 do not by themselves represent temporal carryover.</p>
 </div>
 <div class="section level5">
@@ -1275,7 +1277,7 @@ describing residual persistence. When temporal carryover is itself the
 research question, the member’s own and the partner’s lagged outcomes
 can enter the mean model <span class="citation">(Gistelinck and Loeys
 2020; del Rosario and West 2025)</span>. A partner-lag coefficient is an
-association; interpreting it as influence requires stronger assumptions.
+association. Interpreting it as influence requires stronger assumptions.
 Residual dependence should still be assessed after adding outcome
 lags.</p>
 <p>By adding the outcome to <code>predictors</code> and selecting it

@@ -136,8 +136,7 @@ Predicted outcomes are mean predictions with random effects set to zero
 [`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.md)).
 The checks use the same fitted rows and families as
 [`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.md)
-and weight all observations equally. For cross-sectional data, check
-partner correlations with
+and weight all observations equally. Check partner correlations with
 [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md).
 
 ## Method and credit

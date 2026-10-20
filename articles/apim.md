@@ -292,7 +292,7 @@ covary.](apim_files/figure-html/exchangeable-apim-member-diagram-1.svg)
 
 Individual-level representation of the exchangeable cross-sectional APIM
 used for the long-format multilevel model. Both predictors use one
-pooled grand-mean reference. The members share the same intercept; each
+pooled grand-mean reference. The members share the same intercept. Each
 member’s own predictor has the shared actor effect, and the other
 member’s predictor has the shared partner effect. The two residual
 variances are equal and the residuals may covary.
@@ -482,7 +482,7 @@ dyadMLM::compare_nested_models(
 
 The test provides evidence against all restrictions jointly, but it does
 not show which parameter differs. The helper also cannot determine
-whether the models are mathematically nested; that remains a modeling
+whether the models are mathematically nested. That remains a modeling
 requirement. The usual chi-squared reference distribution may be
 unreliable when a tested variance parameter lies on its boundary.
 
@@ -533,8 +533,10 @@ check detects [omitted partner
 dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance
 pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often it raises false alarms. This check currently supports
-cross-sectional dyads only.
+and how often it raises false alarms. For intensive longitudinal data,
+also supply `member` and `time`. A [separate
+study](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html)
+covers this case.
 
 ### Checking residuals and outcomes
 
@@ -800,7 +802,7 @@ glmmTMB::VarCorr(ild_distinguishable_ar_model)
 The two AR standard deviations and correlations describe each role’s
 persistent component. They are not correlations of the complete residual
 and do not represent partner influence. The dyad-day block continues to
-describe the remaining same-day variation and partner covariance.
+describe the remaining same-day variances and partner covariance.
 
 ##### Random slopes
 
@@ -1017,8 +1019,9 @@ glmmTMB::VarCorr(ild_exchangeable_ar_model)
 #>  coupleID.personID   factor(diaryday)0          0.55221  0.598 (ar1)
 ```
 
-The pooled AR parameters describe persistent within-member variation;
-the dyad-day blocks continue to describe same-day partner covariance.
+The pooled AR parameters describe the persistent within-member
+component. The dyad-day blocks continue to describe same-day partner
+covariance.
 
 For the fitted AR model, we can recover the member-level covariance
 matrices for both the stable dyad effects and the same-occasion residual
@@ -1066,7 +1069,7 @@ print(recovered_covariance)
 The `cwp` terms estimate actor and partner associations for
 occasion-specific deviations from each member’s usual support. The `cbp`
 terms estimate actor and partner associations involving members’ usual
-support levels. These are concurrent associations; they do not by
+support levels. These are concurrent associations. They do not by
 themselves represent temporal carryover.
 
 ##### Extension to exchangeable random slopes
@@ -1304,7 +1307,7 @@ AR(1) terms above retain the concurrent APIM mean model while describing
 residual persistence. When temporal carryover is itself the research
 question, the member’s own and the partner’s lagged outcomes can enter
 the mean model (Gistelinck and Loeys 2020; del Rosario and West 2025). A
-partner-lag coefficient is an association; interpreting it as influence
+partner-lag coefficient is an association. Interpreting it as influence
 requires stronger assumptions. Residual dependence should still be
 assessed after adding outcome lags.
 

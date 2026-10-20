@@ -122,8 +122,8 @@
 <li>✅ <strong>Dyad-Individual Model (DIM):</strong> exchangeable dyads (<a href="https://pascal-kueng.github.io/dyadMLM/articles/dim.html">vignette</a>).</li>
 <li>✅ <strong>Dyadic Score Model (DSM):</strong> distinguishable dyads (<a href="https://pascal-kueng.github.io/dyadMLM/articles/dsm.html">vignette</a>).</li>
 </ul>
-<p>It supports cross-sectional and intensive longitudinal dyadic data (e.g., daily diary data). The package also supports datasets containing multiple dyad compositions.</p>
-<p>Preparation options include selecting and pooling compositions, treating selected compositions as exchangeable, centering predictors, and creating within-/between-person components and lagged predictors.</p>
+<p>All models support cross-sectional and intensive longitudinal dyadic data (e.g., daily diary data). The package also supports datasets containing multiple dyad compositions.</p>
+<p>Preparation options include selecting and pooling compositions, and treating selected compositions as exchangeable. APIM/DIM/DSM predictors can be centered, decomposed into within-/between-person components, and lagged.</p>
 <p>Prepared data can be used with <strong>glmmTMB</strong>, <strong>brms</strong>, and other multilevel modeling packages that support the required model structure. See the <a href="https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html">Getting Started vignette</a> for data requirements and examples of data preparation workflows.</p>
 </div>
 <div class="section level2">
@@ -154,7 +154,7 @@
 </tr>
 <tr>
 <td>
-<a href="https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html">Check partner dependence — cross-sectional</a><sup>1</sup>
+<a href="https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html">Check partner dependence</a><sup>1</sup>
 </td>
 <td>✅ Experimental</td>
 <td>Not implemented · <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md" class="external-link">Contribute</a>
@@ -314,7 +314,8 @@
 <p>The function groups the six plots in one figure. Use <code>panels = FALSE</code> to show them separately.</p>
 <p>Here, simulations produce weaker partner correlations and larger SDs of partner half-differences than observed (red lines), suggesting <strong>misfit</strong>.</p>
 <p>With mixed dyad compositions, each observed role pair gets its own figure. With few dyads in a composition, the simulated ranges are wide, so its panels lack sensitivity. It can be worthwhile to check plausible role distinctions even when fitting an exchangeable model, since pooling can hide differences in variances or partner correlations. These checks alone do not establish whether fixed effects should be pooled (<a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html">nested model comparisons</a> can help assess those restrictions).</p>
-<p>The same <code>simulations</code> can be reused with <code><a href="reference/check_dyad_residuals.html">check_dyad_residuals()</a></code> and <code><a href="reference/check_dyad_outcomes.html">check_dyad_outcomes()</a></code>. Use the same <code>dyad</code>, <code>role</code>, and <code>data</code> arguments. The <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes">APIM vignette</a> shows a worked example.</p>
+<p>For intensive longitudinal data, also supply <code>member</code> and <code>time</code>. The check then compares member means and same-occasion deviations from them separately.</p>
+<p>The same <code>simulations</code> can be reused with <code><a href="reference/check_dyad_residuals.html">check_dyad_residuals()</a></code> and <code><a href="reference/check_dyad_outcomes.html">check_dyad_outcomes()</a></code>. Use the same <code>dyad</code>, <code>role</code>, <code>member</code>, and <code>data</code> arguments. The <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes">APIM vignette</a> shows a worked example.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/check_dyad_residuals.html">check_dyad_residuals</a></span><span class="op">(</span></span>
 <span>  <span class="va">simulations</span>,</span>

@@ -29,12 +29,12 @@
   [\#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).
 
 - Added experimental predictive checks for response variances and
-  partner correlations in cross-sectional `glmmTMB` models with Gaussian
-  or selected non-Gaussian responses, including ordinal, zero-inflated,
-  and hurdle models. Checks and plots can be shown separately for each
-  dyad composition. Printed checks list each observed summary with the
-  middle 95% of its simulations, and the same comparison is stored in
-  `summary`.
+  partner correlations in `glmmTMB` models with Gaussian or selected
+  non-Gaussian responses, including ordinal, zero-inflated, and hurdle
+  models. Checks can be performed separately for each dyad composition.
+  For repeated occasions, supply `member` and `time` to
+  [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
+  to check member means and same-occasion deviations separately.
 
 - Fixed an internal vctrs error in
   [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)

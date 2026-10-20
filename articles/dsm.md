@@ -101,7 +101,7 @@ missingness.
 
 For a cross-sectional Gaussian DSM, a correlated dyad random intercept
 and role-contrast slope represent unexplained outcome-level and
-outcome-difference variation.
+outcome-difference variance.
 
 ![Path diagram for a cross-sectional dyadic score model. The centered
 female-male predictor mean and female-minus-male predictor difference
@@ -280,8 +280,8 @@ constant. The $`a_{12}`$ and $`a_{21}`$ coefficients are the DSM
 cross-paths. They are omitted from the reduced DSM but are needed for
 the full model.
 
-The random intercept variance is unexplained variation in outcome level,
-and the random role-contrast slope variance is unexplained variation in
+The random intercept variance is unexplained variance in outcome level,
+and the random role-contrast slope variance is unexplained variance in
 the full directional outcome difference. Their covariance indicates
 whether unexplained outcome level and unexplained outcome difference are
 associated.
@@ -671,8 +671,10 @@ check detects [omitted partner
 dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance
 pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often it raises false alarms. This check currently supports
-cross-sectional dyads only.
+and how often it raises false alarms. For intensive longitudinal data,
+also supply `member` and `time`. A [separate
+study](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html)
+covers this case.
 
 The same `dsm_simulations` can be checked with
 [`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)

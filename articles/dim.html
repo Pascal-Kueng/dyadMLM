@@ -627,8 +627,10 @@ for variances and correlations estimated from the same data. See the <a href="ht
 help</a> for details and interpretation. Simulation studies show how
 often the check detects <a href="https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html">omitted
 partner dependence</a> and <a href="https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html">incorrect
-covariance pooling</a>, and how often it raises false alarms. This check
-currently supports cross-sectional dyads only.</p>
+covariance pooling</a>, and how often it raises false alarms. For
+intensive longitudinal data, also supply <code>member</code> and
+<code>time</code>. A <a href="https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html">separate
+study</a> covers this case.</p>
 <p>The same <code>dim_simulations</code> can be checked with <a href="https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html"><code>check_dyad_residuals()</code></a>
 and <a href="https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html"><code>check_dyad_outcomes()</code></a>,
 as shown in the <a href="apim.html#checking-residuals-and-outcomes">APIM
@@ -647,7 +649,7 @@ The decomposed columns used below are:</p>
 <ol style="list-style-type: decimal">
 <li>The <code>cwp</code> dyad mean captures a shared occasion-specific
 shift from the two members’ usual levels (shared occasion-level
-variation).</li>
+variance).</li>
 <li>The <code>cwp</code> within-dyad member deviation captures which
 member is further above or below their own usual level on that
 occasion.</li>
@@ -816,8 +818,8 @@ trend across the study.</p>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>This concurrent model includes stable dyad-level and same-day partner
-covariance. To add persistent within-member variation while pooling the
-AR parameters across exchangeable members, we fit the complete model
+covariance. To add a persistent within-member component while pooling
+the AR parameters across exchangeable members, we fit the complete model
 with one member-series term:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dim_ILD_ar_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -861,8 +863,8 @@ with one member-series term:</p>
 <span><span class="co">#&gt;  coupleID.diaryday.1 .member_contrast_arbitrary 0.49488             </span></span>
 <span><span class="co">#&gt;  coupleID.personID   factor(diaryday)0          0.55221  0.598 (ar1)</span></span></code></pre></div>
 <p>See the <a href="apim.html#exchangeable-residual-ar1">exchangeable
-APIM AR(1) section</a> for the distinction between persistent
-within-member variation and same-day partner covariance. To keep this
+APIM AR(1) section</a> for the distinction between the persistent
+within-member component and same-day partner covariance. To keep this
 example focused, both models omit the actor random slopes that are also
 present in the simulation.</p>
 <div class="section level3">

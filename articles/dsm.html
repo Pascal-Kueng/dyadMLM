@@ -188,7 +188,7 @@ missingness.</p>
 </h2>
 <p>For a cross-sectional Gaussian DSM, a correlated dyad random
 intercept and role-contrast slope represent unexplained outcome-level
-and outcome-difference variation.</p>
+and outcome-difference variance.</p>
 <div class="figure">
 <img src="dsm_files/figure-html/conceptual-dsm-diagram-1.svg" class="r-plt" alt="Path diagram for a cross-sectional dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. Paths are labelled a11, a12, a21, and a22, and outcome intercepts are labelled a10 and a20." width="100%"><p class="caption">
 Conceptual cross-sectional DSM. Predictor mean and predictor difference
@@ -404,9 +404,9 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>21</mn></msub><annotation encoding="application/x-tex">a_{21}</annotation></semantics></math>
 coefficients are the DSM cross-paths. They are omitted from the reduced
 DSM but are needed for the full model.</p>
-<p>The random intercept variance is unexplained variation in outcome
+<p>The random intercept variance is unexplained variance in outcome
 level, and the random role-contrast slope variance is unexplained
-variation in the full directional outcome difference. Their covariance
+variance in the full directional outcome difference. Their covariance
 indicates whether unexplained outcome level and unexplained outcome
 difference are associated.</p>
 <p>The curved arrow
@@ -829,8 +829,10 @@ for variances and correlations estimated from the same data. See the <a href="ht
 help</a> for details and interpretation. Simulation studies show how
 often the check detects <a href="https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html">omitted
 partner dependence</a> and <a href="https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html">incorrect
-covariance pooling</a>, and how often it raises false alarms. This check
-currently supports cross-sectional dyads only.</p>
+covariance pooling</a>, and how often it raises false alarms. For
+intensive longitudinal data, also supply <code>member</code> and
+<code>time</code>. A <a href="https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html">separate
+study</a> covers this case.</p>
 <p>The same <code>dsm_simulations</code> can be checked with <a href="https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html"><code>check_dyad_residuals()</code></a>
 and <a href="https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html"><code>check_dyad_outcomes()</code></a>,
 as shown in the <a href="apim.html#checking-residuals-and-outcomes">APIM
