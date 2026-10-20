@@ -67,9 +67,16 @@ select_dyad_columns <- function(data, cols_quo, arg) {
   }
 
   selected_columns <- tryCatch(
-    tidyselect::eval_select(cols_quo, data = data),
+    tidyselect::eval_select(cols_quo, data = data, allow_rename = FALSE),
     error = function(e) {
       stop_if_data_frame(cols_quo, arg, data)
+      if (inherits(e, "tidyselect:::error_disallowed_rename")) {
+        stop(
+          "`", arg, "` cannot rename columns. ",
+          "Select each column by its own name, for example `x` instead of `c(new = x)`.",
+          call. = FALSE
+        )
+      }
       stop(
         sprintf(
           paste0(

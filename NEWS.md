@@ -36,6 +36,10 @@
 * Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.
 
+* Fixed `prepare_dyad_data()` and `validate_dyad_data()` silently using
+  another column when `predictors` or `lag1_predictors` renamed a column, as
+  in `c(z = x)`. Renaming now gives an error.
+
 * `prepare_dyad_data()` now gives a clear error when `data` is supplied
   twice, for example through the pipe and as an argument.
 
