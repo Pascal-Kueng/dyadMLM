@@ -73,8 +73,7 @@
 #' Predicted outcomes are mean predictions with random effects set to zero (see
 #' [simulate_dyad_responses()]). The checks use the same fitted rows and
 #' families as [simulate_dyad_responses()] and weight all observations equally.
-#' For cross-sectional data, check partner correlations with
-#' [check_partner_dependence()].
+#' Check partner correlations with [check_partner_dependence()].
 #'
 #' @section Method and credit:
 #' The internal calculation follows the simulation-based PIT approach used in

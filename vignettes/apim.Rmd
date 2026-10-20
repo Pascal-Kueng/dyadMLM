@@ -238,7 +238,7 @@ change the model.
 To estimate this model in a univariate MLM framework, we can draw a conceptual
 diagram as such: 
 
-```{r exchangeable-apim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the exchangeable cross-sectional APIM used for the long-format multilevel model. Both predictors use one pooled grand-mean reference. The members share the same intercept; each member's own predictor has the shared actor effect, and the other member's predictor has the shared partner effect. The two residual variances are equal and the residuals may covary.", fig.alt="Two-panel path diagram for an exchangeable APIM with grand-mean-centered predictors. Both outcomes have the same intercept. For arbitrary member 1, X 1 is the actor predictor and X 2 is the partner predictor of Y 1. For arbitrary member 2, X 2 is the actor predictor and X 1 is the partner predictor of Y 2. Both panels use the same actor coefficient a and partner coefficient p, and their outcome residuals covary."}
+```{r exchangeable-apim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the exchangeable cross-sectional APIM used for the long-format multilevel model. Both predictors use one pooled grand-mean reference. The members share the same intercept. Each member's own predictor has the shared actor effect, and the other member's predictor has the shared partner effect. The two residual variances are equal and the residuals may covary.", fig.alt="Two-panel path diagram for an exchangeable APIM with grand-mean-centered predictors. Both outcomes have the same intercept. For arbitrary member 1, X 1 is the actor predictor and X 2 is the partner predictor of Y 1. For arbitrary member 2, X 2 is the actor predictor and X 1 is the partner predictor of Y 2. Both panels use the same actor coefficient a and partner coefficient p, and their outcome residuals covary."}
 draw_apim_member_diagram("exchangeable", predictors_centered = TRUE)
 ```
 
@@ -391,7 +391,7 @@ dyadMLM::compare_nested_models(
 
 The test provides evidence against all restrictions jointly, but it does not
 show which parameter differs. The helper also cannot determine whether the
-models are mathematically nested; that remains a modeling requirement. The
+models are mathematically nested. That remains a modeling requirement. The
 usual chi-squared reference distribution may be unreliable when a tested
 variance parameter lies on its boundary.
 
@@ -401,7 +401,9 @@ The model comparison tests the restrictions jointly. Predictive checks show
 whether the restricted model reproduces each role's variance and the partner
 correlation. We supply the original roles to examine their variances separately.
 
-```{r check-cross-apim, eval = has_glmmTMB, fig.width = 10, fig.height = 6.5, out.width = "100%", fig.alt = "Six predictive-check histograms. Member SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values."}
+::: {.no-invert-dark-mode}
+
+```{r check-cross-apim, dev.args = list(bg = "white"), eval = has_glmmTMB, fig.width = 10, fig.height = 6.5, out.width = "100%", fig.alt = "Six predictive-check histograms. Member SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values."}
 apim_simulations <- dyadMLM::simulate_dyad_responses(
   apim_exchangeable_model, seed = 123
 )
@@ -413,6 +415,8 @@ dyadMLM::check_partner_dependence(
   data = apim_distinguishable_data
 )
 ```
+
+:::
 
 The top row shows role-specific SDs and partner correlation. The bottom
 row shows the same information using dyad averages and half the differences
@@ -430,8 +434,8 @@ and correlations estimated from the same data. See the
 for details and interpretation. Simulation studies show how often the check
 detects [omitted partner dependence](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
 and [incorrect covariance pooling](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html),
-and how often it raises false alarms. This check currently supports cross-sectional
-dyads only.
+and how often it raises false alarms. For intensive longitudinal data, also supply
+`member` and `time`. A [separate study](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html) covers this case.
 
 ## Checking residuals and outcomes {#checking-residuals-and-outcomes}
 
@@ -457,7 +461,9 @@ dashed lines at 0.25, 0.5, and 0.75 for all levels of partner support. With a
 missing or misspecified partner effect, they move away from these lines as
 partner support changes.
 
-```{r check-residuals-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution and pattern for women and men: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Red marks observed values.", "Residual spread for women and men: mean PIT distance histograms. Red marks observed values.", "Residual patterns for women and men: PIT quartiles across the partner's provided support with blue envelopes. Red curves show observed values.")}
+::: {.no-invert-dark-mode}
+
+```{r check-residuals-apim, dev.args = list(bg = "white"), eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 8, out.width = "100%", fig.alt = c("Residual distribution and pattern for women and men: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Red marks observed values.", "Residual spread for women and men: mean PIT distance histograms. Red marks observed values.", "Residual patterns for women and men: PIT quartiles across the partner's provided support with blue envelopes. Red curves show observed values.")}
 dyadMLM::check_dyad_residuals(
   apim_simulations,
   dyad = coupleID,
@@ -467,7 +473,11 @@ dyadMLM::check_dyad_residuals(
 )
 ```
 
-```{r check-outcomes-apim, eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 12, out.width = "100%", fig.alt = "Outcome checks for women and men: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Red marks observed values."}
+:::
+
+::: {.no-invert-dark-mode}
+
+```{r check-outcomes-apim, dev.args = list(bg = "white"), eval = has_glmmTMB, dev = "png", fig.ext = "png", dpi = 96, fig.width = 10, fig.height = 12, out.width = "100%", fig.alt = "Outcome checks for women and men: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Red marks observed values."}
 dyadMLM::check_dyad_outcomes(
   apim_simulations,
   dyad = coupleID,
@@ -475,6 +485,8 @@ dyadMLM::check_dyad_outcomes(
   data = apim_distinguishable_data
 )
 ```
+
+:::
 
 Look for flags (red curves outside their blue envelopes, or red lines outside
 their dashed limits) that form a pattern across plots. Here, women's observed
@@ -662,7 +674,7 @@ glmmTMB::VarCorr(ild_distinguishable_ar_model)
 The two AR standard deviations and correlations describe each role's persistent
 component. They are not correlations of the complete residual and do not
 represent partner influence. The dyad-day block continues to describe the
-remaining same-day variation and partner covariance.
+remaining same-day variances and partner covariance.
 
 #### Random slopes
 
@@ -787,7 +799,7 @@ ild_exchangeable_ar_model <- glmmTMB::glmmTMB(
 glmmTMB::VarCorr(ild_exchangeable_ar_model)
 ```
 
-The pooled AR parameters describe persistent within-member variation; the
+The pooled AR parameters describe the persistent within-member component. The
 dyad-day blocks continue to describe same-day partner covariance.
 
 For the fitted AR model, we can recover the member-level covariance matrices for
@@ -807,7 +819,7 @@ print(recovered_covariance)
 The `cwp` terms estimate actor and partner associations for occasion-specific
 deviations from each member's usual support. The `cbp` terms estimate actor and
 partner associations involving members' usual support levels. These are
-concurrent associations; they do not by themselves represent temporal
+concurrent associations. They do not by themselves represent temporal
 carryover.
 
 #### Extension to exchangeable random slopes {#exchangeable-random-slope-back-transformation}
@@ -957,7 +969,7 @@ persistence. When temporal carryover is itself the research question, the
 member's own and the partner's lagged outcomes can enter the mean model
 [@gistelinckMultilevelAutoregressiveDyadic2020;
 @delrosarioPracticalGuideSpecifying2025]. A partner-lag coefficient is an
-association; interpreting it as influence requires stronger assumptions.
+association. Interpreting it as influence requires stronger assumptions.
 Residual dependence should still be assessed after adding outcome lags.
 
 By adding the outcome to `predictors` and selecting it with `lag1_predictors`,

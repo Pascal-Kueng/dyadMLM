@@ -63,13 +63,14 @@ validates dyadic data and creates model-ready columns for:
 - ✅ **Dyadic Score Model (DSM):** distinguishable dyads
   ([vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html)).
 
-It supports cross-sectional and intensive longitudinal dyadic data
-(e.g., daily diary data). The package also supports datasets containing
-multiple dyad compositions.
+All models support cross-sectional and intensive longitudinal dyadic
+data (e.g., daily diary data). The package also supports datasets
+containing multiple dyad compositions.
 
-Preparation options include selecting and pooling compositions, treating
-selected compositions as exchangeable, centering predictors, and
-creating within-/between-person components and lagged predictors.
+Preparation options include selecting and pooling compositions, and
+treating selected compositions as exchangeable. APIM/DIM/DSM predictors
+can be centered, decomposed into within-/between-person components, and
+lagged.
 
 Prepared data can be used with **glmmTMB**, **brms**, and other
 multilevel modeling packages that support the required model structure.
@@ -83,7 +84,7 @@ for data requirements and examples of data preparation workflows.
 |----|----|----|
 | [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
-| [Check partner dependence — cross-sectional](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)<sup>1</sup> | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check partner dependence](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)<sup>1</sup> | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)<sup>1</sup> | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)<sup>1</sup> | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
@@ -243,7 +244,7 @@ For illustration, the path diagram from the [APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitting-the-restricted-exchangeable-apim-with-glmmtmb)
 shows these estimates:
 
-<img src="man/figures/README-cross-sectional-diagram-1.png" alt="Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner effect 0.18, common residual SD 1.09, and residual correlation -0.04." width="100%" />
+<img src="man/figures/README-cross-sectional-diagram-1.svg" alt="Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner effect 0.18, common residual SD 1.09, and residual correlation -0.04." width="100%" />
 
 Next, check whether the model reproduces the data.
 
@@ -262,7 +263,7 @@ check_partner_dependence(
 )
 ```
 
-<img src="man/figures/README-cross-sectional-check-1.png" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
+<img src="man/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
 
 The function groups the six plots in one figure. Use `panels = FALSE` to
 show them separately.
@@ -281,9 +282,13 @@ model
 comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
 can help assess those restrictions).
 
+For intensive longitudinal data, also supply `member` and `time`. The
+check then compares member means and same-occasion deviations from them
+separately.
+
 The same `simulations` can be reused with `check_dyad_residuals()` and
-`check_dyad_outcomes()`. Use the same `dyad`, `role`, and `data`
-arguments. The [APIM
+`check_dyad_outcomes()`. Use the same `dyad`, `role`, `member`, and
+`data` arguments. The [APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes)
 shows a worked example.
 
@@ -296,7 +301,7 @@ check_dyad_residuals(
 )
 ```
 
-<img src="man/figures/README-exchangeable-residuals-1.png" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below." width="100%" />
+<img src="man/figures/README-exchangeable-residuals-1.svg" alt="Residual checks for women and men under the exchangeable APIM: uniform QQ plots with blue envelopes in the top row and PIT quartiles across predicted outcomes in the bottom row. Women's QQ curve and PIT median rise above their envelopes and men's fall below." width="100%" />
 
 Women’s QQ curve and PIT median rise above their envelopes and men’s
 fall below, so women’s observed closeness is higher than simulated and
@@ -311,7 +316,7 @@ check_dyad_outcomes(
 )
 ```
 
-<img src="man/figures/README-exchangeable-outcomes-1.png" alt="Outcome checks for women and men under the exchangeable APIM: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Women's observed ECDF lies right of the simulated curves and men's left. The red lines in the histograms lie within the dashed limits." width="100%" />
+<img src="man/figures/README-exchangeable-outcomes-1.svg" alt="Outcome checks for women and men under the exchangeable APIM: outcome ECDFs in the top row, then histograms of the response SD and the largest absolute deviation. Women's observed ECDF lies right of the simulated curves and men's left. The red lines in the histograms lie within the dashed limits." width="100%" />
 
 The outcome ECDFs show the same issue, while response SDs and largest
 deviations stay within their simulated limits.
@@ -409,12 +414,7 @@ Or cite the package without specifying a version:
 Küng, P. (2026). *dyadMLM: Tools for dyadic multilevel models*
 \[Computer software\]. <https://doi.org/10.5281/zenodo.21481720>
 
-<details>
-
-<summary>
-
-BibTeX (without version)
-</summary>
+BibTeX (without version):
 
 ``` bibtex
 @Manual{dyadMLM,
@@ -424,8 +424,6 @@ BibTeX (without version)
   doi = {10.5281/zenodo.21481720},
 }
 ```
-
-</details>
 
 ## Questions and contributing
 

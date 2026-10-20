@@ -8,8 +8,7 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  dev = "png",
-  dpi = 144,
+  dev = "svg",
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
@@ -78,12 +77,12 @@ validates dyadic data and creates model-ready columns for:
 - ✅ **Dyad-Individual Model (DIM):** exchangeable dyads ([vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.html)).
 - ✅ **Dyadic Score Model (DSM):** distinguishable dyads ([vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html)).
 
-It supports cross-sectional and intensive longitudinal dyadic data (e.g., daily
+All models support cross-sectional and intensive longitudinal dyadic data (e.g., daily
 diary data). The package also supports datasets containing multiple dyad compositions.
 
-Preparation options include selecting and pooling compositions, treating selected
-compositions as exchangeable, centering predictors, and creating within-/between-person
-components and lagged predictors.
+Preparation options include selecting and pooling compositions, and treating selected
+compositions as exchangeable. APIM/DIM/DSM predictors can be centered, decomposed into 
+within-/between-person components, and lagged.
 
 Prepared data can be used with **glmmTMB**, **brms**, and other multilevel modeling
 packages that support the required model structure. See the
@@ -96,7 +95,7 @@ for data requirements and examples of data preparation workflows.
 |---|---|---|
 | [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
-| [Check partner dependence — cross-sectional](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)^1^ | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check partner dependence](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)^1^ | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)^1^ | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 | [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)^1^ | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
 
@@ -207,13 +206,29 @@ For illustration, the path diagram from the
 [APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitting-the-restricted-exchangeable-apim-with-glmmtmb)
 shows these estimates:
 
-```{r cross-sectional-diagram, echo = FALSE, fig.width = 9, fig.height = 4.8, fig.alt = diagram_alt}
+```{r cross-sectional-diagram, echo = FALSE, fig.width = 9, fig.height = 4.8, dev.args = list(bg = "transparent"), fig.alt = diagram_alt}
 draw_apim_diagram(
   "exchangeable",
   model = model,
   labels = c(predictor = "Provided support", outcome = "Closeness"),
   predictors_centered = TRUE
 )
+```
+
+```{r cross-sectional-diagram-theme, include = FALSE}
+# Invert the diagram in dark mode, as the website does for vignette diagrams.
+diagram_file <- "man/figures/README-cross-sectional-diagram-1.svg"
+diagram_svg <- paste(readLines(diagram_file), collapse = "\n")
+dark_style <- paste0(
+  "<defs><filter id=\"dark-mode\" color-interpolation-filters=\"sRGB\">",
+  "<feColorMatrix type=\"matrix\" values=\"-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0\"/>",
+  "<feColorMatrix type=\"hueRotate\" values=\"180\"/></filter></defs>",
+  "<style>@media (prefers-color-scheme: dark) { #diagram { filter: url(#dark-mode); } }</style>",
+  "<g id=\"diagram\">"
+)
+diagram_svg <- sub("(<svg[^>]*>)", paste0("\\1", dark_style), diagram_svg)
+diagram_svg <- sub("</svg>\\s*$", "</g></svg>", diagram_svg)
+writeLines(diagram_svg, diagram_file)
 ```
 
 Next, check whether the model reproduces the data.
@@ -247,8 +262,11 @@ correlations. These checks alone do not establish whether fixed effects should b
 pooled ([nested model comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
 can help assess those restrictions).
 
+For intensive longitudinal data, also supply `member` and `time`. The check
+then compares member means and same-occasion deviations from them separately.
+
 The same `simulations` can be reused with `check_dyad_residuals()` and `check_dyad_outcomes()`.
-Use the same `dyad`, `role`, and `data` arguments. The
+Use the same `dyad`, `role`, `member`, and `data` arguments. The
 [APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#checking-residuals-and-outcomes)
 shows a worked example.
 
@@ -353,8 +371,7 @@ Or cite the package without specifying a version:
 
 `r citation_text`
 
-<details>
-<summary>BibTeX (without version)</summary>
+BibTeX (without version):
 
 ```{r citation-bibtex, echo = FALSE, results = 'asis'}
 package_citation$key <- "dyadMLM"
@@ -363,8 +380,6 @@ cat("```bibtex\n")
 print(toBibtex(package_citation))
 cat("```\n")
 ```
-
-</details>
 
 ## Questions and contributing
 

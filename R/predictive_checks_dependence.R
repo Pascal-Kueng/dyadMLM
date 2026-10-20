@@ -4,11 +4,12 @@
 #'
 #' `r lifecycle::badge("experimental")`
 #' A dyadic model should reproduce how much responses vary and how strongly
-#' partners' responses are related. This check computes variances and correlations
-#' of simulated responses based on the model and compares them to the observed
-#' response variances and correlations from the data.
-#' This helps identify mismatches in the model's assumptions. The check
-#' currently supports cross-sectional dyads only (one response per partner).
+#' partners' responses are related. This check compares the observed response
+#' variances and partner correlations with those of responses simulated from the
+#' fitted model. This helps identify mismatches in the model's assumptions.
+#' This check is especially useful when a less restricted model does not
+#' converge and so cannot be used for model comparison. For repeated occasions,
+#' supply `member` and `time`.
 #'
 #' @param simulations An object returned by [simulate_dyad_responses()].
 #' @param dyad The dyad column name. Looked up first
@@ -20,7 +21,16 @@
 #'   mismatches that pooling may hide. Each dyad composition (role pair, such as
 #'   female-male) is checked separately,
 #'   using exchangeable summaries for same-role pairs and role-specific
-#'   summaries otherwise.
+#'   summaries otherwise. For repeated occasions, each member must keep the
+#'   same role within their dyad. Rows with missing roles are omitted.
+#' @param member The column name identifying each member.
+#'   Only needed for repeated occasions, ignored without a `time` argument.
+#'   Looked up first in the fitted model frame, then in `data` if supplied.
+#' @param time The column name identifying each occasion. Only needed for
+#'   repeated occasions. Requires `member` to be supplied. `time` must identify
+#'   occasions that partners exactly share, such as the diary day. Every fitted
+#'   row needs a known `member` and `time`.
+#'   Looked up first in the fitted model frame, then in `data` if supplied.
 #' @param plot If `TRUE` (default), draw the comparison plots for visual checks.
 #'   If `FALSE`, `ask` and `panels` are ignored.
 #' @param response `"model-centred"` (default) subtracts the same model predictions
@@ -38,7 +48,7 @@
 #'   two rows and up to three columns. If `FALSE`, draw each statistic separately.
 #'   Graphics settings are restored afterwards.
 #' @param data Optional: the unchanged data frame used to fit the model. Supply
-#'   it when `dyad` or `role` is not in the model formulas.
+#'   it when `dyad`, `role`, `member`, or `time` is not in the model formulas.
 #'
 #' @return The comparison plots (shown by default) are the main output. The
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
@@ -47,38 +57,26 @@
 #'   and have `NULL` statistics. Each tibble has one observed row
 #'   followed by one row per simulation, identified by `dataset`. `summary`
 #'   compares each `observed` statistic with the middle 95% of its simulations
-#'   (`lower`, `upper`) and marks those `outside` it. The object includes
+#'   (`lower`, `upper`) and marks those `outside` it. Rows with missing dyad IDs
+#'   or roles and incomplete dyads are omitted with a warning. The object includes
 #'   omission counts and settings, and can be saved and plotted later.
+#'   With repeated occasions, `compositions` has a `level` column (`"between"`
+#'   or `"within"`), and each label ends with its level. Within-level rows count the
+#'   dyads that share at least one occasion.
 #'
 #' @section Reading the plots:
 #' Blue histograms show simulated summaries. Red lines mark observed values.
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
 #' The heading shows the dyad composition, its number of usable dyads, and the
-#' total across all compositions. The top row shows member SDs and partner
-#' correlation. The bottom row shows the same information using dyad averages
-#' and partner differences.
-#'
-#' An observed value far from most simulated values may indicate that the
-#' model does not reproduce that feature of the data well.
-#' Agreement does not establish that omitted dependence is negligible, especially
-#' with few dyads. The [partner-dependence study](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
-#' illustrates how sample size affects detection when residual partner
-#' correlation is omitted.
-#'
-#' Checking each composition can reveal differences hidden by pooling.
-#' Flags (observed values outside the middle 95%, marked `*` when printed) can
-#' occur by chance, especially when checking several summaries.
-#' They invite investigation, not formal rejection of the model. The
-#' [covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
-#' illustrates detection and false alarms when checking each composition; 10 to
-#' 29% of correctly pooled models had at least one flag.
+#' total across all compositions.
 #'
 #' The top row compares:
 #' - **Response SDs:** one for each role, or one common SD for exchangeable members.
 #' - **Partner correlation:** how strongly partners' responses are related.
 #'
-#' The bottom row shows:
+#' The bottom row shows the same information using dyad averages and
+#' half-differences:
 #' - **Dyad-average SD:** how much dyads differ in their average response.
 #' - **Half-difference SD or RMS:** each partner difference is divided by two.
 #'   With distinct roles, the SD shows how much signed differences vary
@@ -90,10 +88,23 @@
 #'   greater variance for the first named role. Negative values indicate greater
 #'   variance for the second.
 #'
-#' These checks are particularly useful when a less restricted model does not
-#' converge and so cannot be used for model comparison. They show how well the
-#' simpler model
-#' reproduces the observed variances and partner correlations.
+#' An observed value far from most simulated values may indicate that the
+#' model does not reproduce that feature of the data well.
+#' Even if simulated and observed values agree, this does not show that omitted
+#' dependence is negligible, especially with few dyads. The
+#' [partner-dependence study](https://pascal-kueng.github.io/dyadMLM/articles/partner-dependence-simulation.html)
+#' illustrates how sample size affects detection when residual partner
+#' correlation is omitted.
+#'
+#' Checking each composition separately can reveal differences hidden by
+#' pooling. With few dyads in a composition, the simulated ranges are wide, so
+#' its panels lack sensitivity.
+#' Flags (observed values outside the middle 95%, marked `*` when printed) can
+#' occur by chance, especially when checking several summaries.
+#' They are a starting point for further investigation, not necessarily a
+#' reason to reject the model. The
+#' [covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
+#' illustrates detection and false alarms when checking each composition.
 #'
 #' A flexible covariance model will usually reproduce features it estimated from
 #' the same data. Agreement alone therefore does not establish good fit.
@@ -102,7 +113,37 @@
 #' Use a suitable model comparison to formally test a specific covariance
 #' restriction when both models can be fitted (see [compare_nested_models()]).
 #'
-#' Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
+#' @section Repeated occasions:
+#' With repeated occasions, partners can be related in two ways: in their
+#' mean responses, and in being above or below their own means on the same
+#' occasions. A model should reproduce both. With `member` and `time`,
+#' every dataset (observed and simulated) is split into two levels after any
+#' model-centring. Each level is checked like cross-sectional data:
+#' - **Between:** each member's mean over all their fitted occasions, paired
+#'   within the dyad. Each dyad counts once.
+#' - **Within:** each response minus its member's mean, paired with the
+#'   partner's deviation on the same occasion. Each shared occasion counts once.
+#'
+#' An occasion without the partner still counts in the member's mean.
+#'
+#' The within check is related to repeated-measures correlation
+#' (Bakdash & Marusich, 2017).
+#'
+#' The [longitudinal study](https://pascal-kueng.github.io/dyadMLM/articles/ild-partner-dependence.html)
+#' examines detection and false alarms. With 50 or fewer dyads, the check often
+#' missed omitted partner covariance.
+#'
+#' Known limitations and caveats:
+#'
+#' - A misfit at one level can also impact the other level's summaries,
+#'   especially with few occasions (due to member means including occasion-level
+#'   variance) or nonlinear links. Thus, both levels should be interpreted
+#'   together.
+#' - Check dependence across occasions (e.g., autocorrelation) separately.
+#'   If the model omits temporal dependence, its covariance estimates can be
+#'   biased, and these checks may not reveal it.
+#' - These checks can be misleading when the model includes lagged outcomes
+#'   as predictors.
 #'
 #' @section Technical details:
 #' After any centring, paired responses `a` and `b` are used to compute
@@ -142,6 +183,8 @@
 #'   seed = 123
 #' )
 #'
+#' # Check whether pooling fits the data. Each composition is checked
+#' # separately, with role-specific summaries for distinguishable compositions.
 #' check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
@@ -159,15 +202,51 @@
 #'   plot = FALSE
 #' )
 #'
-#' # Check how well the model reproduces variances and partner correlations
-#' # within each dyad composition.
 #' plot(check, ask = FALSE, panels = TRUE)
-#' # Composition checks flag differences that the pooled check misses.
 #' print(check)
+#'
+#' # For repeated occasions, also supply `member` and `time`.
+#' example_diary_data <- prepare_dyad_data(
+#'   dyads_ild[dyads_ild$coupleID <= 120, ], # Couples 1 to 120 are female-male.
+#'   dyad = coupleID,
+#'   member = personID,
+#'   role = gender,
+#'   time = diaryday,
+#'   model_types = "none",
+#'   seed = 123
+#' )
+#'
+#' diary_model <- glmmTMB::glmmTMB(
+#'   closeness ~ 0 + gender + gender:diaryday +
+#'
+#'     # In this example, we omit the correlation between partners' random
+#'     # intercepts on level 2 with a diagonal covariance structure. This is
+#'     # sometimes done when a model does not otherwise converge cleanly.
+#'     diag(0 + gender | coupleID) +
+#'
+#'     # Keep the full structure for the level 1 residuals.
+#'     us(0 + gender | coupleID:diaryday),
+#'   dispformula = ~ 0,
+#'   data = example_diary_data
+#' )
+#'
+#' # The between level flags the omitted partner correlation.
+#' check_partner_dependence(
+#'   simulate_dyad_responses(diary_model, nsim = 100, seed = 123),
+#'   dyad = coupleID,
+#'   role = gender,
+#'   member = personID,
+#'   time = diaryday,
+#'   # Supply the fitting data because personID is not in the model formula.
+#'   data = example_diary_data
+#' )
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
 #'   Methods, 10*(2), 139--158. \doi{10.1037/1082-989X.10.2.139}
+#'
+#' Bakdash, J. Z., & Marusich, L. R. (2017). Repeated measures correlation.
+#' *Frontiers in Psychology, 8*, 456. \doi{10.3389/fpsyg.2017.00456}
 #'
 #' @seealso [check_dyad_residuals()], [check_dyad_outcomes()]
 #' @export
@@ -175,6 +254,8 @@ check_partner_dependence <- function(
   simulations,
   dyad,
   role = NULL,
+  member = NULL,
+  time = NULL,
   plot = TRUE,
   response = c("model-centred", "raw"),
   ask = NULL,
@@ -191,17 +272,11 @@ check_partner_dependence <- function(
 
   response <- match.arg(response)
   fitted_model_frame <- simulations$model_frame
-
-  # The pair table identifies both partners' positions in the fitted data.
-  partner_row_map <- prepare_partner_pairs(
-    resolve_fitted_row_argument(rlang::enquo(dyad), "dyad", fitted_model_frame, data),
-    resolve_fitted_row_argument(rlang::enquo(role), "role", fitted_model_frame,
-                                data, allow_null = TRUE)
-  )
-  compositions <- partner_row_map$compositions
-  checked_composition_indices <- which(compositions$n_pairs >= 3L)
-  skipped_composition_indices <- which(compositions$n_pairs < 3L)
-  compositions$statistics <- vector("list", nrow(compositions))
+  dyad_ids <- resolve_fitted_row_argument(rlang::enquo(dyad), "dyad", fitted_model_frame, data)
+  role_values <- resolve_fitted_row_argument(rlang::enquo(role), "role", fitted_model_frame,
+                                             data, allow_null = TRUE)
+  occasion_ids <- resolve_fitted_row_argument(rlang::enquo(time), "time", fitted_model_frame,
+                                              data, allow_null = TRUE)
   n_simulations <- nrow(simulations$simulated_responses)
 
   # Combine the observed and simulated response vectors into one large matrix.
@@ -211,10 +286,32 @@ check_partner_dependence <- function(
   if (response == "model-centred") {
     responses_by_dataset <- sweep(responses_by_dataset, 2, simulations$predicted_response, "-")
   }
+
+  # The pair table identifies both partners' positions in each dataset's responses.
+  if (is.null(occasion_ids)) {
+    partner_row_map <- prepare_partner_pairs(dyad_ids, role_values)
+  } else {
+    # `member` is only needed, and only looked up, for repeated occasions.
+    member_ids <- resolve_fitted_row_argument(rlang::enquo(member), "member",
+                                              fitted_model_frame, data, allow_null = TRUE)
+    if (is.null(member_ids)) {
+      stop("`time` requires `member` to be supplied.", call. = FALSE)
+    }
+    occasion_levels <- prepare_occasion_levels(
+      responses_by_dataset, dyad_ids, member_ids, occasion_ids, role_values
+    )
+    responses_by_dataset <- occasion_levels$responses_by_dataset
+    partner_row_map <- occasion_levels$partner_row_map
+  }
+  compositions <- partner_row_map$compositions
+  checked_composition_indices <- which(compositions$n_pairs >= 3L)
+  skipped_composition_indices <- which(compositions$n_pairs < 3L)
+  compositions$statistics <- vector("list", nrow(compositions))
   dataset_labels <- c("observed", paste0("simulation_", seq_len(n_simulations)))
 
   # Collect diagnostics so each message covers all compositions.
   statistic_diagnostics_by_composition <- vector("list", nrow(compositions))
+  undefined_within_indices <- integer(0)
   for (current_composition_index in checked_composition_indices) {
     composition_pair_rows <- partner_row_map$pairs |>
       dplyr::filter(.data$composition_index == current_composition_index)
@@ -231,11 +328,21 @@ check_partner_dependence <- function(
       )
     }
     composition_statistics <- do.call(rbind, statistics_by_dataset)
+    observed_statistics <- composition_statistics[1, ]
+
+    # A within composition can have undefined summaries, e.g. when every member
+    # has one occasion, so all deviations are zero. Skip it, so the between
+    # level and the other compositions are still checked.
+    if (identical(compositions[["level"]][current_composition_index], "within") &&
+        !all(is.finite(observed_statistics))) {
+      undefined_within_indices <- c(undefined_within_indices, current_composition_index)
+      next
+    }
+
     compositions$statistics[[current_composition_index]] <- composition_statistics |>
       tibble::as_tibble(.name_repair = "minimal") |>
       tibble::add_column(dataset = dataset_labels, .before = 1, .name_repair = "minimal") # .name_repair = "minimal" preserves the statistic names exactly, including duplicates that can arise when distinct roles have identical printed labels.
 
-    observed_statistics <- composition_statistics[1, ]
     simulated_statistics <- composition_statistics[-1, , drop = FALSE]
     statistic_diagnostics_by_composition[[current_composition_index]] <- tibble::tibble(
       description = paste(compositions$label[current_composition_index],
@@ -244,6 +351,8 @@ check_partner_dependence <- function(
       n_defined_simulations = colSums(is.finite(simulated_statistics))
     )
   }
+  checked_composition_indices <- setdiff(checked_composition_indices, undefined_within_indices)
+
   statistic_diagnostics <- dplyr::bind_rows(statistic_diagnostics_by_composition)
   statistic_descriptions <- statistic_diagnostics$description
 
@@ -284,7 +393,7 @@ check_partner_dependence <- function(
   check_result <- list(
     compositions = compositions,
     summary = dplyr::bind_rows(summary_by_composition),
-    n_pairs = nrow(partner_row_map$pairs),
+    n_pairs = partner_row_map$n_complete_dyads,
     n_simulations = n_simulations,
     n_incomplete_dyads = length(partner_row_map$incomplete_dyad_ids),
     n_missing_dyad_rows = length(partner_row_map$missing_dyad_rows),
@@ -317,10 +426,15 @@ check_partner_dependence <- function(
     warning("Omitted: ", paste(omission_details, collapse = "; "), ".", call. = FALSE)
   }
   if (length(skipped_composition_indices) > 0L) {
-    warning("Not checked (fewer than three complete pairs): ",
+    warning("Not checked (fewer than three dyads): ",
             paste0(compositions$label[skipped_composition_indices], " (n = ",
                    compositions$n_pairs[skipped_composition_indices], ")",
                    collapse = "; "), ".", call. = FALSE)
+  }
+  if (length(undefined_within_indices) > 0L) {
+    warning("Not checked (summaries undefined, e.g., one occasion per member): ",
+            paste(compositions$label[undefined_within_indices], collapse = "; "), ".",
+            call. = FALSE)
   }
   if (missing(role)) message_pooled_roles()
   if (plot) graphics::plot(check_result, ask = ask, panels = panels)
@@ -350,7 +464,8 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
   original_dyad_sizes <- table(partner_rows$dyad_number[!is_dyad_id_missing])
   if (any(original_dyad_sizes > 2L)) {
     stop("Each dyad must have at most two fitted responses after rows with ",
-         "missing dyad IDs are omitted.", call. = FALSE)
+         "missing dyad IDs are omitted. For repeated occasions, supply `member` ",
+         "and `time`.", call. = FALSE)
   }
 
   # Remove rows with missing dyad IDs or (if supplied) missing roles.
@@ -411,13 +526,143 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
   # Include known dyads that lost both rows when missing roles were removed.
   return(list(
     pairs = dplyr::select(pairs, "composition_index", "first_partner_row", "second_partner_row"),
-    role_orders = role_orders, compositions = compositions,
+    role_orders = role_orders,
+    compositions = compositions,
+    n_complete_dyads = nrow(pairs),
     incomplete_dyad_ids = unique(dyad_ids[
       !is_dyad_id_missing & !dyad_ids %in% dyad_ids[partner_rows$fitted_row]
     ]),
     missing_dyad_rows = which(is_dyad_id_missing),
     # Report missing roles only on rows with a known dyad ID.
     missing_role_rows = which(is_role_missing & !is_dyad_id_missing)
+  ))
+}
+
+
+# For repeated occasions, split every dataset into member means (between) and
+# each response's deviation from its member's mean (within), and pair partners
+# at each level. Both levels sit side by side in one matrix, so the check runs
+# once over both.
+prepare_occasion_levels <- function(responses_by_dataset, dyad_ids, member_ids,
+                                    occasion_ids, role_values = NULL) {
+  # Treat missing factor labels as missing values too, as prepare_partner_pairs() does.
+  is_missing <- function(values) is.na(values) | is.na(as.character(values))
+  if (any(is_missing(member_ids) | is_missing(occasion_ids))) {
+    stop("`member` and `time` must be known for every fitted row.", call. = FALSE)
+  }
+
+  # One row per fitted row. Missing roles count only on rows with a known dyad ID.
+  rows <- tibble::tibble(
+    fitted_row = seq_along(dyad_ids),
+    dyad = dyad_ids,
+    member = member_ids,
+    occasion = occasion_ids,
+    role = if (is.null(role_values)) NA else role_values
+  ) |>
+    dplyr::mutate(
+      is_dyad_missing = is_missing(.data$dyad),
+      is_role_missing = !is.null(role_values) & is_missing(.data$role) & !.data$is_dyad_missing
+    )
+
+  # Check the structure before dropping missing roles, so repeated occasions or
+  # extra members cannot be hidden.
+  known_dyad_rows <- dplyr::filter(rows, !.data$is_dyad_missing)
+  if (anyDuplicated(known_dyad_rows[c("dyad", "member", "occasion")]) > 0L) {
+    stop("Each member can have at most one fitted row per `time`.", call. = FALSE)
+  }
+  members_per_dyad <- dplyr::summarise(known_dyad_rows, n = dplyr::n_distinct(.data$member),
+                                       .by = "dyad")
+  if (any(members_per_dyad$n > 2L)) {
+    stop("Each dyad must have at most two members.", call. = FALSE)
+  }
+
+  # Keep rows with known roles. Number the members in order of first appearance,
+  # and give each row its column among the deviations.
+  usable_rows <- known_dyad_rows |>
+    dplyr::filter(!.data$is_role_missing) |>
+    dplyr::mutate(member_number = dplyr::cur_group_id(), .by = c("dyad", "member")) |>
+    dplyr::mutate(deviation_column = dplyr::row_number())
+  roles_per_member <- dplyr::summarise(usable_rows, n = dplyr::n_distinct(.data$role),
+                                       .by = "member_number")
+  if (any(roles_per_member$n > 1L)) {
+    stop("Each member must have the same role throughout the data.", call. = FALSE)
+  }
+
+  # 1. Between: pair the partners' means like cross-sectional data. This also
+  #    stops early when too few dyads are complete. Members are in member-number
+  #    order, so pair positions are member numbers.
+  members <- usable_rows |>
+    dplyr::slice_head(n = 1, by = "member_number") |>
+    dplyr::arrange(.data$member_number)
+  between <- prepare_partner_pairs(
+    members$dyad, role_values = if (is.null(role_values)) NULL else members$role
+  )
+
+  # 2. Center: average each member's columns in every dataset (one row per
+  #    dataset), then subtract the member's mean from each response.
+  usable_responses <- responses_by_dataset[, usable_rows$fitted_row, drop = FALSE]
+  columns_by_member <- split(usable_rows$deviation_column, usable_rows$member_number)
+  member_means <- matrix(NA_real_, nrow = nrow(usable_responses), ncol = nrow(members))
+  for (member_number in seq_len(nrow(members))) {
+    member_columns <- columns_by_member[[member_number]]
+    member_means[, member_number] <- rowMeans(usable_responses[, member_columns, drop = FALSE])
+  }
+  deviations <- usable_responses - member_means[, usable_rows$member_number, drop = FALSE]
+
+  # 3. Within: match the two members of each complete dyad on the occasions
+  #    both answered. Each pair keeps its dyad's composition and role order, so
+  #    a composition without shared occasions stays, with zero dyads.
+  shared_occasions <- between$pairs |>
+    dplyr::mutate(dyad_number = dplyr::row_number()) |>
+    dplyr::inner_join(
+      dplyr::select(usable_rows, first_partner_row = "member_number", "occasion",
+                    first_deviation_column = "deviation_column"),
+      by = "first_partner_row"
+    ) |>
+    dplyr::inner_join(
+      dplyr::select(usable_rows, second_partner_row = "member_number", "occasion",
+                    second_deviation_column = "deviation_column"),
+      by = c("second_partner_row", "occasion")
+    )
+  # Count the dyads that share at least one occasion, keeping zeros.
+  sharing_dyads <- dplyr::distinct(shared_occasions, .data$dyad_number, .data$composition_index)
+  within_compositions <- dplyr::mutate(
+    between$compositions,
+    n_pairs = tabulate(sharing_dyads$composition_index, nbins = dplyr::n())
+  )
+
+  # 4. Place the deviations after the member means, and the within compositions
+  #    after the between ones. Labels name the level for messages, printouts,
+  #    and plots.
+  within_pairs <- dplyr::transmute(
+    shared_occasions,
+    composition_index = .data$composition_index + nrow(between$compositions),
+    first_partner_row = .data$first_deviation_column + nrow(members),
+    second_partner_row = .data$second_deviation_column + nrow(members)
+  )
+  compositions <- dplyr::bind_rows(
+    between = between$compositions,
+    within = within_compositions,
+    .id = "level"
+  ) |>
+    dplyr::mutate(label = paste0(.data$label, " (", .data$level, ")"))
+
+  # As in prepare_partner_pairs(), dyads that lost all rows to missing roles
+  # also count as incomplete.
+  complete_dyads <- members$dyad[between$pairs$first_partner_row]
+  return(list(
+    responses_by_dataset = cbind(member_means, deviations),
+    partner_row_map = list(
+      pairs = dplyr::bind_rows(between$pairs, within_pairs),
+      role_orders = rep(between$role_orders, 2L),
+      compositions = compositions,
+      n_complete_dyads = between$n_complete_dyads,
+      incomplete_dyad_ids = unique(
+        dplyr::filter(known_dyad_rows, !.data$dyad %in% complete_dyads)$dyad
+      ),
+      missing_dyad_rows = rows$fitted_row[rows$is_dyad_missing],
+      missing_role_rows = rows$fitted_row[rows$is_role_missing]
+    )
   ))
 }
 
@@ -548,7 +793,8 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
     cat("\n", composition$label, ": ", composition$n_pairs, " of ", x$n_pairs,
         " usable dyads", sep = "")
     if (is.null(composition$statistics[[1]])) {
-      cat("; not checked (fewer than three complete pairs)\n")
+      reason <- if (composition$n_pairs < 3L) "fewer than three dyads" else "summaries undefined"
+      cat("; not checked (", reason, ")\n", sep = "")
       next
     }
     cat("\n")
@@ -635,7 +881,8 @@ print.dyadMLM_partner_check <- function(x, digits = 3L, ...) {
 #' @export
 plot.dyadMLM_partner_check <- function(x, ask = NULL, panels = TRUE, ...) {
 
-  checked_composition_indices <- which(x$compositions$n_pairs >= 3L)
+  # Compositions without statistics were not checked.
+  checked_composition_indices <- which(lengths(x$compositions$statistics) > 0L)
   local_check_paging(ask, panels, if (panels) length(checked_composition_indices) else
     sum(vapply(x$compositions$statistics[checked_composition_indices], ncol, integer(1)) - 1L))
 

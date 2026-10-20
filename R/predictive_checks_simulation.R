@@ -1,7 +1,9 @@
 #' Simulate response datasets for predictive checks
 #'
 #' `r lifecycle::badge("experimental")`
-#' Generates new response datasets for the same observations and predictors.
+#' If a model fits, data simulated from it should resemble the observed data.
+#' This function generates new response datasets for the same observations and
+#' predictors.
 #' Reuse them with [check_partner_dependence()], [check_dyad_residuals()], or
 #' [check_dyad_outcomes()] to check whether a fitted model reproduces features of
 #' the observed data. For a complete example see [check_partner_dependence()].
@@ -64,8 +66,6 @@
 #' The model's fitted link is used for prediction and simulation. Predictions
 #' and simulated responses must be finite.
 #'
-#' [check_partner_dependence()] currently requires cross-sectional dyads.
-#'
 #' @section Technical details:
 #' Each simulation draws new random effects, if the model has any, and then new
 #' responses from the fitted model. Random effects within each block are drawn
@@ -75,8 +75,8 @@
 #' Fitted parameters and predictors, including any lagged responses, stay fixed.
 #' The model is not refitted, and uncertainty in parameter estimates is not
 #' included. This is a *plug-in predictive reference* (Gelman et al., 1996).
-#' If dyads are the only grouping factor, the simulations represent
-#' hypothetical new dyads under the same study design.
+#' If all grouping factors are dyads or nested within dyads (such as dyad-days),
+#' the simulations represent hypothetical new dyads under the same study design.
 #'
 #' `predicted_response` contains predicted mean responses with random effects
 #' in the conditional and zero-inflation models set to zero. For zero-inflated
