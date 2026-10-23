@@ -243,6 +243,9 @@ Next, check whether the model reproduces the data.
 simulations <- simulate_dyad_responses(model, seed = 123)
 ```
 
+The model pools women and men, but the checks below look at each gender
+separately, since pooling can hide misfit.
+
 #### Partner dependence
 
 It can be worthwhile to check plausible role distinctions even when fitting an
