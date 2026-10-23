@@ -248,11 +248,7 @@ separately, since pooling can hide misfit.
 
 #### Partner dependence
 
-It can be worthwhile to check plausible role distinctions even when fitting an
-exchangeable model, since pooling can hide differences in variances or partner
-correlations.
-
-Thus, we check partner dependence, using gender to distinguish partners:
+Check partner dependence, using gender to distinguish partners:
 
 ```{r cross-sectional-check, fig.width = 10, fig.height = 6.5, fig.alt = "Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations."}
 check_partner_dependence(
