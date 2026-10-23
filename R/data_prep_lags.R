@@ -117,6 +117,28 @@ add_temporal_lag_columns <- function(data) {
   out
 }
 
+# Lags match exactly `time - 1`, so time in larger steps leaves them empty.
+# Checked on the returned rows, since temporary rows for missed occasions can
+# hold lag values.
+warn_if_lags_missing <- function(data) {
+  lag_columns <- dyad_generated_columns(attr(data, "dyadMLM")) |>
+    dplyr::filter(.data$lag > 0L, .data$column %in% names(data)) |>
+    dplyr::pull("column")
+  empty_lags <- Filter(function(column) all(is.na(data[[column]])), lag_columns)
+
+  if (length(empty_lags) > 0L) {
+    warning(
+      "All values of ", paste0("`", empty_lags, "`", collapse = ", "),
+      " are missing. Lags match observations at exactly `time - 1`. If `time` ",
+      "counts months or years with steps larger than 1, recode it as a ",
+      "consecutive occasion index (1, 2, 3, ...), keeping gaps for missed ",
+      "occasions.",
+      call. = FALSE
+    )
+  }
+  return(invisible(NULL))
+}
+
 make_predictor_lag_suffix <- function(lag) {
   if (lag == 0L) {
     return("")

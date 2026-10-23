@@ -149,6 +149,8 @@ Target vignette structure:
     preparation or reporting
   - binary, ordinal, and categorical outcomes deferred until complete examples
     are validated
+  - possible section on single-level models with couple-clustered standard
+    errors (see the version 0.3.0 scope)
 - `dev/vignettes/mixed-apim.Rmd`
   - development-only workflow, omitted from the public vignette index
   - cross-sectional and ILD APIMs with mixed dyad compositions
@@ -931,6 +933,89 @@ preparation, diagnostics, and interpretation contracts are stable.
   pkgdown index only when its supported scope is ready for normal package builds.
 - Keep nonlinear outcome-covariance decomposition outside the first generalized
   release unless a separate estimand and validation plan is completed.
+- Candidate section: single-level models with couple-clustered standard errors,
+  e.g., ordinal `MASS::polr()` or `ordinal::clm()` without random effects.
+  Exploratory simulations in October 2026 (10-80 complete dyads plus 100
+  singletons; scripts not kept) found:
+  - The prepared columns, including two-part coding for singletons, are plain
+    fixed-effect terms and work without random effects. Leaving out
+    `.partner_exists` biased the actor and partner slopes (large-sample check:
+    true 0.5 and 0.4, estimated about 0.43 and 0.37). Effects are
+    population-averaged, so they are closer to zero than those of models with
+    random effects.
+  - Cluster on the dyad ID; each person observed alone is their own cluster.
+    Partner effects are informed almost only by complete dyads, so their
+    effective number of clusters is about the number of complete dyads.
+  - Tools (`clubSandwich` 0.7.0, `sandwich` 3.1.3, `glmmTMB` 1.1.15.2):
+    - `clubSandwich` has no methods for `polr` or `clm`. CR2 with Satterthwaite
+      df is only available for `lm` or `glm` versions of the model.
+    - `sandwich::vcovCL()` works, but only with CR0/CR1-type corrections.
+    - `sandwich::vcovBS(type = "jackknife")` had the best small-sample
+      coverage of the clustered options. It silently gives wrong standard
+      errors when the model drops rows (e.g., `missing_partner` rows), so fit
+      on complete cases first.
+    - The built-in sandwich of `glmmTMB` fails for `ordinal()`.
+    - `multgee::ordLORgee()` works; `geepack::ordgee()` diverged silently.
+  - Coverage of the partner slope (500 replications, 10-22 complete dyads):
+    CR0 90-93%, jackknife about 94-96% (its refits failed in 2-4% of samples
+    with 10 dyads). Cross-sectionally, model-based standard errors did at least
+    as well as CR0. In ILD, clustering was essential: model-based standard
+    errors covered the usual-level (CBP) slopes only 67-77% of the time.
+  - Take the cluster vector from the data frame used for fitting. With a
+    formula defined outside a loop, `cluster = ~ coupleID` can fail, and a
+    misaligned vector gives wrong standard errors without an error.
+  - Patterns that do not carry over from the `glmmTMB` vignettes: `0 +` group
+    intercepts (in cumulative-link models the thresholds are the intercept),
+    and reading `.is_<role>` as a role main effect (it is 0 for people observed
+    alone). A separate latent scale for singletons
+    (`clm(scale = ~ .partner_exists)`) is not supported by `vcovCL()`; the
+    jackknife works.
+- Suggested workflow for these models. Follow-up simulations in October 2026
+  used complete cross-sectional dyads; scripts not kept.
+  - Fit the model twice: with `glmmTMB` without random effects for the dyadMLM
+    checks, and with `glm()`, `MASS::glm.nb()` or `ordinal::clm()` for the
+    clustered standard errors. The estimates are identical. The checks already
+    run on such `glmmTMB` fits; pass `data =`, because the dyad ID is no longer
+    in the model frame.
+  - `glm` support in `simulate_dyad_responses()` is not needed. The checks read
+    only the simulations object. A prototype adapter (about 20-35 lines, plus a
+    class allowlist, because `geeglm` and `gam` inherit from `glm`) added
+    nothing a `glmmTMB` fit without random effects cannot do. Binary outcomes
+    are not supported by the checks for any backend.
+  - Standard errors (20-100 dyads, latent ICC about .23, actor, partner, and
+    dyad-level predictors; 1,000-2,000 replications per cell):
+    - CR0 covered 93-95% from about 50 dyads for binary and ordinal outcomes,
+      but as little as 89% with 20-30 dyads.
+    - CR1 (CR0 times G/(G-1)) with t on G-1 df was close to 95% from 20 dyads
+      for binary and from 30 for ordinal outcomes. This needs no `glm`.
+    - CR2 with Satterthwaite df was conservative for binary outcomes with
+      20-30 dyads (97-98%).
+    - For Poisson outcomes with dyad SD 1 on the log scale, all clustered
+      standard errors were too small (CR0 81% with 20 dyads, about 92% with
+      400). CR2 with Satterthwaite df or CR3 helped most with few dyads.
+    - With 20 dyads, logit slopes were biased about 17% away from zero
+      (median), whatever the standard errors.
+  - Checks on fits without random effects (100 and 400 dyads): role-specific
+    views of distinguishable dyads stayed calibrated. Pooled views flagged
+    correct models more often (both checks 11.0% vs 6.7% for the
+    random-intercept model, gaussian), and so did diaries (QQ envelope by role
+    8.3% vs 1.7%; 100 dyads, 10 occasions). Same-role compositions are shown
+    pooled and should behave alike (untested). The partner check flags these
+    fits by construction (73-100% of datasets), and a planned autocorrelation
+    check would too. For Poisson fits, flags in SDs and zeros show
+    overdispersion that clustered standard errors do not need, but may suggest
+    a negative binomial family.
+  - Pitfalls:
+    - `clubSandwich::vcovCR()` and `sandwich::vcovCL()` on `glmmTMB` fits
+      silently return standard errors that are far too small.
+    - `glmmTMB::vcovHC()` gives CR0 only and needs `cluster` as a factor. Its
+      `ordinal()` failure has a two-line upstream fix (prototyped; open
+      `glmmTMB` PRs #1350 and #1344 touch the same helpers).
+    - `compare_nested_models()` runs likelihood-ratio tests that ignore the
+      clustering; use clustered Wald tests instead.
+    - Clustered standard errors assume missingness unrelated to the observed
+      outcomes, whereas likelihood-based mixed models allow missingness that
+      depends on them (MAR).
 
 ## Proposed Version 0.3.1 Scope - Generalized Diagnostics
 
@@ -993,6 +1078,52 @@ them as one release commitment.
   established packages. Defer ILD/time-series imputation, missing structural
   identifiers or completely unobserved members, MNAR sensitivity models, and
   pooling nonlinear covariance summaries until separately validated.
+- People observed alone (`partner_exists`). Exploratory cross-sectional `mice`
+  simulations in October 2026 (scripts not kept) found:
+  - Singletons' partner values do not exist, so they are never imputed. Rows
+    for partners who do not exist must not be kept: `prepare_dyad_data()` then
+    silently turns the singleton into a complete dyad.
+  - Two imputation approaches were unbiased: imputing dyads (one row per dyad)
+    and singletons separately, or one `mice` model that skips the structural
+    cells (`where = FALSE`), uses partner variables only where a partner exists
+    (e.g., `I(ifelse(P == 1, x_partner, 0))`), and lets the partner status `P`
+    interact with own variables. Without these `ifelse()` terms, singletons'
+    own missing values silently stayed `NA`. Models that ignore status-specific
+    relations were biased. Treating the structural zeros as observed made
+    imputations too narrow (coverage about 85%). With status changes in ILD,
+    only the one-model approach is possible; it is untested with `2l` methods.
+  - To retain people whose partner did not take part (the deferred completely
+    unobserved members), add a row for the absent partner (own ID, role,
+    outcome `NA`) and impute their predictors in a dyad-level model. The absent
+    partner's rows then drop out of models, but the dyad is labelled complete:
+    `.is_<role>_x_missing` disappears and printed counts include people who did
+    not take part. A later option to mark rows as not participating could keep
+    the label.
+  - In ILD, rows for occasions a partner missed are only added temporarily
+    during preparation, so users must add them before imputing.
+  - Reshape to one row per dyad by member position, with roles as columns, not
+    by role (reshaping by role fails for same-sex dyads). Convert character
+    columns to factors; `mice` silently drops them from the imputation model.
+  - `partner_exists` and roles must be observed and identical across
+    imputations.
+  - Centering is recomputed in each imputation, so the `.partner_exists`
+    coefficient refers to a slightly different grand mean in each dataset.
+  - A fixed `seed` keeps `.member_contrast_*` identical across imputations.
+    This matters for reproducibility only; estimates do not depend on the
+    signs.
+- Pooling with cluster-robust standard errors: `mice::pool()` on
+  `with(imp, ...)` uses model-based standard errors and ignores clustering.
+  Pool the clustered covariance matrices instead, e.g., with
+  `mitml::testEstimates(qhat, uhat, df.com = ...)`, which accepts one
+  complete-data df per term. Choose that df by hand (see the effective number
+  of clusters in the version 0.3.0 scope).
+- Silent misuse to guard against or document: preparing stacked imputations
+  with `time = .imp` (the duplicate-row error suggests supplying `time`), and
+  imputing prepared columns (actor and partner copies then diverge). When the
+  workflow is documented, also sharpen the user docs: "imputed first" in
+  `prepare_dyad_data()` means before preparing; rows for missed occasions "do
+  not have to be added manually" for preparation but do for imputation; and the
+  imputation sentence in `vignettes/partner-exists.Rmd` should name the steps.
 
 ### Advanced diagnostics
 

@@ -16,7 +16,8 @@ validate_dyad_data(
   dsm_role_order = NULL,
   temporal_decomposition = c("auto", "2l", "none"),
   incomplete_dyads = c("error", "drop"),
-  missing_role = c("error", "drop")
+  missing_role = c("error", "drop"),
+  partner_exists = NULL
 )
 }
 \arguments{
@@ -60,10 +61,13 @@ components. \code{"auto"} resolves to \code{"2l"} when both \code{time} and
 Model-specific helpers may apply additional conventions, such as grand-mean
 centering raw DIM and DSM dyad means.}
 
-\item{incomplete_dyads}{How to handle dyads with fewer than two unique
-members across all rows in \code{data}. \code{"error"} stops with an error and
-\code{"drop"} removes the entire dyad. A dyad with more than two unique members
-is invalid and always causes an error, regardless of this setting.}
+\item{incomplete_dyads}{How to handle people observed alone (a \code{dyad} with
+only one person across all rows in \code{data}) when \code{partner_exists} is not
+supplied. It is then unclear whether their partner exists but did not take
+part, or whether they have no partner. \code{"error"} (default) stops and
+explains how to use \code{partner_exists}. \code{"drop"} removes these dyads. With
+\code{partner_exists}, everyone observed alone is kept and \code{"drop"} is not
+allowed. A dyad with more than two unique members always causes an error.}
 
 \item{missing_role}{How to handle dyads in which at least one member has no
 non-missing \code{role} value on any row. A consistent non-missing role observed
@@ -71,6 +75,13 @@ for a member is propagated to that member's other rows before this policy
 is applied. \code{"error"} stops with an error and \code{"drop"} removes the entire
 dyad. Conflicting non-missing roles always cause an error. Ignored when no
 \code{role} column is supplied.}
+
+\item{partner_exists}{Optional partner status, evaluated in \code{data}: \code{NULL},
+\code{TRUE}, \code{FALSE}, a column name, or an expression (such as \code{!widowed}).
+\code{TRUE} or \code{FALSE} describes everyone observed alone and is ignored for
+complete dyads; a column or expression gives the status for each row.
+Stored per row in a temporary column. See \code{\link[=prepare_dyad_data]{prepare_dyad_data()}} for the
+meaning of each option.}
 }
 \value{
 A tibble with class \code{dyadMLM_data} and metadata about the dyad,

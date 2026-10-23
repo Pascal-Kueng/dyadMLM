@@ -10,6 +10,7 @@ Public report sources stay in `vignettes/articles/`.
 | [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [ild-partner-dependence](ild-partner-dependence/run.R) | Member-mean and same-occasion checks under correct and restricted longitudinal models | [Full report](../../../vignettes/articles/ild-partner-dependence.Rmd) |
+| [mixed-apim-recovery](mixed-apim-recovery/README.md) | Fixed-effect and covariance recovery for mixed-composition Gaussian APIMs | [Recovery report](../../../vignettes/articles/mixed-apim-recovery.Rmd) |
 | [distribution-checks](distribution-checks/run.R) | Residual and outcome flags, pooled versus role checks, and paired PIT centring | [Report](../../../vignettes/articles/distribution-checks.Rmd) |
 | [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
