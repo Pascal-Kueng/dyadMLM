@@ -259,7 +259,9 @@ simulations <- simulate_dyad_responses(model, seed = 123)
 ```
 
 The model pools women and men, but the checks below look at each gender
-separately, since pooling can hide misfit.
+separately, since pooling can hide misfit. It can be worthwhile to check
+other plausible role distinctions too (such as older and younger
+partner).
 
 #### Partner dependence
 
