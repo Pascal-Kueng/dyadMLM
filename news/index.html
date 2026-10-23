@@ -54,6 +54,7 @@
 <li><p>Added experimental predictive checks for response variances and partner correlations in <code>glmmTMB</code> models with Gaussian or selected non-Gaussian responses, including ordinal, zero-inflated, and hurdle models. Checks can be performed separately for each dyad composition. For repeated occasions, supply <code>member</code> and <code>time</code> to <code><a href="../reference/check_partner_dependence.html">check_partner_dependence()</a></code> to check member means and same-occasion deviations separately.</p></li>
 <li><p>Fixed an internal vctrs error in <code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> when no member rows are missing and the data contain, for example, an <code>hms</code> column while the hms package is not loaded.</p></li>
 <li><p>Fixed predictive means for <code>glmmTMB</code> 1.1.15.2 and later when the zero-inflation component has random effects but no fixed effects.</p></li>
+<li><p>Fixed <code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> and <code><a href="../reference/validate_dyad_data.html">validate_dyad_data()</a></code> silently using another column when <code>predictors</code> or <code>lag1_predictors</code> renamed a column, as in <code>c(z = x)</code>. Renaming now gives an error.</p></li>
 <li><p><code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now gives a clear error when <code>data</code> is supplied twice, for example through the pipe and as an argument.</p></li>
 </ul></div>
     <div class="section level2">
