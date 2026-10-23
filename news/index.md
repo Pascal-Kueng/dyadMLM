@@ -45,6 +45,11 @@
   zero-inflation component has random effects but no fixed effects.
 
 - Fixed
+  [`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.md)
+  reporting a likelihood-ratio test for `glmmTMB` models fitted with
+  `priors`. It now asks to refit them without priors.
+
+- Fixed
   [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   and
   [`validate_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/validate_dyad_data.md)

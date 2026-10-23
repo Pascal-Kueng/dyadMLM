@@ -44,6 +44,12 @@ function also checks fitted rows, outcomes, weights and offsets, model
 family and link, maximum-likelihood estimation, and model convergence.
 Each model must use the same untransformed response column.
 
+Because the test requires maximum-likelihood fits, models fitted with
+`priors` in
+[`glmmTMB::glmmTMB()`](https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html) are
+rejected. Their estimates are maximum a posteriori, not maximum
+likelihood.
+
 These checks establish that the models use equivalent observations. They
 cannot establish that one model is mathematically nested within the
 other. The caller remains responsible for supplying genuinely nested
