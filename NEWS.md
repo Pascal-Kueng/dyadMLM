@@ -1,5 +1,9 @@
 # dyadMLM (development version)
 
+* `prepare_dyad_data()` now rejects pool names that match generated role labels
+  in other compositions, preventing distinct groups from silently sharing an
+  indicator column.
+
 * Changed the package license from MIT to GPL-3.
 
 * Added experimental `check_dyad_residuals()` for simulated probability
