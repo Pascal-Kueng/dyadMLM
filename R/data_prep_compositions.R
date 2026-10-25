@@ -254,6 +254,8 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
     as.character(data[[dyad_composition_col]])
   )
 
+  # A pool named like a role label of a distinguishable composition would share
+  # that role's indicator column.
   conflicting_pool_names <- intersect(
     trimws(names(pool_compositions)),
     data[[dyad_composition_role_col]][

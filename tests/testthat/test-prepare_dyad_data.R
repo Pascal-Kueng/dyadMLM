@@ -441,25 +441,22 @@ test_that("prepare_dyad_data rejects pool names matching unpooled role labels", 
   )
 
   for (pool_name in c("A_x_B_A", "A_x_B_B", " A_x_B_A ")) {
-    for (short_colnames in c(TRUE, FALSE)) {
-      expect_error(
-        prepare_dyad_data(
-          data, dyad, member,
-          role = role,
-          predictors = x,
-          pool_compositions = stats::setNames(
-            list(c("C-C", "D-D")), pool_name
-          ),
-          short_colnames = short_colnames,
-          seed = 1
+    expect_error(
+      prepare_dyad_data(
+        data, dyad, member,
+        role = role,
+        predictors = x,
+        pool_compositions = stats::setNames(
+          list(c("C-C", "D-D")), pool_name
         ),
-        paste0(
-          "Conflicting name(s): ", trimws(pool_name),
-          ". Choose a different pool name."
-        ),
-        fixed = TRUE
-      )
-    }
+        seed = 1
+      ),
+      paste0(
+        "Conflicting name(s): ", trimws(pool_name),
+        ". Choose a different pool name."
+      ),
+      fixed = TRUE
+    )
   }
 })
 

@@ -2,7 +2,8 @@
 
 * `prepare_dyad_data()` now rejects pool names that match generated role labels
   in other compositions, preventing distinct groups from silently sharing an
-  indicator column.
+  indicator column (thanks to [@JorAlEs](https://github.com/JorAlEs),
+  [#108](https://github.com/Pascal-Kueng/dyadMLM/pull/108)).
 
 * Changed the package license from MIT to GPL-3.
 
