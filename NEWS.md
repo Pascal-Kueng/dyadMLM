@@ -48,10 +48,10 @@
 * Fixed `compare_nested_models()` reporting a likelihood-ratio test for
   `glmmTMB` models fitted with `priors`. It now asks to refit them without
   priors.
-  
-* Fixed `prepare_dyad_data()` and `validate_dyad_data()` silently using
-  another column when `predictors` or `lag1_predictors` renamed a column, as
-  in `c(z = x)`. Renaming now gives an error.
+
+* Fixed `prepare_dyad_data()` silently using another column when `predictors`
+  or `lag1_predictors` renamed a column, as in `c(z = x)`. Renaming now gives
+  an error.
 
 * Fixed `prepare_dyad_data()` failing when an APIM predictor is also the
   `dyad`, `member`, or `time` column, as in growth models that use time as a
@@ -60,10 +60,9 @@
 * Fixed `prepare_dyad_data()` failing with dplyr 1.1.0. dyadMLM now requires
   dplyr 1.1.1 or later.
 
-* Fixed `prepare_dyad_data()` and `validate_dyad_data()` keeping incomplete
-  dyads despite `incomplete_dyads = "drop"` when the `dyad` column was named
-  `n_members`. Messages and metadata also showed member counts instead of dyad
-  IDs.
+* Fixed `prepare_dyad_data()` keeping incomplete dyads despite
+  `incomplete_dyads = "drop"` when the `dyad` column was named `n_members`.
+  Messages and metadata also showed member counts instead of dyad IDs.
 
 * `prepare_dyad_data()` now gives a clear error when `data` is supplied
   twice, for example through the pipe and as an argument.
