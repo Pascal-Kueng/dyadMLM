@@ -49,6 +49,9 @@
   another column when `predictors` or `lag1_predictors` renamed a column, as
   in `c(z = x)`. Renaming now gives an error.
 
+* Fixed `prepare_dyad_data()` failing with dplyr 1.1.0. dyadMLM now requires
+  dplyr 1.1.1 or later.
+
 * `prepare_dyad_data()` now gives a clear error when `data` is supplied
   twice, for example through the pipe and as an argument.
 
