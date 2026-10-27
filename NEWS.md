@@ -7,6 +7,14 @@
 
 * Changed the package license from MIT to GPL-3.
 
+* Added experimental `simulate_dyad_responses()` and
+  `check_partner_dependence()` to check response variances and partner
+  correlations in `glmmTMB` models with Gaussian or selected non-Gaussian
+  responses, including ordinal, zero-inflated, and hurdle models. Checks can be
+  performed separately for each dyad composition. For repeated occasions,
+  supply `member` and `time` to `check_partner_dependence()` to check member
+  means and same-occasion deviations separately.
+
 * Added experimental `check_dyad_residuals()` for simulated probability
   integral transform (PIT) residuals and `check_dyad_outcomes()` for response
   distributions, SDs, extremes, and zero counts. Both use the output from
@@ -26,13 +34,6 @@
 * Improved function help and the model-comparison example (thanks to
   [@musanyaks](https://github.com/musanyaks),
   [#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).
-
-* Added experimental predictive checks for response variances and partner
-  correlations in `glmmTMB` models with Gaussian or selected non-Gaussian
-  responses, including ordinal, zero-inflated, and hurdle models. Checks can be
-  performed separately for each dyad composition. For repeated occasions,
-  supply `member` and `time` to `check_partner_dependence()` to check member
-  means and same-occasion deviations separately.
 
 * Fixed an internal vctrs error in `prepare_dyad_data()` when no member rows
   are missing and the data contain, for example, an `hms` column while the hms
