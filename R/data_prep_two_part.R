@@ -305,10 +305,10 @@ model_term_advice <- function(meta, data) {
   }
   if (nrow(alone) > 0L) {
     # The variance of a group of one person goes to 0, often without a
-    # warning.
+    # warning. People observed alone each have their own dyad.
     one_person <- character()
     for (column in alone$column) {
-      if (dplyr::n_distinct(data[[meta$member]][data[[column]] == 1]) == 1L) {
+      if (dplyr::n_distinct(data[[meta$dyad]][data[[column]] == 1]) == 1L) {
         one_person <- c(one_person, column)
       }
     }

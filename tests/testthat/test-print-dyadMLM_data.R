@@ -946,8 +946,14 @@ test_that("people observed alone are counted in the current data", {
   expect_printed(printed, "People observed alone: 2 without a partner, 1 with a partner not in the data.")
   # Their indicators keep their full names under "Added columns".
   expect_printed(printed, "#   .is_singleton ")
-  # Only the group of one person is too small for its own variance.
+  # Only the group of one person is too small for its own variance, also when
+  # member IDs repeat across dyads.
   expect_printed(printed, "Pool the variance of `.is_missing_partner` with dyad members.")
+  repeated_ids <- dplyr::mutate(data, person_id = c(1, 2, 1, 2, 1, 1, 1))
+  expect_printed(
+    capture_wide_print(prepare_partner_data(repeated_ids, predictors = x, partner_exists = partnered)),
+    "Pool the variance of `.is_missing_partner` with dyad members."
+  )
 
   printed <- capture_wide_print(prepared[prepared$dyad_id != 4 & prepared$dyad_id != 5, ])
   expect_printed(printed, "# Rows: 5 | Dyads: 2 | People observed alone: 1 |")
