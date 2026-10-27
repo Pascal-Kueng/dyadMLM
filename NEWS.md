@@ -55,6 +55,10 @@
 * `prepare_dyad_data()` now gives a clear error when `data` is supplied
   twice, for example through the pipe and as an argument.
 
+* `prepare_dyad_data()` warns when all lag-1 values of a predictor are
+  missing, for example when `time` counts years with two-year waves
+  ([#83](https://github.com/Pascal-Kueng/dyadMLM/issues/83)).
+
 # dyadMLM 0.2.0
 
 * This early API-stabilization release intentionally makes a few direct,
