@@ -18,11 +18,8 @@ There are currently no reverse dependencies.
 
 ## Release summary
 
-This is an early API-stabilization update following version 0.1.0. It fixes
-longitudinal partner and lagged-column construction when dyad-occasion rows are
-missing, strengthens input validation, and completes the documented Gaussian
-APIM, DIM, and DSM preparation workflows.
-
-The release also contains intentionally breaking names while the package is
-new. The changes and direct migration paths are listed in `NEWS.md`; deprecated
-wrappers are not included.
+This release adds experimental model checks: predictive checks of response
+variances and partner correlations, also for repeated occasions, and checks of
+residuals and response distributions based on simulated responses. It also
+fixes cases in which data preparation or covariance recovery gave wrong results
+without an error. dyadMLM now requires dplyr 1.1.1 or later.
