@@ -354,7 +354,7 @@ model_term_advice <- function(meta, data) {
     # With `.partner_exists` added, pooling one group gives back the separate
     # model.
     if (!is.null(partner_terms) && example$dyad_type == "singleton") {
-      after <- c(after, "With two-part coding, keep the intercepts of people without a partner separate.")
+      after <- c(after, "With two-part coding, pool only the variance of people without a partner, not their intercepts.")
     }
   }
   after <- c(after, "See `vignette(\"partner-exists\")`.")

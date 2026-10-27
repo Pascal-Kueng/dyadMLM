@@ -991,7 +991,7 @@ test_that("partner data print names the terms of every composition", {
     "#     + (0 + .is_singleton_male | dyad_id)"
   ))
   expect_printed(printed, "for example `I(.is_female + .is_singleton_female)`.")
-  expect_printed(printed, "With two-part coding, keep the intercepts of people without a partner separate.")
+  expect_printed(printed, "With two-part coding, pool only the variance of people without a partner, not their intercepts.")
   expect_no_match(printed, "member-contrast term", fixed = TRUE)
   expect_printed(printed, "Pool the variance of `.is_singleton_female` and `.is_singleton_male` with dyad members.")
 
@@ -1047,7 +1047,7 @@ test_that("partner data print names the terms of every composition", {
     printed,
     "To pool the variance, also use `I(.member_contrast_arbitrary + .is_male_x_missing)` in the member-contrast term."
   )
-  expect_no_match(printed, "keep the intercepts", fixed = TRUE)
+  expect_no_match(printed, "not their intercepts", fixed = TRUE)
   expect_no_match(printed, "Partner predictors are 0", fixed = TRUE)
   # Without partner predictors, nothing drops out.
   printed <- capture_wide_print(prepare_partner_data(
