@@ -112,6 +112,8 @@ distributed as expected.
 This example requires the development version of **dyadMLM**. It also
 uses **glmmTMB**.
 
+### Data preparation
+
 ``` r
 library(dyadMLM)
 
@@ -184,6 +186,8 @@ print(prepared_data, n = 4)
 #> #   .provided_support_gmc_partner <dbl>
 ```
 
+### Model fitting
+
 Fit the exchangeable APIM:
 
 ``` r
@@ -246,14 +250,24 @@ shows these estimates:
 
 <img src="man/figures/README-cross-sectional-diagram-1.svg" alt="Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner effect 0.18, common residual SD 1.09, and residual correlation -0.04." width="100%" />
 
-Next, check whether the model reproduces the data.
+### Model checks
 
-Simulate responses and check partner dependence, using gender to
-distinguish partners:
+Next, check whether the model reproduces the data.
 
 ``` r
 simulations <- simulate_dyad_responses(model, seed = 123)
+```
 
+The model pools women and men, but the checks below look at each gender
+separately, since pooling can hide misfit. It can be worthwhile to check
+other plausible role distinctions too (such as older and younger
+partner).
+
+#### Partner dependence
+
+Check partner dependence, using gender to distinguish partners:
+
+``` r
 check_partner_dependence(
   simulations,
   dyad = coupleID,
@@ -265,26 +279,20 @@ check_partner_dependence(
 
 <img src="man/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
 
-The function groups the six plots in one figure. Use `panels = FALSE` to
-show them separately.
-
 Here, simulations produce weaker partner correlations and larger SDs of
 partner half-differences than observed (red lines), suggesting
 **misfit**.
 
-With mixed dyad compositions, each observed role pair gets its own
-figure. With few dyads in a composition, the simulated ranges are wide,
-so its panels lack sensitivity. It can be worthwhile to check plausible
-role distinctions even when fitting an exchangeable model, since pooling
-can hide differences in variances or partner correlations. These checks
-alone do not establish whether fixed effects should be pooled ([nested
-model
+These checks alone do not establish whether fixed effects should be
+pooled ([nested model
 comparisons](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
 can help assess those restrictions).
 
 For intensive longitudinal data, also supply `member` and `time`. The
 check then compares member means and same-occasion deviations from them
 separately.
+
+#### Residuals
 
 The same `simulations` can be reused with `check_dyad_residuals()` and
 `check_dyad_outcomes()`. Use the same `dyad`, `role`, `member`, and
@@ -307,6 +315,8 @@ Women’s QQ curve and PIT median rise above their envelopes and men’s
 fall below, so women’s observed closeness is higher than simulated and
 men’s is lower than simulated.
 
+#### Outcome distributions
+
 ``` r
 check_dyad_outcomes(
   simulations,
@@ -320,6 +330,8 @@ check_dyad_outcomes(
 
 The outcome ECDFs show the same issue, while response SDs and largest
 deviations stay within their simulated limits.
+
+### Model comparison
 
 Together, these plots point to issues with the exchangeability
 assumption of the model. A next step is to fit a distinguishable APIM

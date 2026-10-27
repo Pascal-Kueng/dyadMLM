@@ -1,5 +1,10 @@
 # dyadMLM (development version)
 
+* `prepare_dyad_data()` now rejects pool names that match generated role labels
+  in other compositions, preventing distinct groups from silently sharing an
+  indicator column (thanks to [@JorAlEs](https://github.com/JorAlEs),
+  [#108](https://github.com/Pascal-Kueng/dyadMLM/pull/108)).
+
 * Changed the package license from MIT to GPL-3.
 
 * Added experimental `check_dyad_residuals()` for simulated probability
@@ -53,15 +58,35 @@
   `I(.is_male_x_male + .is_singleton_male)`, which let people observed alone
   share the variance of an exchangeable composition.
 
-* `prepare_dyad_data()` warns when all lag-1 values of a predictor are
-  missing, for example when `time` counts years with two-year waves
-  ([#83](https://github.com/Pascal-Kueng/dyadMLM/issues/83)).
-
 * Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.
 
+* Fixed `compare_nested_models()` reporting a likelihood-ratio test for
+  `glmmTMB` models fitted with `priors`. It now asks to refit them without
+  priors.
+  
+* Fixed `prepare_dyad_data()` and `validate_dyad_data()` silently using
+  another column when `predictors` or `lag1_predictors` renamed a column, as
+  in `c(z = x)`. Renaming now gives an error.
+
+* Fixed `prepare_dyad_data()` failing when an APIM predictor is also the
+  `dyad`, `member`, or `time` column, as in growth models that use time as a
+  predictor.
+
+* Fixed `prepare_dyad_data()` failing with dplyr 1.1.0. dyadMLM now requires
+  dplyr 1.1.1 or later.
+
+* Fixed `prepare_dyad_data()` and `validate_dyad_data()` keeping incomplete
+  dyads despite `incomplete_dyads = "drop"` when the `dyad` column was named
+  `n_members`. Messages and metadata also showed member counts instead of dyad
+  IDs.
+
 * `prepare_dyad_data()` now gives a clear error when `data` is supplied
   twice, for example through the pipe and as an argument.
+
+* `prepare_dyad_data()` warns when all lag-1 values of a predictor are
+  missing, for example when `time` counts years with two-year waves
+  ([#83](https://github.com/Pascal-Kueng/dyadMLM/issues/83)).
 
 # dyadMLM 0.2.0
 

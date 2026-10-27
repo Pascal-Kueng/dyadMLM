@@ -291,6 +291,24 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
     as.character(data[[dyad_composition_col]])
   )
 
+  # A pool named like a role label of a distinguishable composition would share
+  # that role's indicator column.
+  conflicting_pool_names <- intersect(
+    trimws(names(pool_compositions)),
+    data[[dyad_composition_role_col]][
+      data[[dyad_type_col]] == "distinguishable"
+    ]
+  )
+  if (length(conflicting_pool_names) > 0L) {
+    stop(
+      "`pool_compositions` names must not match generated role labels in other compositions. ",
+      "Conflicting name(s): ",
+      paste(sort(conflicting_pool_names), collapse = ", "),
+      ". Choose a different pool name.",
+      call. = FALSE
+    )
+  }
+
   # Add a temporary pooled contrast, then expand it into one contrast column
   # per selected composition in finalize_composition_columns().
   needs_member_contrast <-
@@ -847,9 +865,9 @@ stop_if_labels_coincide <- function(labels) {
   stop(
     "Different groups would get the same label: ",
     paste(unique(labels), collapse = ", "),
-    ". This happens when a `role` value or a `pool_compositions` name looks ",
-    "like part of another label (such as `singleton_`, `_x_missing`, or a ",
-    "composition and role). Rename these role values or pool names.",
+    ". This happens when a `role` value looks like part of another label ",
+    "(such as `singleton_`, `_x_missing`, or a composition and role). Rename ",
+    "these role values.",
     call. = FALSE
   )
 }

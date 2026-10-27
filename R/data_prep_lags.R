@@ -124,7 +124,10 @@ warn_if_lags_missing <- function(data) {
   lag_columns <- dyad_generated_columns(attr(data, "dyadMLM")) |>
     dplyr::filter(.data$lag > 0L, .data$column %in% names(data)) |>
     dplyr::pull("column")
-  empty_lags <- Filter(function(column) all(is.na(data[[column]])), lag_columns)
+  empty_lags <- data |>
+    dplyr::select(dplyr::all_of(lag_columns)) |>
+    dplyr::select(dplyr::where(function(x) all(is.na(x)))) |>
+    names()
 
   if (length(empty_lags) > 0L) {
     warning(

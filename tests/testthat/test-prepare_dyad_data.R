@@ -432,6 +432,85 @@ test_that("prepare_dyad_data can pool exchangeable compositions for DIM", {
   expect_true(".x_within_dyad_dev" %in% names(result))
 })
 
+test_that("prepare_dyad_data rejects pool names matching unpooled role labels", {
+  data <- data.frame(
+    dyad = rep(1:3, each = 2),
+    member = rep(1:2, 3),
+    role = c("A", "B", "C", "C", "D", "D"),
+    x = 1:6
+  )
+
+  for (pool_name in c("A_x_B_A", "A_x_B_B", " A_x_B_A ")) {
+    expect_error(
+      prepare_dyad_data(
+        data, dyad, member,
+        role = role,
+        predictors = x,
+        pool_compositions = stats::setNames(
+          list(c("C-C", "D-D")), pool_name
+        ),
+        seed = 1
+      ),
+      paste0(
+        "Conflicting name(s): ", trimws(pool_name),
+        ". Choose a different pool name."
+      ),
+      fixed = TRUE
+    )
+  }
+})
+
+test_that("prepare_dyad_data keeps pooled and unpooled role indicators separate", {
+  data <- data.frame(
+    dyad = rep(1:3, each = 2),
+    member = rep(1:2, 3),
+    role = c("A", "B", "C", "C", "D", "D"),
+    x = 1:6
+  )
+
+  result <- prepare_dyad_data(
+    data, dyad, member,
+    role = role,
+    predictors = x,
+    pool_compositions = list(pooled = c("C-C", "D-D")),
+    seed = 1
+  )
+
+  expect_equal(result$.is_A_x_B_A, c(1, 0, 0, 0, 0, 0))
+  expect_equal(result$.is_A_x_B_B, c(0, 1, 0, 0, 0, 0))
+  expect_equal(result$.is_pooled, c(0, 0, 1, 1, 1, 1))
+})
+
+test_that("prepare_dyad_data validates pool names against final role labels", {
+  data <- data.frame(
+    dyad = rep(1:3, each = 2),
+    member = rep(1:2, 3),
+    role = c("A", "B", "C", "C", "D", "D"),
+    x = 1:6
+  )
+
+  filtered <- prepare_dyad_data(
+    data, dyad, member,
+    role = role,
+    predictors = x,
+    keep_compositions = c("C-C", "D-D"),
+    pool_compositions = list(A_x_B_A = c("C-C", "D-D")),
+    seed = 1
+  )
+  expect_equal(filtered$.is_exchangeable, rep(1, 4))
+
+  exchangeable <- prepare_dyad_data(
+    data, dyad, member,
+    role = role,
+    predictors = x,
+    set_exchangeable_compositions = "A-B",
+    pool_compositions = list(A_x_B_A = c("C-C", "D-D")),
+    seed = 1
+  )
+  expect_equal(exchangeable$.is_A_x_B, c(1, 1, 0, 0, 0, 0))
+  expect_equal(exchangeable$.is_A_x_B_A, c(0, 0, 1, 1, 1, 1))
+})
+
 test_that("prepare_dyad_data treats data without role as assumed exchangeable dyads", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),

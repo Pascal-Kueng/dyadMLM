@@ -809,9 +809,17 @@ model syntax (0.4.0), expanded `brms` workflows (0.4.5), and reporting and
 visualization (0.5.0). Closely spaced milestones may be bundled into a
 worthwhile CRAN update rather than submitted separately.
 
+The next CRAN release is 0.3.0
+([milestone](https://github.com/Pascal-Kueng/dyadMLM/milestone/1), checklist
+[#58](https://github.com/Pascal-Kueng/dyadMLM/issues/58)). It bundles the
+partner-dependence checks planned as 0.2.1 and 0.2.2, the residual and outcome
+checks, and the fixes since 0.2.0. The proposed scopes numbered 0.2.5 and later,
+including the generalized APIM workflows proposed as 0.3.0, get new numbers when
+they are scheduled.
+
 ## Version 0.2.1 Scope - Cross-Sectional Partner Dependence
 
-Status: in development. `simulate_dyad_responses()` and
+Status: merged, ships in 0.3.0. `simulate_dyad_responses()` and
 `check_partner_dependence()` support Gaussian and compatible scalar
 non-Gaussian `glmmTMB` responses. Keep the implementation direct: simulate,
 apply the same centred or raw statistic, and compare. References are
@@ -826,9 +834,10 @@ prototype branches as references; port validated behavior selectively.
 
 ## Version 0.2.2 Scope - ILD Partner Dependence
 
-Status: in development. `check_partner_dependence()` now takes `member` and
-`time` and checks member means and same-occasion deviations for all supported
-families ([plan](diagnostic_checks/ild-partner-dependence-plan.md)). Lagged
+Status: merged, ships in 0.3.0. `check_partner_dependence()` now takes
+`member` and `time` and checks member means and same-occasion deviations for
+all supported families
+([plan](diagnostic_checks/ild-partner-dependence-plan.md)). Lagged
 statistics follow separately. A [validation study](../vignettes/articles/ild-partner-dependence.Rmd)
 covers the current check.
 
@@ -846,6 +855,31 @@ covers the current check.
 - Validate hand calculations, member swaps, unbalanced schedules, exact gaps,
   fitted covariance structures, and the cross-sectional limit. An external time
   factor cannot restore an AR state already dropped during model fitting.
+
+## Release after 0.3.0 - People Observed Without Their Partner
+
+Status: planned
+([milestone](https://github.com/Pascal-Kueng/dyadMLM/milestone/2)). PR #88
+adds `partner_exists` to `prepare_dyad_data()`. It was deferred from 0.3.0.
+Its handling of status changes over time is the package's own extension and
+needs feedback from statisticians, and the remaining part needs the fixes below
+and #82.
+
+- Support two-part coding only for a status that is constant within each dyad:
+  cross-sectional data, and longitudinal data with singletons, complete dyads,
+  and people whose partner never took part. Stop with an error when the status
+  changes within a dyad.
+- Keep people in their dyad's composition when their partner exists but did
+  not take part, with `NA` partner values.
+- Let `print()` name every indicator that singletons need.
+- Ship singletons in the residual and outcome checks (#82) in the same release.
+- Add status changes over time in a separate PR, after feedback from
+  statisticians. Do not set the partner's usual level (`cbp`) to 0 by default
+  after a loss.
+- Name one or two reviewers and a target date for that feedback.
+
+Details and questions for statisticians:
+[plan in #88](https://github.com/Pascal-Kueng/dyadMLM/pull/88#issuecomment-6444975743).
 
 ## Proposed Version 0.2.5 Scope - APIM Covariance Decomposition
 

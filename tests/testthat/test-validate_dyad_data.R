@@ -218,6 +218,38 @@ test_that("validate_dyad_data checks lag predictor arguments", {
   )
 })
 
+test_that("validate_dyad_data rejects renamed predictor selections", {
+  longitudinal <- data.frame(
+    dyad_id = rep(1:2, each = 4),
+    person_id = rep(c("A", "B"), 4),
+    time = rep(rep(1:2, each = 2), 2),
+    x = 1:8,
+    z = 11:18
+  )
+  validate <- function(...) {
+    validate_dyad_data(longitudinal, dyad = dyad_id, member = person_id, time = time, ...)
+  }
+
+  # `c(z = x)` renames to an existing column, `c(new = x)` to a new one.
+  expect_error(validate(predictors = c(z = x)), "^`predictors` cannot rename columns\\.")
+  expect_error(validate(predictors = c(new = x)), "^`predictors` cannot rename columns\\.")
+  expect_error(
+    validate(predictors = c(x, z), lag1_predictors = c(z = x)),
+    "^`lag1_predictors` cannot rename columns\\."
+  )
+  expect_error(
+    validate(predictors = c(x, z), lag1_predictors = c(new = x)),
+    "^`lag1_predictors` cannot rename columns\\."
+  )
+
+  result <- validate(
+    predictors = c(x, dplyr::starts_with("z")),
+    lag1_predictors = dplyr::all_of("x")
+  )
+  expect_equal(attr(result, "dyadMLM")$predictors, c("x", "z"))
+  expect_equal(attr(result, "dyadMLM")$lag1_predictors, "x")
+})
+
 test_that("validate_dyad_data rejects predictor suffix collisions", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
@@ -733,6 +765,37 @@ test_that("validate_dyad_data rejects groups with more than two members", {
   expect_error(
     validate_dyad_data(data, dyad = dyad_id, member = person_id, incomplete_dyads = "drop"),
     "Found 1 dyad with more than two members, with ID: 1.",
+    fixed = TRUE
+  )
+})
+
+test_that("incomplete-dyad checks keep a dyad column named n_members", {
+  data <- data.frame(
+    n_members = c(10, 20, 20, 30, 30),
+    person = c(1, 1, 2, 1, 2)
+  )
+
+  expect_message(
+    dropped <- prepare_dyad_data(
+      data,
+      dyad = n_members,
+      member = person,
+      incomplete_dyads = "drop",
+      seed = 1
+    ),
+    "Dropped 1 incomplete dyad, with ID: 10.",
+    fixed = TRUE
+  )
+  expect_equal(dropped$n_members, c(20, 20, 30, 30))
+  expect_equal(attr(dropped, "dyadMLM")$dropped_incomplete_dyads, 10)
+
+  too_large <- data.frame(
+    n_members = c(10, 10, 10, 20, 20),
+    person = c(1, 2, 3, 1, 2)
+  )
+  expect_error(
+    prepare_dyad_data(too_large, dyad = n_members, member = person, seed = 1),
+    "Found 1 dyad with more than two members, with ID: 10.",
     fixed = TRUE
   )
 })
