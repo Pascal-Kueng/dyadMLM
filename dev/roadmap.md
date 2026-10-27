@@ -809,10 +809,11 @@ worthwhile CRAN update rather than submitted separately.
 
 The next CRAN release is 0.3.0
 ([milestone](https://github.com/Pascal-Kueng/dyadMLM/milestone/1), checklist
-[#58](https://github.com/Pascal-Kueng/dyadMLM/issues/58)). It bundles the 0.2.1
-and 0.2.2 partner checks, the residual and outcome checks, and the fixes since
-0.2.0. The proposed scopes numbered 0.2.5 and later get new numbers when they
-are scheduled.
+[#58](https://github.com/Pascal-Kueng/dyadMLM/issues/58)). It bundles the
+partner-dependence checks planned as 0.2.1 and 0.2.2, the residual and outcome
+checks, and the fixes since 0.2.0. The proposed scopes numbered 0.2.5 and later,
+including the generalized APIM workflows proposed as 0.3.0, get new numbers when
+they are scheduled.
 
 ## Version 0.2.1 Scope - Cross-Sectional Partner Dependence
 
@@ -857,16 +858,17 @@ covers the current check.
 
 Status: planned
 ([milestone](https://github.com/Pascal-Kueng/dyadMLM/milestone/2)). PR #88
-adds `partner_exists` to `prepare_dyad_data()`. It was deferred from 0.3.0
-because its handling of status changes over time is the package's own
-extension and needs feedback from statisticians.
+adds `partner_exists` to `prepare_dyad_data()`. It was deferred from 0.3.0.
+Its handling of status changes over time is the package's own extension and
+needs feedback from statisticians, and the remaining part needs the fixes below
+and #82.
 
 - Support two-part coding only for a status that is constant within each dyad:
   cross-sectional data, and longitudinal data with singletons, complete dyads,
-  and partners who never took part. Stop with an error when the status changes
-  within a dyad.
-- Keep people whose partner exists but did not take part in their dyad's
-  composition, with `NA` partner values.
+  and people whose partner never took part. Stop with an error when the status
+  changes within a dyad.
+- Keep people in their dyad's composition when their partner exists but did
+  not take part, with `NA` partner values.
 - Let `print()` name every indicator that singletons need.
 - Ship singletons in the residual and outcome checks (#82) in the same release.
 - Add status changes over time in a separate PR, after feedback from
