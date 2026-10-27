@@ -1785,7 +1785,8 @@ match_one_supplied_exchangeable_pair <- function(
     if (!all(shared_values %in% c(0, 1))) {
       stop(
         pair_label, ": `", pair$shared_indicator,
-        "` must contain only 0 and 1. Other values change the scale of the ",
+        "` must be 1 on the rows of this composition and 0 on all other rows. ",
+        "Other values change the scale of the ",
         "shared random effects, so the recovered covariances would be wrong. ",
         "Correct the coding and refit the model.",
         call. = FALSE

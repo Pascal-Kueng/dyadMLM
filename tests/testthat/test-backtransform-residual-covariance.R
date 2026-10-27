@@ -1853,7 +1853,7 @@ test_that("shared-only recovery checks a named shared indicator", {
   model <- glmmTMB::glmmTMB(y ~ 1 + (0 + shared | dyad), data = model_data)
   expect_error(
     recover_exchangeable_covariance(model, block_pairings = shared_only),
-    "`block_pairings`: `shared` must contain only 0 and 1",
+    "`block_pairings`: `shared` must be 1 on the rows of this composition and 0 on all other rows.",
     fixed = TRUE
   )
 })
