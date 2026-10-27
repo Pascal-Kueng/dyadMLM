@@ -122,8 +122,12 @@ decomposition and model-ready predictor construction.</p></dd>
 model-ready columns should be created. Requires <code>time</code> to be a finite,
 integer-valued numeric measurement index. Lagging respects the dyad and
 member structure, matches observations at exactly <code>time - 1</code>, and does not
-bridge missing occasions. Eligible raw, within-person, and APIM GMC
-variants are lagged; stable between-person variants are not.</p></dd>
+bridge missing occasions. If occasions are unequally spaced, for example
+waves in 2008, 2010, and 2013, number the study's occasions (1, 2, 3) and
+supply that index as <code>time</code>. The lag then refers to the previous occasion,
+regardless of how much time lies between them. Eligible raw,
+within-person, and APIM GMC variables are lagged, but stable
+between-person variables are not.</p></dd>
 
 
 <dt id="arg-model-types">model_types<a class="anchor" aria-label="anchor" href="#arg-model-types"></a></dt>

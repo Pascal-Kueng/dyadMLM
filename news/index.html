@@ -59,6 +59,7 @@
 <li><p>Fixed <code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> and <code><a href="../reference/validate_dyad_data.html">validate_dyad_data()</a></code> silently using another column when <code>predictors</code> or <code>lag1_predictors</code> renamed a column, as in <code>c(z = x)</code>. Renaming now gives an error.</p></li>
 <li><p>Fixed <code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> failing with dplyr 1.1.0. dyadMLM now requires dplyr 1.1.1 or later.</p></li>
 <li><p><code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now gives a clear error when <code>data</code> is supplied twice, for example through the pipe and as an argument.</p></li>
+<li><p><code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> warns when all lag-1 values of a predictor are missing, for example when <code>time</code> counts years with two-year waves (<a href="https://github.com/Pascal-Kueng/dyadMLM/issues/83" class="external-link">#83</a>).</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="dyadmlm-020">dyadMLM 0.2.0<a class="anchor" aria-label="anchor" href="#dyadmlm-020"></a></h2><p class="text-muted">CRAN release: 2026-08-21</p>
