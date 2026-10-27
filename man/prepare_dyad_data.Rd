@@ -54,8 +54,11 @@ decomposition and model-ready predictor construction.}
 model-ready columns should be created. Requires \code{time} to be a finite,
 integer-valued numeric measurement index. Lagging respects the dyad and
 member structure, matches observations at exactly \code{time - 1}, and does not
-bridge missing occasions. Eligible raw, within-person, and APIM GMC
-variants are lagged; stable between-person variants are not.}
+bridge missing occasions. If occasions are unequally spaced, for example
+waves in 2008, 2010, and 2013, number the study's occasions (1, 2, 3) and
+supply that index as \code{time}. The lag then refers to the previous occasion,
+however much time lies between them. Eligible raw, within-person, and APIM
+GMC variants are lagged; stable between-person variants are not.}
 
 \item{model_types}{Model-ready column families to construct. Can contain one
 or more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"apim"} creates
