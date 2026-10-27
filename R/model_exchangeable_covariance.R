@@ -867,10 +867,15 @@ validate_exchangeable_coding <- function(
       call. = FALSE
     )
   }
-  # With a generated indicator, a one-sided group only means a missing partner,
-  # which leaves the recovered covariance correct. So warn only for custom ones.
-  if (!is_generated_exchangeable_difference_indicator(idiff) &&
-      any(!has_both_positions)) {
+
+  # 7. Generated indicators code both members of every dyad and keep each
+  # member's position by construction, so a one-sided group only means a
+  # missing partner. A custom indicator can also give both members the same
+  # code, so check it further.
+  if (is_generated_exchangeable_difference_indicator(idiff)) {
+    return(invisible(NULL))
+  }
+  if (any(!has_both_positions)) {
     warning(
       pair_context, sum(!has_both_positions), " of ",
       length(has_both_positions), " supported fitted `", group_name,
@@ -881,10 +886,9 @@ validate_exchangeable_coding <- function(
     )
   }
 
-  # 7. Generated indicators keep each member's position across repeated rows by
-  # construction. For a custom indicator, this cannot be verified here.
-  if (!is_generated_exchangeable_difference_indicator(idiff) &&
-      any(lengths(signs_by_group)[has_both_positions] > 2L)) {
+  # 8. Without a member identifier, stable positions of a custom indicator
+  # across repeated rows cannot be verified here.
+  if (any(lengths(signs_by_group)[has_both_positions] > 2L)) {
     warning(
       pair_context, "At least one supported fitted `", group_name,
       "` group contains repeated rows with both positions, but stable ",
