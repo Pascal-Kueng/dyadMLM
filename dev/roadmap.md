@@ -867,17 +867,26 @@ and #82.
   cross-sectional data, and longitudinal data with singletons, complete dyads,
   and people whose partner never took part. Stop with an error when the status
   changes within a dyad.
-- Keep people in their dyad's composition when their partner exists but did
-  not take part, with `NA` partner values.
-- Let `print()` name every indicator that singletons need.
+- Keep the separate compositions for people whose partner never took part
+  (`<role>_x_missing`) and for singletons. Their couples may differ from
+  couples in which both partners take part. Users can pool compositions with
+  `I()` and test the pooling with a likelihood-ratio test. A partner who misses
+  only some occasions keeps the person in their dyad's composition, as missing
+  data.
+- Let `print()` and the vignette name the indicators of every composition, for
+  the fixed part and the variance terms. Without them, rows of these
+  compositions get no intercept and almost no residual variance, and the model
+  fits without a warning.
 - Ship singletons in the residual and outcome checks (#82) in the same release.
-- Add status changes over time in a separate PR, after feedback from
-  statisticians. Do not set the partner's usual level (`cbp`) to 0 by default
+- Add status changes over time in a later release, after feedback from
+  statisticians ([#118](https://github.com/Pascal-Kueng/dyadMLM/issues/118)).
+  Split the partner's usual level (`cbp`) by status instead of setting it to 0
   after a loss.
 - Name one or two reviewers and a target date for that feedback.
 
 Details and questions for statisticians:
-[plan in #88](https://github.com/Pascal-Kueng/dyadMLM/pull/88#issuecomment-6444975743).
+[plan in #88](https://github.com/Pascal-Kueng/dyadMLM/pull/88#issuecomment-6444975743)
+and [#118](https://github.com/Pascal-Kueng/dyadMLM/issues/118).
 
 ## Proposed Version 0.2.5 Scope - APIM Covariance Decomposition
 
