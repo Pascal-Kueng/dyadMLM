@@ -127,14 +127,16 @@ add_actor_partner_columns <- function(data) {
     }
 
     partner_lookup <- out |>
-      dplyr::select(
-        dplyr::all_of(c(join_keys, member, source_col))
+      # Copy each row's source value so it can be matched back as the
+      # partner value for the other member in the dyad. Copying instead of
+      # renaming keeps the dyad, member, and time columns for matching, even
+      # when one of them is also the predictor.
+      dplyr::mutate(
+        .dy_partner_member = .data[[member]],
+        "{partner_col}" := .data[[source_col]]
       ) |>
-      # Rename each row's source value so it can be matched back as the
-      # partner value for the other member in the dyad.
-      dplyr::rename(
-        .dy_partner_member = dplyr::all_of(member),
-        "{partner_col}" := dplyr::all_of(source_col)
+      dplyr::select(
+        dplyr::all_of(c(join_keys, ".dy_partner_member", partner_col))
       )
 
     # We create a table with the original members' ID, then match the partner
