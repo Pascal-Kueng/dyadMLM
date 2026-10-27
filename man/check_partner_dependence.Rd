@@ -248,7 +248,7 @@ print(check)
 
 # For repeated occasions, also supply `member` and `time`.
 example_diary_data <- prepare_dyad_data(
-  dyads_ild[dyads_ild$coupleID <= 120, ], # Couples 1 to 120 are female-male.
+  dyads_ild[dyads_ild$coupleID <= 80, ], # Couples 1 to 80 are female-male.
   dyad = coupleID,
   member = personID,
   role = gender,
