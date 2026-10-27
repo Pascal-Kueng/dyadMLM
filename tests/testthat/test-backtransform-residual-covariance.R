@@ -1823,6 +1823,41 @@ test_that("the public function returns fitted link-scale covariance for Poisson 
   expect_equal(unname(result[[1L]]$varcov), expected_varcov)
 })
 
+test_that("shared-only recovery checks a named shared indicator", {
+  skip_if_not_installed("glmmTMB")
+
+  model_data <- expand.grid(member = c(-1, 1), occasion = 1:4, dyad = 1:50)
+  model_data$shared <- as.numeric(model_data$dyad <= 25L)
+  set.seed(472)
+  shared_effect <- stats::rnorm(50L, sd = 2)
+  model_data$y <- 2 + model_data$shared * shared_effect[model_data$dyad] +
+    stats::rnorm(nrow(model_data), sd = 0.3)
+  shared_only <- list(
+    shared_block = "(0 + shared | dyad)",
+    difference_block = NULL,
+    shared_indicator = "shared"
+  )
+
+  model <- glmmTMB::glmmTMB(y ~ 1 + (0 + shared | dyad), data = model_data)
+  expect_warning(
+    result <- recover_exchangeable_covariance(
+      model,
+      block_pairings = shared_only
+    ),
+    "Use `NULL` only if that block was omitted",
+    fixed = TRUE
+  )
+  expect_s3_class(result, "exchangeable_covariance")
+
+  model_data$shared <- model_data$shared / 2
+  model <- glmmTMB::glmmTMB(y ~ 1 + (0 + shared | dyad), data = model_data)
+  expect_error(
+    recover_exchangeable_covariance(model, block_pairings = shared_only),
+    "`block_pairings`: `shared` must be 1 on the rows of this composition and 0 on all other rows.",
+    fixed = TRUE
+  )
+})
+
 test_that("fitted covariance recovery allows some one-sided groups", {
   skip_if_not_installed("glmmTMB")
 

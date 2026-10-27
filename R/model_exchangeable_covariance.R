@@ -25,10 +25,11 @@
 #'   - `difference_indicator`: the exact name of the difference-indicator
 #'     column used in `difference_block`. It is required when `difference_block`
 #'     selects a block and optional when `difference_block = NULL`;
-#'   - `shared_indicator`: the exact shared composition-indicator column,
-#'     needed only for composition-specific blocks in mixed-dyad models. It
-#'     defaults to `"1"`, meaning that every fitted row belongs to the pair and
-#'     an ordinary intercept is the shared intercept coordinate.
+#'   - `shared_indicator`: the exact shared composition-indicator column, coded
+#'     1 on the rows of this composition and 0 elsewhere, needed only for
+#'     composition-specific blocks in mixed-dyad models. It defaults to `"1"`,
+#'     meaning that every fitted row belongs to the pair and an ordinary
+#'     intercept is the shared intercept coordinate.
 #' @param posterior For `brms` models, return posterior `"mean"` matrices
 #'   (default), `"median"` matrices, or full posterior `"draws"`. Ignored for
 #'   `glmmTMB` models.
@@ -1778,6 +1779,20 @@ match_one_supplied_exchangeable_pair <- function(
       group_ids = selected_group_ids,
       group_name = if (is.null(group_ids)) NULL else pair_group
     )
+  } else if (!identical(pair$shared_indicator, "1") && !is.null(model_frame)) {
+    # Without a difference block, still check a named shared indicator, because
+    # values other than 0 and 1 rescale the shared random effects.
+    shared_values <- model_frame[[pair$shared_indicator]]
+    if (!all(shared_values %in% c(0, 1))) {
+      stop(
+        pair_label, ": `", pair$shared_indicator,
+        "` must be 1 on the rows of this composition and 0 on all other rows. ",
+        "Other values change the scale of the ",
+        "shared random effects, so the recovered covariances would be wrong. ",
+        "Correct the coding and refit the model.",
+        call. = FALSE
+      )
+    }
   }
   return(matched_pair)
 }

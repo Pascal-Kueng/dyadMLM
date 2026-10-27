@@ -38,6 +38,10 @@
   are missing and the data contain, for example, an `hms` column while the hms
   package is not loaded.
 
+* Fixed `recover_exchangeable_covariance()` accepting a custom shared
+  indicator with values other than 0 and 1, such as 0.5, when
+  `difference_block = NULL`. It now gives an error.
+
 * Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.
 
