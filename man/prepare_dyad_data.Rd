@@ -309,7 +309,7 @@ variance terms. Otherwise, these rows get no intercept and, with
 terms. People observed alone have no member contrast and cannot be listed
 in \code{pool_compositions} or \code{set_exchangeable_compositions}. To let them share
 parameters with dyad members, add their indicators in the model formula,
-e.g., \code{I(.is_male_x_male + .is_singleton_male)} for an intercept or
+e.g., \code{I(.is_male_x_male + .is_male_x_missing)} for an intercept or
 \code{I(.is_male_x_male + .is_singleton_male):x} for a slope, and compare the
 shared with the separate parameters in a likelihood-ratio test
 (\code{\link[=compare_nested_models]{compare_nested_models()}}). For a variance, add them in both the shared

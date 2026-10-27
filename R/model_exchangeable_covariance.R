@@ -910,7 +910,10 @@ validate_exchangeable_coding <- function(
         pair_context, "`", idiff,
         "` must use -1/+1 coding on every fitted row because ",
         "`shared_indicator = \"1\"` means that every row is supported. ",
-        "Correct the coding and refit the model.",
+        "Correct the coding and refit the model. If the rows coded 0 are ",
+        "people observed alone, add their indicators to the difference block ",
+        "inside I() to pool their variance, or use the composition indicator ",
+        "instead of an intercept in the shared block to keep it separate.",
         call. = FALSE
       )
     }

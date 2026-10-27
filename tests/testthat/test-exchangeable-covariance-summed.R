@@ -192,6 +192,24 @@ test_that("a difference block alone can add indicators", {
   expect_s3_class(result, "exchangeable_covariance")
 })
 
+test_that("the coding error points to people observed alone", {
+  skip_if_not_installed("glmmTMB")
+
+  # Single people have their own variance, but the intercept of the shared
+  # block also covers them, while their member contrast is 0.
+  model <- fit_summed(
+    y ~ 0 + .is_exchangeable + .is_singleton +
+      (0 + .is_singleton | dyad_id) + (1 | dyad_id) +
+      (0 + .member_contrast_arbitrary | dyad_id),
+    dispformula = ~0
+  )
+  expect_error(
+    recover_exchangeable_covariance(model),
+    "If the rows coded 0 are people observed alone",
+    fixed = TRUE
+  )
+})
+
 test_that("the coding of summed columns is checked", {
   skip_if_not_installed("glmmTMB")
 

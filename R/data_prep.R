@@ -94,7 +94,7 @@
 #' terms. People observed alone have no member contrast and cannot be listed
 #' in `pool_compositions` or `set_exchangeable_compositions`. To let them share
 #' parameters with dyad members, add their indicators in the model formula,
-#' e.g., `I(.is_male_x_male + .is_singleton_male)` for an intercept or
+#' e.g., `I(.is_male_x_male + .is_male_x_missing)` for an intercept or
 #' `I(.is_male_x_male + .is_singleton_male):x` for a slope, and compare the
 #' shared with the separate parameters in a likelihood-ratio test
 #' ([compare_nested_models()]). For a variance, add them in both the shared

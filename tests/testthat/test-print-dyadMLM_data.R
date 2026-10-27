@@ -989,7 +989,8 @@ test_that("partner data print names the terms of every composition", {
     "#     + (0 + .is_singleton_male | dyad_id)"
   ))
   expect_printed(printed, "for example `I(.is_female + .is_singleton_female)`.")
-  expect_printed(printed, "If intercepts are pooled across partner status, add `.partner_exists`.")
+  expect_printed(printed, "With two-part coding, keep the intercepts of people without a partner separate.")
+  expect_no_match(printed, "member-contrast term", fixed = TRUE)
 
   # The single woman's partner is not in the data. Her rows drop out of models
   # with partner predictors, so her terms are named apart from the others.
@@ -1025,6 +1026,13 @@ test_that("partner data print names the terms of every composition", {
   ))
   expect_printed(printed, "Leave out their terms there.")
   expect_printed(printed, "for example `I(.is_exchangeable + .is_male_x_missing)`.")
+  # Pooling the variance of an exchangeable composition needs its member
+  # contrast too.
+  expect_printed(
+    printed,
+    "To pool the variance, also use `I(.member_contrast_arbitrary + .is_male_x_missing)` in the member-contrast term."
+  )
+  expect_no_match(printed, "keep the intercepts", fixed = TRUE)
   expect_no_match(printed, "Partner predictors are 0", fixed = TRUE)
   # Without partner predictors, nothing drops out.
   printed <- capture_wide_print(prepare_partner_data(
@@ -1042,6 +1050,21 @@ test_that("partner data print names the terms of every composition", {
     "#     + (0 + .is_singleton_male | dyad_id)"
   ))
   expect_printed(printed, "for example `I(.is_exchangeable + .is_singleton_male)`.")
+
+  # Next to female-male and female-female dyads, a single woman is pooled with
+  # the women of the distinguishable composition in the example.
+  mixed <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2, 3),
+    person_id = 1:5,
+    gender = c("female", "female", "female", "male", "female"),
+    partnered = c(TRUE, TRUE, TRUE, TRUE, FALSE),
+    x = 1:5
+  )
+  printed <- capture_wide_print(prepare_partner_data(
+    mixed, role = gender, predictors = x, partner_exists = partnered
+  ))
+  expect_printed(printed, "for example `I(.is_female_x_male_female + .is_singleton_female)`.")
+  expect_no_match(printed, "member-contrast term", fixed = TRUE)
 
   # Former partners in a female-female dyad: the composition intercepts
   # separate them from the partnered female-male dyads.

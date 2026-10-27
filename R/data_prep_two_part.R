@@ -304,19 +304,43 @@ model_term_advice <- function(meta, data) {
     ))
   }
   if (nrow(alone) > 0L) {
-    # Pool the first group with the dyad members of the same role, if any.
+    # Pool the first group with dyad members of the same role, if any, and
+    # preferably of a distinguishable composition, whose variance term needs
+    # no member contrast.
     example <- dplyr::bind_rows(listed, missing_partner)[1L, ]
-    same_role <- indicators |>
-      dplyr::filter(!.data$is_alone, .data$role %in% example$role) |>
-      dplyr::pull("column")
-    dyad_column <- c(same_role, dyad_indicators)[[1L]]
+    dyad <- indicators |>
+      dplyr::filter(!.data$is_alone) |>
+      dplyr::arrange(!.data$role %in% example$role, .data$dyad_type != "distinguishable") |>
+      dplyr::slice(1L)
     after <- c(after, paste0(
       "To pool a group with dyad members, sum their indicators inside I(), ",
-      "for example `I(", dyad_column, " + ", example$column, ")`.",
-      if (!is.null(partner_terms)) {
-        " If intercepts are pooled across partner status, add `.partner_exists`."
-      }
+      "for example `I(", dyad$column, " + ", example$column, ")`."
     ))
+
+    # To pool the variance of an exchangeable composition, the group also goes
+    # into the composition's member contrast, the contrast column that is not
+    # 0 on its rows.
+    if (dyad$dyad_type == "exchangeable") {
+      contrasts <- dyad_generated_columns(meta) |>
+        dplyr::filter(.data$column_role == "member_contrast", .data$column %in% names(data)) |>
+        dplyr::pull("column")
+      in_dyad <- data[[dyad$column]] == 1
+      for (contrast in contrasts) {
+        if (any(data[[contrast]][in_dyad] != 0)) {
+          after <- c(after, paste0(
+            "To pool the variance, also use `I(", contrast, " + ", example$column,
+            ")` in the member-contrast term."
+          ))
+        }
+      }
+    }
+
+    # A pooled intercept of people without a partner undoes two-part coding.
+    # With `.partner_exists` added, pooling one group gives back the separate
+    # model.
+    if (!is.null(partner_terms) && example$dyad_type == "singleton") {
+      after <- c(after, "With two-part coding, keep the intercepts of people without a partner separate.")
+    }
   }
   after <- c(after, "See `vignette(\"partner-exists\")`.")
 
