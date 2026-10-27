@@ -57,6 +57,7 @@
 <li><p>Fixed predictive means for <code>glmmTMB</code> 1.1.15.2 and later when the zero-inflation component has random effects but no fixed effects.</p></li>
 <li><p>Fixed <code><a href="../reference/compare_nested_models.html">compare_nested_models()</a></code> reporting a likelihood-ratio test for <code>glmmTMB</code> models fitted with <code>priors</code>. It now asks to refit them without priors.</p></li>
 <li><p>Fixed <code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> and <code><a href="../reference/validate_dyad_data.html">validate_dyad_data()</a></code> silently using another column when <code>predictors</code> or <code>lag1_predictors</code> renamed a column, as in <code>c(z = x)</code>. Renaming now gives an error.</p></li>
+<li><p>Fixed <code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> failing with dplyr 1.1.0. dyadMLM now requires dplyr 1.1.1 or later.</p></li>
 <li><p><code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now gives a clear error when <code>data</code> is supplied twice, for example through the pipe and as an argument.</p></li>
 </ul></div>
     <div class="section level2">
