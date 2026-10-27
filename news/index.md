@@ -93,6 +93,13 @@
   when `time` counts years with two-year waves
   ([\#83](https://github.com/Pascal-Kueng/dyadMLM/issues/83)).
 
+- Fixed
+  [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
+  accepting member contrasts from
+  [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+  when no fitted group contained both partners, for example in a model
+  grouped by person instead of couple. It now gives an error.
+
 ## dyadMLM 0.2.0
 
 CRAN release: 2026-08-21

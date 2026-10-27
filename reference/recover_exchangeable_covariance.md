@@ -142,11 +142,11 @@ to the two arbitrary member positions consistently within each dyad. For
 composition-specific blocks, it must be zero where `shared_indicator` is
 zero.
 
-For custom difference indicators supplied through `block_pairings`, the
-function checks whether both positions occur within each supported
+The function checks whether both positions occur within each supported
 fitted grouping unit. It rejects coding when no group contains both
-positions, and warns when only some groups are one-sided, which can
-result from fitted-row filtering. It also warns when stable member
+positions. For custom difference indicators supplied through
+`block_pairings`, it also warns when only some groups are one-sided,
+which can result from fitted-row filtering, and when stable member
 assignments cannot be verified across repeated rows without a member
 identifier.
 
