@@ -64,7 +64,20 @@
 
 - Fixed
   [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+  failing when an APIM predictor is also the `dyad`, `member`, or `time`
+  column, as in growth models that use time as a predictor.
+
+- Fixed
+  [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   failing with dplyr 1.1.0. dyadMLM now requires dplyr 1.1.1 or later.
+
+- Fixed
+  [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+  and
+  [`validate_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/validate_dyad_data.md)
+  keeping incomplete dyads despite `incomplete_dyads = "drop"` when the
+  `dyad` column was named `n_members`. Messages and metadata also showed
+  member counts instead of dyad IDs.
 
 - [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   now gives a clear error when `data` is supplied twice, for example
