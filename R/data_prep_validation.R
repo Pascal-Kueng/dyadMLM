@@ -509,7 +509,9 @@ resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dya
     )
 
   # Groups with more than two members are never valid dyads.
-  too_large_groups <- group_member_counts[[dyad_name]][group_member_counts$.dy_n_members > 2]
+  too_large_groups <- group_member_counts |>
+    dplyr::filter(.data$.dy_n_members > 2) |>
+    dplyr::pull(dplyr::all_of(dyad_name))
   if (length(too_large_groups) > 0) {
     stop(
       paste0(
@@ -527,7 +529,9 @@ resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dya
   }
 
   # Groups with fewer than two members are handled by policy.
-  incomplete_groups <- group_member_counts[[dyad_name]][group_member_counts$.dy_n_members < 2]
+  incomplete_groups <- group_member_counts |>
+    dplyr::filter(.data$.dy_n_members < 2) |>
+    dplyr::pull(dplyr::all_of(dyad_name))
 
   # Return early if all groups are complete.
   if (length(incomplete_groups) == 0) {
