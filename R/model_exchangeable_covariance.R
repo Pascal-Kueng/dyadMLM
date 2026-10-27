@@ -106,12 +106,12 @@
 #' composition-specific blocks, it must be zero where `shared_indicator` is
 #' zero.
 #'
-#' For custom difference indicators supplied through `block_pairings`, the function
-#' checks whether both positions occur within each supported fitted grouping
-#' unit. It rejects coding when no group contains both positions, and warns when
-#' only some groups are one-sided, which can result from fitted-row filtering.
-#' It also warns when stable member assignments cannot be verified across
-#' repeated rows without a member identifier.
+#' The function checks whether both positions occur within each supported
+#' fitted grouping unit. It rejects coding when no group contains both
+#' positions, and warns when only some groups are one-sided, which can result
+#' from fitted-row filtering. For custom difference indicators supplied through
+#' `block_pairings`, it also warns when stable member assignments cannot be
+#' verified across repeated rows without a member identifier.
 #'
 #' @section What omitted blocks and terms mean:
 #' `recover_exchangeable_covariance()` only describes constraints that were already imposed
@@ -234,7 +234,8 @@ recover_exchangeable_covariance <- function(
   if (is.null(block_pairings)) {
     matched_pairs <- match_exchangeable_residual_blocks(
       extracted$blocks,
-      model_frame
+      model_frame,
+      group_ids = extracted$group_ids
     )
   } else {
     matched_pairs <- match_supplied_exchangeable_residual_blocks(
@@ -827,10 +828,9 @@ validate_exchangeable_coding <- function(
     )
   }
 
-  # 6. Generated indicators are stable by construction. For a custom
-  # indicator supplied through `block_pairings`, also check its selected grouping level.
-  if (is_generated_exchangeable_difference_indicator(idiff) ||
-      is.null(group_name)) {
+  # 6. Both positions must also occur within the selected fitted groups, for
+  # example within couples rather than within persons.
+  if (is.null(group_name)) {
     return(invisible(NULL))
   }
   if (is.null(group_ids) ||
@@ -878,7 +878,10 @@ validate_exchangeable_coding <- function(
     )
   }
 
-  if (any(lengths(signs_by_group)[has_both_positions] > 2L)) {
+  # 7. Generated indicators keep each member's position across repeated rows by
+  # construction. For a custom indicator, this cannot be verified here.
+  if (!is_generated_exchangeable_difference_indicator(idiff) &&
+      any(lengths(signs_by_group)[has_both_positions] > 2L)) {
     warning(
       pair_context, "At least one supported fitted `", group_name,
       "` group contains repeated rows with both positions, but stable ",
@@ -1041,7 +1044,8 @@ match_blocks_for_exchangeable_indicator <- function(
   idiff,
   shared_indicator,
   fallback_indicator = NULL,
-  model_frame = NULL
+  model_frame = NULL,
+  group_ids = NULL
 ) {
   inventory <- format_exchangeable_block_inventory(blocks)
   difference_block_indices <- integer()
@@ -1130,10 +1134,13 @@ match_blocks_for_exchangeable_indicator <- function(
       idiff,
       selected_shared_indicator
     )
+    group <- blocks[[difference_block_index]]$group
     validate_exchangeable_coding(
       model_frame,
       idiff,
-      selected_shared_indicator
+      selected_shared_indicator,
+      group_ids = group_ids[[group]],
+      group_name = if (is.null(group_ids)) NULL else group
     )
     matched_pairs[[length(matched_pairs) + 1L]] <- pair
   }
@@ -1142,7 +1149,8 @@ match_blocks_for_exchangeable_indicator <- function(
 
 match_exchangeable_residual_blocks <- function(
   blocks,
-  model_frame = NULL
+  model_frame = NULL,
+  group_ids = NULL
 ) {
   # 1. Discover generated difference indicators across all extracted blocks.
   difference_indicators <- rep(NA_character_, length(blocks))
@@ -1224,7 +1232,8 @@ match_exchangeable_residual_blocks <- function(
       idiff,
       shared_indicator = shared_indicator,
       fallback_indicator = if (length(difference_indicators) == 1L) "1" else NULL,
-      model_frame = model_frame
+      model_frame = model_frame,
+      group_ids = group_ids
     )
     matched_pairs <- c(matched_pairs, indicator_pairs)
   }
