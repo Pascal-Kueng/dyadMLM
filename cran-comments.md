@@ -7,6 +7,7 @@ The package license has changed from MIT + file LICENSE to GPL-3.
 * Fedora Linux 44, R 4.6.1 (2026-06-24), `R CMD check --as-cran`
 * GitHub Actions: macOS R-release; Windows R-release; Ubuntu R-oldrel,
   R-release, and R-devel
+* win-builder: R-release (R 4.6.1)
 
 ## R CMD check results
 
