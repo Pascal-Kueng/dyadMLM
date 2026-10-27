@@ -149,10 +149,10 @@
 #'
 #' Each person belongs to one dyad, and the partner status must stay the same
 #' within each dyad. `prepare_dyad_data()` stops when it changes over time (for
-#' example, after a death, a separation, or a new relationship). Filter the
-#' data on the recorded status first, for example keep only the occasions while
-#' the partner exists, or only the first partnership. `partner_exists` cannot
-#' be combined with DIM or DSM columns.
+#' example, after a death, a separation, or a new relationship). In dyads whose
+#' status changes, filter the data on the recorded status first, for example
+#' keep only the occasions while the partner exists, or only the first
+#' partnership. `partner_exists` cannot be combined with DIM or DSM columns.
 #'
 #' @param data A data frame or tibble. Data must be in long format. For
 #' cross-sectional dyadic data, each observed member of each dyad has one row.

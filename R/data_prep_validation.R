@@ -775,9 +775,10 @@ validate_partner_exists <- function(out, dyad_name, time_name, role_name) {
     stop(
       "`partner_exists` changes over time in ", format_group_count(changing_dyads),
       ". Changes in partner status within a dyad (for example, a death, a ",
-      "separation, or a new relationship) are not supported. Filter the data ",
-      "on the recorded status first, for example keep only the occasions ",
-      "while the partner exists, or only the first partnership.",
+      "separation, or a new relationship) are not supported. In dyads whose ",
+      "status changes, filter the data on the recorded status first, for ",
+      "example keep only the occasions while the partner exists, or only the ",
+      "first partnership.",
       call. = FALSE
     )
   }

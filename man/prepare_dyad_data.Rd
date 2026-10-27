@@ -368,10 +368,10 @@ predictors of 0. It is not "the effect of having a partner".
 
 Each person belongs to one dyad, and the partner status must stay the same
 within each dyad. \code{prepare_dyad_data()} stops when it changes over time (for
-example, after a death, a separation, or a new relationship). Filter the
-data on the recorded status first, for example keep only the occasions while
-the partner exists, or only the first partnership. \code{partner_exists} cannot
-be combined with DIM or DSM columns.
+example, after a death, a separation, or a new relationship). In dyads whose
+status changes, filter the data on the recorded status first, for example
+keep only the occasions while the partner exists, or only the first
+partnership. \code{partner_exists} cannot be combined with DIM or DSM columns.
 }
 }
 

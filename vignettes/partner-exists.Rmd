@@ -355,12 +355,14 @@ and the test is not valid. Pool such a group with dyad members.
 
 The partner status must stay the same within a dyad. `prepare_dyad_data()`
 stops when it changes over time, for example after a death, a separation, or
-a new relationship. Filter the data on the recorded status first, for example
-keep only the occasions while the partner exists, or only the first
-partnership. With a status column `partnered`:
+a new relationship. In dyads whose status changes, filter the data on the
+recorded status first, for example keep only the occasions while the partner
+exists, or only the first partnership. With a status column `partnered`, the
+following keeps the occasions with a partner in dyads whose status changes,
+and all other rows:
 
 ```{r filter-partner-status, eval = FALSE}
-together <- filter(data, partnered)
+together <- filter(data, partnered | !any(partnered), .by = coupleID)
 ```
 
 Leaving out `partner_exists` does not help. After a separation in which both
