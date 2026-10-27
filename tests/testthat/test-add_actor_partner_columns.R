@@ -244,3 +244,54 @@ test_that("prepare_dyad_data creates actor and partner columns after dropping in
   expect_equal(result$.x_actor, result$x)
   expect_equal(result$.x_partner, c(10, 1, 60, 50))
 })
+
+test_that("add_actor_partner_columns keeps dyad, member, and time predictors for matching", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "C", "D", "C", "D"),
+    time = c(1, 1, 2, 1, 1, 2, 2)
+  )
+
+  result <- validate_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    time = time,
+    predictors = c(dyad_id, person_id, time),
+    temporal_decomposition = "none"
+  ) |>
+    infer_dyad_compositions(seed = 123) |>
+    center_predictors() |>
+    add_actor_partner_columns()
+
+  expect_equal(result$dyad_id, data$dyad_id)
+  expect_equal(result$person_id, data$person_id)
+  expect_equal(result$time, data$time)
+  expect_equal(result$.dyad_id_actor, data$dyad_id)
+  expect_equal(result$.dyad_id_partner, c(1, 1, NA, 2, 2, 2, 2))
+  expect_equal(result$.person_id_actor, data$person_id)
+  expect_equal(
+    result$.person_id_partner,
+    c("B", "A", NA, "D", "C", "D", "C")
+  )
+  expect_equal(result$.time_actor, data$time)
+  expect_equal(result$.time_partner, c(1, 1, NA, 1, 1, 2, 2))
+})
+
+test_that("prepare_dyad_data accepts the time column as an APIM predictor", {
+  data <- data.frame(
+    dyad = rep(1:2, each = 4),
+    member = rep(c("A", "B"), 4),
+    day = rep(c(1, 1, 2, 2), 2)
+  )
+
+  result <- prepare_dyad_data(
+    data, dyad = dyad, member = member, time = day,
+    predictors = day, temporal_decomposition = "none",
+    model_types = "apim", seed = 1
+  )
+
+  expect_equal(result$day, data$day)
+  expect_equal(result$.day_actor, data$day)
+  expect_equal(result$.day_partner, data$day)
+})
