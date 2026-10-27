@@ -190,11 +190,20 @@ test_that("terms are suggested for the status and partner columns that remain", 
   prepared <- prepare_panel(lag1_predictors = health)
   terms_for <- function(data) two_part_terms(attr(prepared, "dyadMLM"), data)$term
 
-  # Composition indicators separate the statuses, unless `.composition` was
-  # removed.
+  # Composition indicators separate the statuses, but only while they mark
+  # every row.
+  kept <- c(".composition", ".partner_exists", ".health_cwp_partner_lag1")
   expect_equal(
-    terms_for(tibble::as_tibble(prepared)[c(".composition", ".partner_exists", ".health_cwp_partner_lag1")]),
+    terms_for(tibble::as_tibble(prepared)[c(".is_exchangeable", ".is_singleton", kept)]),
     ".health_cwp_partner_lag1"
+  )
+  expect_equal(
+    terms_for(tibble::as_tibble(prepared)[c(".is_exchangeable", kept)]),
+    c(".partner_exists", ".health_cwp_partner_lag1")
+  )
+  expect_equal(
+    terms_for(tibble::as_tibble(prepared)[kept]),
+    c(".partner_exists", ".health_cwp_partner_lag1")
   )
   expect_equal(
     terms_for(tibble::as_tibble(prepared)[c(".partner_exists", ".health_cwp_partner_lag1")]),

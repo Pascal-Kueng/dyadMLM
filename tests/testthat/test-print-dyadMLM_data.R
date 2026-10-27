@@ -992,6 +992,17 @@ test_that("partner data print names the terms of every composition", {
   expect_printed(printed, "With two-part coding, keep the intercepts of people without a partner separate.")
   expect_no_match(printed, "member-contrast term", fixed = TRUE)
 
+  # Without the composition indicators, `.partner_exists` gives the rows
+  # without a partner their own mean.
+  prepared <- prepare_partner_data(distinguishable, role = gender, predictors = x, partner_exists = partnered)
+  for (dropped in c(".is_", ".is_singleton_")) {
+    printed <- capture_wide_print(dplyr::select(prepared, -dplyr::starts_with(dropped)))
+    expect_equal(grep("^#     ", printed, value = TRUE), c(
+      "#     + .partner_exists  # a partner exists (1) or not (0)",
+      "#     + .x_partner       # partner's value"
+    ))
+  }
+
   # The single woman's partner is not in the data. Her rows drop out of models
   # with partner predictors, so her terms are named apart from the others.
   distinguishable$partnered[5] <- TRUE

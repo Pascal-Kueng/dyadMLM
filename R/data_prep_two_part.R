@@ -464,10 +464,11 @@ two_part_terms <- function(meta, data) {
   }
 
   # Composition indicators already separate rows with and without a partner,
-  # unless a composition has both (e.g., former partners who both take part).
-  # Only then is `.partner_exists` needed next to them.
-  needs_status <- TRUE
-  if (dyad_composition_col %in% names(data)) {
+  # if they still mark every row and no composition has both (e.g., former
+  # partners who both take part). Otherwise, `.partner_exists` is needed.
+  indicator_columns <- composition_indicators(meta, data)$column
+  needs_status <- !all(rowSums(data[indicator_columns]) > 0)
+  if (!needs_status) {
     statuses <- tibble::tibble(
       composition = data[[dyad_composition_col]],
       status = data[[".partner_exists"]]
