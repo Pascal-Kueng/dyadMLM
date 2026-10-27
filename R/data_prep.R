@@ -121,10 +121,11 @@
 #' which can bias the partner effects. Random effects cannot replace this.
 #' Next to composition indicators, `.partner_exists` is only needed when a
 #' composition has rows with and without a partner (e.g., former partners who
-#' both take part). Lagged partner predictors are set to 0 too, except at a
-#' person's first occasion and after gaps, where they stay missing as in
-#' complete dyads. Non-numeric partner predictors cannot be set to 0, so they
-#' stop with an error.
+#' both take part). Lagged partner predictors are set to 0 too, except where
+#' the dyad has no row at the previous occasion (for example, at its first
+#' occasion or after a gap). There they stay missing, as in complete dyads.
+#' Non-numeric partner predictors cannot be set to 0, so they stop with an
+#' error.
 #'
 #' ## Actor variables that exist only with a partner
 #'
@@ -147,11 +148,11 @@
 #'
 #' ## Limits
 #'
-#' Each person belongs to one dyad, and the partner status must stay the same
-#' within each dyad. `prepare_dyad_data()` stops when it changes over time (for
-#' example, after a death, a separation, or a new relationship). In dyads whose
-#' status changes, filter the data on the recorded status first, for example
-#' keep only the occasions while the partner exists, or only the first
+#' Each person must belong to one dyad, and the partner status must stay the
+#' same within each dyad. `prepare_dyad_data()` stops when it changes over time
+#' (for example, after a death, a separation, or a new relationship). In dyads
+#' whose status changes, filter the data on the recorded status first, for
+#' example keep only the occasions while the partner exists, or only the first
 #' partnership. `partner_exists` cannot be combined with DIM or DSM columns.
 #'
 #' @param data A data frame or tibble. Data must be in long format. For

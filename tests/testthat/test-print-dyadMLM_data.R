@@ -1016,7 +1016,7 @@ test_that("partner data print names the terms of every composition", {
   ))
   expect_printed(printed, paste(
     "Rows of female_x_missing drop out of models with partner predictors, because their partner values are missing.",
-    "In models without partner predictors, add `.is_female_x_missing` in the same way."
+    "In models without partner predictors, add `.is_female_x_missing` to the fixed part and to the variance terms."
   ))
 
   # Two male-male dyads and a man whose partner is not in the data. Without

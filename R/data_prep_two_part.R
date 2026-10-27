@@ -78,8 +78,7 @@ apply_two_part_coding <- function(data) {
   # Record which partner columns were set to 0, for the message and print().
   # prepare_dyad_data() shows the message once temporary rows are removed, so
   # it describes the returned rows.
-  meta_data$zeroed_partner_columns <- columns_to_zero |>
-    dplyr::select("column", "is_lagged")
+  meta_data$zeroed_partner_columns <- dplyr::select(columns_to_zero, "column")
   attr(data, "dyadMLM") <- meta_data
 
   return(data)
@@ -251,7 +250,7 @@ model_term_advice <- function(meta, data) {
     terms <- paste("0 +", paste(c(dyad_indicators, listed$column), collapse = " + "))
   }
   if (!is.null(partner_terms)) {
-    terms <- c(terms, format_two_part_terms(partner_terms, prefix = ""))
+    terms <- c(terms, format_two_part_terms(partner_terms))
   }
   if (nrow(listed) > 0L) {
     terms <- c(terms, paste("+", variance_terms(listed$column)))
@@ -296,7 +295,8 @@ model_term_advice <- function(meta, data) {
       if (!is.null(partner_terms)) {
         paste0(
           "In models without partner predictors, add `",
-          paste(missing_partner$column, collapse = "`, `"), "` in the same way."
+          paste(missing_partner$column, collapse = "`, `"),
+          "` to the fixed part and to the variance terms."
         )
       } else {
         "Leave out their terms there."
@@ -494,7 +494,7 @@ two_part_terms <- function(meta, data) {
 
 # One line per term, ready to paste into a formula, with aligned comments:
 # "+ .partner_exists  # a partner exists (1) or not (0)".
-format_two_part_terms <- function(terms, prefix) {
+format_two_part_terms <- function(terms) {
   padded_terms <- format(terms$term, width = max(nchar(terms$term)))
-  return(paste0(prefix, "+ ", padded_terms, "  # ", terms$comment))
+  return(paste0("+ ", padded_terms, "  # ", terms$comment))
 }

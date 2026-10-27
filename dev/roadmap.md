@@ -860,10 +860,10 @@ covers the current check.
 
 Status: planned
 ([milestone](https://github.com/Pascal-Kueng/dyadMLM/milestone/2)). PR #88
-adds `partner_exists` to `prepare_dyad_data()`. It was deferred from 0.3.0.
-Its handling of status changes over time is the package's own extension and
-needs feedback from statisticians, and the remaining part needs the fixes below
-and #82.
+adds `partner_exists` to `prepare_dyad_data()`. It was deferred from 0.3.0,
+because its handling of status changes over time needed feedback from
+statisticians. That handling was removed from #88 (see below), and the
+remaining part needs the fixes below and #82.
 
 - Support two-part coding only for a status that is constant within each dyad:
   cross-sectional data, and longitudinal data with singletons, complete dyads,

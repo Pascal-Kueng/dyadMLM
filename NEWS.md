@@ -47,8 +47,8 @@
 
 * `print()` and `summary()` of prepared data now report people observed
   alone, dyad-occasions with a row for only one member, rows with missing
-  partner predictors, and suggested model terms: the indicators of every
-  composition for the fixed part and the variance terms, and the partner
+  partner predictors, and suggested model terms: composition indicators for
+  the fixed part, variance terms for people observed alone, and the partner
   terms of two-part coding. A new help section in `prepare_dyad_data()`
   explains how these cases are prepared.
 

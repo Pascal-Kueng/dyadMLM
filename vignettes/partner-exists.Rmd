@@ -347,9 +347,9 @@ equal residual variances are plausible on substantive grounds. With separate
 singleton variances, only the shared fixed effects link singleton and dyad
 estimates.
 
-A group needs several people for its own mean and variance. In a group of
-one person, the variance between people goes to 0, often without a warning,
-and the test is not valid. Pool such a group with dyad members.
+A group needs several people for its own variance. In a group of one person,
+this variance goes to 0, often without a warning, and the test is not valid.
+Pool the variance of such a group with dyad members.
 
 ## Changes in partner status
 
