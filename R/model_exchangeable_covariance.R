@@ -25,10 +25,11 @@
 #'   - `difference_indicator`: the exact name of the difference-indicator
 #'     column used in `difference_block`. It is required when `difference_block`
 #'     selects a block and optional when `difference_block = NULL`;
-#'   - `shared_indicator`: the exact shared composition-indicator column,
-#'     needed only for composition-specific blocks in mixed-dyad models. It
-#'     defaults to `"1"`, meaning that every fitted row belongs to the pair and
-#'     an ordinary intercept is the shared intercept coordinate.
+#'   - `shared_indicator`: the exact shared composition-indicator column, coded
+#'     1 on the rows of this composition and 0 elsewhere, needed only for
+#'     composition-specific blocks in mixed-dyad models. It defaults to `"1"`,
+#'     meaning that every fitted row belongs to the pair and an ordinary
+#'     intercept is the shared intercept coordinate.
 #' @param posterior For `brms` models, return posterior `"mean"` matrices
 #'   (default), `"median"` matrices, or full posterior `"draws"`. Ignored for
 #'   `glmmTMB` models.
