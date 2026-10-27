@@ -1778,6 +1778,19 @@ match_one_supplied_exchangeable_pair <- function(
       group_ids = selected_group_ids,
       group_name = if (is.null(group_ids)) NULL else pair_group
     )
+  } else if (!identical(pair$shared_indicator, "1") && !is.null(model_frame)) {
+    # Without a difference block, still check a named shared indicator, because
+    # values other than 0 and 1 rescale the shared random effects.
+    shared_values <- model_frame[[pair$shared_indicator]]
+    if (!all(shared_values %in% c(0, 1))) {
+      stop(
+        pair_label, ": `", pair$shared_indicator,
+        "` must contain only 0 and 1. Other values change the scale of the ",
+        "shared random effects, so the recovered covariances would be wrong. ",
+        "Correct the coding and refit the model.",
+        call. = FALSE
+      )
+    }
   }
   return(matched_pair)
 }
