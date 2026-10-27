@@ -52,7 +52,7 @@
 #' @param partner_exists Optional partner status, evaluated in `data`: `NULL`,
 #'   `TRUE`, `FALSE`, a column name, or an expression (such as `!widowed`).
 #'   `TRUE` or `FALSE` describes everyone observed alone and is ignored for
-#'   complete dyads; a column or expression gives the status for each row.
+#'   complete dyads. A column or expression gives the status for each row.
 #'   Stored per row in a temporary column. See [prepare_dyad_data()] for the
 #'   meaning of each option.
 #'

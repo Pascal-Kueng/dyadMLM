@@ -47,13 +47,13 @@
 #' partner's observed occasions. Lag-1 values do not bridge gaps. Models omit
 #' rows when a predictor used in the model is missing.
 #'
-#' Using `print()` on the prepared data reports how many dyad-occasions have a
+#' `print()` on the prepared data reports how many dyad-occasions have a
 #' row for only one member (where `dyadMLM` assumed the partner exists) and how
 #' many rows have at least one missing partner predictor (both cases above).
 #'
 #' ## Recording partner status with `partner_exists`
 #'
-#' If truly no partner *existed* (e.g., when individuals are studied alongside
+#' If no partner *existed* (e.g., when individuals are studied alongside
 #' dyads), treating a partner's values as missing is not meaningful and can
 #' bias the model. In this case, use `partner_exists` to record whether a
 #' partner existed, which sets up two-part predictors (see

@@ -262,14 +262,14 @@ partner's \code{cbp} values remain available, because they are computed from the
 partner's observed occasions. Lag-1 values do not bridge gaps. Models omit
 rows when a predictor used in the model is missing.
 
-Using \code{print()} on the prepared data reports how many dyad-occasions have a
+\code{print()} on the prepared data reports how many dyad-occasions have a
 row for only one member (where \code{dyadMLM} assumed the partner exists) and how
 many rows have at least one missing partner predictor (both cases above).
 }
 
 \subsection{Recording partner status with \code{partner_exists}}{
 
-If truly no partner \emph{existed} (e.g., when individuals are studied alongside
+If no partner \emph{existed} (e.g., when individuals are studied alongside
 dyads), treating a partner's values as missing is not meaningful and can
 bias the model. In this case, use \code{partner_exists} to record whether a
 partner existed, which sets up two-part predictors (see
