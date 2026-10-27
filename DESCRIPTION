@@ -46,7 +46,7 @@ Suggests:
 Config/testthat/edition: 3
 Imports: 
     cli,
-    dplyr (>= 1.1.0),
+    dplyr (>= 1.1.1),
     pillar,
     rlang (>= 0.4.0),
     tidyselect,

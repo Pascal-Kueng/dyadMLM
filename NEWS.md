@@ -53,6 +53,9 @@
   `dyad`, `member`, or `time` column, as in growth models that use time as a
   predictor.
 
+* Fixed `prepare_dyad_data()` failing with dplyr 1.1.0. dyadMLM now requires
+  dplyr 1.1.1 or later.
+
 * `prepare_dyad_data()` now gives a clear error when `data` is supplied
   twice, for example through the pipe and as an argument.
 
