@@ -98,10 +98,11 @@ was omitted;</p></li>
 <li><p><code>difference_indicator</code>: the exact name of the difference-indicator
 column used in <code>difference_block</code>. It is required when <code>difference_block</code>
 selects a block and optional when <code>difference_block = NULL</code>;</p></li>
-<li><p><code>shared_indicator</code>: the exact shared composition-indicator column,
-needed only for composition-specific blocks in mixed-dyad models. It
-defaults to <code>"1"</code>, meaning that every fitted row belongs to the pair and
-an ordinary intercept is the shared intercept coordinate.</p></li>
+<li><p><code>shared_indicator</code>: the exact shared composition-indicator column, coded
+1 on the rows of this composition and 0 elsewhere, needed only for
+composition-specific blocks in mixed-dyad models. It defaults to <code>"1"</code>,
+meaning that every fitted row belongs to the pair and an ordinary
+intercept is the shared intercept coordinate.</p></li>
 </ul></dd>
 
 

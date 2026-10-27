@@ -47,6 +47,11 @@
   when no member rows are missing and the data contain, for example, an
   `hms` column while the hms package is not loaded.
 
+- Fixed
+  [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
+  accepting a custom shared indicator with values other than 0 and 1,
+  such as 0.5, when `difference_block = NULL`. It now gives an error.
+
 - Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.
 
@@ -70,6 +75,14 @@
 - Fixed
   [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   failing with dplyr 1.1.0. dyadMLM now requires dplyr 1.1.1 or later.
+
+- Fixed
+  [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+  and
+  [`validate_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/validate_dyad_data.md)
+  keeping incomplete dyads despite `incomplete_dyads = "drop"` when the
+  `dyad` column was named `n_members`. Messages and metadata also showed
+  member counts instead of dyad IDs.
 
 - [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   now gives a clear error when `data` is supplied twice, for example

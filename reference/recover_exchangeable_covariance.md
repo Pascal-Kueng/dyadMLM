@@ -47,9 +47,10 @@ recover_exchangeable_covariance(
     `difference_block = NULL`;
 
   - `shared_indicator`: the exact shared composition-indicator column,
-    needed only for composition-specific blocks in mixed-dyad models. It
-    defaults to `"1"`, meaning that every fitted row belongs to the pair
-    and an ordinary intercept is the shared intercept coordinate.
+    coded 1 on the rows of this composition and 0 elsewhere, needed only
+    for composition-specific blocks in mixed-dyad models. It defaults to
+    `"1"`, meaning that every fitted row belongs to the pair and an
+    ordinary intercept is the shared intercept coordinate.
 
 - posterior:
 
