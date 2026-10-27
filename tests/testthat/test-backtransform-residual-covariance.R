@@ -1427,14 +1427,28 @@ test_that("fitted-row validation protects the exchangeable coding", {
     dyad_retained_prefix,
     "member_contrast_arbitrary"
   )
-  short_coding_data <- data.frame(value = c(-1, 1))
+  short_coding_data <- data.frame(value = rep(c(-1, 1), 4L))
   names(short_coding_data) <- short_member_contrast
   expect_no_warning(validate_exchangeable_coding(
     short_coding_data,
     short_member_contrast,
     "1",
+    group_ids = rep(1:2, each = 4L),
     group_name = "coupleID"
   ))
+  person_coding_data <- data.frame(value = c(-1, -1, 1, 1))
+  names(person_coding_data) <- short_member_contrast
+  expect_error(
+    validate_exchangeable_coding(
+      person_coding_data,
+      short_member_contrast,
+      "1",
+      group_ids = c(1, 1, 2, 2),
+      group_name = "personID"
+    ),
+    "No supported fitted `personID` group contains both -1 and +1",
+    fixed = TRUE
+  )
   expect_warning(
     validate_exchangeable_coding(
       data.frame(other = 1:2),
@@ -1901,6 +1915,43 @@ test_that("fitted covariance recovery allows some one-sided groups", {
 
   expect_s3_class(result, "exchangeable_covariance")
   expect_true(all(is.finite(result[["dyad"]]$varcov)))
+})
+
+test_that("automatic matching checks partner positions within fitted groups", {
+  skip_if_not_installed("glmmTMB")
+
+  marker <- ".member_contrast_arbitrary"
+  model_data <- expand.grid(
+    occasion = 1:3,
+    member = c(-1, 1),
+    coupleID = seq_len(40L)
+  )
+  model_data[[marker]] <- model_data$member
+  model_data$personID <- paste(model_data$coupleID, model_data$member)
+  set.seed(29)
+  model_data$outcome <- stats::rnorm(40L)[model_data$coupleID] +
+    model_data$member * stats::rnorm(40L, sd = 0.5)[model_data$coupleID] +
+    stats::rnorm(nrow(model_data), sd = 0.5)
+
+  fit_grouped_by <- function(group, rows = TRUE) {
+    suppressWarnings(glmmTMB::glmmTMB(
+      stats::as.formula(paste0(
+        "outcome ~ 1 + (1 | ", group, ") + (0 + ", marker, " | ", group, ")"
+      )),
+      data = model_data[rows, ]
+    ))
+  }
+
+  expect_no_warning(recover_exchangeable_covariance(fit_grouped_by("coupleID")))
+  expect_error(
+    recover_exchangeable_covariance(fit_grouped_by("personID")),
+    "No supported fitted `personID` group contains both -1 and +1",
+    fixed = TRUE
+  )
+  one_sided <- model_data$coupleID <= 3L & model_data$member == 1
+  expect_no_warning(
+    recover_exchangeable_covariance(fit_grouped_by("coupleID", !one_sided))
+  )
 })
 
 test_that("the public function can retain brms draws and labels omitted blocks", {

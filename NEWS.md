@@ -72,6 +72,11 @@
   missing, for example when `time` counts years with two-year waves
   ([#83](https://github.com/Pascal-Kueng/dyadMLM/issues/83)).
 
+* Fixed `recover_exchangeable_covariance()` accepting member contrasts from
+  `prepare_dyad_data()` when no fitted group contained both partners, for
+  example in a model grouped by person instead of couple. It now gives an
+  error.
+
 # dyadMLM 0.2.0
 
 * This early API-stabilization release intentionally makes a few direct,
