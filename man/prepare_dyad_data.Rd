@@ -57,8 +57,9 @@ member structure, matches observations at exactly \code{time - 1}, and does not
 bridge missing occasions. If occasions are unequally spaced, for example
 waves in 2008, 2010, and 2013, number the study's occasions (1, 2, 3) and
 supply that index as \code{time}. The lag then refers to the previous occasion,
-however much time lies between them. Eligible raw, within-person, and APIM
-GMC variants are lagged; stable between-person variants are not.}
+regardless of how much time lies between them. Eligible raw,
+within-person, and APIM GMC variables are lagged, stable between-person
+variables are not.}
 
 \item{model_types}{Model-ready column families to construct. Can contain one
 or more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"apim"} creates
