@@ -56,6 +56,10 @@
   `I(.is_male_x_male + .is_singleton_male)`, which let people observed alone
   share the variance of an exchangeable composition.
 
+* Fixed `recover_exchangeable_covariance()` accepting a custom shared
+  indicator with values other than 0 and 1, such as 0.5, when
+  `difference_block = NULL`. It now gives an error.
+
 * Fixed predictive means for `glmmTMB` 1.1.15.2 and later when the
   zero-inflation component has random effects but no fixed effects.
 
@@ -85,6 +89,11 @@
 * `prepare_dyad_data()` warns when all lag-1 values of a predictor are
   missing, for example when `time` counts years with two-year waves
   ([#83](https://github.com/Pascal-Kueng/dyadMLM/issues/83)).
+
+* Fixed `recover_exchangeable_covariance()` accepting member contrasts from
+  `prepare_dyad_data()` when no fitted group contained both partners, for
+  example in a model grouped by person instead of couple. It now gives an
+  error.
 
 # dyadMLM 0.2.0
 

@@ -25,10 +25,11 @@
 #'   - `difference_indicator`: the exact name of the difference-indicator
 #'     column used in `difference_block`. It is required when `difference_block`
 #'     selects a block and optional when `difference_block = NULL`;
-#'   - `shared_indicator`: the exact shared composition-indicator column,
-#'     needed only for composition-specific blocks in mixed-dyad models. It
-#'     defaults to `"1"`, meaning that every fitted row belongs to the pair and
-#'     an ordinary intercept is the shared intercept coordinate.
+#'   - `shared_indicator`: the exact shared composition-indicator column, coded
+#'     1 on the rows of this composition and 0 elsewhere, needed only for
+#'     composition-specific blocks in mixed-dyad models. It defaults to `"1"`,
+#'     meaning that every fitted row belongs to the pair and an ordinary
+#'     intercept is the shared intercept coordinate.
 #' @param posterior For `brms` models, return posterior `"mean"` matrices
 #'   (default), `"median"` matrices, or full posterior `"draws"`. Ignored for
 #'   `glmmTMB` models.
@@ -106,12 +107,12 @@
 #' composition-specific blocks, it must be zero where `shared_indicator` is
 #' zero.
 #'
-#' For custom difference indicators supplied through `block_pairings`, the function
-#' checks whether both positions occur within each supported fitted grouping
-#' unit. It rejects coding when no group contains both positions, and warns when
-#' only some groups are one-sided, which can result from fitted-row filtering.
-#' It also warns when stable member assignments cannot be verified across
-#' repeated rows without a member identifier.
+#' The function checks whether both positions occur within each supported
+#' fitted grouping unit. It rejects coding when no group contains both
+#' positions. For custom difference indicators supplied through
+#' `block_pairings`, it also warns when only some groups are one-sided, which
+#' can result from fitted-row filtering, and when stable member assignments
+#' cannot be verified across repeated rows without a member identifier.
 #'
 #' People observed alone (see `partner_exists` in [prepare_dyad_data()]) can
 #' share the variance of an exchangeable composition. Add their indicator to
@@ -264,7 +265,8 @@ recover_exchangeable_covariance <- function(
   if (is.null(block_pairings)) {
     matched_pairs <- match_exchangeable_residual_blocks(
       extracted$blocks,
-      model_frame
+      model_frame,
+      group_ids = extracted$group_ids
     )
   } else {
     matched_pairs <- match_supplied_exchangeable_residual_blocks(
@@ -941,10 +943,9 @@ validate_exchangeable_coding <- function(
     )
   }
 
-  # 6. Generated indicators are stable by construction. For a custom
-  # indicator supplied through `block_pairings`, also check its selected grouping level.
-  if (is_generated_exchangeable_difference_indicator(idiff) ||
-      is.null(group_name)) {
+  # 6. Both positions must also occur within the selected fitted groups, for
+  # example within couples rather than within persons.
+  if (is.null(group_name)) {
     return(invisible(NULL))
   }
   if (is.null(group_ids) ||
@@ -981,6 +982,20 @@ validate_exchangeable_coding <- function(
       call. = FALSE
     )
   }
+
+  # 7. Generated indicators code both members of every dyad and keep each
+  # member's position by construction, so a one-sided group only means a
+  # missing partner or a person observed alone. A custom indicator can also
+  # give both members the same code, so check it further. In a sum such as
+  # I(idiff + .is_singleton_male), test the indicator without the added ones.
+  plain_idiff <- if (length(added_indicators) > 0L) {
+    setdiff(all.vars(str2lang(idiff)), added_indicators)
+  } else {
+    idiff
+  }
+  if (is_generated_exchangeable_difference_indicator(plain_idiff)) {
+    return(invisible(NULL))
+  }
   if (any(!has_both_positions)) {
     # Groups of people observed alone have one position by design.
     reason <- if (length(added_indicators) > 0L) {
@@ -1003,6 +1018,8 @@ validate_exchangeable_coding <- function(
     )
   }
 
+  # 8. Without a member identifier, stable positions of a custom indicator
+  # across repeated rows cannot be verified here.
   if (any(lengths(signs_by_group)[has_both_positions] > 2L)) {
     warning(
       pair_context, "At least one supported fitted `", group_name,
@@ -1215,7 +1232,8 @@ match_blocks_for_exchangeable_indicator <- function(
   idiff,
   shared_indicator,
   fallback_indicator = NULL,
-  model_frame = NULL
+  model_frame = NULL,
+  group_ids = NULL
 ) {
   inventory <- format_exchangeable_block_inventory(blocks)
   difference_block_indices <- integer()
@@ -1304,10 +1322,14 @@ match_blocks_for_exchangeable_indicator <- function(
       idiff,
       selected_shared_indicator
     )
+    group <- blocks[[difference_block_index]]$group
     validate_exchangeable_coding(
       model_frame,
       pair$difference_coding_column,
-      pair$shared_coding_column
+      pair$shared_coding_column,
+      group_ids = group_ids[[group]],
+      group_name = if (is.null(group_ids)) NULL else group,
+      added_indicators = pair$added_indicators
     )
     matched_pairs[[length(matched_pairs) + 1L]] <- pair
   }
@@ -1316,7 +1338,8 @@ match_blocks_for_exchangeable_indicator <- function(
 
 match_exchangeable_residual_blocks <- function(
   blocks,
-  model_frame = NULL
+  model_frame = NULL,
+  group_ids = NULL
 ) {
   # 1. Discover generated difference indicators across all extracted blocks.
   difference_indicators <- rep(NA_character_, length(blocks))
@@ -1398,7 +1421,8 @@ match_exchangeable_residual_blocks <- function(
       idiff,
       shared_indicator = shared_indicator,
       fallback_indicator = if (length(difference_indicators) == 1L) "1" else NULL,
-      model_frame = model_frame
+      model_frame = model_frame,
+      group_ids = group_ids
     )
     matched_pairs <- c(matched_pairs, indicator_pairs)
   }
@@ -1944,26 +1968,31 @@ match_one_supplied_exchangeable_pair <- function(
     } else {
       group_ids[[pair_group]]
     }
-    # Generated indicators are stable by construction, also inside a sum.
-    check_groups <- !is.null(group_ids) &&
-      !is_generated_exchangeable_difference_indicator(pair$difference_indicator)
     validate_exchangeable_coding(
       model_frame,
       matched_pair$difference_coding_column,
       matched_pair$shared_coding_column,
       pair_label,
       group_ids = selected_group_ids,
-      group_name = if (check_groups) pair_group else NULL,
+      group_name = if (is.null(group_ids)) NULL else pair_group,
       added_indicators = matched_pair$added_indicators
     )
-  } else if (length(matched_pair$added_indicators) > 0L) {
-    # Without a difference block, overlapping added indicators would sum to 2.
+  } else if (!identical(pair$shared_indicator, "1") && !is.null(model_frame)) {
+    # Without a difference block, still check a named shared indicator, because
+    # values other than 0 and 1 rescale the shared random effects. Added
+    # indicators that overlap would sum to 2.
     shared_values <- exchangeable_coding_values(model_frame, matched_pair$shared_coding_column)
     if (!is.null(shared_values) && !all(shared_values %in% c(0, 1))) {
+      problem <- if (length(matched_pair$added_indicators) > 0L) {
+        "must be 0 or 1 on every row. Indicators added to the shared block must not overlap. "
+      } else {
+        "must be 1 on the rows of this composition and 0 on all other rows. "
+      }
       stop(
-        pair_label, ": `", matched_pair$shared_coding_column,
-        "` must be 0 or 1 on every row. Indicators added to the shared block ",
-        "must not overlap.",
+        pair_label, ": `", matched_pair$shared_coding_column, "` ", problem,
+        "Other values change the scale of the ",
+        "shared random effects, so the recovered covariances would be wrong. ",
+        "Correct the coding and refit the model.",
         call. = FALSE
       )
     }

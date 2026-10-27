@@ -27,10 +27,11 @@ was omitted;
 \item \code{difference_indicator}: the exact name of the difference-indicator
 column used in \code{difference_block}. It is required when \code{difference_block}
 selects a block and optional when \code{difference_block = NULL};
-\item \code{shared_indicator}: the exact shared composition-indicator column,
-needed only for composition-specific blocks in mixed-dyad models. It
-defaults to \code{"1"}, meaning that every fitted row belongs to the pair and
-an ordinary intercept is the shared intercept coordinate.
+\item \code{shared_indicator}: the exact shared composition-indicator column, coded
+1 on the rows of this composition and 0 elsewhere, needed only for
+composition-specific blocks in mixed-dyad models. It defaults to \code{"1"},
+meaning that every fitted row belongs to the pair and an ordinary
+intercept is the shared intercept coordinate.
 }}
 
 \item{posterior}{For \code{brms} models, return posterior \code{"mean"} matrices
@@ -130,12 +131,12 @@ two arbitrary member positions consistently within each dyad. For
 composition-specific blocks, it must be zero where \code{shared_indicator} is
 zero.
 
-For custom difference indicators supplied through \code{block_pairings}, the function
-checks whether both positions occur within each supported fitted grouping
-unit. It rejects coding when no group contains both positions, and warns when
-only some groups are one-sided, which can result from fitted-row filtering.
-It also warns when stable member assignments cannot be verified across
-repeated rows without a member identifier.
+The function checks whether both positions occur within each supported
+fitted grouping unit. It rejects coding when no group contains both
+positions. For custom difference indicators supplied through
+\code{block_pairings}, it also warns when only some groups are one-sided, which
+can result from fitted-row filtering, and when stable member assignments
+cannot be verified across repeated rows without a member identifier.
 
 People observed alone (see \code{partner_exists} in \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}) can
 share the variance of an exchangeable composition. Add their indicator to
