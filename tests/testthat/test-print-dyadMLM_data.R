@@ -992,10 +992,10 @@ test_that("partner data print names the terms of every composition", {
   expect_printed(printed, "With two-part coding, keep the intercepts of people without a partner separate.")
   expect_no_match(printed, "member-contrast term", fixed = TRUE)
 
-  # Without the composition indicators, `.partner_exists` gives the rows
+  # Without all composition indicators, `.partner_exists` gives the rows
   # without a partner their own mean.
   prepared <- prepare_partner_data(distinguishable, role = gender, predictors = x, partner_exists = partnered)
-  for (dropped in c(".is_", ".is_singleton_")) {
+  for (dropped in c(".is_", ".is_singleton_", ".is_singleton_male")) {
     printed <- capture_wide_print(dplyr::select(prepared, -dplyr::starts_with(dropped)))
     expect_equal(grep("^#     ", printed, value = TRUE), c(
       "#     + .partner_exists  # a partner exists (1) or not (0)",
@@ -1028,13 +1028,14 @@ test_that("partner data print names the terms of every composition", {
     gender = "male",
     x = 1:5
   )
-  printed <- capture_wide_print(prepare_partner_data(
-    exchangeable, role = gender, predictors = x, partner_exists = TRUE
-  ))
+  prepared <- prepare_partner_data(exchangeable, role = gender, predictors = x, partner_exists = TRUE)
+  printed <- capture_wide_print(prepared)
   expect_equal(grep("^#     ", printed, value = TRUE), c(
     "#     0 + .is_exchangeable + .is_male_x_missing",
     "#     + (0 + .is_male_x_missing | dyad_id)"
   ))
+  # Without his indicator, the others do not mark every row.
+  expect_no_match(capture_wide_print(dplyr::select(prepared, -".is_male_x_missing")), "Model terms", fixed = TRUE)
   expect_printed(printed, "Leave out their terms there.")
   expect_printed(printed, "for example `I(.is_exchangeable + .is_male_x_missing)`.")
   # Pooling the variance of an exchangeable composition needs its member

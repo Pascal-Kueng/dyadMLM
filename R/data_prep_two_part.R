@@ -355,7 +355,9 @@ model_term_advice <- function(meta, data) {
 
 # The composition indicators still in the data, with the composition, dyad
 # type, and role of the first row each one marks. Indicators that mark no row
-# (e.g., after filtering) are left out.
+# (e.g., after filtering) are left out. If the indicators left do not mark
+# every row (e.g., some were dropped), none are returned, because they cannot
+# give every row its own intercept.
 composition_indicators <- function(meta, data) {
   indicators <- dyad_generated_columns(meta) |>
     dplyr::filter(
@@ -363,7 +365,8 @@ composition_indicators <- function(meta, data) {
       .data$column %in% names(data)
     ) |>
     dplyr::select("column")
-  if (!dyad_composition_col %in% names(data)) {
+  if (!dyad_composition_col %in% names(data) ||
+      !all(rowSums(data[indicators$column]) > 0)) {
     return(tibble::tibble(
       column = character(), composition = character(), role = character(), dyad_type = character()
     ))
@@ -466,8 +469,7 @@ two_part_terms <- function(meta, data) {
   # Composition indicators already separate rows with and without a partner,
   # if they still mark every row and no composition has both (e.g., former
   # partners who both take part). Otherwise, `.partner_exists` is needed.
-  indicator_columns <- composition_indicators(meta, data)$column
-  needs_status <- !all(rowSums(data[indicator_columns]) > 0)
+  needs_status <- nrow(composition_indicators(meta, data)) == 0L
   if (!needs_status) {
     statuses <- tibble::tibble(
       composition = data[[dyad_composition_col]],
