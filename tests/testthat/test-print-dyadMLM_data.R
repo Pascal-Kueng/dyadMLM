@@ -431,15 +431,16 @@ test_that("dyadMLM data print reports people observed alone and two-part coding"
     "Dyad-occasions with a row for only one member: 2 of 5 ",
     "(2 with a partner who has missing values)."
   ))
-  expect_printed(
-    printed,
-    paste(
-      "Two-part coding: Partner predictors are 0 where no partner existed.",
-      "The status terms can only be left out if fixed intercepts already separate",
-      "rows with and without a partner. Suggested fixed-effect terms"
-    )
-  )
-  expect_true("#     + .partner_exists  # a partner exists (1) or not (0)" %in% printed)
+  expect_printed(printed, "Model terms: Partner predictors are 0 where no partner existed.")
+  # The singleton needs its own intercept and variance terms, also per
+  # occasion. These intercepts make `.partner_exists` unnecessary.
+  term_lines <- grep("^#     ", printed, value = TRUE)
+  expect_equal(term_lines, c(
+    "#     0 + .is_exchangeable + .is_singleton",
+    "#     + .x_partner  # partner's value",
+    "#     + (0 + .is_singleton | dyad_id)",
+    "#     + (0 + .is_singleton | dyad_id:wave)"
+  ))
   # `partner_exists` already says which partners existed.
   expect_no_match(printed, "Check:", fixed = TRUE)
 })
@@ -875,12 +876,15 @@ test_that("partner data print relies on dyadMLM's own status columns", {
   # An input column named `.partner_exists` is not treated as a status column.
   data <- separated
   data$.partner_exists <- c(1, NA, 0, 1, 1, 1, 1, 1)
-  expect_no_match(capture_wide_print(prepare(data, predictors = x)), "Two-part coding:", fixed = TRUE)
+  expect_no_match(capture_wide_print(prepare(data, predictors = x)), "Model terms:", fixed = TRUE)
 
-  # The reminder is shown without other partner data lines.
+  # The reminder is shown without other partner data lines. Composition
+  # indicators cannot separate the former partners, so `.partner_exists` is
+  # suggested.
   printed <- capture_wide_print(prepare(separated, predictors = x, partner_exists = together))
   expect_no_match(printed, "Rows with at least", fixed = TRUE)
-  expect_printed(printed, "Two-part coding: Partner predictors are 0")
+  expect_printed(printed, "Model terms: Partner predictors are 0")
+  expect_true("#     + .partner_exists  # a partner exists (1) or not (0)" %in% printed)
 
   # Parts with a count of 0 are left out.
   printed <- capture_wide_print(prepare(separated[-4, ], predictors = x, partner_exists = together))
@@ -952,7 +956,104 @@ test_that("people observed alone are counted in the current data", {
   )
 
   # Terms that became constant are not suggested. With only partnered rows
-  # left, no status varies, so there is no reminder.
+  # left, no status varies, so only the person whose partner is not in the
+  # data needs terms.
   printed <- capture_wide_print(prepared[prepared$.partner_exists == 1, ])
-  expect_no_match(printed, "Two-part coding:", fixed = TRUE)
+  expect_no_match(printed, "Partner predictors are 0", fixed = TRUE)
+  expect_printed(printed, "#     0 + .is_exchangeable + .is_missing_partner")
+})
+
+test_that("partner data print names the terms of every composition", {
+  printed_terms <- function(data, ...) {
+    printed <- capture_wide_print(prepare_partner_data(data, role = gender, ...))
+    return(grep("^#     ", printed, value = TRUE))
+  }
+  # Two female-male dyads, a single woman (dyad 3), and a single man (dyad 4).
+  distinguishable <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2, 3, 4),
+    person_id = 1:6,
+    gender = c("female", "male", "female", "male", "female", "male"),
+    partnered = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
+    x = 1:6
+  )
+
+  # Singletons: own intercepts and variances, which also make `.partner_exists`
+  # unnecessary.
+  printed <- capture_wide_print(prepare_partner_data(
+    distinguishable, role = gender, predictors = x, partner_exists = partnered
+  ))
+  expect_equal(grep("^#     ", printed, value = TRUE), c(
+    "#     0 + .is_female + .is_male + .is_singleton_female + .is_singleton_male",
+    "#     + .x_partner  # partner's value",
+    "#     + (0 + .is_singleton_female | dyad_id)",
+    "#     + (0 + .is_singleton_male | dyad_id)"
+  ))
+  expect_printed(printed, "for example `I(.is_female + .is_singleton_female)`.")
+  expect_printed(printed, "If intercepts are pooled across partner status, add `.partner_exists`.")
+
+  # The single woman's partner is not in the data. Her rows drop out of models
+  # with partner predictors, so her terms are named apart from the others.
+  distinguishable$partnered[5] <- TRUE
+  printed <- capture_wide_print(prepare_partner_data(
+    distinguishable, role = gender, predictors = x, partner_exists = partnered
+  ))
+  expect_equal(grep("^#     ", printed, value = TRUE), c(
+    "#     0 + .is_female + .is_male + .is_singleton_male",
+    "#     + .x_partner  # partner's value",
+    "#     + (0 + .is_singleton_male | dyad_id)"
+  ))
+  expect_printed(printed, paste(
+    "Rows of female_x_missing drop out of models with partner predictors, because their partner values are missing.",
+    "In models without partner predictors, add `.is_female_x_missing` in the same way."
+  ))
+
+  # Two male-male dyads and a man whose partner is not in the data. Without
+  # zeros, his terms are listed, but left out in models with partner
+  # predictors.
+  exchangeable <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2, 3),
+    person_id = 1:5,
+    gender = "male",
+    x = 1:5
+  )
+  printed <- capture_wide_print(prepare_partner_data(
+    exchangeable, role = gender, predictors = x, partner_exists = TRUE
+  ))
+  expect_equal(grep("^#     ", printed, value = TRUE), c(
+    "#     0 + .is_exchangeable + .is_male_x_missing",
+    "#     + (0 + .is_male_x_missing | dyad_id)"
+  ))
+  expect_printed(printed, "Leave out their terms there.")
+  expect_printed(printed, "for example `I(.is_exchangeable + .is_male_x_missing)`.")
+  expect_no_match(printed, "Partner predictors are 0", fixed = TRUE)
+  # Without partner predictors, nothing drops out.
+  printed <- capture_wide_print(prepare_partner_data(
+    exchangeable, role = gender, partner_exists = TRUE
+  ))
+  expect_no_match(printed, "drop out", fixed = TRUE)
+
+  # A single man next to the male-male dyads.
+  printed <- capture_wide_print(prepare_partner_data(
+    exchangeable, role = gender, predictors = x, partner_exists = FALSE
+  ))
+  expect_equal(grep("^#     ", printed, value = TRUE), c(
+    "#     0 + .is_exchangeable + .is_singleton_male",
+    "#     + .x_partner  # partner's value",
+    "#     + (0 + .is_singleton_male | dyad_id)"
+  ))
+  expect_printed(printed, "for example `I(.is_exchangeable + .is_singleton_male)`.")
+
+  # Former partners in a female-female dyad: the composition intercepts
+  # separate them from the partnered female-male dyads.
+  former <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2, 3, 3),
+    person_id = 1:6,
+    gender = c("female", "male", "female", "male", "female", "female"),
+    partnered = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
+    x = 1:6
+  )
+  expect_equal(printed_terms(former, predictors = x, partner_exists = partnered), c(
+    "#     0 + .is_female_x_female + .is_female_x_male_female + .is_female_x_male_male",
+    "#     + .x_partner  # partner's value"
+  ))
 })

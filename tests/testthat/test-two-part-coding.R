@@ -30,9 +30,9 @@ prepare_panel <- function(data = panel_data(), ...) {
   suppressMessages(prepare(data, time = wave, predictors = health, partner_exists = partnered, ...))
 }
 
-# The terms suggested in the message, e.g. ".partner_exists".
+# The fixed-effect terms suggested in the message, e.g. ".partner_exists".
 suggested_terms <- function(message_text) {
-  term_lines <- grep("^  \\+ ", strsplit(message_text, "\n")[[1]], value = TRUE)
+  term_lines <- grep("^  \\+ \\.", strsplit(message_text, "\n")[[1]], value = TRUE)
   return(sub("^  \\+ (\\S+).*", "\\1", term_lines))
 }
 
@@ -50,8 +50,15 @@ test_that("partner predictors are 0 where no partner existed, after centering", 
   expect_equal(prepared$.x_gmc_partner, c(-1.5, -2.5, 0.5, -0.5, 0, NA))
   expect_equal(prepared$.partner_exists, c(1, 1, 1, 1, 0, 1))
 
-  expect_match(run$messages, "Partner predictors were set to 0 where no partner existed", fixed = TRUE)
-  expect_match(run$messages, "  + .partner_exists  # a partner exists (1) or not (0)\n", fixed = TRUE)
+  # The singleton's own intercept separates the rows without a partner, so
+  # `.partner_exists` is not needed.
+  expect_match(run$messages, "Partner predictors are 0 where no partner existed", fixed = TRUE)
+  expect_match(run$messages, paste0(
+    "  0 + .is_exchangeable + .is_singleton\n",
+    "  + .x_gmc_partner  # partner's value (grand-mean centered)\n",
+    "  + (0 + .is_singleton | dyad_id)\n"
+  ), fixed = TRUE)
+  expect_match(run$messages, "Rows of missing_partner drop out of models with partner predictors", fixed = TRUE)
 })
 
 test_that("nothing is added or reported when every row has a partner", {
@@ -155,11 +162,11 @@ test_that("the message lists partner predictors of one decomposition with lags",
   }
 
   expect_equal(suggested_for(), c(
-    ".partner_exists", ".health_cwp_partner", ".health_cwp_partner_lag1", ".health_cbp_partner"
+    ".health_cwp_partner", ".health_cwp_partner_lag1", ".health_cbp_partner"
   ))
   # Without decomposition: raw values, never next to cwp or cbp columns.
   expect_equal(suggested_for(temporal_decomposition = "none"), c(
-    ".partner_exists", ".health_partner", ".health_partner_lag1"
+    ".health_partner", ".health_partner_lag1"
   ))
 })
 
@@ -183,6 +190,12 @@ test_that("terms are suggested for the status and partner columns that remain", 
   prepared <- prepare_panel(lag1_predictors = health)
   terms_for <- function(data) two_part_terms(attr(prepared, "dyadMLM"), data)$term
 
+  # Composition indicators separate the statuses, unless `.composition` was
+  # removed.
+  expect_equal(
+    terms_for(tibble::as_tibble(prepared)[c(".composition", ".partner_exists", ".health_cwp_partner_lag1")]),
+    ".health_cwp_partner_lag1"
+  )
   expect_equal(
     terms_for(tibble::as_tibble(prepared)[c(".partner_exists", ".health_cwp_partner_lag1")]),
     c(".partner_exists", ".health_cwp_partner_lag1")
@@ -207,5 +220,6 @@ test_that("the message describes the returned rows, not temporary rows", {
     partner_exists = partnered, temporal_decomposition = "none"
   ))
   expect_equal(run$result$.x_partner, c(0, 0, 0, NA, NA))
-  expect_equal(run$messages, "Partner predictors were set to 0 where no partner existed.\n")
+  expect_match(run$messages, "^Partner predictors were set to 0 where no partner existed.\n")
+  expect_equal(suggested_terms(run$messages), character())
 })

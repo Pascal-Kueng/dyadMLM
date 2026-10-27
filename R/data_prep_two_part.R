@@ -162,8 +162,8 @@ add_partner_status_column <- function(data) {
 }
 
 
-# Tells users once that values were set to 0 and which status columns belong
-# in the model.
+# Tells users once that values were set to 0 and which terms belong in the
+# model.
 report_two_part_coding <- function(data) {
   meta_data <- attr(data, "dyadMLM")
   zeroed_columns <- meta_data$zeroed_partner_columns
@@ -171,48 +171,28 @@ report_two_part_coding <- function(data) {
     return(invisible(NULL))
   }
 
-  # Like message(), wrap() pastes its arguments into one paragraph. It then
-  # wraps the paragraph to the console width. Term lines are not wrapped, so
+  # Wraps a paragraph to the console width. Term lines are not wrapped, so
   # they can be pasted into a formula.
-  wrap <- function(...) {
-    lines <- strwrap(paste0(...), width = getOption("width", 80L))
+  wrap <- function(paragraph) {
+    lines <- strwrap(paragraph, width = getOption("width", 80L))
     return(paste(lines, collapse = "\n"))
   }
 
-  # Without status columns (no row has a partner), there is no indicator to
-  # include, so one sentence is enough.
-  terms <- two_part_terms(meta_data, data)
-  if (is.null(terms)) {
-    message(wrap("Partner predictors were set to 0 where no partner existed."))
-    return(invisible(NULL))
+  # The advice explains the zeros only when it suggests partner terms.
+  advice <- model_term_advice(meta_data, data)
+  paragraphs <- character()
+  if (is.null(advice) || !advice$has_partner_terms) {
+    paragraphs <- wrap("Partner predictors were set to 0 where no partner existed.")
   }
-
-  # Why the zeros need a status indicator in the model.
-  paragraphs <- wrap(
-    "Partner predictors were set to 0 where no partner existed. The zeros ",
-    "\"turn off\" the predictors where they do not apply, when an indicator ",
-    "of whether a partner existed is included in the model to give these ",
-    "rows their own mean (two-part coding)."
-  )
-
-  # The suggested terms, then why the status terms matter.
-  paragraphs <- c(
-    paragraphs,
-    wrap(
-      "Suggested fixed-effect terms for the partner part of the model ",
-      "(starting point, please revise and check that this is what you ",
-      "need):"
-    ),
-    paste(format_two_part_terms(terms, prefix = "  "), collapse = "\n"),
-    wrap(
-      "Without the status terms, the zeros are treated as real partner ",
-      "values, which can bias the partner effects. They can only be left ",
-      "out if fixed intercepts already separate rows with and without a ",
-      "partner. Random effects cannot replace them. Leave out terms that ",
-      "are constant or duplicate other fixed effects in your model. See ",
-      "`vignette(\"partner-exists\")`."
-    )
-  )
+  if (!is.null(advice)) {
+    for (paragraph in advice$before) {
+      paragraphs <- c(paragraphs, wrap(paragraph))
+    }
+    if (length(advice$terms) > 0L) {
+      paragraphs <- c(paragraphs, paste0("  ", advice$terms, collapse = "\n"))
+    }
+    paragraphs <- c(paragraphs, wrap(advice$after))
+  }
 
   # One message, with a blank line between paragraphs.
   message(paste(paragraphs, collapse = "\n\n"))
@@ -220,11 +200,181 @@ report_two_part_coding <- function(data) {
 }
 
 
+# Advice on the terms a model of these data needs, for the message and
+# print(): the partner terms of two-part coding and the indicators of people
+# observed alone (fixed intercepts and variance terms). Returns `NULL` if there
+# is nothing to advise. Otherwise, returns the paragraphs `before` the
+# suggested `terms` (lines to paste into a formula), a paragraph `after` them,
+# and whether partner terms are suggested.
+model_term_advice <- function(meta, data) {
+  # 1. Partner terms of two-part coding, if partner predictors were set to 0.
+  partner_terms <- two_part_terms(meta, data)
+
+  # 2. Indicators of people observed alone. Their rows are 0 in the
+  #    indicators of dyad members, so they only need their own next to dyads.
+  indicators <- composition_indicators(meta, data) |>
+    dplyr::mutate(is_alone = .data$dyad_type %in% dyad_alone_types)
+  dyad_indicators <- indicators$column[!indicators$is_alone]
+  alone <- dplyr::filter(indicators, .data$is_alone, length(dyad_indicators) > 0L)
+  if (nrow(alone) == 0L && is.null(partner_terms)) {
+    return(NULL)
+  }
+
+  # 3. Rows whose partner is not in the data drop out of models with partner
+  #    predictors (their partner values are missing). Their terms are listed
+  #    only if no partner terms are suggested.
+  has_partner_predictors <- dyad_generated_columns(meta) |>
+    dplyr::filter(.data$column_role == "partner", .data$column %in% names(data)) |>
+    nrow() > 0L
+  missing_partner <- dplyr::filter(alone, .data$dyad_type == "missing_partner")
+  listed <- alone
+  if (!is.null(partner_terms)) {
+    listed <- dplyr::filter(alone, .data$dyad_type != "missing_partner")
+  }
+
+  # 4. Variance terms of people observed alone: per dyad and, in longitudinal
+  #    data, per occasion, as the residual terms of dyad members.
+  groups <- meta$dyad
+  if (isTRUE(meta$longitudinal)) {
+    groups <- c(groups, paste0(meta$dyad, ":", meta$time))
+  }
+  variance_terms <- function(columns) {
+    paste0("(0 + ", rep(columns, each = length(groups)), " | ", groups, ")")
+  }
+
+  # 5. The suggested terms: fixed intercepts of all listed groups (needed for
+  #    people observed alone, or in place of `.partner_exists`), partner terms,
+  #    then variance terms of the listed people observed alone.
+  terms <- character()
+  replaces_status <- !is.null(partner_terms) && !".partner_exists" %in% partner_terms$term
+  if (nrow(listed) > 0L || replaces_status) {
+    terms <- paste("0 +", paste(c(dyad_indicators, listed$column), collapse = " + "))
+  }
+  if (!is.null(partner_terms)) {
+    terms <- c(terms, format_two_part_terms(partner_terms, prefix = ""))
+  }
+  if (nrow(listed) > 0L) {
+    terms <- c(terms, paste("+", variance_terms(listed$column)))
+  }
+
+  # 6. Why these terms are needed, before the terms.
+  before <- character()
+  if (!is.null(partner_terms)) {
+    before <- c(before, paste(
+      "Partner predictors are 0 where no partner existed. The zeros \"turn",
+      "off\" the predictors where they do not apply, when the fixed part gives",
+      "these rows their own mean, through composition indicators or",
+      "`.partner_exists` (two-part coding). Otherwise, the zeros are treated as",
+      "real partner values, which can bias the partner effects."
+    ))
+  }
+  if (nrow(alone) > 0L) {
+    before <- c(before, paste(
+      "Rows of people observed alone are 0 in the indicators of dyad members.",
+      "Without their own indicators in the fixed part and in the variance",
+      "terms, they get no intercept and, with `dispformula = ~ 0`, almost no",
+      "residual variance."
+    ))
+  }
+  if (length(terms) > 0L) {
+    lead <- "Suggested fixed-effect terms"
+    if (nrow(listed) > 0L) {
+      lead <- "Suggested terms, next to the variance terms of dyad members"
+    }
+    before <- c(before, paste(
+      lead, "(starting point, please revise and check that this is what you need):"
+    ))
+  }
+
+  # 7. How to handle people whose partner is not in the data and how to pool,
+  #    after the terms.
+  after <- character()
+  if (nrow(missing_partner) > 0L && has_partner_predictors) {
+    after <- c(after, paste0(
+      "Rows of ", paste(missing_partner$composition, collapse = " and "),
+      " drop out of models with partner predictors, because their partner values are missing. ",
+      if (!is.null(partner_terms)) {
+        paste0(
+          "In models without partner predictors, add `",
+          paste(missing_partner$column, collapse = "`, `"), "` in the same way."
+        )
+      } else {
+        "Leave out their terms there."
+      }
+    ))
+  }
+  if (nrow(alone) > 0L) {
+    # Pool the first group with the dyad members of the same role, if any.
+    example <- dplyr::bind_rows(listed, missing_partner)[1L, ]
+    same_role <- indicators |>
+      dplyr::filter(!.data$is_alone, .data$role %in% example$role) |>
+      dplyr::pull("column")
+    dyad_column <- c(same_role, dyad_indicators)[[1L]]
+    after <- c(after, paste0(
+      "To pool a group with dyad members, sum their indicators inside I(), ",
+      "for example `I(", dyad_column, " + ", example$column, ")`.",
+      if (!is.null(partner_terms)) {
+        " If intercepts are pooled across partner status, add `.partner_exists`."
+      }
+    ))
+  }
+  after <- c(after, "See `vignette(\"partner-exists\")`.")
+
+  return(list(
+    before = before,
+    terms = terms,
+    after = paste(after, collapse = " "),
+    has_partner_terms = !is.null(partner_terms)
+  ))
+}
+
+
+# The composition indicators still in the data, with the composition, dyad
+# type, and role of the first row each one marks. Indicators that mark no row
+# (e.g., after filtering) are left out.
+composition_indicators <- function(meta, data) {
+  indicators <- dyad_generated_columns(meta) |>
+    dplyr::filter(
+      .data$column_role == "composition_indicator",
+      .data$column %in% names(data)
+    ) |>
+    dplyr::select("column")
+  if (!dyad_composition_col %in% names(data)) {
+    return(tibble::tibble(
+      column = character(), composition = character(), role = character(), dyad_type = character()
+    ))
+  }
+
+  # 1. The first row each indicator marks.
+  indicators$row <- NA_integer_
+  for (i in seq_len(nrow(indicators))) {
+    indicators$row[[i]] <- match(1, data[[indicators$column[[i]]]])
+  }
+
+  # 2. That row's composition and role, and the composition's dyad type.
+  roles <- rep(NA_character_, nrow(data))
+  if (isTRUE(meta$role %in% names(data))) {
+    roles <- as.character(data[[meta$role]])
+  }
+  indicators <- indicators |>
+    dplyr::filter(!is.na(.data$row)) |>
+    dplyr::mutate(
+      composition = as.character(data[[dyad_composition_col]][.data$row]),
+      role = roles[.data$row]
+    ) |>
+    dplyr::left_join(
+      dplyr::select(meta$dyad_compositions, "composition", "dyad_type"),
+      by = "composition"
+    )
+  return(dplyr::select(indicators, -"row"))
+}
+
+
 # The terms two-part coding needs in the model, among the columns still in the
-# data: the status column and the partner predictors. Returns a tibble with one
-# row per term and a short description, or `NULL` without partner predictors
-# set to 0, without a status column that varies, or without partner predictors
-# left.
+# data: the status column (if composition indicators do not separate the
+# statuses) and the partner predictors. Returns a tibble with one row per term
+# and a short description, or `NULL` without partner predictors set to 0,
+# without a status column that varies, or without partner predictors left.
 two_part_terms <- function(meta, data) {
   if (is.null(meta$zeroed_partner_columns)) {
     return(NULL)
@@ -289,11 +439,30 @@ two_part_terms <- function(meta, data) {
     return(NULL)
   }
 
-  # The status term first, then the partner terms.
-  terms <- dplyr::bind_rows(
-    tibble::tibble(term = ".partner_exists", comment = "a partner exists (1) or not (0)"),
-    dplyr::select(partner_terms, term = "column", "comment")
-  )
+  # Composition indicators already separate rows with and without a partner,
+  # unless a composition has both (e.g., former partners who both take part).
+  # Only then is `.partner_exists` needed next to them.
+  needs_status <- TRUE
+  if (dyad_composition_col %in% names(data)) {
+    statuses <- tibble::tibble(
+      composition = data[[dyad_composition_col]],
+      status = data[[".partner_exists"]]
+    ) |>
+      dplyr::summarise(
+        n_statuses = dplyr::n_distinct(.data$status, na.rm = TRUE),
+        .by = "composition"
+      )
+    needs_status <- any(statuses$n_statuses > 1L)
+  }
+
+  # The status term first, if needed, then the partner terms.
+  terms <- dplyr::select(partner_terms, term = "column", "comment")
+  if (needs_status) {
+    terms <- dplyr::bind_rows(
+      tibble::tibble(term = ".partner_exists", comment = "a partner exists (1) or not (0)"),
+      terms
+    )
+  }
   return(terms)
 }
 

@@ -205,10 +205,10 @@ print_partner_data <- function(x, meta, current_dyad_compositions) {
     ))
   }
 
-  # Two-part coding: the terms to include, if partner predictors that were set
-  # to 0 are still in the data.
-  terms <- two_part_terms(meta, x)
-  if (length(lines) == 0L && is.null(terms)) {
+  # The terms a model needs for people observed alone and for partner
+  # predictors set to 0.
+  advice <- model_term_advice(meta, x)
+  if (length(lines) == 0L && is.null(advice)) {
     return(invisible(NULL))
   }
 
@@ -236,13 +236,14 @@ print_partner_data <- function(x, meta, current_dyad_compositions) {
   }
 
   # The terms are not wrapped, so they can be pasted into a formula.
-  if (!is.null(terms)) {
-    cat(wrap_note("Two-part coding:", paste(
-      "Partner predictors are 0 where no partner existed. The status terms",
-      "can only be left out if fixed intercepts already separate rows with",
-      "and without a partner. Suggested fixed-effect terms (starting point,",
-      "please revise and check that this is what you need):"
-    )), format_two_part_terms(terms, prefix = "#     "), "#", sep = "\n")
+  if (!is.null(advice)) {
+    cat(
+      wrap_note("Model terms:", paste(advice$before, collapse = " ")),
+      paste0("#     ", advice$terms, recycle0 = TRUE),
+      wrap(advice$after),
+      "#",
+      sep = "\n"
+    )
   }
 
   return(invisible(NULL))

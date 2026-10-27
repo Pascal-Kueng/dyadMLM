@@ -47,8 +47,10 @@
 
 * `print()` and `summary()` of prepared data now report people observed
   alone, dyad-occasions with a row for only one member, rows with missing
-  partner predictors, and suggested terms for two-part coding. A new help
-  section in `prepare_dyad_data()` explains how these cases are prepared.
+  partner predictors, and suggested model terms: the indicators of every
+  composition for the fixed part and the variance terms, and the partner
+  terms of two-part coding. A new help section in `prepare_dyad_data()`
+  explains how these cases are prepared.
 
 * `recover_exchangeable_covariance()` recognizes summed indicators such as
   `I(.is_male_x_male + .is_singleton_male)`, which let people observed alone

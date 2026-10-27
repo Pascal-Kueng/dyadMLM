@@ -869,9 +869,12 @@ and #82.
   cross-sectional data, and longitudinal data with singletons, complete dyads,
   and people whose partner never took part. Stop with an error when the status
   changes within a dyad. Done in #88 (the status-change columns were removed).
-- Keep people in their dyad's composition when their partner exists but did
-  not take part, with `NA` partner values.
-- Let `print()` name every indicator that singletons need.
+- Keep the separate compositions `<role>_x_missing` and `singleton_<role>`
+  (decided 2026-10-27). People whose partner never takes part can differ from
+  people whose partner takes part. Users can pool compositions with `I()` and
+  compare the pooled and separate models with a likelihood-ratio test.
+- Let `print()` name every indicator that people observed alone need, for the
+  fixed part and the variance terms. Done in #88.
 - Ship singletons in the residual and outcome checks (#82) in the same release.
 - Add status changes over time in a separate PR, after feedback from
   statisticians. Do not set the partner's usual level (`cbp`) to 0 by default

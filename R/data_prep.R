@@ -80,13 +80,25 @@
 #' | Partner not in the data | `<role>_x_missing` | `missing_partner` |
 #'
 #' The label stays the same across occasions. `singleton` means no partner at
-#' any observed occasion. People observed alone have no member contrast and
-#' cannot be listed in `pool_compositions` or
-#' `set_exchangeable_compositions`. To let them share parameters with dyad
-#' members, add their indicators in the model formula, e.g.,
-#' `I(.is_male_x_male + .is_singleton_male):x` for a slope. For a variance,
-#' add them in both the shared and the difference block (see
-#' [recover_exchangeable_covariance()]):
+#' any observed occasion. A partner who misses only some occasions has
+#' missing values there, and the person stays in the dyad's composition (see
+#' above). A partner who never takes part gives the person their own
+#' composition, because people whose partner never takes part can differ from
+#' people whose partner takes part (e.g., in how the couple gets along or in
+#' why the partner stayed away).
+#'
+#' Rows of people observed alone are 0 in the indicators of dyad members.
+#' Models therefore need their indicators in the fixed part and in the
+#' variance terms. Otherwise, these rows get no intercept and, with
+#' `dispformula = ~ 0`, almost no residual variance. `print()` lists these
+#' terms. People observed alone have no member contrast and cannot be listed
+#' in `pool_compositions` or `set_exchangeable_compositions`. To let them share
+#' parameters with dyad members, add their indicators in the model formula,
+#' e.g., `I(.is_male_x_male + .is_singleton_male)` for an intercept or
+#' `I(.is_male_x_male + .is_singleton_male):x` for a slope, and compare the
+#' shared with the separate parameters in a likelihood-ratio test
+#' ([compare_nested_models()]). For a variance, add them in both the shared
+#' and the difference block (see [recover_exchangeable_covariance()]):
 #'
 #' ```r
 #' (0 + I(.is_male_x_male + .is_singleton_male) | coupleID) +
@@ -103,14 +115,16 @@
 #' Where no partner existed, numeric partner predictors are set to 0 after
 #' centering, and `.partner_exists` (1 or 0) marks these rows. This is two-part
 #' coding. The status column is only added when the status varies.
-#' **`.partner_exists` must be included as a fixed effect.** Otherwise, the
-#' zeros are treated as real partner values, which can bias the partner
-#' effects. Random effects cannot replace it. It can only be left out if fixed
-#' intercepts already separate all rows without a partner, for example
-#' singleton indicators when no dyad has occasions without a partner. Lagged
-#' partner predictors are set to 0 too, except at a person's first occasion and
-#' after gaps, where they stay missing as in complete dyads. Non-numeric partner
-#' predictors cannot be set to 0, so they stop with an error.
+#' **The fixed part must give rows without a partner their own mean**,
+#' through the indicators of their compositions (as `print()` suggests) or
+#' `.partner_exists`. Otherwise, the zeros are treated as real partner values,
+#' which can bias the partner effects. Random effects cannot replace this.
+#' Next to composition indicators, `.partner_exists` is only needed when a
+#' composition has rows with and without a partner (e.g., former partners who
+#' both take part). Lagged partner predictors are set to 0 too, except at a
+#' person's first occasion and after gaps, where they stay missing as in
+#' complete dyads. Non-numeric partner predictors cannot be set to 0, so they
+#' stop with an error.
 #'
 #' ## Actor variables that exist only with a partner
 #'
@@ -120,8 +134,8 @@
 #' does not apply two-part coding to such actor variables, but you can do it
 #' yourself after preparing the data. Set their actor columns to 0 where
 #' `.partner_exists` is 0 with `dplyr::if_else()` (multiplying keeps `NA`,
-#' since `0 * NA` is `NA`), and include the status terms as for partner
-#' predictors. See `vignette("partner-exists")` for an example.
+#' since `0 * NA` is `NA`), and give rows without a partner their own mean as
+#' for partner predictors. See `vignette("partner-exists")` for an example.
 #'
 #' ## Interpreting results
 #'
