@@ -868,7 +868,7 @@ and #82.
 - Support two-part coding only for a status that is constant within each dyad:
   cross-sectional data, and longitudinal data with singletons, complete dyads,
   and people whose partner never took part. Stop with an error when the status
-  changes within a dyad.
+  changes within a dyad. Done in #88 (the status-change columns were removed).
 - Keep people in their dyad's composition when their partner exists but did
   not take part, with `NA` partner values.
 - Let `print()` name every indicator that singletons need.

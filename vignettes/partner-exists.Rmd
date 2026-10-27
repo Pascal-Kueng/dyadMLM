@@ -2,9 +2,8 @@
 title: "People Observed Without Their Partner"
 author: "Pascal Küng"
 description: >
-  In dyadic models, keep singles, people whose partner did not take part, and
-  people who lose or gain a partner during a study, with two-part partner
-  predictors where no partner exists.
+  In dyadic models, keep singles and people whose partner did not take part,
+  with two-part partner predictors where no partner exists.
 bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
@@ -28,9 +27,8 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 
 Dyadic samples often include people observed without their partner. Some
 have no partner (singles, widowed people). Others have a partner who did not
-take part. In longitudinal studies, people can also lose or gain a partner.
-This vignette shows how to keep all of them in a dyadic multilevel model with
-the `partner_exists` argument of `prepare_dyad_data()`.
+take part. This vignette shows how to keep all of them in a dyadic multilevel
+model with the `partner_exists` argument of `prepare_dyad_data()`.
 
 It builds on the
 [Actor-Partner Interdependence Model vignette](apim.html), in particular its
@@ -56,17 +54,13 @@ indicator column (`.is_*`):
 |---|---|---|---|---|
 | Partner did not take part | `TRUE` | `<role>_x_missing` | `missing_partner` | missing (`NA`) |
 | No partner at any observed occasion (*singleton*) | `FALSE` | `singleton_<role>` | `singleton` | 0 |
-| Partner lost or gained during the study | `TRUE` while a partner exists | dyad label, e.g., `female_x_male` | `assumed_exchangeable` | 0 where no partner exists |
 
-- A label stays the same across occasions. A person observed alone who had a
-  partner at some occasion is labeled as having a partner who did not take
-  part.
+- The status must be the same in all rows of a dyad, for both members and at
+  all occasions (see [Changes in partner status](#changes-in-partner-status)).
 - Base `partner_exists` on recorded status, such as relationship status or
   widowhood, not on whether both people supplied data. A rule such as
   `dplyr::n() == 2` mixes the two kinds of people observed alone.
 - Give each singleton their own `dyad` ID, never a shared ID or `NA`.
-- Where both members have a row at an occasion, their values must agree.
-  After a separation in which both keep taking part, both are `FALSE`.
 
 ## Partners who did not take part
 
@@ -332,128 +326,20 @@ equal residual variances are plausible on substantive grounds. With separate
 singleton variances, only the shared fixed effects link singleton and dyad
 estimates.
 
-## Longitudinal data: losing or gaining a partner
+## Changes in partner status
 
-Without `partner_exists`, a partner who has no row at an occasion is treated
-as existing, with missing values. After a death, the survivor's later rows
-then drop out of models with momentary partner predictors. With
-`partner_exists`, these rows are kept with two-part predictors.
+The partner status must stay the same within a dyad. `prepare_dyad_data()`
+stops when it changes over time, for example after a death, a separation, or
+a new relationship. Filter the data on the recorded status first, for example
+keep only the occasions while the partner exists, or only the first
+partnership. With a status column `partnered`:
 
-With `time`, `prepare_dyad_data()` splits each predictor into a momentary
-deviation from the person's usual level (`cwp`) and the usual level itself
-(`cbp`), so that within-person changes and between-person differences get
-separate slopes [@curranDisaggregationWithinBetween2011]. See the
-[intensive longitudinal APIMs](apim.html#intensive-longitudinal-apims).
-
-### Example: a partner dies
-
-Anna and Ben take part in a panel study. Ben dies after wave 3. In the
-timeline, ● is a row with data:
-
-| wave | 1 | 2 | 3 | 4 | 5 |
-|---|---|---|---|---|---|
-| Anna | ● | ● | ● | ● | ● |
-| Ben | ● | ● | ● | | |
-| `partnered` | `TRUE` | `TRUE` | `TRUE` | `FALSE` | `FALSE` |
-
-If the data file has empty rows for Ben after his death, remove them.
-Otherwise, they count as occasions without a partner when Ben's share of
-occasions with a partner (`.partner_exists_cbp`) is computed.
-
-The simulated `panel` also contains a couple that stays together and a
-couple that separates after wave 3 (both keep taking part). `partnered`
-records relationship status:
-
-```{r simulate-panel, include = FALSE}
-set.seed(20261014)
-panel <- expand.grid(wave = 1:5, member = 1:2, coupleID = 1:3) |>
-  mutate(
-    personID = c("Cleo", "Dan", "Anna", "Ben", "Eva", "Finn")[
-      (coupleID - 1) * 2 + member
-    ],
-    partnered = !(coupleID %in% 2:3 & wave >= 4),
-    health = round(rnorm(n(), 5, 1), 1),
-    wellbeing = round(rnorm(n(), 5, 1), 1),
-    satisfaction = if_else(partnered, round(rnorm(n(), 4, 1), 1), NA_real_)
-  ) |>
-  filter(!(personID == "Ben" & wave >= 4)) |>
-  select(coupleID, personID, wave, partnered, health, satisfaction, wellbeing)
+```{r filter-partner-status, eval = FALSE}
+together <- filter(data, partnered)
 ```
 
-```{r prepare-panel}
-prepared <- prepare_dyad_data(
-  panel, dyad = coupleID, member = personID, time = wave,
-  predictors = health, lag1_predictors = health,
-  partner_exists = partnered, seed = 1
-)
-```
-
-The message lists the suggested terms. Anna's rows show the coding of Ben's
-health:
-
-```{r panel-anna-rows}
-prepared |>
-  filter(personID == "Anna") |>
-  select(
-    wave, .partner_exists, .partner_exists_lag1,
-    .health_cwp_partner, .health_cwp_partner_lag1,
-    .health_cbp_partner_when_exists, .health_cbp_partner_after_exists
-  ) |>
-  knitr::kable(digits = 2)
-```
-
-- From wave 4, `.partner_exists` is 0, and Ben's momentary deviation
-  (`.health_cwp_partner`) is 0 in Anna's rows.
-- Ben's usual level moves from `_when_exists` to `_after_exists`. Setting it
-  to 0 would assume that it no longer relates to Anna's outcome. In its own
-  column, it gets its own slope.
-- At wave 4, the lagged value still holds Ben's wave-3 value. It pairs with
-  `.partner_exists_lag1`, which is 1 there.
-- `.partner_exists_cwp` and `.partner_exists_cbp` (not shown) split the
-  status into losing or gaining a partner (within person) and the share of
-  occasions with a partner (between persons). Use both instead of
-  `.partner_exists`.
-
-A model with the suggested terms (random effects kept minimal here):
-
-```{r panel-model, eval = FALSE}
-glmmTMB::glmmTMB(
-  wellbeing ~ 1 + .partner_exists_cwp + .partner_exists_cbp +
-    .partner_exists_lag1 +
-    .health_cwp_actor + .health_cbp_actor +
-    .health_cwp_partner + .health_cwp_partner_lag1 +
-    .health_cbp_partner_when_exists + .health_cbp_partner_after_exists +
-    (1 | coupleID / personID),
-  data = prepared
-)
-```
-
-The section "People observed without their partner" in
-`?prepare_dyad_data` explains how to interpret these coefficients.
-
-### Separation, new relationships, and on-off relationships
-
-| wave | 1 | 2 | 3 | 4 | 5 |
-|---|---|---|---|---|---|
-| Separation (both keep taking part) | `TRUE` | `TRUE` | `TRUE` | `FALSE` | `FALSE` |
-| New relationship (partner joins at wave 3) | `FALSE` | `FALSE` | `TRUE` | `TRUE` | `TRUE` |
-| On-off relationship | `TRUE` | `FALSE` | `FALSE` | `TRUE` | `TRUE` |
-
-- **Separation.** The preparation and model are as for a death, and both
-  keep their rows. The former partner's usual level includes their
-  occasions after the separation.
-- **New relationship.** Before the relationship, the partner's usual level
-  is in `_before_exists`. It can relate to the outcome through selection
-  (who ends up together). If the data also contain losses,
-  `.partner_before_exists` is added, so that occasions before a relationship
-  and after a loss get their own means.
-- **On-off relationship.** A partner who returns is treated as the same
-  partner, with a message. The gap counts as after a relationship
-  (`_after_exists`). A different partner is not supported. End the person's
-  data before the relationship with the different partner.
-
-Splitting the usual level into before and after needs a numeric `time`.
-Otherwise, it is not split, with a warning.
+Leaving out `partner_exists` does not help. After a separation in which both
+keep taking part, they would then be treated as current partners.
 
 ## Actor variables that exist only with a partner
 
@@ -463,75 +349,10 @@ partner exists, so these rows drop out of models that use them.
 `prepare_dyad_data()` applies two-part coding to partner predictors only,
 but you can apply it to such actor variables after preparing the data.
 
-In cross-sectional data, or when the status never changes within a dyad,
-set the actor columns to 0 where `.partner_exists` is 0, for example with
+Set the actor columns to 0 where `.partner_exists` is 0, for example with
 `if_else(.partner_exists == 0, 0, .x_gmc_actor)`. Use `dplyr::if_else()`,
 because multiplying by `.partner_exists` keeps missing values (`0 * NA` is
 `NA`).
-
-When the status changes, also split the actor's usual level by partner
-status, as `prepare_dyad_data()` does for partner predictors. In `panel`,
-`satisfaction` is a relationship rating that is missing where no partner
-exists:
-
-```{r actor-two-part, message = FALSE}
-prepared <- prepare_dyad_data(
-  panel, dyad = coupleID, member = personID, time = wave,
-  predictors = c(health, satisfaction), lag1_predictors = satisfaction,
-  partner_exists = partnered, seed = 1
-) |>
-  mutate(
-    # First wave with a partner in the couple (Inf if never).
-    first_partnered = if (any(.partner_exists == 1)) {
-      min(wave[.partner_exists == 1])
-    } else {
-      Inf
-    },
-    .by = coupleID
-  ) |>
-  mutate(
-    # Momentary part: 0 where no partner exists (at this or the previous wave).
-    .satisfaction_cwp_actor = if_else(
-      .partner_exists == 0, 0, .satisfaction_cwp_actor
-    ),
-    .satisfaction_cwp_actor_lag1 = if_else(
-      .partner_exists_lag1 %in% 0, 0, .satisfaction_cwp_actor_lag1
-    ),
-    # Usual level, split by partner status.
-    .satisfaction_cbp_actor_when_exists = if_else(
-      .partner_exists == 1, .satisfaction_cbp_actor, 0
-    ),
-    .satisfaction_cbp_actor_before_exists = if_else(
-      .partner_exists == 0 & wave < first_partnered & is.finite(first_partnered),
-      .satisfaction_cbp_actor, 0
-    ),
-    .satisfaction_cbp_actor_after_exists = if_else(
-      .partner_exists == 0 & wave > first_partnered,
-      .satisfaction_cbp_actor, 0
-    )
-  )
-
-prepared |>
-  filter(personID == "Anna") |>
-  select(
-    wave, satisfaction, .satisfaction_cwp_actor,
-    .satisfaction_cbp_actor_when_exists, .satisfaction_cbp_actor_after_exists
-  ) |>
-  knitr::kable(digits = 2)
-```
-
-Use the recoded `.satisfaction_cwp_actor` and `.satisfaction_cwp_actor_lag1`,
-and the split columns in place of `.satisfaction_cbp_actor`, together with
-the status terms that `prepare_dyad_data()` suggests. Leave out a split
-column that is 0 everywhere (here `_before_exists`, because no relationship
-begins in these data). Rows of couples or singletons without a partner at
-any occasion are 0 in all these columns, so they need their own fixed
-intercept, such as singleton indicators.
-
-`.partner_exists_lag1` is only created with lagged predictors and when the
-status differs from the previous occasion somewhere. Otherwise, compute the same status with
-`partner_exists_lag1 = .partner_exists[match(wave - 1, wave)]` and
-`.by = coupleID`.
 
 ## References
 

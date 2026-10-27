@@ -409,13 +409,12 @@ test_that("dyadMLM data print reports missing partner data", {
 
 test_that("dyadMLM data print reports people observed alone and two-part coding", {
   # Dyad 1: the wife (person 1) answers waves 1-3, her husband (person 2) only
-  # wave 1. He skips wave 2 and dies before wave 3. Dyad 2 is complete. Dyad 3
-  # is a person without a partner.
+  # wave 1. Dyad 2 is complete. Dyad 3 is a person without a partner.
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2, 3, 3),
     person_id = c(1, 1, 1, 2, 3, 4, 3, 4, 5, 5),
     wave = c(1, 2, 3, 1, 1, 1, 2, 2, 1, 2),
-    alive = c(TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
+    alive = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
     x = 1:10
   )
   printed <- capture_wide_print(prepare_partner_data(
@@ -426,11 +425,11 @@ test_that("dyadMLM data print reports people observed alone and two-part coding"
   expect_printed(printed, "# Rows: 10 | Dyads: 2 | People observed alone: 1 |")
   expect_match(printed, "# singleton +singleton +1 person", all = FALSE)
   expect_printed(printed, "People observed alone: 1 without a partner.")
-  # Without a partner: dyad 1 at wave 3. With a partner who has missing values:
-  # dyad 1 at wave 2. The person observed alone (dyad 3) is not counted.
+  # With a partner who has missing values: dyad 1 at waves 2 and 3. The person
+  # observed alone (dyad 3) is not counted.
   expect_printed(printed, paste0(
     "Dyad-occasions with a row for only one member: 2 of 5 ",
-    "(1 without a partner, 1 with a partner who has missing values)."
+    "(2 with a partner who has missing values)."
   ))
   expect_printed(
     printed,
@@ -863,13 +862,13 @@ test_that("partner data print relies on dyadMLM's own status columns", {
   prepare <- function(data, ...) {
     prepare_partner_data(data, time = wave, temporal_decomposition = "none", ...)
   }
-  # Dyads 1 and 2 are observed together at waves 1-2. Dyad 1 separates at
-  # wave 2 but both partners keep taking part.
+  # Dyads 1 and 2 are observed together at waves 1-2. Dyad 1 separated before
+  # wave 1 but both former partners take part.
   separated <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
     wave = c(1, 1, 2, 2, 1, 1, 2, 2),
-    together = c(TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE),
+    together = c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE),
     x = 1:8
   )
 
@@ -888,17 +887,16 @@ test_that("partner data print relies on dyadMLM's own status columns", {
   expect_printed(printed, "Dyad-occasions with a row for only one member: 1 of 4 (1 without a partner).")
 
   # Counts of different widths are not padded. Person 2 takes part at wave 1
-  # only and no partner exists at wave 12.
-  widths <- tibble::tibble(
-    dyad_id = c(rep(1, 13), 2, 2),
-    person_id = c(rep(1, 12), 2, 3, 4),
-    wave = c(1:12, 1, 1, 1),
-    together = c(rep(TRUE, 11), FALSE, TRUE, TRUE, TRUE),
-    x = 1:15
+  # only. The former partners in dyad 1 of `separated` add one occasion with
+  # only one of them.
+  widths <- dplyr::bind_rows(
+    tibble::tibble(dyad_id = 3, person_id = c(5:6, rep(5, 10)), wave = c(1, 1, 2:11), together = TRUE),
+    separated[-4, ]
   )
+  widths$x <- seq_len(nrow(widths))
   printed <- capture_wide_print(prepare(widths, predictors = x, partner_exists = together))
   expect_printed(printed, paste0(
-    "Dyad-occasions with a row for only one member: 11 of 13 ",
+    "Dyad-occasions with a row for only one member: 11 of 15 ",
     "(1 without a partner, 10 with a partner who has missing values)."
   ))
 
@@ -957,50 +955,4 @@ test_that("people observed alone are counted in the current data", {
   # left, no status varies, so there is no reminder.
   printed <- capture_wide_print(prepared[prepared$.partner_exists == 1, ])
   expect_no_match(printed, "Two-part coding:", fixed = TRUE)
-})
-
-test_that("partner data print lists split two-part terms and counts their missing values", {
-  # The wife (person 1) loses her husband (person 2, who never answered x)
-  # before wave 3. Dyad 2 is a stable couple.
-  data <- tibble::tibble(
-    dyad_id = c(1, 1, 1, 1, 1, 2, 2, 2, 2),
-    person_id = c(1, 1, 1, 2, 2, 3, 4, 3, 4),
-    wave = c(1, 2, 3, 1, 2, 1, 1, 2, 2),
-    partnered = c(TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
-    x = c(1, 2, 3, NA, NA, 6, 7, 8, 9)
-  )
-  prepared <- prepare_partner_data(data, time = wave, predictors = x, partner_exists = partnered)
-  printed <- capture_wide_print(prepared)
-
-  # The former partner's usual level is unknown, so `_after_exists` is only 0
-  # or NA and not suggested.
-  term_lines <- grep("^#     \\+ ", printed, value = TRUE)
-  expect_equal(sub("^#     \\+ (\\S+).*", "\\1", term_lines), c(
-    ".partner_exists_cwp", ".partner_exists_cbp", ".x_cwp_partner",
-    ".x_cbp_partner_when_exists"
-  ))
-  expect_printed(printed, "#   .{pred}_cbp_partner_when_exists ")
-  # The wife's partner predictors are unknown at all three waves. At wave 3,
-  # only the former partner's usual level is (`_after_exists` is NA).
-  expect_printed(printed, "Rows with at least one missing partner predictor: 3 of 9.")
-
-  # The reminder still appears without the raw status.
-  printed <- capture_wide_print(dplyr::select(prepared, -".partner_exists"))
-  expect_printed(printed, "Two-part coding:")
-
-  # With the former partner's usual level known, it is suggested, and a
-  # singleton then needs its own intercept, unless filtered out.
-  answered <- data
-  answered$x[answered$person_id == 2] <- c(4, 5)
-  with_singleton <- dplyr::bind_rows(
-    answered,
-    tibble::tibble(dyad_id = 3, person_id = 5, wave = 1:2, partnered = FALSE, x = c(4, 5))
-  )
-  prepared <- prepare_partner_data(with_singleton, time = wave, predictors = x, partner_exists = partnered)
-  printed <- capture_wide_print(prepared)
-  expect_true("#     + .x_cbp_partner_after_exists  # former partner's usual level, after a loss" %in% printed)
-  expect_printed(printed, "+ .is_singleton")
-  printed <- capture_wide_print(prepared[prepared$dyad_id != 3, ])
-  expect_no_match(printed, "+ .is_singleton", fixed = TRUE)
-  expect_printed(printed, "Two-part coding:")
 })

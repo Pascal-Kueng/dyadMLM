@@ -13,12 +13,12 @@ validate_partner_exists(out, dyad_name, time_name, role_name)
 \code{time_name} and \code{role_name} may be \code{NULL}.}
 }
 \value{
-\code{NULL}, invisibly. Called for its errors and message.
+\code{NULL}, invisibly. Called for its errors.
 }
 \description{
 Both members must agree on whether they are partners when both have a row at
-the same occasion. The role value \code{"missing"} is reserved for labels of
-people whose partner is not in the data. Partners who return after a period
-without a partner are reported with a message.
+the same occasion, and the status must stay the same within each dyad. The
+role value \code{"missing"} is reserved for labels of people whose partner is not
+in the data.
 }
 \keyword{internal}

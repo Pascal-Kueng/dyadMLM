@@ -12,16 +12,16 @@ temporary partner status column.}
 }
 \value{
 \code{data} with two-part coded partner columns, the partner status
-columns, and the temporary status column for the previous occasion.
+column, and the temporary status column for the previous occasion.
 }
 \description{
 Where no partner existed, there is no partner value. Numeric partner
 predictors are set to 0 there (two-part coding), and the partner status
-columns \code{.partner_exists} and \code{.partner_exists_lag1} let the model give these
-rows their own mean. Contemporaneous partner predictors follow the status at
-the same occasion, and lagged partner predictors follow the status at the
-previous occasion. Centering happens before this step, so 0 is the centered
-reference. Non-numeric partner predictors cannot be set to 0, so they stop
-with an error.
+column \code{.partner_exists} lets the model give these rows their own mean.
+Lagged partner predictors are only set to 0 where the dyad has a row at the
+previous occasion, so they stay missing at first occasions and after gaps,
+as in complete dyads. Centering happens before this step, so 0 is the
+centered reference. Non-numeric partner predictors cannot be set to 0, so
+they stop with an error.
 }
 \keyword{internal}

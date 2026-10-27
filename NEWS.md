@@ -41,13 +41,9 @@
 * `prepare_dyad_data()` gains `partner_exists`, which records whether a
   partner existed. It keeps people observed alone (singletons and people whose
   partner did not take part) with their own compositions, and sets partner
-  predictors to 0 where no partner existed (two-part coding, with
-  `.partner_exists` and `.partner_exists_lag1` columns). When the status
-  changes within a dyad in longitudinal data with
-  `temporal_decomposition = "2l"`, the status is split into within- and
-  between-person parts, and the partner's usual level (`cbp`) is split by
-  partner status (with numeric `time`). See
-  `vignette("partner-exists")`.
+  predictors to 0 where no partner existed (two-part coding, with a
+  `.partner_exists` column). The status must stay the same within each dyad.
+  See `vignette("partner-exists")`.
 
 * `print()` and `summary()` of prepared data now report people observed
   alone, dyad-occasions with a row for only one member, rows with missing

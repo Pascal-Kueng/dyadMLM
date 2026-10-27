@@ -105,14 +105,46 @@ test_that("both members must agree on partner status at the same occasion", {
     fixed = TRUE
   )
 
-  # Both members FALSE (e.g., after a separation) and FALSE without a partner
-  # row at that occasion are both allowed.
-  diary$together[4] <- FALSE
+  # Both members FALSE (e.g., former partners who both take part) and FALSE
+  # without a partner row at that occasion are both allowed.
+  diary$together[1:5] <- FALSE
   validated <- validate_partner_exists_data(diary, time = day, partner_exists = together)
   expect_equal(
     stored_status(validated),
-    c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE)
+    c(FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE)
   )
+})
+
+test_that("partner status must stay the same within a dyad over time", {
+  # Dyad 1 stays together, dyad 2 lives alone, and dyad 3 has a partner who
+  # never takes part.
+  constant <- tibble::tibble(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 3, 3),
+    person_id = c(1, 2, 1, 2, 3, 3, 4, 4),
+    wave = c(1, 1, 2, 2, 1, 2, 1, 2),
+    together = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE)
+  )
+  expect_no_error(validate_partner_exists_data(constant, time = wave, partner_exists = together))
+
+  changes <- list(
+    # Person 2 dies after wave 1.
+    death = dplyr::mutate(constant[-4, ], together = c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE)),
+    # Both keep taking part after separating.
+    separation = dplyr::mutate(constant, together = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE)),
+    # Person 3 finds a partner who does not take part.
+    formation = dplyr::mutate(constant, together = c(TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE))
+  )
+  changing_dyad <- c(death = 1, separation = 1, formation = 2)
+  for (change in names(changes)) {
+    expect_error(
+      validate_partner_exists_data(changes[[change]], time = wave, partner_exists = together),
+      paste0(
+        "`partner_exists` changes over time in 1 dyad, with ID: ", changing_dyad[[change]],
+        ". Changes in partner status within a dyad"
+      ),
+      fixed = TRUE
+    )
+  }
 })
 
 test_that("the role value \"missing\" is reserved when partner_exists is supplied", {

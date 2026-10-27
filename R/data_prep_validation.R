@@ -628,8 +628,8 @@ resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dya
       "- If none of them has a partner, use `partner_exists = FALSE`.\n",
       "- If all of them have a partner who is not in the data, use ",
       "`partner_exists = TRUE`.\n",
-      "- If this differs between people or over time, supply `partner_exists` ",
-      "as a TRUE/FALSE column.\n",
+      "- If this differs between people, supply `partner_exists` as a ",
+      "TRUE/FALSE column.\n",
       "- To remove them, use `incomplete_dyads = \"drop\"`.\n",
       "See the section \"People observed without their partner\" in ",
       "?prepare_dyad_data.",
@@ -695,8 +695,8 @@ add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) 
 
   # A constant only describes people observed alone. Otherwise, `FALSE` would
   # also mark complete dyads as having no partner, so they are set to `TRUE`.
-  # A column is used as given, so both members can be `FALSE` (e.g., after a
-  # separation).
+  # A column is used as given, so both members can be `FALSE` (e.g., former
+  # partners who both take part).
   if (is_constant) {
     out <- out |>
       dplyr::group_by(.data[[dyad_name]]) |>
@@ -726,15 +726,15 @@ add_partner_exists <- function(out, partner_exists_quo, dyad_name, member_name) 
 #' Check partner status for consistency
 #'
 #' Both members must agree on whether they are partners when both have a row at
-#' the same occasion. The role value `"missing"` is reserved for labels of
-#' people whose partner is not in the data. Partners who return after a period
-#' without a partner are reported with a message.
+#' the same occasion, and the status must stay the same within each dyad. The
+#' role value `"missing"` is reserved for labels of people whose partner is not
+#' in the data.
 #'
 #' @param out The validated data with the temporary partner status column.
 #' @param dyad_name,time_name,role_name Names of the structural columns.
 #'   `time_name` and `role_name` may be `NULL`.
 #'
-#' @return `NULL`, invisibly. Called for its errors and message.
+#' @return `NULL`, invisibly. Called for its errors.
 #' @keywords internal
 validate_partner_exists <- function(out, dyad_name, time_name, role_name) {
   # One row per occasion at which the two members report different statuses.
@@ -761,40 +761,25 @@ validate_partner_exists <- function(out, dyad_name, time_name, role_name) {
     )
   }
 
-  # Tell users once about dyads in which the partner returns after a period
-  # without one (TRUE, then FALSE, then TRUE). A dyad that starts without a
-  # partner and then has one (FALSE, then TRUE) is not reported. Only numeric
-  # time has a reliable order (character labels sort alphabetically, e.g.,
-  # "w10" before "w2").
-  if (!is.null(time_name) && is.numeric(out[[time_name]])) {
-    returning_dyads <- out |>
-      dplyr::distinct(
-        .data[[dyad_name]],
-        .data[[time_name]],
-        .dy_status = .data[[dyad_partner_exists_col]]
-      ) |>
-      dplyr::arrange(.data[[time_name]]) |>
-      # Count how often a period with a partner starts in each dyad. The `.dy_`
-      # names cannot clash with input columns.
-      dplyr::summarise(
-        .dy_n_partner_periods = sum(.data$.dy_status & !dplyr::lag(.data$.dy_status, default = FALSE)),
-        .by = dplyr::all_of(dyad_name)
-      ) |>
-      dplyr::filter(.data$.dy_n_partner_periods > 1L) |>
-      dplyr::pull(dplyr::all_of(dyad_name))
+  # The status must stay the same within each dyad. Changes over time would
+  # need status-specific columns, which dyadMLM does not create.
+  changing_dyads <- out |>
+    dplyr::summarise(
+      .dy_n_statuses = dplyr::n_distinct(.data[[dyad_partner_exists_col]]),
+      .by = dplyr::all_of(dyad_name)
+    ) |>
+    dplyr::filter(.data$.dy_n_statuses > 1L) |>
+    dplyr::pull(dplyr::all_of(dyad_name))
 
-    if (length(returning_dyads) > 0L) {
-      message(
-        "`partner_exists` returns to TRUE after FALSE in ",
-        length(returning_dyads), if (length(returning_dyads) == 1L) " dyad" else " dyads",
-        " (", format_group_list(returning_dyads, max = 5), "). This is treated ",
-        "as the same partner returning. A new partner would place the person in ",
-        "two dyads. Standard dyadic multilevel models assume each person belongs ",
-        "to one dyad (people nested in dyads), so this would need a ",
-        "cross-classified model, which dyadMLM does not support. End the ",
-        "person's data before the new partnership."
-      )
-    }
+  if (length(changing_dyads) > 0L) {
+    stop(
+      "`partner_exists` changes over time in ", format_group_count(changing_dyads),
+      ". Changes in partner status within a dyad (for example, a death, a ",
+      "separation, or a new relationship) are not supported. Filter the data ",
+      "on the recorded status first, for example keep only the occasions ",
+      "while the partner exists, or only the first partnership.",
+      call. = FALSE
+    )
   }
 
   if (!is.null(role_name) && any(out[[role_name]] %in% "missing")) {

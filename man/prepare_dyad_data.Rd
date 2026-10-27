@@ -156,24 +156,19 @@ partner. This is appropriate if everyone observed alone is an individual
 studied alone (not having an unobserved partner), and thus modeling them
 as half a dyad is inappropriate. Occasions at which a partner in a
 complete dyad has no row are still treated as the partner existing but
-not observed. To mark such occasions as "no partner exists", use a
-column.
+not observed.
 \item A column name (quoted or not) or an expression evaluated in \code{data} (for
 example \code{partnered} or \code{!widowed}) that is TRUE/FALSE or 1/0 \strong{for each
 row}.
 This can be used if some individuals have an unobserved partner, and
-others have no partner. It can also be used to mark individuals
-changing status over time.
+others have no partner.
 }
 
-Missing values in the column are not allowed. When both members have a
-row at the same occasion, their values must agree (e.g., both members
-need to be partnered, or both need to be not partnered, which can cover
-partners splitting up but still taking part in the same study). Where no
-partner existed, numeric partner predictors are set to 0, and
-\code{.partner_exists} is added when the status varies (two-part coding). See
-the section "People observed without their partner" below for more
-information.}
+Missing values in the column are not allowed. The value must be the same
+in all rows of a dyad (both members and all occasions). Where no partner
+existed, numeric partner predictors are set to 0, and \code{.partner_exists}
+is added when the status varies (two-part coding). See the section
+"People observed without their partner" below for more information.}
 
 \item{seed}{Optional seed for random \verb{.member_contrast_*} sign assignment.
 If \code{NULL}, the current R session's RNG state is used.}
@@ -274,14 +269,11 @@ many rows have at least one missing partner predictor (both cases above).
 
 \subsection{Recording partner status with \code{partner_exists}}{
 
-If truly no partner \emph{existed} at some occasions (for example, before a
-relationship began or after a separation or death), or at all
-occasions (e.g., when individuals are studied alongside dyads), treating a
-partner's values as missing is not meaningful and can bias the model. This
-also applies to empty rows kept for a partner who no longer exists, as in
-some balanced panel files (remove these rows). In this case, use
-\code{partner_exists} to record whether a partner existed, which sets up
-two-part predictors (see \code{vignette("partner-exists")} for examples).
+If truly no partner \emph{existed} (e.g., when individuals are studied alongside
+dyads), treating a partner's values as missing is not meaningful and can
+bias the model. In this case, use \code{partner_exists} to record whether a
+partner existed, which sets up two-part predictors (see
+\code{vignette("partner-exists")} for examples).
 
 Alternatively, to analyze only occasions at which both members were
 observed, remove the other occasions before preparing the data, for example:
@@ -303,10 +295,9 @@ data) get their own composition and indicator column:\tabular{lll}{
 
 
 The label stays the same across occasions. \code{singleton} means no partner at
-any observed occasion. A person observed alone who had a partner at some
-occasions is labeled as having a partner not in the data. People observed
-alone have no member contrast and cannot be listed in \code{pool_compositions}
-or \code{set_exchangeable_compositions}. To let them share parameters with dyad
+any observed occasion. People observed alone have no member contrast and
+cannot be listed in \code{pool_compositions} or
+\code{set_exchangeable_compositions}. To let them share parameters with dyad
 members, add their indicators in the model formula, e.g.,
 \code{I(.is_male_x_male + .is_singleton_male):x} for a slope. For a variance,
 add them in both the shared and the difference block (see
@@ -326,64 +317,15 @@ partner keep their own mean (see "Two-part coding" below).
 
 Where no partner existed, numeric partner predictors are set to 0 after
 centering, and \code{.partner_exists} (1 or 0) marks these rows. This is two-part
-coding. The status columns are only added when the status varies.
-\strong{\code{.partner_exists} (or its two parts, see below) must be included as a
-fixed effect.} Otherwise, the zeros are treated as real partner values,
-which can bias the partner effects. Random effects cannot replace it. It can
-only be left out if fixed intercepts already separate all rows without a
-partner, for example singleton indicators when no dyad has occasions without
-a partner. Non-numeric partner predictors cannot be set to 0, so they stop
-with an error.
-}
-
-\subsection{Changes in partner status}{
-
-When the status changes over time within a dyad in longitudinal data, the
-following columns are added:
-\itemize{
-\item With \code{temporal_decomposition = "2l"}, \code{.partner_exists_cwp} and
-\code{.partner_exists_cbp} split the status into a within-person part (losing
-or gaining a partner) and a between-person part (the person's share of
-occasions with a partner, centered). Include both instead of
-\code{.partner_exists}. Do not include only the within part (Yaremych,
-Preacher & Hedeker, 2023), unless fixed intercepts already separate the
-statuses.
-\item \code{.partner_before_exists} (1 where no partner exists yet, but one does
-later), when both occasions before a relationship and after a loss occur
-(needs a numeric \code{time}). It lets their means differ (e.g., being single
-versus being widowed).
-\item With \code{temporal_decomposition = "2l"}, the partner's usual level (\code{cbp}) is
-split. It still exists after a loss. Setting it to 0 there would assume
-that it no longer relates to the outcome. If that is wrong, its slope
-while a partner exists can be biased too. So each \verb{.\{pred\}_cbp_partner} is
-replaced by one column per partner status, each 0 outside its status
-(columns for statuses that do not occur are not created):
-}\tabular{ll}{
-   Partner status at the occasion \tab Column \cr
-   A partner exists \tab \verb{.\{pred\}_cbp_partner_when_exists} \cr
-   No partner yet, but one later \tab \verb{.\{pred\}_cbp_partner_before_exists} \cr
-   No partner, but one earlier \tab \verb{.\{pred\}_cbp_partner_after_exists} \cr
-}
-
-
-Include all of them. The suffixes show that these columns are not constant
-within a person. A usual level that applies but is unknown is \code{NA}.
-Singletons have 0 in all of them and need their own fixed intercepts (e.g.,
-singleton indicators). Complete dyads without a partner at any occasion
-(e.g., separated before the first occasion) need one too, which you create
-yourself. To assume one slope for all statuses, use \code{I()} around their sum.
-To assume no association without a partner, use \verb{_when_exists} alone.
-"Before" and "after" need a numeric \code{time}. Otherwise, the usual level is
-not split, with a warning.
-
-Lagged partner predictors follow the status at the previous occasion and
-pair with \code{.partner_exists_lag1} (added only with lagged predictors and
-where the previous status differs from the current one somewhere). Where
-known, this column differs from \code{.partner_exists} only at the first
-occasion after a partner is lost or gained. If no such occasion remains in
-the model data, it duplicates \code{.partner_exists} and can be left out. It
-stays one column, so its within-person and between-person associations are
-combined.
+coding. The status column is only added when the status varies.
+\strong{\code{.partner_exists} must be included as a fixed effect.} Otherwise, the
+zeros are treated as real partner values, which can bias the partner
+effects. Random effects cannot replace it. It can only be left out if fixed
+intercepts already separate all rows without a partner, for example
+singleton indicators when no dyad has occasions without a partner. Lagged
+partner predictors are set to 0 too, except at a person's first occasion and
+after gaps, where they stay missing as in complete dyads. Non-numeric partner
+predictors cannot be set to 0, so they stop with an error.
 }
 
 \subsection{Actor variables that exist only with a partner}{
@@ -395,39 +337,27 @@ does not apply two-part coding to such actor variables, but you can do it
 yourself after preparing the data. Set their actor columns to 0 where
 \code{.partner_exists} is 0 with \code{dplyr::if_else()} (multiplying keeps \code{NA},
 since \code{0 * NA} is \code{NA}), and include the status terms as for partner
-predictors. Where \code{.partner_exists} or \code{.partner_exists_lag1} was not
-created, use the recorded status at the same or previous occasion. In
-longitudinal data with status changes, also split their usual level
-(\code{cbp}) by partner status. See \code{vignette("partner-exists")} for examples.
+predictors. See \code{vignette("partner-exists")} for an example.
 }
 
 \subsection{Interpreting results}{
 \itemize{
 \item \code{.partner_exists} compares rows with and without a partner at partner
-predictors of 0. It is not "the effect of having a partner", and it mixes
-change over time with differences between people.
+predictors of 0. It is not "the effect of having a partner".
 \item What 0 means depends on the component: the partner's usual level for
 \code{cwp}, the average person's usual level for \code{cbp}, the grand mean for
 \code{gmc}, and the scale's 0 for raw values. Prefer centered components.
-\item Raw and \code{gmc} partner values contain the partner's usual level too.
-Setting them to 0 assumes that this part does not relate to the outcome
-where no partner exists, and they cannot be split. In longitudinal data,
-prefer the \code{cwp} and split \code{cbp} columns.
-\item When the status changes within a person, partner \code{cwp} values may no
-longer average 0 within that person (e.g., when the former partner keeps
-taking part).
-\item After a separation in which the former partner keeps taking part, their
-usual level includes their occasions after the separation.
-\item At the first occasion after a separation, lagged partner predictors still
-hold the former partner's value from the previous occasion, by design.
 }
 }
 
 \subsection{Limits}{
 
-Each person belongs to one dyad. If \code{partner_exists} returns to \code{TRUE} after
-\code{FALSE}, this is treated as the same partner returning. A new partner is not
-supported. \code{partner_exists} cannot be combined with DIM or DSM columns.
+Each person belongs to one dyad, and the partner status must stay the same
+within each dyad. \code{prepare_dyad_data()} stops when it changes over time (for
+example, after a death, a separation, or a new relationship). Filter the
+data on the recorded status first, for example keep only the occasions while
+the partner exists, or only the first partnership. \code{partner_exists} cannot
+be combined with DIM or DSM columns.
 }
 }
 
@@ -485,12 +415,6 @@ ild_prepared <- prepare_dyad_data(
 
 print(ild_prepared)
 
-}
-\references{
-Yaremych, H. E., Preacher, K. J., & Hedeker, D. (2023).
-Centering categorical predictors in multilevel models: Best practices and
-interpretation. \emph{Psychological Methods, 28}(3), 613-630.
-\doi{10.1037/met0000434}.
 }
 \seealso{
 The vignette \href{https://pascal-kueng.github.io/dyadMLM/articles/partner-exists.html}{People Observed Without Their Partner}

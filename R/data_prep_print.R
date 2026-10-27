@@ -192,16 +192,10 @@ print_partner_data <- function(x, meta, current_dyad_compositions) {
     }
   }
 
-  # All contemporaneous partner columns, including usual levels split by
-  # partner status. Lagged columns are left out, because they are always
-  # missing at each person's first occasion.
+  # All contemporaneous partner columns. Lagged columns are left out, because
+  # they are always missing at each person's first occasion.
   partner_columns <- generated |>
-    dplyr::filter(
-      .data$column_role %in% c(
-        "partner", "partner_when_exists", "partner_before_exists", "partner_after_exists"
-      ),
-      .data$lag == 0L
-    ) |>
+    dplyr::filter(.data$column_role == "partner", .data$lag == 0L) |>
     dplyr::pull("column")
   n_missing <- sum(rowSums(is.na(x[partner_columns])) > 0L)
   if (n_missing > 0L) {
