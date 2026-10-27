@@ -42,8 +42,8 @@
 #'   waves in 2008, 2010, and 2013, number the study's occasions (1, 2, 3) and
 #'   supply that index as `time`. The lag then refers to the previous occasion,
 #'   regardless of how much time lies between them. Eligible raw,
-#'   within-person, and APIM GMC variables are lagged, stable between-person
-#'   variables are not.
+#'   within-person, and APIM GMC variables are lagged, but stable
+#'   between-person variables are not.
 #' @param model_types Model-ready column families to construct. Can contain one
 #'   or more of `"apim"`, `"dim"`, and `"dsm"`. `"apim"` creates
 #'   actor and partner predictors. `"dim"` creates dyad-mean and
