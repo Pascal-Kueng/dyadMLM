@@ -761,6 +761,37 @@ test_that("validate_dyad_data rejects groups with more than two members", {
   )
 })
 
+test_that("incomplete-dyad checks keep a dyad column named n_members", {
+  data <- data.frame(
+    n_members = c(10, 20, 20, 30, 30),
+    person = c(1, 1, 2, 1, 2)
+  )
+
+  expect_message(
+    dropped <- prepare_dyad_data(
+      data,
+      dyad = n_members,
+      member = person,
+      incomplete_dyads = "drop",
+      seed = 1
+    ),
+    "Dropped 1 incomplete dyad, with ID: 10.",
+    fixed = TRUE
+  )
+  expect_equal(dropped$n_members, c(20, 20, 30, 30))
+  expect_equal(attr(dropped, "dyadMLM")$dropped_incomplete_dyads, 10)
+
+  too_large <- data.frame(
+    n_members = c(10, 10, 10, 20, 20),
+    person = c(1, 2, 3, 1, 2)
+  )
+  expect_error(
+    prepare_dyad_data(too_large, dyad = n_members, member = person, seed = 1),
+    "Found 1 dyad with more than two members, with ID: 10.",
+    fixed = TRUE
+  )
+})
+
 test_that("validate_dyad_data stores role metadata", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
