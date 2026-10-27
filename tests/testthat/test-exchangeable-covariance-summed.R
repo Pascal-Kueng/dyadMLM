@@ -159,7 +159,7 @@ test_that("summed indicators recover the same covariance as summed columns", {
     dispformula = ~0
   )
 
-  automatic <- recover_exchangeable_covariance(summed_terms)
+  automatic <- expect_no_warning(recover_exchangeable_covariance(summed_terms))
   supplied <- suppressWarnings(recover_exchangeable_covariance(
     summed_columns,
     block_pairings = list(
