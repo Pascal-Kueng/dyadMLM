@@ -1914,10 +1914,8 @@ test_that("automatic matching checks partner positions within fitted groups", {
     fixed = TRUE
   )
   one_sided <- model_data$coupleID <= 3L & model_data$member == 1
-  expect_warning(
-    recover_exchangeable_covariance(fit_grouped_by("coupleID", !one_sided)),
-    "3 of 40 supported fitted `coupleID` groups do not contain both -1 and +1",
-    fixed = TRUE
+  expect_no_warning(
+    recover_exchangeable_covariance(fit_grouped_by("coupleID", !one_sided))
   )
 })
 

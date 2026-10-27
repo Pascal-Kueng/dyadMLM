@@ -108,10 +108,10 @@
 #'
 #' The function checks whether both positions occur within each supported
 #' fitted grouping unit. It rejects coding when no group contains both
-#' positions, and warns when only some groups are one-sided, which can result
-#' from fitted-row filtering. For custom difference indicators supplied through
-#' `block_pairings`, it also warns when stable member assignments cannot be
-#' verified across repeated rows without a member identifier.
+#' positions. For custom difference indicators supplied through
+#' `block_pairings`, it also warns when only some groups are one-sided, which
+#' can result from fitted-row filtering, and when stable member assignments
+#' cannot be verified across repeated rows without a member identifier.
 #'
 #' @section What omitted blocks and terms mean:
 #' `recover_exchangeable_covariance()` only describes constraints that were already imposed
@@ -867,7 +867,10 @@ validate_exchangeable_coding <- function(
       call. = FALSE
     )
   }
-  if (any(!has_both_positions)) {
+  # With a generated indicator, a one-sided group only means a missing partner,
+  # which leaves the recovered covariance correct. So warn only for custom ones.
+  if (!is_generated_exchangeable_difference_indicator(idiff) &&
+      any(!has_both_positions)) {
     warning(
       pair_context, sum(!has_both_positions), " of ",
       length(has_both_positions), " supported fitted `", group_name,

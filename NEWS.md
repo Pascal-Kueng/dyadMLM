@@ -53,9 +53,9 @@
   twice, for example through the pipe and as an argument.
 
 * Fixed `recover_exchangeable_covariance()` accepting member contrasts from
-  `prepare_dyad_data()` when fitted groups did not contain both partners, for
+  `prepare_dyad_data()` when no fitted group contained both partners, for
   example in a model grouped by person instead of couple. It now gives an
-  error when no group contains both partners and a warning when only some do.
+  error.
 
 # dyadMLM 0.2.0
 
