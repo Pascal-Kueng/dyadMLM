@@ -946,6 +946,8 @@ test_that("people observed alone are counted in the current data", {
   expect_printed(printed, "People observed alone: 2 without a partner, 1 with a partner not in the data.")
   # Their indicators keep their full names under "Added columns".
   expect_printed(printed, "#   .is_singleton ")
+  # Only the group of one person is too small for its own variance.
+  expect_printed(printed, "Pool the variance of `.is_missing_partner` with dyad members.")
 
   printed <- capture_wide_print(prepared[prepared$dyad_id != 4 & prepared$dyad_id != 5, ])
   expect_printed(printed, "# Rows: 5 | Dyads: 2 | People observed alone: 1 |")
@@ -991,6 +993,7 @@ test_that("partner data print names the terms of every composition", {
   expect_printed(printed, "for example `I(.is_female + .is_singleton_female)`.")
   expect_printed(printed, "With two-part coding, keep the intercepts of people without a partner separate.")
   expect_no_match(printed, "member-contrast term", fixed = TRUE)
+  expect_printed(printed, "Pool the variance of `.is_singleton_female` and `.is_singleton_male` with dyad members.")
 
   # Without all composition indicators, `.partner_exists` gives the rows
   # without a partner their own mean.

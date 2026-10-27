@@ -304,6 +304,21 @@ model_term_advice <- function(meta, data) {
     ))
   }
   if (nrow(alone) > 0L) {
+    # The variance of a group of one person goes to 0, often without a
+    # warning.
+    one_person <- character()
+    for (column in alone$column) {
+      if (dplyr::n_distinct(data[[meta$member]][data[[column]] == 1]) == 1L) {
+        one_person <- c(one_person, column)
+      }
+    }
+    if (length(one_person) > 0L) {
+      after <- c(after, paste0(
+        "A group of one person is too small for its own variance. Pool the variance of `",
+        paste(one_person, collapse = "` and `"), "` with dyad members."
+      ))
+    }
+
     # Pool the first group with dyad members of the same role, if any, and
     # preferably of a distinguishable composition, whose variance term needs
     # no member contrast.
