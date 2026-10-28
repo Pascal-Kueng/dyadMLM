@@ -23,12 +23,13 @@ test_that("temporary completion adds and then removes only missing member rows",
     dplyr::filter(is.na(.data$.dy_original_row))
 
   expect_equal(nrow(temporary_missing_member_rows), 1L)
-  expect_equal(temporary_missing_member_rows$dyad_id, 1)
-  expect_equal(temporary_missing_member_rows$person_id, "B")
-  expect_equal(temporary_missing_member_rows$time, 3)
+  expect_equal(temporary_missing_member_rows$.dy_key_dyad, 1)
+  expect_equal(temporary_missing_member_rows$.dy_key_member, "B")
+  expect_equal(temporary_missing_member_rows$.dy_key_time, 3)
   expect_equal(as.character(temporary_missing_member_rows$role), "second")
+  expect_true(is.na(temporary_missing_member_rows$time))
   expect_true(is.na(temporary_missing_member_rows$x))
-  expect_false(2 %in% completed$time[completed$dyad_id == 1])
+  expect_false(2 %in% completed$.dy_key_time[completed$.dy_key_dyad == 1])
 
   restored <- restore_observed_dyad_rows(completed)
 
@@ -274,6 +275,6 @@ test_that("temporary completion treats structural predictors like a copy", {
     c(metadata$dyad, metadata$member, metadata$time),
     c("couple", "member", "day")
   )
-  expect_null(metadata$structural_predictors)
+  expect_null(metadata$supplied_keys)
   expect_false(any(startsWith(names(result), ".dy_")))
 })
