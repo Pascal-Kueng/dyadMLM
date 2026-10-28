@@ -10,6 +10,7 @@ Public report sources stay in `vignettes/articles/`.
 | [covariance-pooling](covariance-pooling/run.R) | Gaussian composition checks and model comparison | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [generalized-covariance-pooling](generalized-covariance-pooling/run.R) | Screen families, then compare pooled and full latent covariance | [Full report](../../../vignettes/articles/covariance-pooling.Rmd) |
 | [ild-partner-dependence](ild-partner-dependence/run.R) | Member-mean and same-occasion checks under correct and restricted longitudinal models | [Full report](../../../vignettes/articles/ild-partner-dependence.Rmd) |
+| [mixed-apim-recovery](mixed-apim-recovery/README.md) | Fixed-effect and covariance recovery for mixed-composition Gaussian APIMs | [Recovery report](../../vignettes/articles/mixed-apim-recovery.Rmd) |
 | [distribution-checks](distribution-checks/run.R) | Residual and outcome flags, pooled versus role checks, and paired PIT centring | [Report](../../../vignettes/articles/distribution-checks.Rmd) |
 | [validation](validation/validation.R) | Earlier sensitivity studies and focused fitting checks | [Recorded findings](validation/results-summary.md) |
 
@@ -214,6 +215,27 @@ the model without AR at φ = 0.7:
 ```sh
 Rscript dev/diagnostic_checks/simulation-studies/ild-partner-dependence/serial-recovery.R dev/diagnostic_checks/simulation-studies/results/ild-partner-dependence/500-datasets-1000-draws
 ```
+
+[consequences.R](ild-partner-dependence/consequences.R) is a separate Gaussian
+run for the article's section on flags and estimates. It uses 50 or 200 dyads
+and 14 complete occasions. It varies one feature at a time: stable correlation
+(0, .1, .2, .4), occasion correlation (0, .1, .2, .3) or the ratio of occasion
+SDs (1, 1.1, 1.25, 1.5). Each dataset fits the full model and the matching
+restriction. `check-consequences.R` checks the generator.
+
+```sh
+Rscript dev/diagnostic_checks/simulation-studies/ild-partner-dependence/check-consequences.R
+Rscript -e 'source("dev/diagnostic_checks/simulation-studies/ild-partner-dependence/consequences.R"); run_consequences(500L, 1000L, 10L, "run")'
+Rscript dev/diagnostic_checks/simulation-studies/ild-partner-dependence/paired-inference.R dev/diagnostic_checks/simulation-studies/results/ild-partner-dependence-consequences/500-datasets-1000-draws
+```
+
+Results go to `results/ild-partner-dependence-consequences/<datasets>-datasets-<draws>-draws/`.
+Only a complete default run exports five tables to
+`report-data/ild-partner-dependence-consequences/`: conditions, inference,
+statistic flags, figure flags and fit diagnostics.
+[paired-inference.R](ild-partner-dependence/paired-inference.R) rereads the
+saved checkpoints and writes `paired-inference.csv`, the coverage change of the
+restricted model on datasets where both fits are usable.
 
 Render the saved results without rerunning simulations:
 

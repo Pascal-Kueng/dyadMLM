@@ -608,7 +608,13 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
          coupleID:diaryday),
   dispformula = ~ 0,
   family = gaussian(),
-  data = ild_distinguishable_data
+  data = ild_distinguishable_data,
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(
+    profile = TRUE,
+    optimizer = stats::optim,
+    optArgs = list(method = "BFGS")
+  )
 )
 ```
 

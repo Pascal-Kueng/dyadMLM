@@ -9,6 +9,7 @@ output:
     self_contained: true
 params:
   output_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/ild-partner-dependence"
+  consequences_directory: "../../dev/diagnostic_checks/simulation-studies/report-data/ild-partner-dependence-consequences"
 ---
 
 ```{r setup, include=FALSE}
@@ -238,6 +239,60 @@ if (!is_pilot) {
     100 * min(sd_rows$rate), 100 * max(sd_rows$rate)))
 }
 ```
+
+## Flags and estimates
+
+```{r consequence-numbers}
+read_consequences <- function(filename) {
+  read.csv(file.path(params$consequences_directory, filename))
+}
+consequence_conditions <- read_consequences("conditions.csv")
+# Flags of the partner correlation that each omitted covariance targets.
+consequence_flags <- read_consequences("flags.csv") |>
+  left_join(consequence_conditions, by = "condition") |>
+  filter(fits == "usable", rule == "rank", statistic == "partner_cor",
+    (axis == "stable_cor" & level == "between") |
+      (axis == "occasion_cor" & level == "within"))
+paired_inference <- read_consequences("paired-inference.csv") |>
+  left_join(consequence_conditions, by = "condition")
+
+small_occasion_flags <- consequence_flags |>
+  filter(axis == "occasion_cor", n_dyads == 200, strength == 0.1)
+small_occasion <- paired_inference |>
+  filter(axis == "occasion_cor", n_dyads == 200, strength == 0.1)
+strong_stable <- paired_inference |>
+  filter(axis == "stable_cor", n_dyads == 200, strength == 0.4)
+strong_stable_intercept <- strong_stable |> filter(parameter == "role_average_intercept")
+strong_stable_difference <- strong_stable |> filter(parameter == "role_difference")
+modest_stable_flags <- consequence_flags |>
+  filter(axis == "stable_cor", n_dyads == 50, strength == 0.2)
+modest_stable_intercept <- paired_inference |>
+  filter(axis == "stable_cor", n_dyads == 50, strength == 0.2,
+    parameter == "role_average_intercept")
+```
+
+A flag shows that the model misses a feature of the data. It does not show
+whether the estimates you report are affected. A separate Gaussian run
+(50 or 200 dyads, 14 occasions, predictors independent between partners,
+`r unique(consequence_conditions$repetitions)` datasets per setting) fitted the
+full model and one restriction at a time:
+
+- At 200 dyads, an occasion partner correlation of only .1 was flagged in
+  `r scales::percent(small_occasion_flags$rate, accuracy = 0.1)` of datasets.
+  Dropping it still left 95% interval coverage at
+  `r percent_range(small_occasion$coverage_restricted)`.
+- At 200 dyads, dropping a stable partner correlation of .4 lowered the average
+  intercept's coverage by `r round(-100 * strong_stable_intercept$coverage_change)`
+  points, to `r scales::percent(strong_stable_intercept$coverage_restricted, accuracy = 1)`.
+  It also made the role-difference interval too wide
+  (`r scales::percent(strong_stable_difference$coverage_restricted, accuracy = 1)`
+  coverage). The actor and partner slopes were not affected.
+- At 50 dyads, a stable correlation of .2 was flagged in only
+  `r scales::percent(modest_stable_flags$rate, accuracy = 1)` of datasets.
+  Dropping it still cost the average intercept
+  `r round(-100 * modest_stable_intercept$coverage_change)` points of coverage.
+
+So when both models fit, compare the estimates and SEs you plan to report.
 
 ## Serial dependence and lagged outcomes
 
