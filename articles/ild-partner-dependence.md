@@ -146,6 +146,28 @@ settings, where the two roles’ true occasion SDs differ by a factor of
 1.5, the within-level dyad-average/role-difference correlation detected
 incorrectly imposed equal occasion variances in 90.8–100.0% of datasets.
 
+## Flags and estimates
+
+A flag shows that the model misses a feature of the data. It does not
+show whether the estimates you report are affected. A separate Gaussian
+run (50 or 200 dyads, 14 occasions, predictors independent between
+partners, 500 datasets per setting) fitted the full model and one
+restriction at a time:
+
+- At 200 dyads, an occasion partner correlation of only .1 was flagged
+  in 99.6% of datasets. Dropping it still left 95% interval coverage at
+  95–96%.
+- At 200 dyads, dropping a stable partner correlation of .4 lowered the
+  average intercept’s coverage by 5 points, to 87%. It also made the
+  role-difference interval too wide (99% coverage). The actor and
+  partner slopes were not affected.
+- At 50 dyads, a stable correlation of .2 was flagged in only 23% of
+  datasets. Dropping it still cost the average intercept 2 points of
+  coverage.
+
+So when both models fit, compare the estimates and SEs you plan to
+report.
+
 ## Serial dependence and lagged outcomes
 
 Omitted autocorrelation raises two questions: does it cause false alarms

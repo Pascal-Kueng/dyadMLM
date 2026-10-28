@@ -210,6 +210,12 @@ Known limitations and caveats:
 - These checks can be misleading when the model includes lagged outcomes
   as predictors.
 
+- These checks compare response variances and correlations, not how a
+  predictor's effect varies across dyads or members. They are not
+  designed to detect an omitted random slope. Instead, use a model
+  comparison (see
+  [`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.md)).
+
 ## Technical details
 
 After any centring, paired responses `a` and `b` are used to compute
