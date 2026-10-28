@@ -235,15 +235,16 @@ print_partner_data <- function(x, meta, current_dyad_compositions) {
     )), "#", sep = "\n")
   }
 
-  # The terms are not wrapped, so they can be pasted into a formula.
+  # One paragraph per block, as in the message of prepare_dyad_data(). The
+  # terms are not wrapped, so they can be pasted into a formula.
   if (!is.null(advice)) {
-    cat(
-      wrap_note("Model terms:", paste(advice$before, collapse = " ")),
-      paste0("#     ", advice$terms, recycle0 = TRUE),
-      wrap(advice$after),
-      "#",
-      sep = "\n"
+    paragraphs <- c(
+      list(wrap_note("Model terms:", advice$before[1L])),
+      lapply(advice$before[-1L], wrap),
+      if (length(advice$terms) > 0L) list(paste0("#     ", advice$terms)),
+      list(wrap(advice$after))
     )
+    cat(unlist(lapply(paragraphs, c, "#")), sep = "\n")
   }
 
   return(invisible(NULL))

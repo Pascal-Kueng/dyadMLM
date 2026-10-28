@@ -106,6 +106,13 @@ test_that("summed columns are computed when the model frame keeps raw columns", 
     "have incompatible coding",
     fixed = TRUE
   )
+
+  # Without a shared block, only the summed difference column is named.
+  expect_error(
+    validate_exchangeable_coding(frame, difference_sum, NA_character_),
+    paste0("`", difference_sum, "` must contain only -1, 0 and +1."),
+    fixed = TRUE
+  )
 })
 
 # Exchangeable male-male dyads plus single men, prepared with `partner_exists`.

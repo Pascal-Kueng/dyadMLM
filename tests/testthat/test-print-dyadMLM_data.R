@@ -954,6 +954,15 @@ test_that("people observed alone are counted in the current data", {
     capture_wide_print(prepare_partner_data(repeated_ids, predictors = x, partner_exists = partnered)),
     "Pool the variance of `.is_missing_partner` with dyad members."
   )
+  # In longitudinal data, only its variance per dyad is too small.
+  longitudinal <- dplyr::mutate(data[rep(1:7, each = 3), ], wave = rep(1:3, 7), x = seq_along(wave))
+  expect_printed(
+    capture_wide_print(prepare_partner_data(
+      longitudinal, time = wave, predictors = x, temporal_decomposition = "none",
+      partner_exists = partnered
+    )),
+    "Pool only the variance of `.is_missing_partner` per dyad (`| dyad_id`) with dyad members."
+  )
 
   printed <- capture_wide_print(prepared[prepared$dyad_id != 4 & prepared$dyad_id != 5, ])
   expect_printed(printed, "# Rows: 5 | Dyads: 2 | People observed alone: 1 |")

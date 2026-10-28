@@ -850,7 +850,6 @@ validate_exchangeable_coding <- function(
   } else if (is.na(shared_indicator)) {
     # No shared block: the summed difference column marks the supported rows.
     support_values <- if (is.numeric(difference_values)) abs(difference_values) else difference_values
-    shared_indicator <- paste0("abs(", idiff, ")")
   } else if (!is.null(shared_values)) {
     support_values <- shared_values
   } else {
@@ -881,7 +880,11 @@ validate_exchangeable_coding <- function(
     coding_requirement <- paste0(
       "Code `", idiff, "` as -1/+1 before fitting."
     )
-    if (!all_rows_supported) {
+    if (is.na(shared_indicator)) {
+      coding_requirement <- paste0(
+        "Code `", idiff, "` as -1/0/+1 before fitting."
+      )
+    } else if (!all_rows_supported) {
       column_names <- paste0(column_names, " and `", shared_indicator, "`")
       coding_requirement <- paste0(
         "Code `", idiff, "` as -1/0/+1 and `", shared_indicator,
@@ -916,6 +919,13 @@ validate_exchangeable_coding <- function(
         "people observed alone, add their indicators to the difference block ",
         "inside I() to pool their variance, or use the composition indicator ",
         "instead of an intercept in the shared block to keep it separate.",
+        call. = FALSE
+      )
+    }
+    if (is.na(shared_indicator)) {
+      stop(
+        pair_context, "`", idiff, "` must contain only -1, 0 and +1. ",
+        "Correct the coding and refit the model.",
         call. = FALSE
       )
     }

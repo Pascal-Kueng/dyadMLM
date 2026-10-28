@@ -251,8 +251,11 @@ billion instead of about -300).
 
 Slopes are shared unless the model separates them. To let the actor slope
 differ by partner status, add `.partner_exists:.provided_support_gmc_actor`.
-In models with role-specific slopes, such as `.is_male:x`, singletons share
-their role's slope through `I(.is_male + .is_singleton_male):x`.
+If a partner predictor interacts with another variable, such as the actor
+predictor, also add that variable's interaction with `.partner_exists`, or the
+estimates depend on how the partner predictor was centered. In models with
+role-specific slopes, such as `.is_male:x`, singletons share their role's
+slope through `I(.is_male + .is_singleton_male):x`.
 
 ### Residual variance of singletons: own or pooled
 

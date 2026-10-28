@@ -276,9 +276,14 @@ model_term_advice <- function(meta, data) {
     ))
   }
   if (length(terms) > 0L) {
-    lead <- "Suggested fixed-effect terms"
-    if (nrow(listed) > 0L) {
-      lead <- "Suggested terms, next to the variance terms of dyad members"
+    # Actor terms and the variance terms of dyad members are not listed.
+    lead <- if (nrow(listed) > 0L) "Suggested terms" else "Suggested fixed-effect terms"
+    beside <- c(
+      if (!is.null(partner_terms)) "the actor terms",
+      if (nrow(listed) > 0L) "the variance terms of dyad members"
+    )
+    if (length(beside) > 0L) {
+      lead <- paste0(lead, ", next to ", paste(beside, collapse = " and "))
     }
     before <- c(before, paste(
       lead, "(starting point, please revise and check that this is what you need):"
@@ -305,7 +310,8 @@ model_term_advice <- function(meta, data) {
   }
   if (nrow(alone) > 0L) {
     # The variance of a group of one person goes to 0, often without a
-    # warning. People observed alone each have their own dyad.
+    # warning. People observed alone each have their own dyad. In longitudinal
+    # data, only the variance per dyad does, not the one per occasion.
     one_person <- character()
     for (column in alone$column) {
       if (dplyr::n_distinct(data[[meta$dyad]][data[[column]] == 1]) == 1L) {
@@ -313,10 +319,18 @@ model_term_advice <- function(meta, data) {
       }
     }
     if (length(one_person) > 0L) {
-      after <- c(after, paste0(
-        "A group of one person is too small for its own variance. Pool the variance of `",
-        paste(one_person, collapse = "` and `"), "` with dyad members."
-      ))
+      columns <- paste0("`", paste(one_person, collapse = "` and `"), "`")
+      too_small <- paste0(
+        "A group of one person is too small for its own variance. Pool the variance of ",
+        columns, " with dyad members."
+      )
+      if (isTRUE(meta$longitudinal)) {
+        too_small <- paste0(
+          "A group of one person is too small for its own variance per dyad. Pool only the variance of ",
+          columns, " per dyad (`| ", meta$dyad, "`) with dyad members."
+        )
+      }
+      after <- c(after, too_small)
     }
 
     # Pool the first group with dyad members of the same role, if any, and
