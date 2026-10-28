@@ -48,12 +48,7 @@ exchangeable dyads.}
 measures.}
 
 \item{predictors}{Optional variables to use for temporal predictor
-decomposition and model-ready predictor construction. If \code{time} is also a
-predictor, it has a value at every occasion of the dyad, including
-occasions at which only the partner was observed. Its lag and its within-
-and between-person components then include occasions the person missed.
-To use only the person's own occasions, add a copy of the \code{time} column
-under another name and use the copy as the predictor.}
+decomposition and model-ready predictor construction.}
 
 \item{lag1_predictors}{Optional subset of \code{predictors} for which lag-1
 model-ready columns should be created. Requires \code{time} to be a finite,
