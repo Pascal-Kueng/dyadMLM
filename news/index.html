@@ -47,7 +47,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="dyadmlm-development-version">dyadMLM (development version)<a class="anchor" aria-label="anchor" href="#dyadmlm-development-version"></a></h2>
-</div>
+<ul><li>Fixed <code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> treating occasions a person missed as observed when the <code>dyad</code>, <code>member</code>, or <code>time</code> column is also a predictor. Lags, means, and partner values of such a predictor now use observed rows only, as for any other predictor (<a href="https://github.com/Pascal-Kueng/dyadMLM/issues/117" class="external-link">#117</a>).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="dyadmlm-030">dyadMLM 0.3.0<a class="anchor" aria-label="anchor" href="#dyadmlm-030"></a></h2><p class="text-muted">CRAN release: 2026-10-27</p>
 <ul><li><p><code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now rejects pool names that match generated role labels in other compositions, preventing distinct groups from silently sharing an indicator column (thanks to <a href="https://github.com/JorAlEs" class="external-link">@JorAlEs</a>, <a href="https://github.com/Pascal-Kueng/dyadMLM/pull/108" class="external-link">#108</a>).</p></li>
