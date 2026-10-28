@@ -722,11 +722,14 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
          coupleID:diaryday),
   dispformula = ~ 0,
   family = gaussian(),
-  data = ild_distinguishable_data
+  data = ild_distinguishable_data,
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(
+    profile = TRUE,
+    optimizer = stats::optim,
+    optArgs = list(method = "BFGS")
+  )
 )
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; false convergence (8). See vignette('troubleshooting'),
-#> help('diagnose')
 ```
 
 ##### Adding role-specific residual AR(1)
