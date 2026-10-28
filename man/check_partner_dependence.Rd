@@ -180,6 +180,10 @@ If the model omits temporal dependence, its covariance estimates can be
 biased, and these checks may not reveal it.
 \item These checks can be misleading when the model includes lagged outcomes
 as predictors.
+\item These checks compare response variances and correlations, not how a
+predictor's effect varies across dyads or members. They are not designed
+to detect an omitted random slope. Instead, use a model comparison (see
+\code{\link[=compare_nested_models]{compare_nested_models()}}).
 }
 }
 
