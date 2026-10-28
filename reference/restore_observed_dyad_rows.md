@@ -1,6 +1,6 @@
 # Restore rows observed in the supplied data
 
-Removes rows added by
+Removes rows and internal structural columns added by
 [`temporarily_complete_dyad_occasions()`](https://pascal-kueng.github.io/dyadMLM/reference/temporarily_complete_dyad_occasions.md)
 and restores the original row order. Rows removed by an explicit
 preparation option, such as composition filtering, remain removed.
