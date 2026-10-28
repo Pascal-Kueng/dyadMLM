@@ -1,3 +1,5 @@
+# dyadMLM (development version)
+
 # dyadMLM 0.3.0
 
 * `prepare_dyad_data()` now rejects pool names that match generated role labels
