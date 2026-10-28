@@ -96,8 +96,7 @@ replicated for both genders. We also check whether the model replicates
 other aspects of the data well, and whether the residuals are
 distributed as expected.
 
-This example requires the development version of **dyadMLM**. It also
-uses **glmmTMB**.
+This example uses **glmmTMB**.
 
 ### Data preparation
 

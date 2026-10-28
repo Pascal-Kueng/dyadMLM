@@ -1,6 +1,6 @@
 # Changelog
 
-## dyadMLM (development version)
+## dyadMLM 0.3.0
 
 - [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   now rejects pool names that match generated role labels in other
@@ -9,6 +9,18 @@
   [\#108](https://github.com/Pascal-Kueng/dyadMLM/pull/108)).
 
 - Changed the package license from MIT to GPL-3.
+
+- Added experimental
+  [`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.md)
+  and
+  [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
+  to check response variances and partner correlations in `glmmTMB`
+  models with Gaussian or selected non-Gaussian responses, including
+  ordinal, zero-inflated, and hurdle models. Checks can be performed
+  separately for each dyad composition. For repeated occasions, supply
+  `member` and `time` to
+  [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
+  to check member means and same-occasion deviations separately.
 
 - Added experimental
   [`check_dyad_residuals()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.md)
@@ -34,14 +46,6 @@
   [@musanyaks](https://github.com/musanyaks),
   [\#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).
 
-- Added experimental predictive checks for response variances and
-  partner correlations in `glmmTMB` models with Gaussian or selected
-  non-Gaussian responses, including ordinal, zero-inflated, and hurdle
-  models. Checks can be performed separately for each dyad composition.
-  For repeated occasions, supply `member` and `time` to
-  [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
-  to check member means and same-occasion deviations separately.
-
 - Fixed an internal vctrs error in
   [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   when no member rows are missing and the data contain, for example, an
@@ -62,8 +66,6 @@
 
 - Fixed
   [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
-  and
-  [`validate_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/validate_dyad_data.md)
   silently using another column when `predictors` or `lag1_predictors`
   renamed a column, as in `c(z = x)`. Renaming now gives an error.
 
@@ -78,8 +80,6 @@
 
 - Fixed
   [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
-  and
-  [`validate_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/validate_dyad_data.md)
   keeping incomplete dyads despite `incomplete_dyads = "drop"` when the
   `dyad` column was named `n_members`. Messages and metadata also showed
   member counts instead of dyad IDs.
