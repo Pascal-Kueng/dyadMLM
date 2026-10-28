@@ -14,8 +14,9 @@ columns have been constructed.}
 A \code{dyadMLM_data} object containing only originally observed rows.
 }
 \description{
-Removes rows added by \code{\link[=temporarily_complete_dyad_occasions]{temporarily_complete_dyad_occasions()}} and restores
-the original row order. Rows removed by an explicit preparation option, such
+Removes rows and internal structural columns added by
+\code{\link[=temporarily_complete_dyad_occasions]{temporarily_complete_dyad_occasions()}} and restores the original row order.
+Rows removed by an explicit preparation option, such
 as composition filtering, remain removed.
 }
 \keyword{internal}

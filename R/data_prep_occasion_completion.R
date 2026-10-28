@@ -1,14 +1,16 @@
 #' Temporarily complete observed dyad occasions
 #'
 #' Adds the missing member row when only one member is present at an observed
-#' dyad occasion. Structural identifiers and a resolved stable role are kept;
-#' all measured variables are missing on the added row. The added rows are used
-#' only while model-ready columns are constructed.
+#' dyad occasion. Internal copies of the structural identifiers and a resolved
+#' stable role are kept. All other columns, including the supplied `dyad`,
+#' `member`, and `time` columns, are missing on the added row. The added rows
+#' are used only while model-ready columns are constructed.
 #'
 #' @param data A validated `dyadMLM_data` object.
 #'
-#' @return A `dyadMLM_data` object containing temporary missing-member rows and
-#'   an internal column recording the original row order.
+#' @return A `dyadMLM_data` object containing temporary missing-member rows,
+#'   internal copies of the structural identifiers, and an internal column
+#'   recording the original row order.
 #'
 #' @keywords internal
 temporarily_complete_dyad_occasions <- function(data) {
@@ -27,18 +29,15 @@ temporarily_complete_dyad_occasions <- function(data) {
   input_data <- tibble::as_tibble(data) |>
     dplyr::mutate(.dy_original_row = dplyr::row_number())
 
-  # A structural column that is also a predictor, such as `time`, must be
-  # missing on temporary rows like any other predictor. Otherwise its lags and
-  # means would count occasions the person missed. So an internal copy
-  # identifies the rows instead, until restore_observed_dyad_rows().
+  # Internal copies of the structural columns identify the rows until
+  # restore_observed_dyad_rows(). So the supplied columns are missing on
+  # temporary rows like any other variable. Otherwise a structural column used
+  # as a predictor, such as `time`, would count occasions the person missed.
   for (key in c("dyad", "member", "time")) {
-    column <- metadata[[key]]
-    if (column %in% metadata$predictors) {
-      key_column <- paste0(".dy_key_", key)
-      input_data[[key_column]] <- input_data[[column]]
-      metadata$structural_predictors[[key]] <- column
-      metadata[[key]] <- key_column
-    }
+    key_column <- paste0(".dy_key_", key)
+    input_data[[key_column]] <- input_data[[metadata[[key]]]]
+    metadata$supplied_keys[[key]] <- metadata[[key]]
+    metadata[[key]] <- key_column
   }
 
   row_key_columns <- c(metadata$dyad, metadata$member, metadata$time)
@@ -101,8 +100,9 @@ temporarily_complete_dyad_occasions <- function(data) {
 
 #' Restore rows observed in the supplied data
 #'
-#' Removes rows added by [temporarily_complete_dyad_occasions()] and restores
-#' the original row order. Rows removed by an explicit preparation option, such
+#' Removes rows and internal structural columns added by
+#' [temporarily_complete_dyad_occasions()] and restores the original row order.
+#' Rows removed by an explicit preparation option, such
 #' as composition filtering, remain removed.
 #'
 #' @param data A temporarily completed `dyadMLM_data` object after model-ready
@@ -118,13 +118,13 @@ restore_observed_dyad_rows <- function(data) {
   metadata <- attr(data, "dyadMLM")
   original_data_class <- class(data)
 
-  # Remove the internal copies of structural predictors and point the metadata
+  # Remove the internal copies of the structural columns and point the metadata
   # back at the supplied columns.
-  for (key in names(metadata$structural_predictors)) {
+  for (key in names(metadata$supplied_keys)) {
     data[[metadata[[key]]]] <- NULL
-    metadata[[key]] <- metadata$structural_predictors[[key]]
+    metadata[[key]] <- metadata$supplied_keys[[key]]
   }
-  metadata$structural_predictors <- NULL
+  metadata$supplied_keys <- NULL
 
   # Temporary rows have no original row number. Keep the supplied rows, restore
   # their order, and remove the internal marker.
