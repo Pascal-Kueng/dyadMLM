@@ -273,7 +273,7 @@ modest_stable_intercept <- paired_inference |>
 
 A flag shows that the model misses a feature of the data. It does not show
 whether the estimates you report are affected. A separate Gaussian run
-(50 or 200 dyads, 14 occasions,
+(50 or 200 dyads, 14 occasions, predictors independent between partners,
 `r unique(consequence_conditions$repetitions)` datasets per setting) fitted the
 full model and one restriction at a time:
 
