@@ -1,11 +1,39 @@
 # dyadMLM (development version)
 
+* `prepare_dyad_data()` gains `partner_exists`, which records whether a
+  partner existed. It keeps people observed alone (singletons and people whose
+  partner did not take part) with their own compositions, and sets partner
+  predictors to 0 where no partner existed (two-part coding, with a
+  `.partner_exists` column). The status must stay the same within each dyad.
+  See `vignette("partner-exists")`.
+
+* `print()` and `summary()` of prepared data now report people observed
+  alone, dyad-occasions with a row for only one member, rows with missing
+  partner predictors, and suggested model terms: composition indicators for
+  the fixed part, variance terms for people observed alone, and the partner
+  terms of two-part coding. A new help section in `prepare_dyad_data()`
+  explains how these cases are prepared.
+
+* `recover_exchangeable_covariance()` recognizes summed indicators such as
+  `I(.is_male_x_male + .is_singleton_male)`, which let people observed alone
+  share the variance of an exchangeable composition.
+
+# dyadMLM 0.3.0
+
 * `prepare_dyad_data()` now rejects pool names that match generated role labels
   in other compositions, preventing distinct groups from silently sharing an
   indicator column (thanks to [@JorAlEs](https://github.com/JorAlEs),
   [#108](https://github.com/Pascal-Kueng/dyadMLM/pull/108)).
 
 * Changed the package license from MIT to GPL-3.
+
+* Added experimental `simulate_dyad_responses()` and
+  `check_partner_dependence()` to check response variances and partner
+  correlations in `glmmTMB` models with Gaussian or selected non-Gaussian
+  responses, including ordinal, zero-inflated, and hurdle models. Checks can be
+  performed separately for each dyad composition. For repeated occasions,
+  supply `member` and `time` to `check_partner_dependence()` to check member
+  means and same-occasion deviations separately.
 
 * Added experimental `check_dyad_residuals()` for simulated probability
   integral transform (PIT) residuals and `check_dyad_outcomes()` for response
@@ -27,34 +55,9 @@
   [@musanyaks](https://github.com/musanyaks),
   [#50](https://github.com/Pascal-Kueng/dyadMLM/pull/50)).
 
-* Added experimental predictive checks for response variances and partner
-  correlations in `glmmTMB` models with Gaussian or selected non-Gaussian
-  responses, including ordinal, zero-inflated, and hurdle models. Checks can be
-  performed separately for each dyad composition. For repeated occasions,
-  supply `member` and `time` to `check_partner_dependence()` to check member
-  means and same-occasion deviations separately.
-
 * Fixed an internal vctrs error in `prepare_dyad_data()` when no member rows
   are missing and the data contain, for example, an `hms` column while the hms
   package is not loaded.
-
-* `prepare_dyad_data()` gains `partner_exists`, which records whether a
-  partner existed. It keeps people observed alone (singletons and people whose
-  partner did not take part) with their own compositions, and sets partner
-  predictors to 0 where no partner existed (two-part coding, with a
-  `.partner_exists` column). The status must stay the same within each dyad.
-  See `vignette("partner-exists")`.
-
-* `print()` and `summary()` of prepared data now report people observed
-  alone, dyad-occasions with a row for only one member, rows with missing
-  partner predictors, and suggested model terms: composition indicators for
-  the fixed part, variance terms for people observed alone, and the partner
-  terms of two-part coding. A new help section in `prepare_dyad_data()`
-  explains how these cases are prepared.
-
-* `recover_exchangeable_covariance()` recognizes summed indicators such as
-  `I(.is_male_x_male + .is_singleton_male)`, which let people observed alone
-  share the variance of an exchangeable composition.
 
 * Fixed `recover_exchangeable_covariance()` accepting a custom shared
   indicator with values other than 0 and 1, such as 0.5, when
@@ -66,10 +69,10 @@
 * Fixed `compare_nested_models()` reporting a likelihood-ratio test for
   `glmmTMB` models fitted with `priors`. It now asks to refit them without
   priors.
-  
-* Fixed `prepare_dyad_data()` and `validate_dyad_data()` silently using
-  another column when `predictors` or `lag1_predictors` renamed a column, as
-  in `c(z = x)`. Renaming now gives an error.
+
+* Fixed `prepare_dyad_data()` silently using another column when `predictors`
+  or `lag1_predictors` renamed a column, as in `c(z = x)`. Renaming now gives
+  an error.
 
 * Fixed `prepare_dyad_data()` failing when an APIM predictor is also the
   `dyad`, `member`, or `time` column, as in growth models that use time as a
@@ -78,10 +81,9 @@
 * Fixed `prepare_dyad_data()` failing with dplyr 1.1.0. dyadMLM now requires
   dplyr 1.1.1 or later.
 
-* Fixed `prepare_dyad_data()` and `validate_dyad_data()` keeping incomplete
-  dyads despite `incomplete_dyads = "drop"` when the `dyad` column was named
-  `n_members`. Messages and metadata also showed member counts instead of dyad
-  IDs.
+* Fixed `prepare_dyad_data()` keeping incomplete dyads despite
+  `incomplete_dyads = "drop"` when the `dyad` column was named `n_members`.
+  Messages and metadata also showed member counts instead of dyad IDs.
 
 * `prepare_dyad_data()` now gives a clear error when `data` is supplied
   twice, for example through the pipe and as an argument.

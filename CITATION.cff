@@ -16,7 +16,8 @@ abstract: >-
   cross-sectional and intensive longitudinal dyadic data for Actor-Partner
   Interdependence Model (APIM), Dyad-Individual Model (DIM), and Dyadic Score
   Model (DSM) parameterizations. It also provides selected tools for model
-  comparison and covariance back-transformation.
+  comparison, covariance back-transformation, and experimental model checks
+  based on simulated responses.
 keywords:
   - dyadic data
   - multilevel models
@@ -25,5 +26,5 @@ keywords:
   - exchangeable dyads
   - mixed-composition dyads
 license: GPL-3.0-only
-version: 0.2.0
-date-released: 2026-08-21
+version: 0.3.0
+date-released: 2026-10-28
