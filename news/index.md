@@ -1,6 +1,10 @@
 # Changelog
 
+## dyadMLM (development version)
+
 ## dyadMLM 0.3.0
+
+CRAN release: 2026-10-27
 
 - [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   now rejects pool names that match generated role labels in other

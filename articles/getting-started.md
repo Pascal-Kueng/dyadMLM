@@ -872,7 +872,8 @@ citation("dyadMLM")
 #> To cite package 'dyadMLM' in publications use:
 #> 
 #>   Küng, P. (2026). dyadMLM: Tools for dyadic multilevel models (Version
-#>   0.3.0) [Computer software]. https://doi.org/10.5281/zenodo.21481720
+#>   0.3.0.9000) [Computer software].
+#>   https://doi.org/10.5281/zenodo.21481720
 #> 
 #> A BibTeX entry for LaTeX users is
 #> 
@@ -880,7 +881,7 @@ citation("dyadMLM")
 #>     title = {dyadMLM: Tools for dyadic multilevel models},
 #>     author = {Pascal Küng},
 #>     year = {2026},
-#>     note = {R package version 0.3.0},
+#>     note = {R package version 0.3.0.9000},
 #>     doi = {10.5281/zenodo.21481720},
 #>   }
 ```
