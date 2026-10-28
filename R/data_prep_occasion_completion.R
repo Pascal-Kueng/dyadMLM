@@ -22,12 +22,26 @@ temporarily_complete_dyad_occasions <- function(data) {
     stop("Temporary dyad-occasion completion requires longitudinal data.", call. = FALSE)
   }
 
-  row_key_columns <- c(metadata$dyad, metadata$member, metadata$time)
   # Work with a plain tibble and mark every supplied row. Temporary rows added
   # below receive NA for this column, so the marker also restores row order.
   input_data <- tibble::as_tibble(data) |>
     dplyr::mutate(.dy_original_row = dplyr::row_number())
 
+  # A structural column that is also a predictor, such as `time`, must be
+  # missing on temporary rows like any other predictor. Otherwise its lags and
+  # means would count occasions the person missed. So an internal copy
+  # identifies the rows instead, until restore_observed_dyad_rows().
+  for (key in c("dyad", "member", "time")) {
+    column <- metadata[[key]]
+    if (column %in% metadata$predictors) {
+      key_column <- paste0(".dy_key_", key)
+      input_data[[key_column]] <- input_data[[column]]
+      metadata$structural_predictors[[key]] <- column
+      metadata[[key]] <- key_column
+    }
+  }
+
+  row_key_columns <- c(metadata$dyad, metadata$member, metadata$time)
   dyad_member_columns <- c(metadata$dyad, metadata$member)
   if (!is.null(metadata$role)) {
     # Keep the stable role so temporary member rows retain their composition.
@@ -103,6 +117,14 @@ restore_observed_dyad_rows <- function(data) {
 
   metadata <- attr(data, "dyadMLM")
   original_data_class <- class(data)
+
+  # Remove the internal copies of structural predictors and point the metadata
+  # back at the supplied columns.
+  for (key in names(metadata$structural_predictors)) {
+    data[[metadata[[key]]]] <- NULL
+    metadata[[key]] <- metadata$structural_predictors[[key]]
+  }
+  metadata$structural_predictors <- NULL
 
   # Temporary rows have no original row number. Keep the supplied rows, restore
   # their order, and remove the internal marker.

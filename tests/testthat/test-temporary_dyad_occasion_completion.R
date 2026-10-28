@@ -237,3 +237,43 @@ test_that("temporary completion recovers lagged DIM and DSM scores", {
     dsm_sparse$time == 3
   expect_false(any(is.na(dsm_sparse[target_row, dsm_lag_columns])))
 })
+
+
+test_that("temporary completion treats structural predictors like a copy", {
+  data <- expand.grid(day = 1:4, member = 1:2, couple = 1:2)
+  data$day_copy <- data$day
+  data$member_copy <- data$member
+  data$couple_copy <- data$couple
+  # Member 2 of couple 1 misses day 2.
+  data <- data[!(data$couple == 1 & data$member == 2 & data$day == 2), ]
+
+  result <- prepare_dyad_data(
+    data,
+    dyad = couple,
+    member = member,
+    time = day,
+    predictors = c(day, day_copy, member, member_copy, couple, couple_copy),
+    lag1_predictors = c(day, day_copy, member, member_copy),
+    model_types = c("apim", "dim"),
+    seed = 123
+  )
+
+  generated <- attr(result, "dyadMLM")$generated_columns
+  for (column in c("day", "member", "couple")) {
+    columns <- generated$column[generated$variable %in% column]
+    copies <- sub(column, paste0(column, "_copy"), columns, fixed = TRUE)
+    expect_equal(result[columns], result[copies], ignore_attr = TRUE)
+  }
+
+  target_row <- result$couple == 1 & result$member == 2 & result$day == 3
+  expect_true(is.na(result$.day_lag1[target_row]))
+  expect_equal(result$day, data$day)
+
+  metadata <- attr(result, "dyadMLM")
+  expect_identical(
+    c(metadata$dyad, metadata$member, metadata$time),
+    c("couple", "member", "day")
+  )
+  expect_null(metadata$structural_predictors)
+  expect_false(any(startsWith(names(result), ".dy_")))
+})

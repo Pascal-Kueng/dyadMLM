@@ -1,5 +1,11 @@
 # dyadMLM (development version)
 
+* Fixed `prepare_dyad_data()` treating occasions a person missed as observed
+  when the `dyad`, `member`, or `time` column is also a predictor. Lags, means,
+  and partner values of such a predictor now use observed rows only, as for
+  any other predictor
+  ([#117](https://github.com/Pascal-Kueng/dyadMLM/issues/117)).
+
 # dyadMLM 0.3.0
 
 * `prepare_dyad_data()` now rejects pool names that match generated role labels
