@@ -33,7 +33,12 @@
 #' @param time Optional column identifying time or measurement order of repeated
 #' measures.
 #' @param predictors Optional variables to use for temporal predictor
-#'   decomposition and model-ready predictor construction.
+#'   decomposition and model-ready predictor construction. If `time` is also a
+#'   predictor, it has a value at every occasion of the dyad, including
+#'   occasions at which only the partner was observed. Its lag and its within-
+#'   and between-person components then include occasions the person missed.
+#'   To use only the person's own occasions, add a copy of the `time` column
+#'   under another name and use the copy as the predictor.
 #' @param lag1_predictors Optional subset of `predictors` for which lag-1
 #'   model-ready columns should be created. Requires `time` to be a finite,
 #'   integer-valued numeric measurement index. Lagging respects the dyad and
