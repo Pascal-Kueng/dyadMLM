@@ -1,0 +1,18 @@
+.main-container table,
+.apim-table {
+  display: block;
+  overflow-x: auto;
+  background: #fff !important;
+  color: #222 !important;
+  color-scheme: light;
+}
+
+.main-container th,
+.main-container td,
+.apim-table th,
+.apim-table td {
+  background: #fff !important;
+  color: #222 !important;
+  padding: 10px 16px !important;
+  white-space: nowrap;
+}
