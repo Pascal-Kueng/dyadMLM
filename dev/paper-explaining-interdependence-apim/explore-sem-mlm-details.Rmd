@@ -1,0 +1,153 @@
+---
+title: "APIM exploration: checks and CI methods"
+author: "Pascal Küng"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    math_method: mathml
+    df_print: kable
+    css: explore-sem-mlm.css
+---
+
+This notebook checks the glmmTMB bootstrap from `explore-sem-mlm.Rmd` and
+compares other ways to get CIs. It first runs the main notebook with its
+output hidden, so all its results are available here.
+
+```{r run-main-notebook, include=FALSE}
+# Use the main notebook's cache and figure folders, so the bootstrap is not
+# rerun. Without the cache, this takes 5 to 15 minutes.
+invisible(knitr::knit_child(
+  "explore-sem-mlm.Rmd",
+  options = list(
+    cache.path = "explore-sem-mlm_cache/html/",
+    fig.path = "explore-sem-mlm_files/figure-html/"
+  ),
+  quiet = TRUE
+))
+```
+
+## 1. glmmTMB and lavaan on the same samples
+
+In the main notebook, lavaan and glmmTMB drew different samples, so their
+CIs differ a little. Here we refit lavaan to the same 1999 samples as glmmTMB
+(`bootstrap$dyads`). If the glmmTMB bootstrap is right, both give the same
+estimates in every sample, apart from tiny optimizer differences.
+
+```{r same-samples}
+# Refit lavaan to any data and return all estimates in one row. as.list()
+# turns lavaan's vector class into plain numbers.
+estimate_lavaan <- function(data) {
+  fit <- update(apim_fit, data = data, se = "none")
+  tibble::as_tibble_row(as.list(coef(fit, type = "user")))
+}
+
+# One row per sample, columns in the same order as glmmtmb_draws.
+lavaan_draws <- parallel::mclapply(
+  bootstrap$dyads, \(rows) estimate_lavaan(flashe_data[rows, ]), mc.cores = 4
+) |>
+  dplyr::bind_rows() |>
+  dplyr::select(dplyr::all_of(names(glmmtmb_draws)))
+
+# Largest difference between glmmTMB and lavaan.
+max(abs(glmmtmb_draws - lavaan_draws))
+```
+
+## 2. Other CI methods for the contributions
+
+The main notebook uses the bootstrap. Here we compare it with three other
+methods:
+
+- lavaan's default delta method. It assumes normally distributed data, and
+  its CIs are symmetric.
+- The same delta method with robust standard errors (`estimator = "MLR"`),
+  which do not assume normal data.
+- A Monte Carlo CI for glmmTMB (Preacher & Selig, 2012). It draws many sets
+  of model estimates from a normal distribution, using the fitted estimates
+  and their covariance matrix. Then it computes the contributions for each
+  set. With `sandwich = TRUE`, this covariance matrix is robust and clustered
+  by dyad. The predictor variances and covariance are drawn assuming normal
+  data.
+
+```{r delta-method}
+# Without se = "bootstrap", lavaan uses the delta method. MLR makes its
+# standard errors robust.
+delta_fit <- sem(
+  apim_model, fixed.x = FALSE, data = flashe_data, missing = "fiml"
+)
+mlr_fit <- sem(
+  apim_model, fixed.x = FALSE, data = flashe_data, missing = "fiml",
+  estimator = "MLR"
+)
+```
+
+```{r monte-carlo}
+# Takes about 2 minutes, mostly for the sandwich matrix.
+set.seed(2026)
+n_draws <- 20000
+n_dyads <- nrow(flashe_data)
+
+# Draw the coefficients and glmmTMB's internal variance parameters together.
+# glmmTMB stores the residual (co)variances as two log SDs and a transformed
+# correlation (theta).
+theta <- glmmTMB::getME(apim_mlm_fit, "theta")
+model_draws <- MASS::mvrnorm(
+  n_draws,
+  mu = c(
+    glmmTMB::fixef(apim_mlm_fit)$cond,
+    log_sd_parent = theta[1], log_sd_teen = theta[2], cor_theta = theta[3]
+  ),
+  Sigma = vcov(apim_mlm_fit, full = TRUE, sandwich = TRUE)
+)
+
+# Draw the predictor variances and covariance, assuming normal data.
+# rWishart() returns one 2 x 2 matrix per draw.
+predictor_draws <- rWishart(
+  n_draws, df = n_dyads, Sigma = predictor_covariance_matrix / n_dyads
+)
+
+# One row per draw, with the names from estimate_apim(). Then add the
+# contributions as before.
+monte_carlo_draws <- tibble::as_tibble(model_draws) |>
+  dplyr::transmute(
+    actor_parent = `.is_parent:.efficacy_centered_actor`,
+    actor_teen = `.is_teen:.efficacy_centered_actor`,
+    partner_teen_to_parent = `.is_parent:.efficacy_centered_partner`,
+    partner_parent_to_teen = `.is_teen:.efficacy_centered_partner`,
+    # Residual covariance = SD parent * SD teen * correlation.
+    residual_cov = exp(log_sd_parent) * exp(log_sd_teen) *
+      cor_theta / sqrt(1 + cor_theta^2),
+    var_efficacy_parent = predictor_draws[1, 1, ],
+    var_efficacy_teen = predictor_draws[2, 2, ],
+    cov_efficacy = predictor_draws[1, 2, ]
+  ) |>
+  add_contributions()
+
+monte_carlo_cis <- percentile_cis(monte_carlo_draws)
+```
+
+```{r compare-ci-methods}
+# The CIs from a lavaan fit, with our labels.
+lavaan_cis <- function(fit) {
+  broom::tidy(fit, conf.int = TRUE) |>
+    dplyr::select(parameter = label, ci_low = conf.low, ci_high = conf.high)
+}
+
+# One row per contribution, one column per method.
+ci_methods <- dplyr::bind_rows(
+  `glmmTMB bootstrap` = glmmtmb_cis,
+  `lavaan delta` = lavaan_cis(delta_fit),
+  `lavaan delta, MLR` = lavaan_cis(mlr_fit),
+  `glmmTMB Monte Carlo` = monte_carlo_cis,
+  .id = "method"
+) |>
+  dplyr::filter(parameter %in% c(names(route_labels), "explained")) |>
+  dplyr::mutate(ci = sprintf("[%.3f, %.3f]", ci_low, ci_high)) |>
+  tidyr::pivot_wider(
+    id_cols = parameter, names_from = method, values_from = ci
+  )
+print_table(ci_methods)
+```
+
+The bootstrap, the robust delta method and the Monte Carlo CIs are close.
+The default delta method differs most for the residual covariance. It
+assumes normal data, but the intake scores are not normally distributed.
