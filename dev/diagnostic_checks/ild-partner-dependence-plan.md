@@ -117,7 +117,7 @@ Left out on purpose; suggest separately only if wanted:
   occasions" section covering §1, the weighting line from §2, and §3. Add one ILD
   example with `dyads_ild`.
 - `simulate_dyad_responses()`: drop "currently requires cross-sectional dyads".
-- NEWS entry; the dev README and roadmap 0.2.2 scope (all families, lags next).
+- NEWS entry and the dev README.
 
 ## 6. Tests
 
