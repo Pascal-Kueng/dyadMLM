@@ -24,7 +24,6 @@ Reserved for later:
 
 - `temporal_decomposition = "3l"` for EMA/day/burst workflows
   with an explicit higher temporal unit
-- automatic inference of 3-level decomposition from the fitted model structure
 - multiple-composition DSM support
 - explicit multivariate or SEM-oriented dyad-score preparation
 
