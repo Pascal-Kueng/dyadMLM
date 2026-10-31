@@ -3,7 +3,7 @@
 **Status:** analysis and tutorial design note. The concurrent-model guidance,
 observed-person-mean caution, and concise dynamic-model limitations are now
 implemented in the DIM vignette. Equivalent review of the APIM and planned DSM
-ILD material remains open.
+ILD material is part of [#25](https://github.com/Pascal-Kueng/dyadMLM/issues/25).
 
 **Scope:** Gaussian and generalized intensive longitudinal dyadic data, with
 particular attention to APIM, DIM, and DSM examples fitted outside

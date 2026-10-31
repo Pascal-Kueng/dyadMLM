@@ -10,13 +10,15 @@ temporarily_complete_dyad_occasions(data)
 \item{data}{A validated \code{dyadMLM_data} object.}
 }
 \value{
-A \code{dyadMLM_data} object containing temporary missing-member rows and
-an internal column recording the original row order.
+A \code{dyadMLM_data} object containing temporary missing-member rows,
+internal copies of the structural identifiers, and an internal column
+recording the original row order.
 }
 \description{
 Adds the missing member row when only one member is present at an observed
-dyad occasion. Structural identifiers and a resolved stable role are kept;
-all measured variables are missing on the added row. The added rows are used
-only while model-ready columns are constructed.
+dyad occasion. Internal copies of the structural identifiers and a resolved
+stable role are kept. All other columns, including the supplied \code{dyad},
+\code{member}, and \code{time} columns, are missing on the added row. The added rows
+are used only while model-ready columns are constructed.
 }
 \keyword{internal}
