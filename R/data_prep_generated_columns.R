@@ -21,12 +21,19 @@ dyad_generated_columns <- function(meta) {
   # composition filtering, not merely the value requested by the user.
   if (isTRUE(meta$short_colnames)) {
     columns$column_pattern <- columns$short_column_pattern
-    is_exchangeable_indicator <-
+    # `.is_exchangeable` and the indicators of people observed alone keep their
+    # full names, e.g., `.is_singleton_Partner_A` for "singleton_Partner A".
+    alone_compositions <- meta$dyad_compositions$composition[
+      meta$dyad_compositions$dyad_type %in% dyad_alone_types
+    ]
+    full_names <- paste0(
+      dyad_retained_prefix, "is_", make_dyad_suffixes(c("exchangeable", alone_compositions))
+    )
+    keeps_full_name <-
       columns$model_family == "composition" &
       columns$column_role == "composition_indicator" &
-      columns$column == paste0(dyad_retained_prefix, "is_exchangeable")
-    columns$column_pattern[is_exchangeable_indicator] <-
-      columns$column[is_exchangeable_indicator]
+      columns$column %in% full_names
+    columns$column_pattern[keeps_full_name] <- columns$column[keeps_full_name]
   }
   columns
 }
@@ -286,6 +293,7 @@ generated_column_spec_lookup <- function() {
     "composition",    "composition_role", "none", "composition_role",        "none",                       "none",                     "none",            2L,           ".composition_role",                         NA_character_,                                               "composition-specific member role",
     "composition",    "composition_role", "none", "composition_indicator",   "none",                       "none",                     "none",            3L,           ".is_{comp-role}",                           ".is_{role}",                                                 "composition-role indicator columns",
     "composition",    "composition",  "none",     "member_contrast",         "none",                       "none",                     "none",            4L,           ".member_contrast_{comp}_arbitrary",         ".member_contrast_arbitrary",                                 "composition-specific member contrasts coded -1/+1 in arbitrary direction for exchangeability-constrained random effects. Values are 0 for other compositions",
+    "apim",           "partner_status", "none",   "partner_status",          "none",                       "none",                     "none",            5L,           ".partner_exists",                           NA_character_,                                               "partner status for two-part coding: 1 if a partner existed, 0 if not",
     "temporal",       "predictor",    "raw",      "temporal_component",      "none",                       "none",                     "none",            7L,           ".{pred}",                                   NA_character_,                                               "raw predictor values",
     "temporal",       "predictor",    "cwp",      "temporal_component",      "within_person",              "none",                     "none",            8L,           ".{pred}_cwp",                               NA_character_,                                               "within-person predictor: momentary deviations from each person's usual level",
     "temporal",       "predictor",    "cbp",      "temporal_component",      "between_person_grand_mean",  "none",                     "none",            9L,           ".{pred}_cbp",                               NA_character_,                                               "between-person predictor: stable differences from the average person's usual level",
