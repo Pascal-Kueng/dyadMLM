@@ -1,6 +1,6 @@
 # Explaining interdependence in the APIM
 
-Paper 1 is cross-sectional ([paper-1-outline.md](paper-1-outline.md)),
+Paper 1 is a cross-sectional tutorial ([paper-1-outline.md](paper-1-outline.md)),
 Paper 2 uses intensive longitudinal data ([ild-outline.md](ild-outline.md)),
 and Paper 3 on generalized outcomes follows only if justified (see
 [paper-1-outline.md](paper-1-outline.md)).

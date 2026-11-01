@@ -1,6 +1,10 @@
-# Paper 1 (cross-sectional APIM): outline
+# Paper 1 (cross-sectional APIM tutorial): outline
 
-Draft, 10 October 2026. Replaces plan.md, paper-idea.Rmd and
+Draft, 10 October 2026, revised 1 November 2026. Paper 1 is a tutorial: why
+to split the covariance between partners' outcomes into routes, how to do
+it, and how to read the result, with one or two examples and code.
+
+Replaces plan.md, paper-idea.Rmd and
 paper-outline.Rmd (see git history). Paper 2:
 [ild-outline.md](ild-outline.md). Software plan: milestone
 [APIM covariance decomposition](https://github.com/Pascal-Kueng/dyadMLM/milestone/5). Full references with DOIs: [literature.md](literature.md).
@@ -16,14 +20,15 @@ paper-outline.Rmd (see git history). Paper 2:
   with a sandwich matrix. The last two are close to the bootstrap; the
   default delta CI is too narrow for the residual covariance (non-normal
   intake).
-- To do: simulation, missing data, manuscript text, Section 9.
+- To do: second example, a small interval check, missing data, manuscript
+  text, Section 9.
 
 ## 2. Scope and estimand
 
 - Independent dyads, cross-sectional, continuous outcomes, linear APIM with
   fixed slopes; Gaussian ML first. One distinguishable predictor pair is the
   running example; covariates, multiple predictors and exchangeable dyads
-  are in Paper 1. Out: random slopes, ILD, nonlinear links, interactions,
+  are short extensions. Out: random slopes, ILD, nonlinear links, interactions,
   causal claims.
 - Target: the model-implied marginal outcome covariance across the
   population of dyads, in unstandardized units (a standardized version must
@@ -84,6 +89,21 @@ Var(Y₂) = a₂²σ₂² + p₂²σ₁² + 2a₂p₂σ₁₂ + ψ₂₂
 - The residual correlation divides ψ₁₂ by the residual SDs, c_R by the total
   outcome SDs; only c_R is on the routes' scale (Model A below: .286 vs .170).
 
+**Negative routes.** A route is negative when its paths and its predictor
+moment multiply to a negative number, for example a positive actor path and
+a negative partner path. The tutorial shows how to report them.
+- In everyday couple and family data, interdependence seems almost always
+  positive. A screen of about 35 open datasets (16–17 October 2026) found no
+  negative partner correlation from a real process.
+- Negative routes do occur, but they are small. In MEPS married dual-earner
+  couples (hourly wage → work hours), the own wage raises and the partner's
+  wage lowers work hours. The member-driven routes are −.017 and −.024
+  correlation points (CIs exclude 0), with a total r of .09. One household
+  respondent answers for both partners. FLASHE reactive parenting gives
+  about −.005.
+- A simulated example shows mixed signs and a total near zero.
+- The screen's scripts are lost, so recompute a number before citing it.
+
 **Software caution.** State where the predictor moments come from (SEM
 parameters, or the dyad-level covariance with divisor n). ψ₁₂ must be the
 total covariance left between the members: a shared dyad effect, a
@@ -120,7 +140,7 @@ and residual variances; a full claim needs a joint distribution unchanged
 by swapping labels. Equality constraints in a distinguishable model test
 symmetry; they do not make the dyads exchangeable.
 
-## 6. Inference and simulation plan
+## 6. Inference
 
 - CIs must carry the joint uncertainty of the paths, the predictor and
   covariate moments, the residual parameters and the denominator; the
@@ -130,6 +150,10 @@ symmetry; they do not make the dyads exchangeable.
   denominators. Fix the interval type, the resamples (1999 now) and
   failed-fit handling in advance. SEM software already gives such CIs for
   defined parameters (lavaan); that alone is not the contribution.
+- The tutorial recommends the dyad bootstrap and shows the code. A full
+  simulation study is not its aim. A small coverage check goes in the
+  supplement (size open, Section 9). The full design below is for the
+  software check in #135.
 - Simulation factors: number of dyads, predictor correlation, unequal
   variances, symmetry, signs and cancellation, residual dependence, one
   covariate setting, near-zero total. Stress cases: near-zero path products
@@ -141,18 +165,26 @@ symmetry; they do not make the dyads exchangeable.
   Start with complete pairs; with missing data, fit and moments need aligned
   samples.
 
-## 7. Argument and displays
+## 7. Tutorial structure and displays
 
-Sections: (1) introduction: precedents, equal-total example, no equations;
-(2) model and routes; (3) decomposition and reporting, with the waterfall;
-(4) covariates, multiple predictors, exchangeability; (5) estimation and
-uncertainty: bootstrap box, short delta formula, R/Mplus workflow; (6)
-simulation of estimator and CI behaviour, not the algebra; (7) empirical
-example; (8) discussion with a minimum reporting checklist; (9) supplement.
+1. Why: the same partner correlation can arise in different ways
+   (equal-total example below, no equations). Precedents.
+2. The model and the five routes, with the route diagram and a plain
+   reading of each route.
+3. How: step-by-step R code. Fit the APIM in glmmTMB or lavaan, compute the
+   routes, add dyad bootstrap CIs. Use `decompose_apim_covariance()` once
+   released (#134).
+4. How to read the result: signed routes, percentages or correlation
+   points, negative routes and cancellation, a total near zero, the
+   residual, and why the attribution is statistical, not causal. Waterfall
+   figure.
+5. Examples: FLASHE efficacy → intake, and a second one (Section 9).
+6. Short extensions: covariates, several predictors, exchangeable dyads.
+7. Discussion with a reporting checklist. Supplement: full algebra, the
+   coverage check and all code.
 
-Aim for 6–8 compact equation groups, each with a plain reading. Writing
-models: Laurenceau and Bolger (2005), Ledermann et al. (2011), Gistelinck et
-al. (2018).
+Keep equations few, each with a plain reading. Writing models: Laurenceau
+and Bolger (2005), Ledermann et al. (2011), Gistelinck et al. (2018).
 
 **Equal-total example** (figure code: paper-idea.Rmd, chunks
 same-total-calculation and same-total-figure, at commit ce0cb770), with
@@ -173,9 +205,9 @@ same-total-calculation and same-total-figure, at commit ce0cb770), with
   577–580). Applications: Popp et al. (2008), Dwyer et al. (2017), Ferraris
   et al. (2022).
 - Framing: Wickham and Knee (2012). No application gives CIs for the
-  contributions. Contribution: an auditable synthesis with validated
-  inference and reproducible software; if it only reproduces existing
-  calculations, a tutorial. The attribution is statistical, not causal.
+  contributions. Contribution: a tutorial that brings the scattered
+  precedents together, with rules for reading the routes, CIs and code. The
+  attribution is statistical, not causal.
 
 ## 9. Open decisions
 
@@ -187,7 +219,16 @@ same-total-calculation and same-total-figure, at commit ce0cb770), with
   Tests would need defined nulls and a calibration check.
 - With collaborators: target journal (sets the length), empirical example,
   scope, division of work and authorship.
-- Missing data: how far beyond complete pairs; decide before the simulation.
+- Missing data: how far beyond complete pairs.
+- Second example. Candidates:
+  - MEPS married couples, wage → work hours (public data, negative partner
+    routes, Section 3).
+  - FLASHE split by parent–teen pairing (needs a formal test of the group
+    differences).
+  - Only the simulated example.
+- Size of the coverage check in the supplement, or none.
+- From the 9 October meeting agenda (outcomes not recorded): Mplus code
+  beside R, whether to involve David Kenny, the writing platform.
 
 ## 10. Paper 3 (note)
 
