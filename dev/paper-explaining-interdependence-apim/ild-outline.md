@@ -302,9 +302,15 @@ checked by algebra or simulation but have no source.
 
 ## 11. Steps in explore-ild.Rmd
 
-1. Choose the outcome and predictor, and how to tell partners apart. Check
-   trends and missing days.
-2. Centre by hand on days both partners answered.
+1. Chosen so far: perceived partner support as the predictor, partners told
+   apart by gender, female–male couples only. Still open: the outcome.
+   Check trends and missing days, and the partner dependence at both levels
+   (`check_partner_dependence()` with `member` and `time`).
+2. Keep only days on which both partners answered the predictor and the
+   outcome. Then `prepare_dyad_data()` splits the predictors into within and
+   between parts (`temporal_decomposition = "2l"`). Its person means use all
+   rows it gets, so this filter must come first. Centre the outcome by hand
+   for the per-level fits.
 3. glmmTMB, one model per level: decompose, check the sums against the
    observed covariances.
 4. glmmTMB, joint model: compare with step 3 (paths, the 1/T shift).
@@ -317,6 +323,17 @@ checked by algebra or simulation but have no source.
    - λ with and without autocorrelation.
 7. Couple bootstrap CIs.
 8. Optional: random slopes, glmmTMB and lavaan `rv()`.
+
+Other examples with negative routes (screen of 16–17 October 2026, scripts
+lost, so recompute before use):
+- T&T daily solo physical activity ~ conditions for physical activity:
+  member-driven routes −37% at the daily level. Partly by definition
+  (switching from solo to joint exercise).
+- ESM couples data of Zygar-Hoffmann et al. (2020, PsychArchives, not yet in
+  the reference list), time alone ~ time with others: member-driven
+  routes −.19 daily and −.16 between. A time-budget effect, not psychology.
+- Swiss CAID couples, dominance (Hopwood lab, osf.io/8p92f, unpublished):
+  strongly negative, but caused by the persuader role the study assigns.
 
 ## 12. To check in the library
 
