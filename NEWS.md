@@ -1,5 +1,23 @@
 # dyadMLM (development version)
 
+* `prepare_dyad_data()` gains `partner_exists`, which records whether a
+  partner existed. It keeps people observed alone (singletons and people whose
+  partner did not take part) with their own compositions, and sets partner
+  predictors to 0 where no partner existed (two-part coding, with a
+  `.partner_exists` column). The status must stay the same within each dyad.
+  See `vignette("partner-exists")`.
+
+* `print()` and `summary()` of prepared data now report people observed
+  alone, dyad-occasions with a row for only one member, rows with missing
+  partner predictors, and suggested model terms: composition indicators for
+  the fixed part, variance terms for people observed alone, and the partner
+  terms of two-part coding. A new help section in `prepare_dyad_data()`
+  explains how these cases are prepared.
+
+* `recover_exchangeable_covariance()` recognizes summed indicators such as
+  `I(.is_male_x_male + .is_singleton_male)`, which let people observed alone
+  share the variance of an exchangeable composition.
+
 * Fixed `prepare_dyad_data()` treating occasions a person missed as observed
   when the `dyad`, `member`, or `time` column is also a predictor. Lags, means,
   and partner values of such a predictor now use observed rows only, as for
