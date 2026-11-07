@@ -69,11 +69,11 @@ for data requirements and examples of data preparation workflows.
 
 | Tool | glmmTMB | brms |
 |----|----|----|
-| [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Compare nested models](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html) | ✅ Supported | Not implemented · [Contribute](https://pascal-kueng.github.io/dyadMLM/CONTRIBUTING.html) |
 | [Recover exchangeable member variances and partner covariances](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html) | ✅ Point estimates | ✅ Posterior summaries and draws |
-| [Check partner dependence](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)¹ | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
-| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)¹ | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
-| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)¹ | ✅ Experimental | Not implemented · [Contribute](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md) |
+| [Check partner dependence](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.html)¹ | ✅ Experimental | Not implemented · [Contribute](https://pascal-kueng.github.io/dyadMLM/CONTRIBUTING.html) |
+| [Check residuals](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_residuals.html)¹ | ✅ Experimental | Not implemented · [Contribute](https://pascal-kueng.github.io/dyadMLM/CONTRIBUTING.html) |
+| [Check outcomes](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.html)¹ | ✅ Experimental | Not implemented · [Contribute](https://pascal-kueng.github.io/dyadMLM/CONTRIBUTING.html) |
 
 ¹ Predictive checks compare the *observed* data and residuals with those
 simulated from the fitted model (similar to what the
@@ -465,4 +465,4 @@ through
 
 Documentation, examples, tests, reviews, and code contributions are all
 welcome. See the [contribution
-guide](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md).
+guide](https://pascal-kueng.github.io/dyadMLM/CONTRIBUTING.html).
