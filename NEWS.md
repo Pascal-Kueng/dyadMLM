@@ -6,6 +6,12 @@
   any other predictor
   ([#117](https://github.com/Pascal-Kueng/dyadMLM/issues/117)).
 
+* `simulate_dyad_responses()` now stops for models fitted with `REML = TRUE`.
+  For these fits, `predicted_response` did not match the fitted model, which
+  affected `check_partner_dependence()` and the response SD and largest
+  deviation in `check_dyad_outcomes()`. Refit with `REML = FALSE`
+  ([#164](https://github.com/Pascal-Kueng/dyadMLM/issues/164)).
+
 # dyadMLM 0.3.0
 
 * `prepare_dyad_data()` now rejects pool names that match generated role labels

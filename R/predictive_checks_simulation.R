@@ -49,6 +49,9 @@
 #' Smooth terms (`s()`) are not supported: simulations would draw new curves.
 #' Fixed-effect splines such as `splines::ns()` are supported.
 #'
+#' Models fitted with `REML = TRUE` are not supported. Refit them with
+#' `REML = FALSE`.
+#'
 #' Zero-inflated and hurdle versions are supported where available. Checks
 #' describe the combined response, including zeros, rather than each model
 #' component separately. Good agreement does not establish that the zero and
@@ -127,6 +130,12 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   }
   if (any(stats::weights(model) != 1)) {
     stop("Predictive checks currently only support unweighted models.", call. = FALSE)
+  }
+  # For REML fits, glmmTMB's predict(re.form = NA) estimates the fixed effects
+  # again without random effects, so the predictions would not match the model.
+  if (isTRUE(model$modelInfo$REML)) {
+    stop("Models fitted with `REML = TRUE` are not supported. ",
+         "Refit the model with `REML = FALSE`.", call. = FALSE)
   }
   # glmmTMB fits the wiggly part of s() as a random effect, so simulate() would redraw it.
   if (any(lengths(lapply(model$modelInfo$reTrms, `[[`, "smooth_info")) > 0L)) {
