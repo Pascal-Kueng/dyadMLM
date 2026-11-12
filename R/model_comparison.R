@@ -135,7 +135,13 @@ validate_comparison_model <- function(model, name) {
       !isTRUE(model$fit$convergence == 0)) {
     stop(
       sprintf(
-        "The `%s` model did not converge. Diagnose and refit it before comparing models.",
+        paste0(
+          "The `%s` model did not converge. Diagnose and refit it before comparing models. ",
+          "If it is a Gaussian model with `dispformula = ~ 0` and glmmTMB reported ",
+          "false convergence, refitting with ",
+          "`control = glmmTMB::glmmTMBControl(zerodisp_val = log(0.001 * sd(y)))` ",
+          "often helps, where `y` is the outcome."
+        ),
         name
       ),
       call. = FALSE
@@ -412,8 +418,12 @@ likelihood_ratio_comparison <- function(model1, model2, labels, alpha) {
   full_log_lik <- as.numeric(full_log_lik)
   statistic <- 2 * (full_log_lik - restricted_log_lik)
 
-  # Allow only a negligible negative value caused by numerical rounding.
-  if (!is.finite(statistic) || statistic < -sqrt(.Machine$double.eps)) {
+  # When the larger model adds nothing, e.g. a variance estimated at zero, both
+  # fits reach the same log-likelihood up to optimizer noise. The statistic can
+  # then be slightly negative and is set to zero below. A value below this
+  # limit points to a real problem.
+  smallest_allowed_statistic <- -0.001
+  if (!is.finite(statistic) || statistic < smallest_allowed_statistic) {
     stop(
       paste0(
         "The larger model has a lower log-likelihood than the smaller model. ",
