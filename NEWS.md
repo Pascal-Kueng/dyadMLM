@@ -6,6 +6,13 @@
   any other predictor
   ([#117](https://github.com/Pascal-Kueng/dyadMLM/issues/117)).
 
+* Fixed `compare_nested_models()` stopping with "The larger model has a lower
+  log-likelihood" when the larger model adds nothing, for example a variance
+  estimated at zero. The statistic is then 0 and the p-value 1. The
+  non-convergence error now names a `glmmTMB` setting that often helps for
+  Gaussian models with `dispformula = ~ 0`
+  ([#163](https://github.com/Pascal-Kueng/dyadMLM/issues/163)).
+
 # dyadMLM 0.3.0
 
 * `prepare_dyad_data()` now rejects pool names that match generated role labels
