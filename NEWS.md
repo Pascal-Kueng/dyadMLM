@@ -6,6 +6,13 @@
   any other predictor
   ([#117](https://github.com/Pascal-Kueng/dyadMLM/issues/117)).
 
+* `recover_exchangeable_covariance()` now warns when a Gaussian `glmmTMB`
+  model has a residual variance that the recovered residual-level covariance
+  leaves out. This happens when the model is fitted without
+  `dispformula = ~ 0`. Member variances were then too small and partner
+  correlations too far from zero, without a warning
+  ([#162](https://github.com/Pascal-Kueng/dyadMLM/issues/162)).
+
 # dyadMLM 0.3.0
 
 * `prepare_dyad_data()` now rejects pool names that match generated role labels

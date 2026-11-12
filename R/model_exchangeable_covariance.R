@@ -143,6 +143,10 @@
 #' [extension to exchangeable random slopes](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation)
 #' section for the manual calculation.
 #'
+#' Fit Gaussian `glmmTMB` models with `dispformula = ~ 0`. Otherwise part of
+#' each member's variance stays in the residual variance, which the recovered
+#' covariance does not include. The function warns in that case.
+#'
 #' In `brms`, cross-sectional and same-occasion partner dependence can be
 #' represented directly with
 #' `unstr(time = member_position, gr = residual_group)`. With Gaussian
@@ -2005,6 +2009,17 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
       }
     }
 
+    if (!is.null(extracted$residual_variance)) {
+      details <- c(details, paste0(
+        "The model also has a residual variance of ",
+        format(signif(extracted$residual_variance, 3)),
+        ". The recovered covariance does not include it, so member variances ",
+        "are too small and partner correlations too far from zero. Refit the ",
+        "model with `dispformula = ~ 0` to move this variance into the ",
+        "random effects."
+      ))
+    }
+
     omitted_shared <- pair$underlying_terms[
       is.na(pair$shared_term_indices)
     ]
@@ -2359,10 +2374,24 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
       covariance = covariance_array
     )
   }
+
+  # A Gaussian model has a residual variance outside all random-effect blocks.
+  # Keep it unless it is a negligible share of the outcome variance, as it is
+  # when `dispformula = ~ 0` fixes it near zero. `sigma()` is NA when the
+  # dispersion model has predictors.
+  residual_variance <- NULL
+  if (identical(stats::family(model)$family, "gaussian")) {
+    outcome <- stats::model.response(stats::model.frame(model))
+    if (isTRUE(stats::sigma(model)^2 > 0.001 * stats::var(outcome))) {
+      residual_variance <- stats::sigma(model)^2
+    }
+  }
+
   return(list(
     backend = "glmmTMB",
     blocks = blocks,
-    group_ids = group_ids
+    group_ids = group_ids,
+    residual_variance = residual_variance
   ))
 }
 
