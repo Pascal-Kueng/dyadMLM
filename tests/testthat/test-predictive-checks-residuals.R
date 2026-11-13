@@ -283,8 +283,11 @@ test_that("lone responses keep their composition, and empty roles still plot", {
   # SDs need two responses; one simulated dataset is enough to summarise.
   lone <- subset_fixture(simulations, 1L)
   lone$simulated_responses <- lone$simulated_responses[1, , drop = FALSE]
-  statistics <- expect_warning(check_dyad_outcomes(lone, "dyad", "role", data = fitting_data,
-                                    ask = FALSE), "Fewer than 39", fixed = TRUE)$compositions[[1]]$statistics
+  expect_warning(
+    result <- check_dyad_outcomes(lone, "dyad", "role", data = fitting_data, ask = FALSE),
+    "Fewer than 39", fixed = TRUE
+  )
+  statistics <- result$compositions[[1]]$statistics
   expect_true(all(is.na(statistics$A["Response SD", ])))
 })
 
