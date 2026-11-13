@@ -486,7 +486,7 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
 
   # Integer role codes keep different values separate even if labels look alike.
   # Factors keep their level order; other roles use sorted values.
-  ordered_role_values <- sort(unique(partner_rows$role))
+  ordered_role_values <- sort_dyad_labels(unique(partner_rows$role))
   # Build one row per dyad, with partners in role order (or row order without roles).
   pairs <- partner_rows |>
     dplyr::mutate(

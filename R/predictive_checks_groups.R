@@ -36,7 +36,7 @@ build_check_groups <- function(model_frame, dyad_quo, role_quo,
 
   # Integer codes preserve role order and avoid combining equal-looking labels.
   known_role <- !is.na(role_values) & !is.na(as.character(role_values))
-  ordered_roles <- sort(unique(role_values[known_role]))
+  ordered_roles <- sort_dyad_labels(unique(role_values[known_role]))
   roster <- tibble::tibble(
     dyad_number = match(dyad_ids, unique(dyad_ids)),
     member_number = match(member_ids, unique(member_ids)),
