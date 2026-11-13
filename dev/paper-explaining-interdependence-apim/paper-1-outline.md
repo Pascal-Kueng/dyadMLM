@@ -252,7 +252,31 @@ printed appendix and an online supplement.
   Bayesian credible intervals from posterior draws.
 - A small coverage check in the supplement (size open, or none).
 
-**5. Software**
+**5. FLASHE results**
+- Route diagram and waterfall with 95% dyad bootstrap CIs, observed and
+  model-implied r, and a results paragraph readers can adapt.
+
+**6. Example 2: routes with opposite signs (simulated)**
+- Constructed example, e.g. housework hours predicted by paid work hours.
+  Own paid work lowers own housework, the partner's raises it, so the
+  member-driven routes are negative. They partly cancel the actor- and
+  partner-driven routes, which are positive if partners' paid hours
+  correlate positively.
+- Shows how to report and plot cancellation.
+- One paragraph on real data: sizeable negative routes seem rare (MEPS,
+  see Negative routes above).
+
+**7. Extensions**
+- Indistinguishable dyads: the two member-driven routes are equal and
+  pooled.
+- Several predictors and covariates, shown with FLASHE plus parent gender
+  (ten routes): more routes plus cross terms, grouped and named by
+  variable. A cross term has no unique owner.
+- Optional: dyad types with different routes (multigroup), e.g. FLASHE
+  mother–teen vs father–teen (credit Figueroa et al., 2019). Test the route
+  difference, not equal paths.
+
+**8. Software**
 - The same routes from lavaan, glmmTMB, blavaan and brms. lavaan and
   glmmTMB agree on FLASHE (differences below 1e-4).
 - lavaan: routes as defined parameters (`:=`), free predictor moments
@@ -266,30 +290,6 @@ printed appendix and an online supplement.
 - Table of pros and cons: ease, speed, missing data, intervals, extensions.
 - Code: lavaan in Appendix A, the rest in the supplement. Show
   `decompose_apim_covariance()` only if released by submission (#134).
-
-**6. FLASHE results**
-- Route diagram and waterfall with 95% dyad bootstrap CIs, observed and
-  model-implied r, and a results paragraph readers can adapt.
-
-**7. Example 2: routes with opposite signs (simulated)**
-- Constructed example, e.g. housework hours predicted by paid work hours.
-  Own paid work lowers own housework, the partner's raises it, so the
-  member-driven routes are negative. They partly cancel the actor- and
-  partner-driven routes, which are positive if partners' paid hours
-  correlate positively.
-- Shows how to report and plot cancellation.
-- One paragraph on real data: sizeable negative routes seem rare (MEPS,
-  see Negative routes above).
-
-**8. Extensions**
-- Indistinguishable dyads: the two member-driven routes are equal and
-  pooled.
-- Several predictors and covariates, shown with FLASHE plus parent gender
-  (ten routes): more routes plus cross terms, grouped and named by
-  variable. A cross term has no unique owner.
-- Optional: dyad types with different routes (multigroup), e.g. FLASHE
-  mother–teen vs father–teen (credit Figueroa et al., 2019). Test the route
-  difference, not equal paths.
 
 **9. Discussion**
 - What the routes add, and what they cannot say (causes, unmeasured shared
