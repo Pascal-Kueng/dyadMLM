@@ -259,7 +259,9 @@ This contrast is `+1` for one member and `-1` for the other. The exchangeable
 residual structure is represented by two separate random-effects terms: a
 shared dyad random intercept and a random coefficient for this difference
 column. Additional random slopes can be included in both blocks without
-changing this logic.
+changing this logic. Use the `.member_contrast_*` column only in a
+random-effect block of its own, separate from the shared block. If results
+change with `seed`, the column is used somewhere else.
 
 We fit a simple exchangeable APIM and then use
 `dyadMLM::recover_exchangeable_covariance()` to back-transform its

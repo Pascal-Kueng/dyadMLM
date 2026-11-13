@@ -109,7 +109,10 @@
 #'   dyad. Conflicting non-missing roles always cause an error. Ignored when no
 #'   `role` column is supplied.
 #' @param seed Optional seed for random `.member_contrast_*` sign assignment.
-#'   If `NULL`, the current R session's RNG state is used.
+#'   If `NULL`, the current R session's RNG state is used. Use a
+#'   `.member_contrast_*` column only in a random-effect block of its own,
+#'   separate from the shared block. If results change with `seed`, the column
+#'   is used somewhere else.
 #' @param short_colnames Whether to use shorter composition-dependent generated
 #'   column names when the final data contain one composition. The default `TRUE`
 #'   omits the redundant composition label from `.is_*` and
@@ -143,7 +146,10 @@
 #'   `apim_predictors`, and `dim_predictors`, as well as `dsm_predictors` and
 #'   `dsm_role_order` when applicable. The `generated_columns` table records each
 #'   package-generated column retained in the returned data. Modifying prepared
-#'   data does not automatically regenerate package-generated columns.
+#'   data does not automatically regenerate package-generated columns. Use a
+#'   `.member_contrast_*` column only in a random-effect block of its own,
+#'   separate from the shared block. If results change with `seed`, the column
+#'   is used somewhere else.
 #'
 #' @examples
 #' data <- data.frame(
