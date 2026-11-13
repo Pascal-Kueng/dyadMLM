@@ -102,3 +102,89 @@ test_that("resolve_composition_references rejects empty references", {
     fixed = TRUE
   )
 })
+
+# Returns the first collation locale that this machine can switch to and that
+# sorts mixed-case labels differently from the C locale, or NULL if none exists.
+find_non_c_collation <- function() {
+  candidates <- c(
+    "en_US.UTF-8", "en_US.utf8", "en_GB.UTF-8", "de_DE.UTF-8",
+    "English_United States.1252", "en-US"
+  )
+  for (locale in candidates) {
+    sorted <- suppressWarnings(withr::with_collate(
+      locale,
+      if (identical(Sys.getlocale("LC_COLLATE"), locale)) {
+        sort(c("Male", "female"))
+      } else {
+        NULL
+      }
+    ))
+    if (identical(sorted, c("female", "Male"))) {
+      return(locale)
+    }
+  }
+  NULL
+}
+
+test_that("canonical_composition sorts mixed-case roles in the C locale", {
+  expect_equal(
+    withr::with_collate("C", canonical_composition(c("female", "Male"))),
+    "Male_x_female"
+  )
+
+  locale <- find_non_c_collation()
+  skip_if(is.null(locale), "No non-C collation locale is available.")
+
+  expect_equal(
+    withr::with_collate(locale, canonical_composition(c("female", "Male"))),
+    "Male_x_female"
+  )
+})
+
+test_that("generated labels do not depend on the collation locale (#174)", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2, 3, 3, 4, 4),
+    person_id = c("A", "B", "C", "D", "E", "F", "G", "H"),
+    role = c("Male", "female", "female", "Male", "female", "female",
+             "Male", "Male")
+  )
+
+  prepare_in <- function(locale) {
+    withr::with_collate(locale, {
+      validated <- validate_dyad_data(
+        data,
+        dyad = dyad_id,
+        member = person_id,
+        role = role
+      )
+      infer_dyad_compositions(validated, seed = 123)
+    })
+  }
+
+  result_c <- prepare_in("C")
+  expect_equal(
+    levels(result_c$.composition),
+    c("Male_x_Male", "Male_x_female", "female_x_female")
+  )
+  expect_true(".is_Male_x_female_Male" %in% names(result_c))
+  expect_true(".is_Male_x_female_female" %in% names(result_c))
+  expect_false(any(grepl("female_x_Male", names(result_c), fixed = TRUE)))
+
+  locale <- find_non_c_collation()
+  skip_if(is.null(locale), "No non-C collation locale is available.")
+
+  result_other <- prepare_in(locale)
+  expect_identical(names(result_other), names(result_c))
+  expect_identical(
+    levels(result_other$.composition),
+    levels(result_c$.composition)
+  )
+  expect_identical(
+    levels(result_other$.composition_role),
+    levels(result_c$.composition_role)
+  )
+  expect_identical(
+    as.character(result_other$.composition),
+    as.character(result_c$.composition)
+  )
+})

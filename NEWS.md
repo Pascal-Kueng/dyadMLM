@@ -1,5 +1,13 @@
 # dyadMLM (development version)
 
+* Composition labels, generated column names, and factor levels no longer
+  depend on the machine's language settings. Role labels are now sorted in the
+  C locale (`sort(method = "radix")`), so roles that differ in case, such as
+  `"Male"` and `"female"`, give the same labels on every machine. Labels for
+  some mixed-case roles change: for example, `"female_x_Male"` is now
+  `"Male_x_female"`
+  ([#174](https://github.com/Pascal-Kueng/dyadMLM/issues/174)).
+
 * Fixed `prepare_dyad_data()` treating occasions a person missed as observed
   when the `dyad`, `member`, or `time` column is also a predictor. Lags, means,
   and partner values of such a predictor now use observed rows only, as for

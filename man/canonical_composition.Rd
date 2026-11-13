@@ -23,6 +23,7 @@ A single composition label.
 }
 \description{
 Sorts role labels before pasting them so composition labels do not depend on
-row order.
+row order. Labels are sorted in the C locale so they also do not depend on
+the machine's language settings.
 }
 \keyword{internal}

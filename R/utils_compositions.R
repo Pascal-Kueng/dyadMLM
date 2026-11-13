@@ -33,10 +33,28 @@ dyad_dsm_role_contrast_col <- paste0(dyad_retained_prefix, "dsm_role_contrast")
 # HELPER FUNCTIONS
 ###########################################################################
 
+#' Sort role or composition labels independently of the locale
+#'
+#' Base `sort()` follows the collation of the R session (`LC_COLLATE`), so
+#' labels that differ only in case (for example, `"Male"` and `"female"`) can be
+#' ordered differently on different machines. The radix method always sorts
+#' in the C locale, which keeps generated labels and column names identical
+#' across machines. Factors keep their level order.
+#'
+#' @param x A vector of role or composition labels.
+#'
+#' @return `x`, sorted with `method = "radix"`.
+#' @noRd
+sort_dyad_labels <- function(x) {
+  sort(x, method = "radix")
+}
+
+
 #' Create a canonical dyad composition label
 #'
 #' Sorts role labels before pasting them so composition labels do not depend on
-#' row order.
+#' row order. Labels are sorted in the C locale so they also do not depend on
+#' the machine's language settings.
 #'
 #' @param roles A vector of role labels.
 #' @param sep Separator used between label components.
@@ -44,7 +62,7 @@ dyad_dsm_role_contrast_col <- paste0(dyad_retained_prefix, "dsm_role_contrast")
 #' @return A single composition label.
 #' @keywords internal
 canonical_composition <- function(roles, sep = dyad_composition_sep) {
-  paste(sort(as.character(roles)), collapse = sep)
+  paste(sort_dyad_labels(as.character(roles)), collapse = sep)
 }
 
 
