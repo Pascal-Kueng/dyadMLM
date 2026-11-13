@@ -51,6 +51,9 @@ receive stable names \code{pair_1}, \code{pair_2}, and so on in resolved order.
 \code{varcov} and \code{sdcor} are matrices, except when \code{posterior = "draws"} for a
 \code{brms} model, where they are draw by coefficient by coefficient arrays.
 \code{brms} quantities are transformed draw by draw before summarizing.
+For \code{brms} models, \code{varcov} and \code{sdcor} are summarized separately (element
+by element) and therefore need not agree. The median is also taken
+element-wise, so the resulting matrix need not be a valid covariance matrix.
 }
 \description{
 Back-transforms covariance matrices from paired shared and member-difference
