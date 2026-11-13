@@ -73,10 +73,12 @@ Ordinal checks use category scores \verb{1, 2, ..., K} in their fitted order,
 matching \link[glmmTMB:family_glmmTMB]{glmmTMB's predictions}. The checks compare
 observed and simulated scores. The scores do not measure
 distances on an underlying continuous scale.
+
 Because each dyad contains only two people, glmmTMB tends to underestimate
-the dyad variance in ordinal models. Simulations then show less partner
-dependence than the data, so the partner check can flag a correct ordinal
-model, especially with many dyads.
+the dyad variance in ordinal models, and also in zero-inflated and strongly
+overdispersed count models. Simulations then show less partner dependence
+than the data, so the partner check can flag a correct model. In practice,
+this happens only with very many dyads (thousands rather than hundreds).
 
 The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.
@@ -92,6 +94,12 @@ random effects in the zero-inflation and dispersion models, if present.
 Fitted parameters and predictors, including any lagged responses, stay fixed.
 The model is not refitted, and uncertainty in parameter estimates is not
 included. This is a \emph{plug-in predictive reference} (Gelman et al., 1996).
+Because lagged responses stay at their observed values, simulated responses
+vary less than the observed ones when the model includes a lagged outcome.
+Raw-scale summaries, such as \code{response = "raw"} in
+\code{\link[=check_partner_dependence]{check_partner_dependence()}}, can then flag a correct model. With lagged
+outcomes, use only model-centred summaries, such as the default
+\code{response = "model-centred"}.
 If all grouping factors are dyads or nested within dyads (such as dyad-days),
 the simulations represent hypothetical new dyads under the same study design.
 
