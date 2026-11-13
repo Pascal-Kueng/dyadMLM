@@ -172,6 +172,9 @@
 #'   `varcov` and `sdcor` are matrices, except when `posterior = "draws"` for a
 #'   `brms` model, where they are draw by coefficient by coefficient arrays.
 #'   `brms` quantities are transformed draw by draw before summarizing.
+#'   For `brms` models, `varcov` and `sdcor` are summarized separately (element
+#'   by element) and therefore need not agree. The median is also taken
+#'   element-wise, so the resulting matrix need not be a valid covariance matrix.
 #'
 #' @seealso The
 #'   [exchangeable APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure)
