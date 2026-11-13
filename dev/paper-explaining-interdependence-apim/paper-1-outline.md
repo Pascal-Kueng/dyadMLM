@@ -1,6 +1,6 @@
 # Paper 1 (cross-sectional APIM tutorial): outline
 
-Draft, 10 October 2026, revised 1 November 2026. Paper 1 is a tutorial: why
+Draft, 10 October 2026, revised 1 and 13 November 2026. Paper 1 is a tutorial: why
 to split the covariance between partners' outcomes into routes, how to do
 it, and how to read the result, with one or two examples and code.
 
@@ -165,23 +165,146 @@ symmetry; they do not make the dyads exchangeable.
   Start with complete pairs; with missing data, fit and moments need aligned
   samples.
 
-## 7. Tutorial structure and displays
+## 7. Manuscript outline
 
-1. Why: the same partner correlation can arise in different ways
-   (equal-total example below, no equations). Precedents.
-2. The model and the five routes, with the route diagram and a plain
-   reading of each route.
-3. How: step-by-step R code. Fit the APIM in glmmTMB or lavaan, compute the
-   routes, add dyad bootstrap CIs. Use `decompose_apim_covariance()` once
-   released (#134).
-4. How to read the result: signed routes, percentages or correlation
-   points, negative routes and cancellation, a total near zero, the
-   residual, and why the attribution is statistical, not causal. Waterfall
-   figure.
-5. Examples: FLASHE efficacy → intake, and a second one (Section 9).
-6. Short extensions: covariates, several predictors, exchangeable dyads.
-7. Discussion with a reporting checklist. Supplement: full algebra, the
-   coverage check and all code.
+Working title: *A guide to explaining interdependence in the actor-partner
+interdependence model (APIM): Where does the partner correlation come
+from?*
+
+Structure: Introduction, a body organised by concept (no Methods section,
+and each example gets a short "data and model" paragraph), Discussion, a
+printed appendix and an online supplement.
+
+### 1. Introduction (agreed 13 November 2026)
+
+- Partners’ outcomes tend to be related. This nonindependence is the defining feature of dyadic data and presents an analytical challenge (Kenny, Kashy & Cook, 2006).
+- The actor-partner interdependence model (APIM) is the most popular statistical model to address this challenge and answer dyadic questions (Kenny, 2018). Yet reports focus almost exclusively on actor and partner effects and treat the covariance or correlation between partners' outcomes as a nuisance that needs to be accounted for in the model simply to make the inference for the actor and partner effects correct (see Kenny, Ackerman & Kashy, 2024, pp. 566, 577). However, that covariance can be of substantive interest. One can ask: Why are partners similar, and how much of that similarity does the model explain?
+- Consider this other angle: every researcher is familiar with R squared, which is used as an indication of how well a model explains variance in an outcome. When it comes to dyadic models, however, we have two outcomes whose variances need to be explained, alongside their covariance.
+- However, how much covariance the model explains is not the most interesting part. Instead, how the model explains this covariance can be of substantive interest.
+- Path-tracing principles (Wright, 1921) can be applied to the APIM to figure out through which paths the predictors' variances and covariances explain the outcomes' covariance.
+- The different covariance contributions can be grouped into four distinct routes plus a residual (unexplained) part: ....
+- This method has been previously developed and described by:
+  - Kenny, Kashy & Cook (2006, p. 146) [check the page in print: four routes or only the total share?];
+  - Bolger & Laurenceau's FLASHE webinar (2016);
+  - Dwyer et al. (2017, appendix), also an application;
+  - Kenny, Ackerman & Kashy (2024);
+  - Kenny's handout (n.d.) and his APIM_MM web app (Kenny, 2015).
+- Yet, to this day, very few publications use this method. A brief non-systematic review of the literature, through keyword and full-text searches and forward citations of known applications and method sources, revealed only 14 applications, 10 of them in journals (e.g., Popp et al., 2008; Dwyer et al., 2017; Ferraris et al., 2022; full list in Table S1).
+- One reason might be that the method sources above are scattered. Although together they provide the formulas, route diagrams, worked examples and a web app that computes grouped contributions, no single source yet guides readers from fitting the model to reporting, plotting and confidence intervals for the contributions. To our knowledge, none of the sources or applications reports such intervals. Beyond route diagrams, we also found little guidance on how to plot the contributions, especially when routes with opposite signs partly cancel out. Finally, the applications differ in how they report the contributions, for example as covariances, percentages or correlation points, and for each route or only as a total share (Table S1).
+- Thus, the aims of the current paper are to introduce the concept to a wider audience and the growing community of dyadic and relationship scientists, and to provide an applied conceptual guide with real-world and simulated data examples. It demonstrates how to describe, interpret and visualize covariance contributions, and how to obtain confidence intervals for them.
+- Code is provided for structural equation modelling (SEM) with lavaan, for frequentist multilevel modelling (MLM) with glmmTMB, for Bayesian MLM via brms, and Bayesian SEM via blavaan. Advantages and disadvantages of each approach are briefly discussed.
+- While the logic extends, with additional choices, to (intensive) longitudinal data and to binary, ordinal or count outcomes, the current paper focuses on the simpler case of cross-sectional data and continuous outcomes analysed with linear models. It will cover distinguishable and indistinguishable dyads and also demonstrate the case of multiple APIM predictors and covariates.
+- Optionally include:
+  - code about 50 recent APIM papers and report how many say how much of the partner correlation their model explains.
+  - mention that we will include an example where different dyad-types have different variance-covariance components? And then run this with multigroup in SEM in one model (does lavaan support that), and in glmmTMB with the dyadMLM workflow (unreleased vignette)? Or too much for this first paper?
+    - maybe as a Short extension, optional example. lavaan supports multigroup models (`group =`), with routes defined per group and differences tested by constraints. In glmmTMB, dyadMLM’s composition blocks give the same tests. A cheap example: FLASHE mother–teen vs father–teen. NCI’s FLASHE user guide already tests mother/father differences, and Figueroa et al. (2019) already compared the explained shares by parent role, so it could even be the second example, without new data. Otherwise one paragraph plus supplement code.
+  - mention that we show how to deal with random effects? maybe even with an example of school clustering? Does this work in SEM too or only MLM?
+
+### 2.–9. Rest of the paper (draft)
+
+**2. The routes**
+- Running example: FLASHE, teen and parent self-efficacy → fruit and
+  vegetable intake (Bolger & Laurenceau, 2016). Data and model in one
+  paragraph: 1,486 complete parent–teen dyads, measures, missing data,
+  estimation. The FLASHE terms do not allow sharing the data, so the
+  supplement has code only.
+- The APIM equations and the route diagram, one panel per route.
+- Each route in one plain sentence. Name the routes once in Kenny's terms
+  too (Kenny et al., 2024, p. 577, call the member-driven routes
+  "spurious", with X as a common cause).
+- Each route is a path into one outcome × a predictor variance or
+  covariance × a path into the other outcome. Its sign follows from these
+  three.
+- The routes add up to the model-implied covariance if the residuals are
+  uncorrelated with both partners' predictors (normality is not needed).
+  The split is statistical, not causal.
+- Equal-total figure: two models with the same partner correlation but
+  different routes (or as Figure 1 in the introduction).
+
+**3. Reading, reporting and plotting the routes**
+- Covariance, correlation points and percent of the total side by side.
+  Recommend one (open, see Open decisions).
+- Observed vs model-implied r: equal for the full (untrimmed) APIM on
+  complete data. Report both.
+- How much is explained: the predictor routes' share of the total
+  covariance. Like R², but it can be negative or above 100%. Compute it
+  within one model, not from two separate fits.
+- Opposite signs: routes can cancel, so a small total can hide large
+  routes.
+- The residual route is not the residual correlation (different
+  denominators).
+- Box "what the routes are not": not causal shares, not variance explained,
+  not correlations or proportions (they are signed and can exceed ±1).
+- Figures: route diagram with numbers, waterfall. CIs are added in the
+  FLASHE results.
+
+**4. Confidence intervals**
+- Paths, predictor moments, residual covariance and the denominator vary
+  together. Fixed predictor moments give intervals that are too narrow.
+- Main method: the dyad bootstrap (resample whole dyads, refit, recompute
+  everything).
+- Why not the default delta (Wald) interval: it assumes normal data, and in
+  FLASHE it was narrower than the bootstrap for the residual covariance
+  (the robust MLR version was close). Products of estimates can also have
+  skewed sampling distributions.
+- Alternatives: robust (MLR) delta intervals, Monte Carlo draws from the
+  joint robust covariance matrix plus draws of the predictor moments, and
+  Bayesian credible intervals from posterior draws.
+- A small coverage check in the supplement (size open, or none).
+
+**5. Software**
+- The same routes from lavaan, glmmTMB, blavaan and brms. lavaan and
+  glmmTMB agree on FLASHE (differences below 1e-4).
+- lavaan: routes as defined parameters (`:=`), free predictor moments
+  (`fixed.x = FALSE`), bootstrap built in. blavaan: the same syntax, routes
+  per posterior draw (blavaan 0.6-1 or later, otherwise compute them from
+  the draws).
+- glmmTMB: predictor moments come from the data, so the bootstrap wraps the
+  whole computation. The residual route is the dyad random-effect
+  covariance. brms: the predictor moments must be modelled too, or the
+  intervals miss their uncertainty.
+- Table of pros and cons: ease, speed, missing data, intervals, extensions.
+- Code: lavaan in Appendix A, the rest in the supplement. Show
+  `decompose_apim_covariance()` only if released by submission (#134).
+
+**6. FLASHE results**
+- Route diagram and waterfall with 95% dyad bootstrap CIs, observed and
+  model-implied r, and a results paragraph readers can adapt.
+
+**7. Example 2: routes with opposite signs (simulated)**
+- Constructed example, e.g. housework hours predicted by paid work hours.
+  Own paid work lowers own housework, the partner's raises it, so the
+  member-driven routes are negative. They partly cancel the actor- and
+  partner-driven routes, which are positive if partners' paid hours
+  correlate positively.
+- Shows how to report and plot cancellation.
+- One paragraph on real data: sizeable negative routes seem rare (MEPS,
+  see Negative routes above).
+
+**8. Extensions**
+- Indistinguishable dyads: the two member-driven routes are equal and
+  pooled.
+- Several predictors and covariates, shown with FLASHE plus parent gender
+  (ten routes): more routes plus cross terms, grouped and named by
+  variable. A cross term has no unique owner.
+- Optional: dyad types with different routes (multigroup), e.g. FLASHE
+  mother–teen vs father–teen (credit Figueroa et al., 2019). Test the route
+  difference, not equal paths.
+
+**9. Discussion**
+- What the routes add, and what they cannot say (causes, unmeasured shared
+  influences).
+- Limits and outlook: missing data beyond complete pairs, longitudinal and
+  intensive longitudinal data (Paper 2), binary, ordinal or count outcomes,
+  further clustering such as schools.
+- Reporting checklist: observed and model-implied r, all routes with CIs,
+  the scale and denominator, the software settings.
+
+**Appendix and supplement**
+- Appendix A: annotated lavaan listing (about 15–20 lines). Optional
+  Appendix B: the algebra, else in the supplement.
+- Supplement (Zenodo): code for all four set-ups, the coverage check,
+  figure code, Table S1 (applications) and the 50-paper coding if done.
 
 Keep equations few, each with a plain reading. Writing models: Laurenceau
 and Bolger (2005), Ledermann et al. (2011), Gistelinck et al. (2018).
@@ -200,9 +323,9 @@ same-total-calculation and same-total-figure, at commit ce0cb770), with
 - The decomposition, route names, signed reporting, diagrams and APIM
   software have precedents; do not claim priority: Kenny, Kashy and Cook
   (2006, p. 146, full page unchecked); Kenny (2013, webinar); Kenny (n.d.,
-  handout); APIM_MM (Kenny, 2016, 2019); Bolger and Laurenceau (2016,
-  FLASHE webinar); Kenny, Ackerman and Kashy (2024, Section 23.5, pp.
-  577–580). Applications: Popp et al. (2008), Dwyer et al. (2017), Ferraris
+  handout); APIM_MM (Kenny, 2015); Bolger and Laurenceau (2016,
+  FLASHE webinar); Dwyer et al. (2017, appendix); Kenny, Ackerman and Kashy
+  (2024, Section 23.5, pp. 577–580). Applications: Popp et al. (2008), Dwyer et al. (2017), Ferraris
   et al. (2022).
 - Framing: Wickham and Knee (2012). No application gives CIs for the
   contributions. Contribution: a tutorial that brings the scattered
@@ -220,12 +343,19 @@ same-total-calculation and same-total-figure, at commit ce0cb770), with
 - With collaborators: target journal (sets the length), empirical example,
   scope, division of work and authorship.
 - Missing data: how far beyond complete pairs.
-- Second example. Candidates:
+- Second example. The draft uses a simulated one. Real-data alternatives:
   - MEPS married couples, wage → work hours (public data, negative partner
     routes, Section 3).
   - FLASHE split by parent–teen pairing (needs a formal test of the group
     differences).
-  - Only the simulated example.
+  - American Couples (data access pending), or Time and Ties couples.
+- An example with two predictor pairs (the introduction promises multiple
+  predictors; only the covariate example exists).
+- The optional introduction items: the 50-paper coding, the dyad-types
+  (multigroup) example (would lift "interactions" from the out-list in
+  Section 2), school clustering.
+- Equal-total figure: Figure 1 in the introduction or in the routes
+  section.
 - Size of the coverage check in the supplement, or none.
 - From the 9 October meeting agenda (outcomes not recorded): Mplus code
   beside R, whether to involve David Kenny, the writing platform.
