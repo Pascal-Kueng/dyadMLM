@@ -568,8 +568,8 @@ finalize_composition_columns <- function(
     fixed_composition_column_plan
   ) {
 
-  # Convert to factors before returning. Levels are sorted in the C locale so
-  # the reference level does not depend on the machine's language settings.
+  # Convert to factors before returning. Levels are sorted the same way on every
+  # machine, so the reference level does not depend on the language settings.
   data[[dyad_composition_col]] <- factor(
     data[[dyad_composition_col]],
     levels = sort_dyad_labels(

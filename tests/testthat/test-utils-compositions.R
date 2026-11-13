@@ -126,18 +126,19 @@ find_non_c_collation <- function() {
   NULL
 }
 
-test_that("canonical_composition sorts mixed-case roles in the C locale", {
+test_that("canonical_composition sorts mixed-case roles ignoring case", {
+  expect_equal(sort_dyad_labels(c("male", "Male", "female")), c("female", "Male", "male"))
   expect_equal(
-    withr::with_collate("C", canonical_composition(c("female", "Male"))),
-    "Male_x_female"
+    withr::with_collate("C", canonical_composition(c("Male", "female"))),
+    "female_x_Male"
   )
 
   locale <- find_non_c_collation()
   skip_if(is.null(locale), "No non-C collation locale is available.")
 
   expect_equal(
-    withr::with_collate(locale, canonical_composition(c("female", "Male"))),
-    "Male_x_female"
+    withr::with_collate(locale, canonical_composition(c("Male", "female"))),
+    "female_x_Male"
   )
 })
 
@@ -164,11 +165,11 @@ test_that("generated labels do not depend on the collation locale (#174)", {
   result_c <- prepare_in("C")
   expect_equal(
     levels(result_c$.composition),
-    c("Male_x_Male", "Male_x_female", "female_x_female")
+    c("female_x_female", "female_x_Male", "Male_x_Male")
   )
-  expect_true(".is_Male_x_female_Male" %in% names(result_c))
-  expect_true(".is_Male_x_female_female" %in% names(result_c))
-  expect_false(any(grepl("female_x_Male", names(result_c), fixed = TRUE)))
+  expect_true(".is_female_x_Male_Male" %in% names(result_c))
+  expect_true(".is_female_x_Male_female" %in% names(result_c))
+  expect_false(any(grepl("Male_x_female", names(result_c), fixed = TRUE)))
 
   locale <- find_non_c_collation()
   skip_if(is.null(locale), "No non-C collation locale is available.")

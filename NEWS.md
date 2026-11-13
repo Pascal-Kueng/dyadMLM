@@ -1,11 +1,11 @@
 # dyadMLM (development version)
 
 * Composition labels, generated column names, and factor levels no longer
-  depend on the machine's language settings. Role labels are now sorted in the
-  C locale (`sort(method = "radix")`), so roles that differ in case, such as
-  `"Male"` and `"female"`, give the same labels on every machine. Labels for
-  some mixed-case roles change: for example, `"female_x_Male"` is now
-  `"Male_x_female"`
+  depend on the machine's language settings. Role labels are now sorted
+  ignoring case, the same way on every machine. Labels change only in sessions
+  that sorted differently before: with `LC_ALL=C`, `"Male_x_female"` is now
+  `"female_x_Male"`, and role labels with non-ASCII letters now sort after
+  `z` everywhere
   ([#174](https://github.com/Pascal-Kueng/dyadMLM/issues/174)).
 
 * Fixed `prepare_dyad_data()` treating occasions a person missed as observed
