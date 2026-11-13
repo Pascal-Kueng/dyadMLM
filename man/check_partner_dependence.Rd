@@ -93,6 +93,8 @@ supply \code{member} and \code{time}.
 }
 \section{Reading the plots}{
 
+\subsection{What the plots show}{
+
 Blue histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95\% of simulations (no formal confidence
 intervals).
@@ -119,6 +121,9 @@ because it depends on how partners are ordered. Positive values indicate
 greater variance for the first named role. Negative values indicate greater
 variance for the second.
 }
+}
+
+\subsection{Reading differences and flags}{
 
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.
@@ -144,6 +149,7 @@ For example, pooled summaries (\code{role = NULL}) of a Gaussian model with an
 unconstrained exchangeable covariance, as below, agree almost by construction.
 Use a suitable model comparison to formally test a specific covariance
 restriction when both models can be fitted (see \code{\link[=compare_nested_models]{compare_nested_models()}}).
+}
 }
 
 \section{Repeated occasions}{
