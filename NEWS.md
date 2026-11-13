@@ -1,5 +1,9 @@
 # dyadMLM (development version)
 
+* `check_dyad_outcomes()` warns when fewer than 39 simulated datasets are supplied,
+  because the 95% limits are then infinite and nothing can be flagged
+  ([#180](https://github.com/Pascal-Kueng/dyadMLM/issues/180)).
+
 * Fixed `prepare_dyad_data()` treating occasions a person missed as observed
   when the `dyad`, `member`, or `time` column is also a predictor. Lags, means,
   and partner values of such a predictor now use observed rows only, as for

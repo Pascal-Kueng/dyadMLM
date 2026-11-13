@@ -114,3 +114,14 @@ test_that("ordinal outcomes use role proportions and all declared categories", {
   expect_identical(distribution$labels, categories)
   expect_equal(distribution$roles[[1]]$observed[5], 0)
 })
+
+
+test_that("outcome check warns when fewer than 39 simulated datasets cannot flag anything", {
+  simulations <- distribution_check_fixture()
+  simulations$simulated_responses <- simulations$simulated_responses[1:20, , drop = FALSE]
+  expect_warning(check_dyad_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE),
+                 "Fewer than 39 simulated datasets", fixed = TRUE)
+  simulations <- distribution_check_fixture()
+  simulations$simulated_responses <- simulations$simulated_responses[1:39, , drop = FALSE]
+  expect_no_warning(check_dyad_outcomes(simulations, dyad = "dyad", role = "role", plot = FALSE))
+})

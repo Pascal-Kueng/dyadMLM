@@ -58,6 +58,9 @@ check_dyad_outcomes <- function(simulations, dyad = NULL, role = NULL, member = 
   if (!inherits(simulations, "dyadMLM_response_simulations"))
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
   frame <- simulations$model_frame
+  # With fewer simulated datasets the 95% limits are infinite and nothing can be flagged.
+  if (nrow(simulations$simulated_responses) < 39)
+    warning("Fewer than 39 simulated datasets: the 95% limits are infinite, so nothing can be flagged. Use at least 1,000.", call. = FALSE)
   compositions <- build_check_groups(
     frame, rlang::enquo(dyad), rlang::enquo(role), rlang::enquo(member), data
   )
