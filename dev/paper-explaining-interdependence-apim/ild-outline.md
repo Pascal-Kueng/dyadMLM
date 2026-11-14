@@ -329,11 +329,14 @@ lost, so recompute before use):
 - T&T daily solo physical activity ~ conditions for physical activity:
   member-driven routes −37% at the daily level. Partly by definition
   (switching from solo to joint exercise).
-- ESM couples data of Zygar-Hoffmann et al. (2020, PsychArchives, not yet in
-  the reference list), time alone ~ time with others: member-driven
-  routes −.19 daily and −.16 between. A time-budget effect, not psychology.
-- Swiss CAID couples, dominance (Hopwood lab, osf.io/8p92f, unpublished):
-  strongly negative, but caused by the persuader role the study assigns.
+- ESM couples data (Zygar-Hoffmann et al., 2020), time alone ~ time with
+  others: member-driven routes −.19 per prompt (total +.16), −.24 for daily
+  means (total +.20) and −.16 between couples (total +.36). Largely
+  definitional, a time budget.
+- Swiss couples, observed dominance (CAID coding, Gilbert, Bachofner,
+  Trenkenschuh & Hopwood, preprint, osf.io/8p92f): within couples (analysed
+  9 October 2026) the total is −.82 (residual −.39), and all four routes are negative because the
+  study assigns the persuader role. Ask the authors before use.
 
 ## 12. To check in the library
 
@@ -516,6 +519,8 @@ Wright, S. (1921). Correlation and causation. *Journal of Agricultural Research,
 Xiao, Y., & Liu, H. (2025). Detrending for intensive longitudinal dyadic data analysis using DSEM. *Structural Equation Modeling, 32*(3), 450–459. https://doi.org/10.1080/10705511.2024.2442980 *[abstract]*
 
 Yuan, K.-H., & Hayashi, K. (2005). On Muthén's maximum likelihood for two-level covariance structure models. *Psychometrika, 70*(1), 147–167. https://doi.org/10.1007/s11336-003-1070-8 *[abstract]*
+
+Zygar-Hoffmann, C., Hagemeyer, B., Pusch, S., & Schönbrodt, F. D. (2020). *A large longitudinal study on motivation, behavior and satisfaction in couples: Research data from a four-week experience sampling study with a pre-, post-, and one-year follow-up assessment* (Version 2.0.0) [Data set]. Research Data Center at ZPID. https://doi.org/10.5160/psychdata.zrce18mo99_v20000
 
 From the master list (checked there): Bolger and Shrout (2007);
 Cornelius et al. (2022); Gistelinck and Loeys (2019, 2020); Gonzalez and

@@ -32,7 +32,7 @@ history.
   rates "nothing at both levels" as well supported (about 85–90%). "Nothing
   even at one level" is less certain (75–85%), mainly because of
   closed-access journals.
-- **Applications.** Six papers report the four routes, all cross-sectional.
+- **Applications.** Five papers report the four routes, all cross-sectional.
   New are two friendship papers with a lagged APIM over two or three waves
   that report the total share explained (Popp et al. 2008, the earliest
   application found; Giletta et al. 2011), and two dissertations that report
@@ -43,7 +43,7 @@ history.
   residual covariance (the 2025 workshop's Mplus fit) and the level
   covariance parameters (Gistelinck & Loeys 2019), but not their 89%/11%
   level shares. No public study-specific decomposition code was found
-  (checked 7 October for the 2a papers, De Padova, Velten & Margraf and
+  (checked 7 October for the 2a papers, Figueroa, De Padova, Velten & Margraf and
   Cavalcanti); Ferraris et al. (2022) offer code on request.
 
 Columns: **ILD** = yes (intensive longitudinal, within/between levels),
@@ -84,6 +84,7 @@ chapter, checked against the page images, and one in the draft:
 | Source | DOI or link | Summary | ILD | Main contribution |
 |:--|:--|:--|:--|:--|
 | Kenny (n.d.). *Path tracing* [web page]. | [davidakenny.net](https://davidakenny.net/cm/tracing.htm) | General rules for getting covariances from paths. Figueroa et al. (2019) cite it for their decomposition. | no | Method source used by applications. |
+| Wright (1921). *Journal of Agricultural Research*, 20(7), 557–585. | No DOI. [Scan](https://archive.org/details/sim_journal-of-agricultural-research_1921-01-03_20_7) | Path coefficients. A correlation is the sum, over all connecting paths, of the products of the path coefficients (p. 568). Two variables with correlated common causes give four terms (pp. 567–568). Standardized coefficients. | no | Origin of path tracing and of the four routes. |
 | Kline (2016). *Principles and practice of structural equation modeling* (4th ed.). Guilford. | No DOI. ISBN 9781462523344 | Dwyer et al. (2017) cite it for path tracing. APIM content not checked. | no | Method source used by applications. |
 | Boker, McArdle & Neale (2002). *Structural Equation Modeling*. | [10.1207/S15328007SEM0902_2](https://doi.org/10.1207/S15328007SEM0902_2) | Algorithm to list all paths and compute the components of an expected covariance. | no | General version of the decomposition for any SEM. |
 | Zhang, Hamagami, Grimm & McArdle (2015). *Structural Equation Modeling*. | [10.1080/10705511.2014.935257](https://doi.org/10.1080/10705511.2014.935257) | R package RAMpath: traces paths and computes covariance components. | no | Software precedent for automatic path tracing. |
@@ -119,7 +120,6 @@ chapter, checked against the page images, and one in the draft:
 |:--|:--|:--|:--|:--|
 | Dwyer et al. (2017). *American Journal of Preventive Medicine*. | [10.1016/j.amepre.2017.01.011](https://doi.org/10.1016/j.amepre.2017.01.011) | FLASHE. Autonomous motivation and fruit/vegetable intake; 22.6% of the parent–teen correlation explained. Strictly, the share is of the covariance left after the controls: the denominator is the controls-only model's outcome residual covariance (1.980), and the numerators use the final model's residual motivation moments. | no | First published four-route application; controls; formulas in the supplement. |
 | Burns (2019). *Preventive Medicine*. | [10.1016/j.ypmed.2019.105756](https://doi.org/10.1016/j.ypmed.2019.105756) | FLASHE. Enjoyment, self-efficacy and physical activity; routes in correlation units and percent. | no | Two predictors; cross-predictor terms. |
-| Figueroa et al. (2019). *Public Health Nutrition*. | [10.1017/S136898001800383X](https://doi.org/10.1017/S136898001800383X) | FLASHE. Motivation and beverage intake; explained shares by parent role. | no | Multigroup comparison of shares. |
 | Lee et al. (2021). *Journal of Child and Family Studies*. | [10.1007/s10826-021-01906-6](https://doi.org/10.1007/s10826-021-01906-6) | Mother–daughter mental health and closeness. | no | Outside FLASHE; follows Dwyer. |
 | Ferraris et al. (2022). *Journal of Family Psychology*. | [10.1037/fam0001009](https://doi.org/10.1037/fam0001009) | Social support and well-being; appendix prints the four formulas with numbers. The printed values give 29.24%, not the reported 28.76%, so it is not a replication target. | no | Formulas in an appendix. |
 | Fu et al. (2025). *International Journal of Physical Activity and Health*. | [10.18122/ijpah.4.1.3.boisestate](https://doi.org/10.18122/ijpah.4.1.3.boisestate) | Parents' perceived health and child movement; four routes plus residual. | no | Mother–father dyads. |
@@ -130,6 +130,7 @@ chapter, checked against the page images, and one in the draft:
 |:--|:--|:--|:--|:--|
 | Popp, Laursen, Kerr, Stattin & Burk (2008). *Developmental Psychology*. **New.** | [10.1037/0012-1649.44.4.1028](https://doi.org/10.1037/0012-1649.44.4.1028) | Swedish adolescent friends' intoxication, three yearly waves. Lagged APIM: actor = stability, partner = influence. 32–56% of the friends' later correlation explained. Formula in footnote 1, "adapted from Kenny et al., 2006, p. 146". | partial | Earliest application found; panel APIM; shares compared across groups. |
 | Giletta et al. (2011). *Developmental Psychology*. **New.** | [10.1037/a0023872](https://doi.org/10.1037/a0023872) | Dutch adolescent friends' depressive symptoms, two waves, exchangeable dyads. Stability and influence explain 23% of later similarity (girls). | partial | Exchangeable dyads; replicates Popp's procedure. |
+| Figueroa et al. (2019). *Public Health Nutrition*. | [10.1017/S136898001800383X](https://doi.org/10.1017/S136898001800383X) | FLASHE, multigroup path analysis by parent role. Covariance explained, healthy beverages: 12.78% (mother–teen) vs 17.46% (father–teen). Shares only, no routes, and the difference is not tested. | no | Shares compared across dyad types. |
 | Velten & Margraf (2017). *PLOS ONE*. | [10.1371/journal.pone.0172855](https://doi.org/10.1371/journal.pone.0172855) | Sexual satisfaction in couples (APIM_MM). The APIM explains 53.7% of the nonindependence, between-dyad covariates 27.8%. | no | Covariate share. |
 | De Padova et al. (2021). *Cancer Medicine*. | [10.1002/cam4.3961](https://doi.org/10.1002/cam4.3961) | Cancer survivors and caregivers; APIM_MM tables in the supplement with grouped and negative parts. In model 3 the main text calls .106 the overall correlation; the supplement gives .137 overall and .106 due to the APIM. | no | Negative and cross-predictor parts. |
 | Vadgama (2017). Doctoral dissertation, Syracuse University. **New.** | No DOI. [SURFACE](https://surface.syr.edu/etd/816); ProQuest 10682594 | 127 Asian-Indian immigrant couples; father involvement. APIM_MM partition: 66.75% of r = .54 explained; covariate share split out; pie chart. | no | Three predictors plus a covariate; pie-chart reporting. |
@@ -158,11 +159,39 @@ None decomposes the partner covariance into routes at either level.
   & Cook (2006), and p. 146 for the formula once the page is checked.
 - Teaching and software: Kenny (2013) slides (earliest dated), the
   Bolger–Laurenceau webinar, Kenny's handout and APIM_MM (Kenny, 2015).
-- Path algebra: Boker et al. (2002). Framing: Wickham & Knee (2012). Cite
-  Kline (2016) only as Dwyer's path-tracing source.
+- Path algebra: Wright (1921, pp. 567–568) and Boker et al. (2002).
+  Framing: Wickham & Knee (2012). Cite Kline (2016) only as Dwyer's
+  path-tracing source.
 - Applications: Dwyer et al. (2017) and Ferraris et al. (2022); Burns
   (2019), De Padova et al. (2021) and Cavalcanti et al. (2026) for
   reporting, multiple predictors and signed parts.
+- Intervals: Bollen & Stine (1990,
+  [10.2307/271084](https://doi.org/10.2307/271084)) and Shrout & Bolger
+  (2002, [10.1037/1082-989X.7.4.422](https://doi.org/10.1037/1082-989X.7.4.422))
+  for the bootstrap. MacKinnon, Lockwood & Williams (2004,
+  [10.1207/s15327906mbr3901_4](https://doi.org/10.1207/s15327906mbr3901_4))
+  and Preacher & Selig (2012, p. 79,
+  [10.1080/19312458.2012.679848](https://doi.org/10.1080/19312458.2012.679848))
+  for non-normal products of estimates. Preacher & Selig (2012) and
+  `semTools::monteCarloCI()` for Monte Carlo intervals. Cite them for
+  these points only, not for an interval type (MacKinnon et al. favour
+  bias-corrected intervals).
+- FLASHE: Nebeling et al. (2017,
+  [10.1016/j.amepre.2017.01.028](https://doi.org/10.1016/j.amepre.2017.01.028)),
+  1,573 dyads returned all four surveys. Describe our 1,486 complete pairs
+  separately. NCI's terms of use forbid releasing the data without written
+  approval of the FLASHE program staff.
+- Dyad types: Garcia, Kenny & Ledermann (2015,
+  [10.1111/pere.12060](https://doi.org/10.1111/pere.12060)) on moderators
+  in the APIM. Dyad type as a between-dyads moderator is our framing.
+  Figueroa et al. (2019) compare shares by parent role descriptively.
+- Housework example (premise only): Gershuny, Bittman & Brice (2005,
+  [10.1111/j.1741-3737.2005.00160.x](https://doi.org/10.1111/j.1741-3737.2005.00160.x)),
+  women adjust their domestic work a lot when they enter full-time work,
+  men adapt more slowly. Optionally Coverman (1985,
+  [10.1111/j.1533-8525.1985.tb00217.x](https://doi.org/10.1111/j.1533-8525.1985.tb00217.x)),
+  husbands with employed wives are more likely to take part. Bianchi et
+  al. (2000) do not support the partner effect.
 - Writing models: Laurenceau & Bolger (2005, exposition;
   [10.1037/0893-3200.19.1.86](https://doi.org/10.1037/0893-3200.19.1.86)),
   Ledermann, Macho & Kenny (2011, derived dyadic quantities;
@@ -229,7 +258,7 @@ level.
 
 The earlier review (31 August to 7 October) used keyword searches, OpenAlex
 and Europe PMC forward citations, and full-text checks through UZH. Its
-forward-citation step (13 September) used nine seeds: the six papers in 2a,
+forward-citation step (13 September) used nine seeds: the five papers in 2a, Figueroa et al. (2019),
 Wickham & Knee (2012), Kenny, Ackerman & Kashy (2024) and Cavalcanti et al.
 (2026). OpenAlex, Europe PMC and, for three seeds, Semantic Scholar
 returned 390 citing records (with duplicates across indexes). These were

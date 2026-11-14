@@ -1,6 +1,6 @@
 # Paper 1 (cross-sectional APIM tutorial): outline
 
-Draft, 10 October 2026, revised 1 and 13 November 2026. Paper 1 is a tutorial: why
+Draft, 10 October 2026, revised 1, 13 and 14 November 2026. Paper 1 is a tutorial: why
 to split the covariance between partners' outcomes into routes, how to do
 it, and how to read the result, with one or two examples and code.
 
@@ -20,16 +20,19 @@ paper-outline.Rmd (see git history). Paper 2:
   with a sandwich matrix. The last two are close to the bootstrap; the
   default delta CI is too narrow for the residual covariance (non-normal
   intake).
-- To do: second example, a small interval check, missing data, manuscript
-  text, Section 9.
+- To do: the housework simulation, blavaan and brms code, a formal test of
+  the FLASHE pairing differences (Section 9), a FLASHE covariate check (teen
+  age, parent education: does a covariate add a negative part?), the
+  coverage check, missing data, manuscript text, Section 9.
 
 ## 2. Scope and estimand
 
 - Independent dyads, cross-sectional, continuous outcomes, linear APIM with
   fixed slopes; Gaussian ML first. One distinguishable predictor pair is the
   running example; covariates, multiple predictors and exchangeable dyads
-  are short extensions. Out: random slopes, ILD, nonlinear links, interactions,
-  causal claims.
+  are short extensions. Out: random slopes, ILD, nonlinear links,
+  interactions (except the optional dyad-types example, Section 9), causal
+  claims.
 - Target: the model-implied marginal outcome covariance across the
   population of dyads, in unstandardized units (a standardized version must
   transform paths, moments, ψ and the denominator alike).
@@ -95,12 +98,21 @@ a negative partner path. The tutorial shows how to report them.
 - In everyday couple and family data, interdependence seems almost always
   positive. A screen of about 35 open datasets (16–17 October 2026) found no
   negative partner correlation from a real process.
-- Negative routes do occur, but they are small. In MEPS married dual-earner
-  couples (hourly wage → work hours), the own wage raises and the partner's
-  wage lowers work hours. The member-driven routes are −.017 and −.024
-  correlation points (CIs exclude 0), with a total r of .09. One household
-  respondent answers for both partners. FLASHE reactive parenting gives
-  about −.005.
+- Negative routes do occur, but they are small or need replication
+  (correlation points):
+  - FLASHE reactive parenting (NCI public-use files), 1,587 dyads. X: own "I don't like exercise".
+    Y: "the parent makes sure the teen gets enough physical activity",
+    rated by both. Actor-driven −.004 and partner-driven −.005, together about 2%
+    of r = .45. Both ratings describe the same parenting.
+  - MEPS 2017–2022, female–male couples (n = 9,388): wife's poor health →
+    husband's doctor visits. Wife-driven route −.011 [−.014, −.008], about
+    3% of r = .42. Holds for couple means, not within couples over time.
+  - MEPS female couples (n = 86): work hours → low energy. Member-driven
+    routes −.19 [−.32, −.09], about 70% of r = .27. Picked from about 1,900
+    models, so it needs replication.
+- Not used: MEPS wage → work hours (dull and almost definitional) and
+  Zygar-Hoffmann et al. (2020) time alone ~ time with others (a time
+  budget, ild-outline.md Section 11).
 - A simulated example shows mixed signs and a total near zero.
 - The screen's scripts are lost, so recompute a number before citing it.
 
@@ -124,7 +136,8 @@ and Cov(ε, (X, Z)) = 0, Σ_Y = BΣ_XX B′ + ΓΣ_ZZ Γ′ + Ψ + BΣ_XZ Γ′ 
 - Decided in explore-sem-mlm.Rmd, Section 6 (parent gender): name covariates
   by variable, show the ten routes as separate panels, and group the four
   mixed routes as "Efficacy and parent gender together". Interactions would
-  need a decomposition per group and are not in Paper 1.
+  need a decomposition per group and are not in Paper 1, except the
+  optional dyad-types example (Section 9).
 - Covariate-adjusted slopes with marginal moments still give the marginal
   target. A conditional target, Cov(Y | Z = z) = B Cov(X | Z = z) B′ +
   Cov(ε | Z = z), needs conditional moments, and a constant Ψ there needs
@@ -200,111 +213,101 @@ printed appendix and an online supplement.
     - maybe as a Short extension, optional example. lavaan supports multigroup models (`group =`), with routes defined per group and differences tested by constraints. In glmmTMB, dyadMLM’s composition blocks give the same tests. A cheap example: FLASHE mother–teen vs father–teen. NCI’s FLASHE user guide already tests mother/father differences, and Figueroa et al. (2019) already compared the explained shares by parent role, so it could even be the second example, without new data. Otherwise one paragraph plus supplement code.
   - mention that we show how to deal with random effects? maybe even with an example of school clustering? Does this work in SEM too or only MLM?
 
-### 2.–9. Rest of the paper (draft)
+Sections 2–9 are a draft (13 November 2026).
 
-**2. The routes**
-- Running example: FLASHE, teen and parent self-efficacy → fruit and
-  vegetable intake (Bolger & Laurenceau, 2016). Data and model in one
-  paragraph: 1,486 complete parent–teen dyads, measures, missing data,
-  estimation. The FLASHE terms do not allow sharing the data, so the
-  supplement has code only.
-- The APIM equations and the route diagram, one panel per route.
-- Each route in one plain sentence. Name the routes once in Kenny's terms
-  too (Kenny et al., 2024, p. 577, call the member-driven routes
-  "spurious", with X as a common cause).
-- Each route is a path into one outcome × a predictor variance or
-  covariance × a path into the other outcome. Its sign follows from these
-  three.
-- The routes add up to the model-implied covariance if the residuals are
-  uncorrelated with both partners' predictors (normality is not needed).
-  The split is statistical, not causal.
-- Equal-total figure: two models with the same partner correlation but
-  different routes (or as Figure 1 in the introduction).
+### 2. The routes
 
-**3. Reading, reporting and plotting the routes**
-- Covariance, correlation points and percent of the total side by side.
-  Recommend one (open, see Open decisions).
-- Observed vs model-implied r: equal for the full (untrimmed) APIM on
-  complete data. Report both.
-- How much is explained: the predictor routes' share of the total
-  covariance. Like R², but it can be negative or above 100%. Compute it
-  within one model, not from two separate fits.
-- Opposite signs: routes can cancel, so a small total can hide large
-  routes.
-- The residual route is not the residual correlation (different
-  denominators).
-- Box "what the routes are not": not causal shares, not variance explained,
-  not correlations or proportions (they are signed and can exceed ±1).
-- Figures: route diagram with numbers, waterfall. CIs are added in the
-  FLASHE results.
+- Goal: name the five routes, show how each is built and what they add up to.
+- Running example: FLASHE, teen and parent self-efficacy → fruit and vegetable intake (Bolger & Laurenceau, 2016).
+    - Data and model in one paragraph: 1,486 complete parent–teen dyads, measures, missing data, estimation.
+    - The FLASHE terms do not allow sharing the data, so the supplement has code only.
+- The APIM equations and a route diagram, one panel per route.
+- The five routes, each in one plain sentence:
+    - Actor-driven: partners are similar on X, and each person's X predicts their own Y.
+    - Partner-driven: the same similarity, but each X predicts the other person's Y.
+    - Teen-driven: the teen's X reaches both outcomes, through the actor path into the teen's Y and the partner path into the parent's Y.
+    - Parent-driven: the same for the parent's X.
+    - Residual: the residual covariance, what the predictors leave unexplained.
+- The first four are the predictor routes. The teen- and parent-driven routes are the member-driven routes.
+- Name the routes once in Kenny's terms too. Kenny et al. (2024, p. 577) call the member-driven routes "spurious", with X as a common cause.
+- Each predictor route is a path into one outcome × a predictor variance or covariance (a predictor moment) × a path into the other outcome. Its sign follows from these three.
+- The routes always add up to the model-implied covariance. This rests on two APIM assumptions: the residuals are uncorrelated with both partners' predictors, and the outcomes do not affect each other. Normality is not needed.
+- Figure: two models with the same partner correlation but different routes. The total alone does not show how the model explains the covariance (placement open).
 
-**4. Confidence intervals**
-- Paths, predictor moments, residual covariance and the denominator vary
-  together. Fixed predictor moments give intervals that are too narrow.
-- Main method: the dyad bootstrap (resample whole dyads, refit, recompute
-  everything).
-- Why not the default delta (Wald) interval: it assumes normal data, and in
-  FLASHE it was narrower than the bootstrap for the residual covariance
-  (the robust MLR version was close). Products of estimates can also have
-  skewed sampling distributions.
-- Alternatives: robust (MLR) delta intervals, Monte Carlo draws from the
-  joint robust covariance matrix plus draws of the predictor moments, and
-  Bayesian credible intervals from posterior draws.
-- A small coverage check in the supplement (size open, or none).
+### 3. Reading the routes
 
-**5. FLASHE results**
-- Route diagram and waterfall with 95% dyad bootstrap CIs, observed and
-  model-implied r, and a results paragraph readers can adapt.
+- Goal: which total the routes split, which scale to report, how much the model explains, and common misreadings.
+- Which total: the routes split the model-implied covariance. It equals the observed covariance for the untrimmed APIM fitted by ML on complete data (with divisor-n predictor moments). Report the observed and the model-implied r.
+- Opposite signs: routes can cancel, so a small total can hide large routes.
+- Three scales, side by side. Recommend one (open decision).
+    - Covariance: the route in unstandardized units.
+    - Correlation points: the route divided by the product of the model-implied outcome SDs. The routes then add up to the model-implied r.
+    - Percent of the total covariance: can be negative or above 100% when routes cancel, and is unstable near a zero total.
+- How much is explained: the predictor routes' share of the total covariance. Like R², but it can be negative or above 100%.
+    - Compute it within one model. The drop in residual covariance between two separate fits gives the same share only if both fits reproduce the same outcome covariance.
+- The residual route is not the residual correlation. In correlation points, the residual route divides the residual covariance by the total outcome SDs, the residual correlation divides it by the residual SDs.
+- Box "what the routes are not": not causal shares (the split is statistical), not variance explained, not correlations or proportions (they are signed, and correlation points can lie outside ±1).
 
-**6. Example 2: routes with opposite signs (simulated)**
+### 4. Confidence intervals
+
+- Goal: intervals that carry all sources of uncertainty, with the dyad bootstrap as the main method.
+- Paths, predictor moments, residual variances and covariance, and the denominator are all estimated and vary together. Treating the predictor moments as fixed gives intervals that are too narrow for the population of dyads.
+- Main method: the dyad bootstrap. Resample whole dyads, refit, and recompute all moments, routes and denominators (percentile intervals, 1999 resamples in FLASHE).
+- Why not the default delta (Wald) interval: it is symmetric and assumes normal data, but products of estimates can have skewed sampling distributions. In FLASHE it was narrower than the bootstrap for the residual covariance.
+- Alternatives:
+    - MLR delta: the same interval with robust standard errors. Close to the bootstrap in FLASHE.
+    - Monte Carlo: draws from the joint robust covariance matrix plus draws of the predictor moments. Close to the bootstrap in FLASHE.
+    - Bayesian: credible intervals from the routes per posterior draw.
+- Hard case: near-zero path products. Delta intervals break down there, and the bootstrap is not automatically valid either.
+- Supplement: a small coverage check, how often the 95% intervals contain the true value (size open, or none).
+
+### 5. FLASHE results: plotting and reporting
+
+- Goal: a complete report of the running example, with intervals.
+- Figure: route diagram with the estimates and 95% dyad bootstrap CIs.
+- Figure: waterfall with 95% dyad bootstrap CIs. Each bar starts where the previous route ended, so the last bar ends at the total, even when routes cancel.
+- Observed and model-implied r.
+- A results paragraph readers can adapt.
+
+### 6. Simulated example: routes with opposite signs
+
+- Goal: how to read, plot and report routes that cancel.
 - Constructed example, e.g. housework hours predicted by paid work hours.
-  Own paid work lowers own housework, the partner's raises it, so the
-  member-driven routes are negative. They partly cancel the actor- and
-  partner-driven routes, which are positive if partners' paid hours
-  correlate positively.
-- Shows how to report and plot cancellation.
-- One paragraph on real data: sizeable negative routes seem rare (MEPS,
-  see Negative routes above).
+    - Own paid work lowers own housework, and the partner's raises it, so the member-driven routes are negative.
+    - If partners' paid hours correlate positively, the actor- and partner-driven routes are positive, and the routes cancel in part.
+- Waterfall and results paragraph, as for FLASHE.
+- One paragraph on real data: sizeable negative routes seem rare. Small real ones: FLASHE reactive parenting and MEPS health → doctor visits (Negative routes, outline Section 3).
 
-**7. Extensions**
-- Indistinguishable dyads: the two member-driven routes are equal and
-  pooled.
-- Several predictors and covariates, shown with FLASHE plus parent gender
-  (ten routes): more routes plus cross terms, grouped and named by
-  variable. A cross term has no unique owner.
-- Optional: dyad types with different routes (multigroup), e.g. FLASHE
-  mother–teen vs father–teen (credit Figueroa et al., 2019). Test the route
-  difference, not equal paths.
+### 7. Extensions
 
-**8. Software**
-- The same routes from lavaan, glmmTMB, blavaan and brms. lavaan and
-  glmmTMB agree on FLASHE (differences below 1e-4).
-- lavaan: routes as defined parameters (`:=`), free predictor moments
-  (`fixed.x = FALSE`), bootstrap built in. blavaan: the same syntax, routes
-  per posterior draw (blavaan 0.6-1 or later, otherwise compute them from
-  the draws).
-- glmmTMB: predictor moments come from the data, so the bootstrap wraps the
-  whole computation. The residual route is the dyad random-effect
-  covariance. brms: the predictor moments must be modelled too, or the
-  intervals miss their uncertainty.
-- Table of pros and cons: ease, speed, missing data, intervals, extensions.
-- Code: lavaan in Appendix A, the rest in the supplement. Show
-  `decompose_apim_covariance()` only if released by submission (#134).
+- Goal: what changes for indistinguishable dyads, covariates, several predictors and, optionally, dyad types.
+- Indistinguishable dyads: the two member-driven routes are equal, so they are pooled into one.
+- Covariates, shown with FLASHE plus parent gender (ten routes). Routes are named by variable.
+    - Mixed routes link self-efficacy and parent gender through their covariance. A mixed route has no unique owner, so the four are reported together.
+- Several predictor pairs: the same logic, with more routes and mixed routes (worked example open).
+- Optional: dyad types with different routes (multigroup), e.g. FLASHE mother–teen vs father–teen (credit Figueroa et al., 2019). Test whether a route differs between groups, not whether the paths are equal.
 
-**9. Discussion**
-- What the routes add, and what they cannot say (causes, unmeasured shared
-  influences).
-- Limits and outlook: missing data beyond complete pairs, longitudinal and
-  intensive longitudinal data (Paper 2), binary, ordinal or count outcomes,
-  further clustering such as schools.
-- Reporting checklist: observed and model-implied r, all routes with CIs,
-  the scale and denominator, the software settings.
+### 8. Software
 
-**Appendix and supplement**
-- Appendix A: annotated lavaan listing (about 15–20 lines). Optional
-  Appendix B: the algebra, else in the supplement.
-- Supplement (Zenodo): code for all four set-ups, the coverage check,
-  figure code, Table S1 (applications) and the 50-paper coding if done.
+- Goal: the same routes from lavaan, glmmTMB, blavaan and brms, and what each package needs.
+- lavaan and glmmTMB agree on FLASHE (differences below 1e-4). blavaan and brms are still to do.
+- lavaan: routes as defined parameters (`:=`), free predictor moments (`fixed.x = FALSE`), bootstrap built in.
+- blavaan: the same syntax, routes per posterior draw (blavaan 0.6-1 or later, otherwise compute them from the draws).
+- glmmTMB: the predictor moments come from the data (divisor n), so the bootstrap wraps the whole computation. The residual route is all covariance left between the members, in our model the dyad random-effect covariance.
+- brms: the predictor moments must be modelled too, or the intervals miss their uncertainty.
+- Table: pros and cons of the four packages (ease, speed, missing data, intervals, extensions).
+- Code: lavaan in Appendix A, the rest in the supplement. Show `decompose_apim_covariance()` only if released by submission.
+
+### 9. Discussion
+
+- What the routes add: how the model explains the partner covariance, not only how much. What they cannot say: causes, unmeasured shared influences.
+- Limits and outlook: missing data beyond complete pairs, longitudinal data, intensive longitudinal data (Paper 2), binary, ordinal or count outcomes, further clustering such as schools.
+- Reporting checklist: observed and model-implied r, all routes with CIs, the scale and its denominator, the software settings (source of the predictor moments, interval type, resamples, failed-fit handling).
+
+### Appendix and supplement
+
+- Appendix A: annotated lavaan listing (about 15–20 lines). Optional Appendix B: the algebra, otherwise in the supplement.
+- Supplement (Zenodo): code for all four packages, the coverage check, figure code, Table S1 (applications) and the 50-paper coding if done.
 
 Keep equations few, each with a plain reading. Writing models: Laurenceau
 and Bolger (2005), Ledermann et al. (2011), Gistelinck et al. (2018).
@@ -334,31 +337,28 @@ same-total-calculation and same-total-figure, at commit ce0cb770), with
 
 ## 9. Open decisions
 
-- Reporting scale: percent of total covariance (both notebooks) or signed
-  correlation points (old plan; Kenny's materials). Percentages break down
-  under cancellation or a near-zero total.
-- p-values: bootstrap p-value stars on paths and routes (explore-sem-mlm.Rmd,
-  Section 5) or none, only CIs and a few prespecified contrasts (old plan).
-  Tests would need defined nulls and a calibration check.
-- With collaborators: target journal (sets the length), empirical example,
-  scope, division of work and authorship.
+- Reporting scale: percent of total covariance (both exploration notebooks) or signed correlation points (old plan, and Kenny's materials). Percentages break down under cancellation or a near-zero total.
+- p-values: bootstrap p-value stars on paths and routes (explore-sem-mlm.Rmd, Section 5) or none, only CIs and a few prespecified contrasts (old plan). Tests would need defined nulls and a calibration check.
+- With collaborators: target journal (sets the length), scope, division of work and authorship.
+- Target journal: scan of 13 November 2026, in this order. Free open access assumes a UZH corresponding author.
+    1. Personal Relationships: Original Article, 9,000 words including references and tables. Free OA through the Wiley deal (ends 31 December 2027). Core APIM readers. About 14% accepted, median 306 days to acceptance.
+    2. Multivariate Behavioral Research: Tutorial, 40 pages including references, appendices printed. OA likely free (T&F deal). Best fit of type and length, but reviewers may ask for a coverage simulation.
+    3. Journal of Family Psychology: regular article, about 5,000–6,000 words. USD 3,500, or free green OA in ZORA. Home of Kenny's and Ledermann's APIM papers.
+    4. Health Psychology: methods tutorial, about 5,000–6,000 words. USD 3,500 or green OA. Needs a health framing.
+    5. SEM, Teacher's Corner: 25 pages, appendices printed. OA likely free (T&F deal). SEM methodologists as readers.
+    6. Behavior Research Methods (tutorial, no word limit found, free OA), then the free diamond-OA journals The Quantitative Methods for Psychology (no limit stated) and Methodology (6,000 words including everything).
+    - Not verified: JFP's page limits and the APA fee (USD 3,500), whether the T&F deal covers MBR tutorials and Teacher's Corner papers (ask the UZH OA team), whether Personal Relationships prints appendices.
+- Running example (decided for now, 14 November 2026): FLASHE, because its four parent–teen pairings allow a dyad-types example. Keep Time and Ties and American Couples in mind. The 9 October meeting had suggested a different example.
 - Missing data: how far beyond complete pairs.
-- Second example. The draft uses a simulated one. Real-data alternatives:
-  - MEPS married couples, wage → work hours (public data, negative partner
-    routes, Section 3).
-  - FLASHE split by parent–teen pairing (needs a formal test of the group
-    differences).
-  - American Couples (data access pending), or Time and Ties couples.
-- An example with two predictor pairs (the introduction promises multiple
-  predictors; only the covariate example exists).
-- The optional introduction items: the 50-paper coding, the dyad-types
-  (multigroup) example (would lift "interactions" from the out-list in
-  Section 2), school clustering.
-- Equal-total figure: Figure 1 in the introduction or in the routes
-  section.
+- Second example. The draft uses a simulated one. Real-data alternatives (none has sizeable negative routes, outline Section 3):
+    - FLASHE split by parent–teen pairing. One APIM per pairing (16 October 2026, NCI public-use files, 1,437 complete pairs, scripts lost): the teen-driven route is .116 [.062, .173] correlation points for fathers with daughters (n = 179), against .026, .033 and .051 for father–son, mother–daughter and mother–son. Explained share 32% against 9–20%. Not tested yet: fit one joint model (lavaan `group =` or dyadMLM composition blocks) and bootstrap the route differences.
+    - American Couples: application submitted (form filled in 20 October 2026), no answer by 14 November. Only the applicant may work with the data, J-P and Niall see aggregated results. Analysis with an AI tool probably needs the archive's written OK (ask mra@help.hmdc.harvard.edu).
+    - Time and Ties couples (aggregated baseline data).
+- An example with two predictor pairs (the introduction promises multiple predictors, but only the covariate example exists).
+- The optional introduction items: the 50-paper coding, the dyad-types (multigroup) example (would bring dyad-type interactions into scope), school clustering.
+- Equal-total figure: Figure 1 in the introduction or in the routes section.
 - Size of the coverage check in the supplement, or none.
-- From the 9 October meeting agenda (outcomes not recorded): Mplus code
-  beside R, whether to involve David Kenny, the writing platform.
+- 9 October meeting (minutes outside the repo): R and Mplus code wanted (Mplus is not yet in Section 7). Ask J-P whether to invite David Kenny as a co-author. Still open: the writing platform.
 
 ## 10. Paper 3 (note)
 
