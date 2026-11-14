@@ -49,7 +49,8 @@
 #' Smooth terms (`s()`) are not supported: simulations would draw new curves.
 #' Fixed-effect splines such as `splines::ns()` are supported.
 #'
-#' Models fitted with `REML = TRUE` are not supported. Refit them with
+#' Models fitted with `REML = TRUE` are not supported: glmmTMB's predictions
+#' without random effects do not match such fits. Refit them with
 #' `REML = FALSE`.
 #'
 #' Zero-inflated and hurdle versions are supported where available. Checks
