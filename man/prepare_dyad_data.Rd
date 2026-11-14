@@ -137,7 +137,7 @@ dyad. Conflicting non-missing roles always cause an error. Ignored when no
 If \code{NULL}, the current R session's RNG state is used. Use a
 \verb{.member_contrast_*} column only in a random-effect block of its own,
 separate from the shared block. If results change with \code{seed}, the column
-is used somewhere else.}
+is used in another part of the model, for example as a fixed effect.}
 
 \item{short_colnames}{Whether to use shorter composition-dependent generated
 column names when the final data contain one composition. The default \code{TRUE}
@@ -178,7 +178,7 @@ package-generated column retained in the returned data. Modifying prepared
 data does not automatically regenerate package-generated columns. Use a
 \verb{.member_contrast_*} column only in a random-effect block of its own,
 separate from the shared block. If results change with \code{seed}, the column
-is used somewhere else.
+is used in another part of the model, for example as a fixed effect.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata

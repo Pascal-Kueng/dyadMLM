@@ -112,7 +112,7 @@
 #'   If `NULL`, the current R session's RNG state is used. Use a
 #'   `.member_contrast_*` column only in a random-effect block of its own,
 #'   separate from the shared block. If results change with `seed`, the column
-#'   is used somewhere else.
+#'   is used in another part of the model, for example as a fixed effect.
 #' @param short_colnames Whether to use shorter composition-dependent generated
 #'   column names when the final data contain one composition. The default `TRUE`
 #'   omits the redundant composition label from `.is_*` and
@@ -149,7 +149,7 @@
 #'   data does not automatically regenerate package-generated columns. Use a
 #'   `.member_contrast_*` column only in a random-effect block of its own,
 #'   separate from the shared block. If results change with `seed`, the column
-#'   is used somewhere else.
+#'   is used in another part of the model, for example as a fixed effect.
 #'
 #' @examples
 #' data <- data.frame(
