@@ -64,6 +64,10 @@ Supports unweighted \code{glmmTMB} models with the following families:
 Smooth terms (\code{s()}) are not supported: simulations would draw new curves.
 Fixed-effect splines such as \code{splines::ns()} are supported.
 
+Models fitted with \code{REML = TRUE} are not supported: glmmTMB's predictions
+without random effects do not match such fits. Refit them with
+\code{REML = FALSE}.
+
 Zero-inflated and hurdle versions are supported where available. Checks
 describe the combined response, including zeros, rather than each model
 component separately. Good agreement does not establish that the zero and
