@@ -49,6 +49,10 @@
 #' Smooth terms (`s()`) are not supported: simulations would draw new curves.
 #' Fixed-effect splines such as `splines::ns()` are supported.
 #'
+#' Models fitted with `REML = TRUE` are not supported: glmmTMB's predictions
+#' without random effects do not match such fits. Refit them with
+#' `REML = FALSE`.
+#'
 #' Zero-inflated and hurdle versions are supported where available. Checks
 #' describe the combined response, including zeros, rather than each model
 #' component separately. Good agreement does not establish that the zero and
@@ -58,10 +62,12 @@
 #' matching [glmmTMB's predictions][glmmTMB::family_glmmTMB]. The checks compare
 #' observed and simulated scores. The scores do not measure
 #' distances on an underlying continuous scale.
+#'
 #' Because each dyad contains only two people, glmmTMB tends to underestimate
-#' the dyad variance in ordinal models. Simulations then show less partner
-#' dependence than the data, so the partner check can flag a correct ordinal
-#' model, especially with many dyads.
+#' the dyad variance in ordinal models, and also in zero-inflated and strongly
+#' overdispersed count models. Simulations then show less partner dependence
+#' than the data, so the partner check can flag a correct model. This mainly
+#' happens with very many dyads (thousands rather than hundreds).
 #'
 #' The model's fitted link is used for prediction and simulation. Predictions
 #' and simulated responses must be finite.
@@ -77,6 +83,12 @@
 #' included. This is a *plug-in predictive reference* (Gelman et al., 1996).
 #' If all grouping factors are dyads or nested within dyads (such as dyad-days),
 #' the simulations represent hypothetical new dyads under the same study design.
+#'
+#' In a model with lagged responses, these stay at their observed values, so
+#' simulated responses vary less than the observed ones. Raw-scale summaries,
+#' such as `response = "raw"` in [check_partner_dependence()], can then flag a
+#' correct model. For such models, use only model-centred summaries, such as
+#' the default `response = "model-centred"`.
 #'
 #' `predicted_response` contains predicted mean responses with random effects
 #' in the conditional and zero-inflation models set to zero. For zero-inflated
@@ -127,6 +139,12 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   }
   if (any(stats::weights(model) != 1)) {
     stop("Predictive checks currently only support unweighted models.", call. = FALSE)
+  }
+  # For REML fits, glmmTMB's predict(re.form = NA) estimates the fixed effects
+  # again without random effects, so the predictions would not match the model.
+  if (isTRUE(model$modelInfo$REML)) {
+    stop("Models fitted with `REML = TRUE` are not supported. ",
+         "Refit the model with `REML = FALSE`.", call. = FALSE)
   }
   # glmmTMB fits the wiggly part of s() as a random effect, so simulate() would redraw it.
   if (any(lengths(lapply(model$modelInfo$reTrms, `[[`, "smooth_info")) > 0L)) {
