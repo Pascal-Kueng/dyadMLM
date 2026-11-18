@@ -1,10 +1,8 @@
 # dyadMLM (development version)
 
-* Fixed `prepare_dyad_data()` treating occasions a person missed as observed
-  when the `dyad`, `member`, or `time` column is also a predictor. Lags, means,
-  and partner values of such a predictor now use observed rows only, as for
-  any other predictor
-  ([#117](https://github.com/Pascal-Kueng/dyadMLM/issues/117)).
+* `check_dyad_outcomes()` warns when fewer than 39 simulated datasets are
+  supplied, because the 95% limits are then infinite and nothing can be flagged
+  ([#180](https://github.com/Pascal-Kueng/dyadMLM/issues/180)).
 
 * `recover_exchangeable_covariance()` now warns when a Gaussian `glmmTMB`
   model has a residual variance that the recovered residual-level covariance
@@ -12,6 +10,18 @@
   `dispformula = ~ 0`. Member variances were then too small and partner
   correlations too far from zero. This now elicits a warning
   ([#162](https://github.com/Pascal-Kueng/dyadMLM/issues/162)).
+
+* Fixed `prepare_dyad_data()` treating occasions a person missed as observed
+  when the `dyad`, `member`, or `time` column is also a predictor. Lags, means,
+  and partner values of such a predictor now use observed rows only, as for
+  any other predictor
+  ([#117](https://github.com/Pascal-Kueng/dyadMLM/issues/117)).
+
+* `simulate_dyad_responses()` now stops for models fitted with `REML = TRUE`.
+  For these fits, `predicted_response` did not match the fitted model, which
+  affected `check_partner_dependence()` and the response SD and largest
+  deviation in `check_dyad_outcomes()`. Refit with `REML = FALSE`
+  ([#164](https://github.com/Pascal-Kueng/dyadMLM/issues/164)).
 
 # dyadMLM 0.3.0
 
