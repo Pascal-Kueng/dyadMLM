@@ -72,7 +72,11 @@ names are preserved; unnamed pairings receive stable names `pair_1`,
 `pair_2`, and so on in resolved order. `varcov` and `sdcor` are
 matrices, except when `posterior = "draws"` for a `brms` model, where
 they are draw by coefficient by coefficient arrays. `brms` quantities
-are transformed draw by draw before summarizing.
+are transformed draw by draw before summarizing. For `brms` summaries
+(`posterior = "mean"` or `"median"`), `varcov` and `sdcor` are
+summarized separately, element by element, and therefore need not agree.
+The median is also taken element by element, so the resulting matrix
+need not be a valid covariance matrix.
 
 ## Details
 

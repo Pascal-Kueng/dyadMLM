@@ -2,6 +2,11 @@
 
 ## dyadMLM (development version)
 
+- [`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.md)
+  warns when fewer than 39 simulated datasets are supplied, because the
+  95% limits are then infinite and nothing can be flagged
+  ([\#180](https://github.com/Pascal-Kueng/dyadMLM/issues/180)).
+
 - Fixed
   [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   treating occasions a person missed as observed when the `dyad`,
@@ -9,6 +14,15 @@
   partner values of such a predictor now use observed rows only, as for
   any other predictor
   ([\#117](https://github.com/Pascal-Kueng/dyadMLM/issues/117)).
+
+- [`simulate_dyad_responses()`](https://pascal-kueng.github.io/dyadMLM/reference/simulate_dyad_responses.md)
+  now stops for models fitted with `REML = TRUE`. For these fits,
+  `predicted_response` did not match the fitted model, which affected
+  [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
+  and the response SD and largest deviation in
+  [`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.md).
+  Refit with `REML = FALSE`
+  ([\#164](https://github.com/Pascal-Kueng/dyadMLM/issues/164)).
 
 ## dyadMLM 0.3.0
 

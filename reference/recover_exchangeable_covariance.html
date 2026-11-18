@@ -125,7 +125,11 @@ or encodings. Caller-supplied outer names are preserved; unnamed pairings
 receive stable names <code>pair_1</code>, <code>pair_2</code>, and so on in resolved order.
 <code>varcov</code> and <code>sdcor</code> are matrices, except when <code>posterior = "draws"</code> for a
 <code>brms</code> model, where they are draw by coefficient by coefficient arrays.
-<code>brms</code> quantities are transformed draw by draw before summarizing.</p>
+<code>brms</code> quantities are transformed draw by draw before summarizing.
+For <code>brms</code> summaries (<code>posterior = "mean"</code> or <code>"median"</code>), <code>varcov</code> and
+<code>sdcor</code> are summarized separately, element by element, and therefore need
+not agree. The median is also taken element by element, so the resulting
+matrix need not be a valid covariance matrix.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

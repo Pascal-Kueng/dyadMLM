@@ -179,6 +179,10 @@ dyads that share at least one occasion.</p>
     <h2 id="reading-the-plots">Reading the plots<a class="anchor" aria-label="anchor" href="#reading-the-plots"></a></h2>
 
 
+<div class="section">
+<h3 id="what-the-plots-show">What the plots show<a class="anchor" aria-label="anchor" href="#what-the-plots-show"></a></h3>
+
+
 <p>Blue histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95% of simulations (no formal confidence
 intervals).
@@ -197,7 +201,13 @@ partner order.</p></li>
 because it depends on how partners are ordered. Positive values indicate
 greater variance for the first named role. Negative values indicate greater
 variance for the second.</p></li>
-</ul><p>An observed value far from most simulated values may indicate that the
+</ul></div>
+
+<div class="section">
+<h3 id="reading-differences-and-flags">Reading differences and flags<a class="anchor" aria-label="anchor" href="#reading-differences-and-flags"></a></h3>
+
+
+<p>An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.
 Even if simulated and observed values agree, this does not show that omitted
 dependence is negligible, especially with few dyads. The
@@ -219,6 +229,8 @@ For example, pooled summaries (<code>role = NULL</code>) of a Gaussian model wit
 unconstrained exchangeable covariance, as below, agree almost by construction.
 Use a suitable model comparison to formally test a specific covariance
 restriction when both models can be fitted (see <code><a href="compare_nested_models.html">compare_nested_models()</a></code>).</p>
+</div>
+
     </div>
     <div class="section level2">
     <h2 id="repeated-occasions">Repeated occasions<a class="anchor" aria-label="anchor" href="#repeated-occasions"></a></h2>

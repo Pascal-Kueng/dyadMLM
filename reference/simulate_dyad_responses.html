@@ -124,6 +124,9 @@ the seed.</p>
 <li><p><code><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB::ordinal()</a></code> (glmmTMB 1.1.15.2 or later)</p></li>
 </ul><p>Smooth terms (<code>s()</code>) are not supported: simulations would draw new curves.
 Fixed-effect splines such as <code><a href="https://rdrr.io/r/splines/ns.html" class="external-link">splines::ns()</a></code> are supported.</p>
+<p>Models fitted with <code>REML = TRUE</code> are not supported: glmmTMB's predictions
+without random effects do not match such fits. Refit them with
+<code>REML = FALSE</code>.</p>
 <p>Zero-inflated and hurdle versions are supported where available. Checks
 describe the combined response, including zeros, rather than each model
 component separately. Good agreement does not establish that the zero and
@@ -131,11 +134,12 @@ response components each fit well.</p>
 <p>Ordinal checks use category scores <code>1, 2, ..., K</code> in their fitted order,
 matching <a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">glmmTMB's predictions</a>. The checks compare
 observed and simulated scores. The scores do not measure
-distances on an underlying continuous scale.
-Because each dyad contains only two people, glmmTMB tends to underestimate
-the dyad variance in ordinal models. Simulations then show less partner
-dependence than the data, so the partner check can flag a correct ordinal
-model, especially with many dyads.</p>
+distances on an underlying continuous scale.</p>
+<p>Because each dyad contains only two people, glmmTMB tends to underestimate
+the dyad variance in ordinal models, and also in zero-inflated and strongly
+overdispersed count models. Simulations then show less partner dependence
+than the data, so the partner check can flag a correct model. This mainly
+happens with very many dyads (thousands rather than hundreds).</p>
 <p>The model's fitted link is used for prediction and simulation. Predictions
 and simulated responses must be finite.</p>
     </div>
@@ -152,6 +156,11 @@ The model is not refitted, and uncertainty in parameter estimates is not
 included. This is a <em>plug-in predictive reference</em> (Gelman et al., 1996).
 If all grouping factors are dyads or nested within dyads (such as dyad-days),
 the simulations represent hypothetical new dyads under the same study design.</p>
+<p>In a model with lagged responses, these stay at their observed values, so
+simulated responses vary less than the observed ones. Raw-scale summaries,
+such as <code>response = "raw"</code> in <code><a href="check_partner_dependence.html">check_partner_dependence()</a></code>, can then flag a
+correct model. For such models, use only model-centred summaries, such as
+the default <code>response = "model-centred"</code>.</p>
 <p><code>predicted_response</code> contains predicted mean responses with random effects
 in the conditional and zero-inflation models set to zero. For zero-inflated
 and hurdle models, this is the conditional response mean multiplied by

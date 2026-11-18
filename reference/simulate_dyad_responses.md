@@ -99,6 +99,10 @@ Smooth terms (`s()`) are not supported: simulations would draw new
 curves. Fixed-effect splines such as
 [`splines::ns()`](https://rdrr.io/r/splines/ns.html) are supported.
 
+Models fitted with `REML = TRUE` are not supported: glmmTMB's
+predictions without random effects do not match such fits. Refit them
+with `REML = FALSE`.
+
 Zero-inflated and hurdle versions are supported where available. Checks
 describe the combined response, including zeros, rather than each model
 component separately. Good agreement does not establish that the zero
@@ -108,11 +112,14 @@ Ordinal checks use category scores `1, 2, ..., K` in their fitted order,
 matching [glmmTMB's
 predictions](https://rdrr.io/pkg/glmmTMB/man/nbinom2.html). The checks
 compare observed and simulated scores. The scores do not measure
-distances on an underlying continuous scale. Because each dyad contains
-only two people, glmmTMB tends to underestimate the dyad variance in
-ordinal models. Simulations then show less partner dependence than the
-data, so the partner check can flag a correct ordinal model, especially
-with many dyads.
+distances on an underlying continuous scale.
+
+Because each dyad contains only two people, glmmTMB tends to
+underestimate the dyad variance in ordinal models, and also in
+zero-inflated and strongly overdispersed count models. Simulations then
+show less partner dependence than the data, so the partner check can
+flag a correct model. This mainly happens with very many dyads
+(thousands rather than hundreds).
 
 The model's fitted link is used for prediction and simulation.
 Predictions and simulated responses must be finite.
@@ -131,6 +138,13 @@ is not included. This is a *plug-in predictive reference* (Gelman et
 al., 1996). If all grouping factors are dyads or nested within dyads
 (such as dyad-days), the simulations represent hypothetical new dyads
 under the same study design.
+
+In a model with lagged responses, these stay at their observed values,
+so simulated responses vary less than the observed ones. Raw-scale
+summaries, such as `response = "raw"` in
+[`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md),
+can then flag a correct model. For such models, use only model-centred
+summaries, such as the default `response = "model-centred"`.
 
 `predicted_response` contains predicted mean responses with random
 effects in the conditional and zero-inflation models set to zero. For

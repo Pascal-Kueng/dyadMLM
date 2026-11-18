@@ -117,6 +117,8 @@ occasion.
 
 ## Reading the plots
 
+### What the plots show
+
 Blue histograms show simulated summaries. Red lines mark observed
 values. Dashed lines enclose the middle 95% of simulations (no formal
 confidence intervals). The heading shows the dyad composition, its
@@ -143,6 +145,8 @@ half-differences:
   roles, because it depends on how partners are ordered. Positive values
   indicate greater variance for the first named role. Negative values
   indicate greater variance for the second.
+
+### Reading differences and flags
 
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well. Even if
