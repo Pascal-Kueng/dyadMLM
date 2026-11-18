@@ -220,7 +220,10 @@ dyad. Conflicting non-missing roles always cause an error. Ignored when no
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Optional seed for random <code>.member_contrast_*</code> sign assignment.
-If <code>NULL</code>, the current R session's RNG state is used.</p></dd>
+If <code>NULL</code>, the current R session's RNG state is used. Use a
+<code>.member_contrast_*</code> column only in a random-effect block of its own,
+separate from the shared block. If results change with <code>seed</code>, the column
+is used in another part of the model, for example as a fixed effect.</p></dd>
 
 
 <dt id="arg-short-colnames">short_colnames<a class="anchor" aria-label="anchor" href="#arg-short-colnames"></a></dt>
@@ -266,7 +269,10 @@ predictor metadata such as <code>temporal_decompositions</code>, <code>lag1_pred
 <code>apim_predictors</code>, and <code>dim_predictors</code>, as well as <code>dsm_predictors</code> and
 <code>dsm_role_order</code> when applicable. The <code>generated_columns</code> table records each
 package-generated column retained in the returned data. Modifying prepared
-data does not automatically regenerate package-generated columns.</p>
+data does not automatically regenerate package-generated columns. Use a
+<code>.member_contrast_*</code> column only in a random-effect block of its own,
+separate from the shared block. If results change with <code>seed</code>, the column
+is used in another part of the model, for example as a fixed effect.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
