@@ -94,9 +94,10 @@ test_that("supported scalar families and alternative links share the response-ch
     expect_true(all(is.finite(simulated_statistics)))
 
     rows_by_role <- split(seq_len(nrow(data)), data$role)
-    outcomes <- check_dyad_outcomes(
+    # 20 simulated datasets are too few for limits, which the check warns about.
+    expect_warning(outcomes <- check_dyad_outcomes(
       simulations, dyad = "dyad", role = "role", plot = FALSE
-    )
+    ), "Fewer than 39", fixed = TRUE)
     expect_s3_class(outcomes, "dyadMLM_outcome_check")
     expect_identical(outcomes$compositions[[1]]$rows, rows_by_role)
     for (statistics in outcomes$compositions[[1]]$statistics) {
