@@ -50,6 +50,12 @@ Because the test requires maximum-likelihood fits, models fitted with
 rejected. Their estimates are maximum a posteriori, not maximum
 likelihood.
 
+A model that did not converge is rejected. If it is a Gaussian model
+with `dispformula = ~ 0` and glmmTMB reported false convergence,
+refitting with
+`control = glmmTMB::glmmTMBControl(zerodisp_val = log(0.001 * sd(y)))`
+often helps (where `y` is the outcome).
+
 These checks establish that the models use equivalent observations. They
 cannot establish that one model is mathematically nested within the
 other. The caller remains responsible for supplying genuinely nested

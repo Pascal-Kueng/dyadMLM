@@ -15,6 +15,14 @@
   95% limits are then infinite and nothing can be flagged
   ([\#180](https://github.com/Pascal-Kueng/dyadMLM/issues/180)).
 
+- [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
+  now warns when a Gaussian `glmmTMB` model has a residual variance that
+  the recovered residual-level covariance leaves out. This happens when
+  the model is fitted without `dispformula = ~ 0`. Member variances were
+  then too small and partner correlations too far from zero. This now
+  elicits a warning
+  ([\#162](https://github.com/Pascal-Kueng/dyadMLM/issues/162)).
+
 - Fixed
   [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   treating occasions a person missed as observed when the `dyad`,
@@ -31,6 +39,15 @@
   [`check_dyad_outcomes()`](https://pascal-kueng.github.io/dyadMLM/reference/check_dyad_outcomes.md).
   Refit with `REML = FALSE`
   ([\#164](https://github.com/Pascal-Kueng/dyadMLM/issues/164)).
+
+- Fixed
+  [`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.md)
+  stopping with “The larger model has a lower log-likelihood” when the
+  larger model adds nothing, for example a variance estimated at zero.
+  The statistic is then 0 and the p-value 1. The help now names a
+  `glmmTMB` setting that often helps when a Gaussian model with
+  `dispformula = ~ 0` does not converge
+  ([\#163](https://github.com/Pascal-Kueng/dyadMLM/issues/163)).
 
 ## dyadMLM 0.3.0
 
