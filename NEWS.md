@@ -1,5 +1,13 @@
 # dyadMLM (development version)
 
+* Composition labels, generated column names, and factor levels no longer
+  depend on the machine's language settings. Role labels are now sorted
+  ignoring case, the same way on every machine. Labels change only in sessions
+  that sorted differently before: with `LC_ALL=C`, `"Male_x_female"` is now
+  `"female_x_Male"`, and role labels with non-ASCII letters now sort after
+  `z` everywhere
+  ([#174](https://github.com/Pascal-Kueng/dyadMLM/issues/174)).
+
 * `check_dyad_outcomes()` warns when fewer than 39 simulated datasets are
   supplied, because the 95% limits are then infinite and nothing can be flagged
   ([#180](https://github.com/Pascal-Kueng/dyadMLM/issues/180)).
