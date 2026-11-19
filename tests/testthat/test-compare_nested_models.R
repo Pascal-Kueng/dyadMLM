@@ -747,6 +747,27 @@ test_that("compare_nested_models rejects unsuitable fitted models", {
   )
 })
 
+test_that("compare_nested_models returns zero when the larger model adds nothing", {
+  skip_if_not_installed("glmmTMB")
+
+  model_data <- comparison_female_male_cross_dyads
+  smaller <- glmmTMB::glmmTMB(closeness ~ 1, data = model_data)
+  larger <- glmmTMB::glmmTMB(closeness ~ 1 + gender, data = model_data)
+
+  # Optimizer noise: the larger model's log-likelihood is 0.000001 lower.
+  larger$fit$objective <- smaller$fit$objective + 1e-6
+  comparison <- compare_nested_models(smaller, larger)
+  expect_identical(comparison$Chisq[[2L]], 0)
+  expect_identical(comparison[["Pr(>Chisq)"]][[2L]], 1)
+
+  # A clearly lower log-likelihood is still an error.
+  larger$fit$objective <- smaller$fit$objective + 0.01
+  expect_error(
+    compare_nested_models(smaller, larger),
+    "The larger model has a lower log-likelihood"
+  )
+})
+
 test_that("compare_nested_models rejects models fitted with priors", {
   skip_if_not_installed("glmmTMB")
 

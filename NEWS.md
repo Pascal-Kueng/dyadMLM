@@ -24,6 +24,13 @@
   deviation in `check_dyad_outcomes()`. Refit with `REML = FALSE`
   ([#164](https://github.com/Pascal-Kueng/dyadMLM/issues/164)).
 
+* Fixed `compare_nested_models()` stopping with "The larger model has a lower
+  log-likelihood" when the larger model adds nothing, for example a variance
+  estimated at zero. The statistic is then 0 and the p-value 1. The help now
+  names a `glmmTMB` setting that often helps when a Gaussian model with
+  `dispformula = ~ 0` does not converge
+  ([#163](https://github.com/Pascal-Kueng/dyadMLM/issues/163)).
+
 # dyadMLM 0.3.0
 
 * `prepare_dyad_data()` now rejects pool names that match generated role labels
