@@ -1,7 +1,8 @@
 # Create a canonical dyad composition label
 
 Sorts role labels before pasting them so composition labels do not
-depend on row order.
+depend on row order. Labels are sorted ignoring case, the same way on
+every machine.
 
 ## Usage
 
