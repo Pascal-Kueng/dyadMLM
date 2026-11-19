@@ -98,7 +98,10 @@ test_that("backend adapters return aligned common block records", {
   )
   glmm_blocks <- glmmTMB_extract_exchangeable_residual_blocks(glmm_model)
 
-  expect_named(glmm_blocks, c("backend", "blocks", "group_ids"))
+  expect_named(
+    glmm_blocks,
+    c("backend", "blocks", "group_ids", "residual_variance")
+  )
   expect_named(brms_blocks, c("backend", "blocks", "group_ids"))
   expect_length(glmm_blocks$blocks, 4)
   expect_length(brms_blocks$blocks, 4)
@@ -1792,6 +1795,30 @@ test_that("the public function returns member-level glmmTMB matrices", {
   expect_named(result, "pair_1")
   expect_identical(result[[1L]]$shared_term, extracted$blocks[[1L]]$term)
   expect_identical(result[[1L]]$difference_term, extracted$blocks[[2L]]$term)
+})
+
+test_that("a residual variance left out of the recovered covariance is flagged", {
+  skip_if_not_installed("glmmTMB")
+
+  data <- expand.grid(member = c(-1, 1), coupleID = seq_len(100))
+  data$coupleID <- factor(data$coupleID)
+  data$.member_contrast_arbitrary <- data$member
+  set.seed(162)
+  data$outcome <- stats::rnorm(100)[as.integer(data$coupleID)] +
+    stats::rnorm(nrow(data))
+  model_formula <- outcome ~ 1 + us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID)
+
+  # With `dispformula = ~ 0`, the random effects hold all residual variance.
+  fixed_model <- glmmTMB::glmmTMB(model_formula, dispformula = ~0, data = data)
+  expect_no_warning(recover_exchangeable_covariance(fixed_model))
+
+  # Otherwise part of it stays in sigma^2, outside the recovered covariance.
+  free_model <- suppressWarnings(glmmTMB::glmmTMB(model_formula, data = data))
+  expect_warning(
+    recover_exchangeable_covariance(free_model),
+    "The model also has a residual variance of"
+  )
 })
 
 test_that("the public function returns fitted link-scale covariance for Poisson models", {
