@@ -18,11 +18,43 @@
   `I(.is_male_x_male + .is_singleton_male)`, which let people observed alone
   share the variance of an exchangeable composition.
 
+* Composition labels, generated column names, and factor levels no longer
+  depend on the machine's language settings. Role labels are now sorted
+  ignoring case, the same way on every machine. Labels change only in sessions
+  that sorted differently before: with `LC_ALL=C`, `"Male_x_female"` is now
+  `"female_x_Male"`, and role labels with non-ASCII letters now sort after
+  `z` everywhere
+  ([#174](https://github.com/Pascal-Kueng/dyadMLM/issues/174)).
+
+* `check_dyad_outcomes()` warns when fewer than 39 simulated datasets are
+  supplied, because the 95% limits are then infinite and nothing can be flagged
+  ([#180](https://github.com/Pascal-Kueng/dyadMLM/issues/180)).
+
+* `recover_exchangeable_covariance()` now warns when a Gaussian `glmmTMB`
+  model has a residual variance that the recovered residual-level covariance
+  leaves out. This happens when the model is fitted without
+  `dispformula = ~ 0`. Member variances were then too small and partner
+  correlations too far from zero. This now elicits a warning
+  ([#162](https://github.com/Pascal-Kueng/dyadMLM/issues/162)).
+
 * Fixed `prepare_dyad_data()` treating occasions a person missed as observed
   when the `dyad`, `member`, or `time` column is also a predictor. Lags, means,
   and partner values of such a predictor now use observed rows only, as for
   any other predictor
   ([#117](https://github.com/Pascal-Kueng/dyadMLM/issues/117)).
+
+* `simulate_dyad_responses()` now stops for models fitted with `REML = TRUE`.
+  For these fits, `predicted_response` did not match the fitted model, which
+  affected `check_partner_dependence()` and the response SD and largest
+  deviation in `check_dyad_outcomes()`. Refit with `REML = FALSE`
+  ([#164](https://github.com/Pascal-Kueng/dyadMLM/issues/164)).
+
+* Fixed `compare_nested_models()` stopping with "The larger model has a lower
+  log-likelihood" when the larger model adds nothing, for example a variance
+  estimated at zero. The statistic is then 0 and the p-value 1. The help now
+  names a `glmmTMB` setting that often helps when a Gaussian model with
+  `dispformula = ~ 0` does not converge
+  ([#163](https://github.com/Pascal-Kueng/dyadMLM/issues/163)).
 
 # dyadMLM 0.3.0
 

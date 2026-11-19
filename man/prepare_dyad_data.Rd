@@ -171,7 +171,10 @@ is added when the status varies (two-part coding). See the section
 "People observed without their partner" below for more information.}
 
 \item{seed}{Optional seed for random \verb{.member_contrast_*} sign assignment.
-If \code{NULL}, the current R session's RNG state is used.}
+If \code{NULL}, the current R session's RNG state is used. Use a
+\verb{.member_contrast_*} column only in a random-effect block of its own,
+separate from the shared block. If results change with \code{seed}, the column
+is used in another part of the model, for example as a fixed effect.}
 
 \item{short_colnames}{Whether to use shorter composition-dependent generated
 column names when the final data contain one composition of dyads. The
@@ -212,6 +215,9 @@ predictor metadata such as \code{temporal_decompositions}, \code{lag1_predictors
 \code{dsm_role_order} when applicable. The \code{generated_columns} table records
 each package-generated column retained in the returned data. Modifying
 prepared data does not automatically regenerate package-generated columns.
+Use a \verb{.member_contrast_*} column only in a random-effect block of its own,
+separate from the shared block. If results change with \code{seed}, the column
+is used in another part of the model, for example as a fixed effect.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata

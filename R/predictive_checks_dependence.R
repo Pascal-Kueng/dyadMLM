@@ -65,6 +65,8 @@
 #'   dyads that share at least one occasion.
 #'
 #' @section Reading the plots:
+#' ## What the plots show
+#'
 #' Blue histograms show simulated summaries. Red lines mark observed values.
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
@@ -87,6 +89,8 @@
 #'   because it depends on how partners are ordered. Positive values indicate
 #'   greater variance for the first named role. Negative values indicate greater
 #'   variance for the second.
+#'
+#' ## Reading differences and flags
 #'
 #' An observed value far from most simulated values may indicate that the
 #' model does not reproduce that feature of the data well.
@@ -486,7 +490,7 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
 
   # Integer role codes keep different values separate even if labels look alike.
   # Factors keep their level order; other roles use sorted values.
-  ordered_role_values <- sort(unique(partner_rows$role))
+  ordered_role_values <- sort_dyad_labels(unique(partner_rows$role))
   # Build one row per dyad, with partners in role order (or row order without roles).
   pairs <- partner_rows |>
     dplyr::mutate(

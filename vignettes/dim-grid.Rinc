@@ -117,11 +117,11 @@ dim_reparameterization_grid <- function(
       <div class="wdg-group-title wdg-apim-title">APIM coordinates</div>
       <label class="wdg-control wdg-actor">
         <span><span>%s, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>actor</sub></span></span><output data-wdg-output="actor">0.00</output></span>
-        <input data-wdg-input="actor" type="range" min="-%s" max="%s" step="0.1" value="0">
+        <input data-wdg-input="actor" type="range" min="-%s" max="%s" step="any" value="0">
       </label>
       <label class="wdg-control wdg-partner">
         <span><span>%s, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>partner</sub></span></span><output data-wdg-output="partner">0.00</output></span>
-        <input data-wdg-input="partner" type="range" min="-%s" max="%s" step="0.1" value="0">
+        <input data-wdg-input="partner" type="range" min="-%s" max="%s" step="any" value="0">
       </label>
     </div>
 
@@ -129,11 +129,11 @@ dim_reparameterization_grid <- function(
       <div class="wdg-group-title wdg-dim-title">DIM coordinates</div>
       <label class="wdg-control wdg-mean">
         <span><span>Dyad mean, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>mean</sub></span></span><output data-wdg-output="mean">0.00</output></span>
-        <input data-wdg-input="mean" type="range" min="-%s" max="%s" step="0.05" value="0">
+        <input data-wdg-input="mean" type="range" min="-%s" max="%s" step="any" value="0">
       </label>
       <label class="wdg-control wdg-within">
         <span><span>%s, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>dev</sub></span></span><output data-wdg-output="within">0.00</output></span>
-        <input data-wdg-input="within" type="range" min="-%s" max="%s" step="0.05" value="0">
+        <input data-wdg-input="within" type="range" min="-%s" max="%s" step="any" value="0">
       </label>
     </div>
 

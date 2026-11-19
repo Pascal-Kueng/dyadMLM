@@ -87,6 +87,10 @@ jobs:
             dev/workshop/helpers.R \
             dev/workshop/hints.R
 
+      # pkgdown wrote the sitemap before the workshop was added.
+      - name: Add workshop to sitemap
+        run: Rscript -e 'pkgdown:::build_sitemap()'
+
       - name: Validate staged workshop materials
         shell: bash
         run: |

@@ -625,9 +625,20 @@ finalize_composition_columns <- function(
     fixed_composition_column_plan
   ) {
 
-  # Convert to factors before returning.
-  data[[dyad_composition_col]] <- factor(data[[dyad_composition_col]])
-  data[[dyad_composition_role_col]] <- factor(data[[dyad_composition_role_col]])
+  # Convert to factors before returning. Levels are sorted the same way on every
+  # machine, so the reference level does not depend on the language settings.
+  data[[dyad_composition_col]] <- factor(
+    data[[dyad_composition_col]],
+    levels = sort_dyad_labels(
+      unique(as.character(data[[dyad_composition_col]]))
+    )
+  )
+  data[[dyad_composition_role_col]] <- factor(
+    data[[dyad_composition_role_col]],
+    levels = sort_dyad_labels(
+      unique(as.character(data[[dyad_composition_role_col]]))
+    )
+  )
 
   meta_data <- attr(data, "dyadMLM")
   # Short names omit the composition label. They are unambiguous only when
@@ -663,7 +674,7 @@ finalize_composition_columns <- function(
   stop_if_labels_coincide(shared_role_labels)
 
   # Build the exact output names once and reuse them for validation and writing.
-  composition_role_labels <- sort(unique(
+  composition_role_labels <- sort_dyad_labels(unique(
     as.character(data[[dyad_composition_role_col]])
   ))
 
@@ -706,7 +717,7 @@ finalize_composition_columns <- function(
   }
 
   # Only compositions with non-zero member contrasts need a contrast column.
-  contrast_composition_labels <- sort(unique(as.character(
+  contrast_composition_labels <- sort_dyad_labels(unique(as.character(
     data[[dyad_composition_col]][data[[dyad_diff_col]] != 0]
   )))
   member_contrast_columns <- character(length(contrast_composition_labels))

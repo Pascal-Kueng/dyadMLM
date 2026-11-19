@@ -432,6 +432,11 @@ test_that("unsupported predictive-check inputs fail clearly", {
   weighted_model <- predictive_check_test_model(weights = rep(c(1, 2), 20))
   expect_error(simulate_dyad_responses(weighted_model), "unweighted models")
 
+  reml_model <- glmmTMB::glmmTMB(
+    outcome ~ predictor + (1 | dyad), data = model$frame, REML = TRUE
+  )
+  expect_error(simulate_dyad_responses(reml_model), "`REML = TRUE` are not supported")
+
   # glmmTMB fits smooths as random effects, which simulations would redraw.
   skip_if_not_installed("mgcv")
   smooth_data <- model$frame

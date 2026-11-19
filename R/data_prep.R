@@ -280,7 +280,10 @@
 #'   is added when the status varies (two-part coding). See the section
 #'   "People observed without their partner" below for more information.
 #' @param seed Optional seed for random `.member_contrast_*` sign assignment.
-#'   If `NULL`, the current R session's RNG state is used.
+#'   If `NULL`, the current R session's RNG state is used. Use a
+#'   `.member_contrast_*` column only in a random-effect block of its own,
+#'   separate from the shared block. If results change with `seed`, the column
+#'   is used in another part of the model, for example as a fixed effect.
 #' @param short_colnames Whether to use shorter composition-dependent generated
 #'   column names when the final data contain one composition of dyads. The
 #'   default `TRUE` omits the redundant composition label from `.is_*` and
@@ -317,6 +320,9 @@
 #'   `dsm_role_order` when applicable. The `generated_columns` table records
 #'   each package-generated column retained in the returned data. Modifying
 #'   prepared data does not automatically regenerate package-generated columns.
+#'   Use a `.member_contrast_*` column only in a random-effect block of its own,
+#'   separate from the shared block. If results change with `seed`, the column
+#'   is used in another part of the model, for example as a fixed effect.
 #'
 #' @seealso The vignette [People Observed Without Their Partner](https://pascal-kueng.github.io/dyadMLM/articles/partner-exists.html)
 #'   shows models combining dyads and people observed alone.

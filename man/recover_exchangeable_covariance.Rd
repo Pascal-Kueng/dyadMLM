@@ -51,6 +51,10 @@ receive stable names \code{pair_1}, \code{pair_2}, and so on in resolved order.
 \code{varcov} and \code{sdcor} are matrices, except when \code{posterior = "draws"} for a
 \code{brms} model, where they are draw by coefficient by coefficient arrays.
 \code{brms} quantities are transformed draw by draw before summarizing.
+For \code{brms} summaries (\code{posterior = "mean"} or \code{"median"}), \code{varcov} and
+\code{sdcor} are summarized separately, element by element, and therefore need
+not agree. The median is also taken element by element, so the resulting
+matrix need not be a valid covariance matrix.
 }
 \description{
 Back-transforms covariance matrices from paired shared and member-difference
@@ -199,6 +203,10 @@ For \code{glmmTMB}, random effects in non-conditional components are ignored wit
 a warning. See the vignette's
 \href{https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation}{extension to exchangeable random slopes}
 section for the manual calculation.
+
+Fit Gaussian \code{glmmTMB} models with \code{dispformula = ~ 0}. Otherwise part of
+each member's variance stays in the residual variance, which the recovered
+covariance does not include. The function warns in that case.
 
 In \code{brms}, cross-sectional and same-occasion partner dependence can be
 represented directly with
