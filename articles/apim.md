@@ -809,8 +809,8 @@ glmmTMB::VarCorr(ild_distinguishable_ar_model)
 #> Conditional model:
 #>  Groups            Name                         Std.Dev. Corr        
 #>  coupleID          .is_female                   0.88813              
-#>                    .is_male                     0.83006  0.334       
-#>  coupleID.diaryday .is_female                   0.83203              
+#>                    .is_male                     0.83007  0.334       
+#>  coupleID.diaryday .is_female                   0.83204              
 #>                    .is_male                     0.81486  0.253       
 #>  coupleID.1        .is_female:factor(diaryday)0 0.49445  0.592 (ar1) 
 #>  coupleID.2        .is_male:factor(diaryday)0   0.57570  0.658 (ar1)
@@ -1064,7 +1064,7 @@ glmmTMB::VarCorr(ild_exchangeable_ar_model)
 #>  coupleID            (Intercept)                0.71486             
 #>  coupleID.1          .member_contrast_arbitrary 0.52485             
 #>  coupleID.diaryday   (Intercept)                0.67201             
-#>  coupleID.diaryday.1 .member_contrast_arbitrary 0.49488             
+#>  coupleID.diaryday.1 .member_contrast_arbitrary 0.49489             
 #>  coupleID.personID   factor(diaryday)0          0.55221  0.598 (ar1)
 ```
 
