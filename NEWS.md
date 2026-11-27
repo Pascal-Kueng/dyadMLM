@@ -10,9 +10,7 @@
 
 * `recover_exchangeable_covariance()` now warns about singular fits in
   `glmmTMB` models: when a recovered standard deviation is practically zero
-  (Gaussian models), so that its correlations are noise, and when a partner
-  correlation is +1 or -1 because one of the two variances in the pair is
-  practically zero
+  (Gaussian models only), and when a partner correlation is +1 or -1
   ([#170](https://github.com/Pascal-Kueng/dyadMLM/issues/170)).
 
 * `check_dyad_outcomes()` warns when fewer than 39 simulated datasets are

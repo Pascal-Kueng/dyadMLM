@@ -143,11 +143,9 @@
 #' [extension to exchangeable random slopes](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation)
 #' section for the manual calculation.
 #'
-#' For `glmmTMB` models, the function warns about two kinds of singular fit. A
-#' recovered standard deviation can be practically zero (checked for Gaussian
-#' models), which makes the correlations with that random effect noise. Or a
-#' partner correlation can be +1 or -1, because one of the two variances in the
-#' pair is practically zero.
+#' For `glmmTMB` models, the function warns about singular fits: when a
+#' recovered standard deviation is practically zero (Gaussian models only), and
+#' when a partner correlation is +1 or -1.
 #'
 #' Fit Gaussian `glmmTMB` models with `dispformula = ~ 0`. Otherwise part of
 #' each member's variance stays in the residual variance, which the recovered
@@ -272,8 +270,6 @@ recover_exchangeable_covariance <- function(
   # both backends use estimate/draw x coefficient x coefficient arrays.
   results <- vector("list", length(matched_pairs))
   has_undefined_correlations <- FALSE # needed for warning
-  zero_effects <- vector("list", length(matched_pairs)) # needed for warning
-  boundary_signs <- vector("list", length(matched_pairs)) # needed for warning
 
   for (i in seq_along(matched_pairs)) {
     pair <- matched_pairs[[i]]
@@ -304,14 +300,6 @@ recover_exchangeable_covariance <- function(
       varcov <- apply(varcov, c(2L, 3L), point_summary, na.rm = TRUE)
       sdcor <- apply(sdcor, c(2L, 3L), point_summary, na.rm = TRUE)
       sdcor[is.nan(sdcor)] <- NA_real_
-    }
-    zero_effects[[i]] <- practically_zero_effects(
-      model, sdcor, pair$underlying_terms
-    )
-    if (identical(extracted$backend, "glmmTMB")) {
-      signs <- boundary_partner_correlations(sdcor, pair)
-      # A practically zero SD is reported on its own.
-      boundary_signs[[i]] <- signs[!names(signs) %in% zero_effects[[i]]]
     }
     shared_term <- if (is.na(pair$shared_block_index)) {
       NULL
@@ -353,107 +341,81 @@ recover_exchangeable_covariance <- function(
       call. = FALSE
     )
   }
-  zero_notes <- character()
-  for (i in seq_along(results)) {
-    if (length(zero_effects[[i]]) > 0L) {
-      zero_notes <- c(zero_notes, paste0(
-        "`", zero_effects[[i]], "` in `", result_names[[i]], "`"
-      ))
-    }
-  }
-  if (length(zero_notes) > 0L) {
-    warning(
-      "Practically zero SD (singular fit) for ",
-      paste(zero_notes, collapse = ", "),
-      ": below 1% of the outcome SD. Correlations with these random effects ",
-      "are not interpretable. Consider removing them from the model.",
-      call. = FALSE
-    )
-  }
-  boundary_notes <- character()
-  for (i in seq_along(results)) {
-    signs <- boundary_signs[[i]]
-    for (term in names(signs)) {
-      boundary_notes <- c(boundary_notes, paste0(
-        "`", term, "` in `", result_names[[i]], "` (",
-        if (signs[[term]] > 0) {
-          "+1, member-contrast variance practically zero"
-        } else {
-          "-1, shared variance practically zero"
-        },
-        ")"
-      ))
-    }
-  }
-  if (length(boundary_notes) > 0L) {
-    warning(
-      "Partner correlation at the boundary (singular fit) for ",
-      paste(boundary_notes, collapse = ", "),
-      ". Consider removing the term with practically zero variance from its ",
-      "block.",
-      call. = FALSE
-    )
+  if (identical(extracted$backend, "glmmTMB")) {
+    warn_about_singular_fit(model, results, matched_pairs)
   }
   class(results) <- c("exchangeable_covariance", "list")
   return(results)
 }
 
-# Random effects whose size is practically zero (a singular fit). The size of
-# an effect is its member-level SD times the typical size of its predictor.
-# Returns the terms below 1% of the outcome SD. The comparison needs the
-# outcome's scale, so it covers Gaussian identity-link glmmTMB models only.
-practically_zero_effects <- function(model, sdcor, terms) {
-  if (!inherits(model, "glmmTMB")) {
-    return(character())
-  }
+# Warn about singular fits in a glmmTMB model. Every term of every pair is
+# checked for two cases:
+# 1. Its SD is practically zero: the SD times the typical size of the term's
+#    predictor is below 1% of the outcome SD. This needs the outcome's scale,
+#    so it covers Gaussian identity-link models only.
+# 2. Its partner correlation is +1 or -1, because the variance in one of the
+#    pair's two blocks is practically zero.
+warn_about_singular_fit <- function(model, results, pairs) {
   family <- stats::family(model)
-  if (!identical(family$family, "gaussian") ||
-      !identical(family$link, "identity")) {
-    return(character())
-  }
-
   frame <- stats::model.frame(model)
-  outcome_sd <- stats::sd(stats::model.response(frame))
-  # Both members have the same SDs, so the first member's are enough.
-  member_sds <- diag(sdcor)[seq_along(terms)]
+  outcome_sd <- NA_real_
+  if (identical(family$family, "gaussian") &&
+      identical(family$link, "identity")) {
+    outcome_sd <- stats::sd(stats::model.response(frame))
+  }
 
-  zero_terms <- character()
-  for (k in seq_along(terms)) {
-    term <- terms[[k]]
-    if (identical(term, "(Intercept)")) {
-      predictor_size <- 1
-    } else if (term %in% names(frame) && is.numeric(frame[[term]])) {
-      predictor_size <- sqrt(mean(frame[[term]]^2))
-    } else {
-      next # The predictor's size is unknown, for example for interactions.
-    }
-    effect_size <- member_sds[[k]] * predictor_size
-    # An SD of exactly zero already gives `NA` correlations and its own warning.
-    if (effect_size > 0 && effect_size < 0.01 * outcome_sd) {
-      zero_terms <- c(zero_terms, term)
+  notes <- character()
+  for (i in seq_along(pairs)) {
+    pair <- pairs[[i]]
+    sdcor <- results[[i]]$sdcor
+    terms <- pair$underlying_terms
+    for (k in seq_along(terms)) {
+      term <- terms[[k]]
+      label <- paste0("`", term, "` in `", names(results)[[i]], "`")
+
+      # 1. Practically zero SD. Both members have the same SD. The predictor's
+      # size is unknown for some terms, for example for interactions.
+      predictor_size <- NA_real_
+      if (identical(term, "(Intercept)")) {
+        predictor_size <- 1
+      } else if (term %in% names(frame) && is.numeric(frame[[term]])) {
+        predictor_size <- sqrt(mean(frame[[term]]^2))
+      }
+      effect_size <- sdcor[k, k] * predictor_size
+      # An SD of exactly zero gives `NA` correlations and its own warning.
+      if (isTRUE(effect_size > 0 && effect_size < 0.01 * outcome_sd)) {
+        notes <- c(notes, paste0(
+          label, ": the SD is practically zero (below 1% of the outcome SD). ",
+          "Its correlations are not interpretable. Consider removing this ",
+          "random effect."
+        ))
+        next
+      }
+
+      # 2. Partner correlation of +1 or -1. A term fitted in only one block is
+      # there by design.
+      in_both_blocks <- !is.na(pair$shared_term_indices[[k]]) &&
+        !is.na(pair$difference_term_indices[[k]])
+      partner_correlation <- sdcor[k, length(terms) + k]
+      if (in_both_blocks && isTRUE(abs(partner_correlation) > 0.999)) {
+        notes <- c(notes, paste0(
+          label, ": the partner correlation is ",
+          if (partner_correlation > 0) "+1" else "-1",
+          ", because the variance in the ",
+          if (partner_correlation > 0) "difference" else "shared",
+          " block is practically zero. Consider removing the term from that ",
+          "block."
+        ))
+      }
     }
   }
-  return(zero_terms)
-}
-
-# Terms whose partner correlation is at +1 or -1 (a singular fit): one of the
-# two fitted variances, member-contrast or shared, is practically zero. Returns
-# the sign of the correlation, named by term. A term fitted in only one block
-# is at the boundary by design and is skipped.
-boundary_partner_correlations <- function(sdcor, pair) {
-  terms <- pair$underlying_terms
-  n_terms <- length(terms)
-  signs <- numeric()
-  for (k in seq_len(n_terms)) {
-    in_both_blocks <- !is.na(pair$shared_term_indices[[k]]) &&
-      !is.na(pair$difference_term_indices[[k]])
-    partner_correlation <- sdcor[k, n_terms + k]
-    if (in_both_blocks && !is.na(partner_correlation) &&
-        abs(partner_correlation) > 0.999) {
-      signs[[terms[[k]]]] <- sign(partner_correlation)
-    }
+  if (length(notes) > 0L) {
+    warning(
+      "Singular fit:\n\n- ", paste(notes, collapse = "\n- "),
+      call. = FALSE
+    )
   }
-  return(signs)
+  return(invisible(NULL))
 }
 
 #' Print recovered exchangeable member-level covariance
