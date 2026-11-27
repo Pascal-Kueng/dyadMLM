@@ -1851,6 +1851,67 @@ test_that("a practically zero SD is flagged as a singular fit", {
   )
 })
 
+test_that("a partner correlation of +1 or -1 is flagged as a singular fit", {
+  skip_if_not_installed("glmmTMB")
+
+  # 1. The rule itself, on constructed SD and correlation matrices.
+  sdcor_with <- function(partner_correlation) {
+    matrix(
+      c(1, partner_correlation, partner_correlation, 1),
+      nrow = 2
+    )
+  }
+  fitted_in_both <- list(
+    underlying_terms = "(Intercept)",
+    shared_term_indices = 1L,
+    difference_term_indices = 1L
+  )
+  expect_identical(
+    boundary_partner_correlations(sdcor_with(0.6), fitted_in_both),
+    numeric()
+  )
+  expect_identical(
+    boundary_partner_correlations(sdcor_with(1), fitted_in_both),
+    c("(Intercept)" = 1)
+  )
+  expect_identical(
+    boundary_partner_correlations(sdcor_with(-0.9999), fitted_in_both),
+    c("(Intercept)" = -1)
+  )
+  # A term left out of the member-contrast block is at +1 by design.
+  shared_only <- fitted_in_both
+  shared_only$difference_term_indices <- NA_integer_
+  expect_identical(
+    boundary_partner_correlations(sdcor_with(1), shared_only),
+    numeric()
+  )
+
+  # 2. A diary model fitted to data without stable member differences.
+  data <- expand.grid(day = 1:8, member = c(-1, 1), coupleID = seq_len(60))
+  data$coupleID <- factor(data$coupleID)
+  data$couple_day <- interaction(data$coupleID, data$day)
+  data$.member_contrast_arbitrary <- data$member
+  set.seed(2)
+  data$outcome <- stats::rnorm(60)[as.integer(data$coupleID)] +
+    stats::rnorm(nlevels(data$couple_day), 0, 0.6)[
+      as.integer(data$couple_day)
+    ] + stats::rnorm(nrow(data), 0, 0.8)
+  diary_model <- suppressWarnings(glmmTMB::glmmTMB(
+    outcome ~ 1 + us(1 | coupleID) +
+      us(0 + .member_contrast_arbitrary | coupleID) +
+      us(1 | couple_day) + us(0 + .member_contrast_arbitrary | couple_day),
+    dispformula = ~0, data = data
+  ))
+  expect_warning(
+    recover_exchangeable_covariance(diary_model),
+    paste0(
+      "Partner correlation at the boundary (singular fit) for `(Intercept)` ",
+      "in `pair_1` (+1, member-contrast variance practically zero)"
+    ),
+    fixed = TRUE
+  )
+})
+
 test_that("a residual variance left out of the recovered covariance is flagged", {
   skip_if_not_installed("glmmTMB")
 

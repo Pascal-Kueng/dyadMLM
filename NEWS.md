@@ -8,9 +8,11 @@
   `z` everywhere
   ([#174](https://github.com/Pascal-Kueng/dyadMLM/issues/174)).
 
-* `recover_exchangeable_covariance()` now warns when a recovered standard
-  deviation is practically zero (a singular fit) in a Gaussian `glmmTMB` model.
-  The correlations printed for such a random effect are noise
+* `recover_exchangeable_covariance()` now warns about singular fits in
+  `glmmTMB` models: when a recovered standard deviation is practically zero
+  (Gaussian models), so that its correlations are noise, and when a partner
+  correlation is +1 or -1 because one of the two variances in the pair is
+  practically zero
   ([#170](https://github.com/Pascal-Kueng/dyadMLM/issues/170)).
 
 * `check_dyad_outcomes()` warns when fewer than 39 simulated datasets are

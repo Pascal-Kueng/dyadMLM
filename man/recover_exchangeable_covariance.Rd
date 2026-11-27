@@ -175,9 +175,11 @@ a warning. See the vignette's
 \href{https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation}{extension to exchangeable random slopes}
 section for the manual calculation.
 
-For Gaussian \code{glmmTMB} models, the function warns when a recovered standard
-deviation is practically zero (a singular fit). Correlations with that
-random effect are then noise.
+For \code{glmmTMB} models, the function warns about two kinds of singular fit. A
+recovered standard deviation can be practically zero (checked for Gaussian
+models), which makes the correlations with that random effect noise. Or a
+partner correlation can be +1 or -1, because one of the two variances in the
+pair is practically zero.
 
 Fit Gaussian \code{glmmTMB} models with \code{dispformula = ~ 0}. Otherwise part of
 each member's variance stays in the residual variance, which the recovered
