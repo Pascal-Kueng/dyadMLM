@@ -625,8 +625,9 @@ residual SD at a very small value (about 0.0001). In diary models, the optimizer
 then sometimes reports "false convergence (8)", even when the estimates are
 fine. Here the residual SD is fixed at 0.1% of the outcome's SD, which removes
 the warning and is still negligible for the variance-covariance matrix we model
-with the random effects. The setting does not hide real problems. It only
-avoids the numerical trouble that the very small fixed residual SD causes.
+with the random effects. The setting does not hide real problems. It simply
+avoids glmmTMB freaking out due to the small, manually constrained value of the
+residual SD.
 
 #### Adding role-specific residual AR(1) {#distinguishable-residual-ar1}
 
