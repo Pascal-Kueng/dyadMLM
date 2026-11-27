@@ -739,6 +739,64 @@ $$
 to the full $2T\times2T$ covariance. This constant covariance at every lag can
 be difficult to distinguish from an AR process whose $\rho$ is near one.
 
+### Numerical check of the Kronecker special case
+
+The statement above, that the two-mode model with $\rho_+=\rho_-$ is an
+exchangeable Kronecker AR(1), was checked on simulated data. The check used a
+development build of `glmmTMB` (1.1.15.1) with an unreleased `kron()`
+structure. The workflow in this tutorial does not depend on that build.
+
+Released `glmmTMB` fits the restricted model by tying the two AR correlations
+with `map`:
+
+```r
+# theta holds, in formula order: the two stable SDs (1, 2), the mean mode's SD
+# and correlation (3, 4), and the difference mode's SD and correlation (5, 6).
+fit_e_equal_rho <- update(
+  fit_e_two_mode,
+  map = list(theta = factor(c(1, 2, 3, 4, 5, 4)))
+)
+
+anova(fit_e_equal_rho, fit_e_two_mode)
+```
+
+With the $A$ of Section 5, $\rho_+=\rho_-$ means no partner carryover in the
+residual process. The likelihood-ratio test above therefore tests that
+restriction, with one degree of freedom.
+
+The development build fits the same model as one term, with `member_f` as
+`member_no` coded as a factor:
+
+```r
+kron(homcs(0 + member_f) %x% ar1(0 + day_f) | coupleID)
+```
+
+Five simulated datasets (150 dyads, 14 days) were each fitted without and with
+the same-day block $W$. Three had partner carryover in the residual process
+($\rho_+=0.7$, $\rho_-=0.3$) and no same-day noise. Two had $\rho_+=\rho_-=0.6$
+and same-day noise.
+
+- In all 10 comparisons, the tied two-mode model and the `kron()` model had the
+  same log-likelihood to four decimals.
+- Two `ou()` modes gave the same log-likelihood as two `ar1()` modes on equally
+  spaced days.
+- With partner carryover in the data, freeing the two correlations raised the
+  log-likelihood by 55 to 74 without $W$, and by 10 to 12 with $W$. With
+  $\rho_+=\rho_-$ in the data, it raised it by at most 2.7.
+- With partner carryover in the data, adding $W$ to the tied model raised the
+  log-likelihood by 44 to 62, although the data had no same-day noise. A
+  same-day block can therefore absorb partner carryover that the model leaves
+  out. Fit the two-mode model with free correlations before adding $W$.
+
+For distinguishable dyads, two further datasets had persistence that the
+partners shared. `kron(us(0 + role) %x% ar1(0 + day_f) | coupleID)` plus a
+same-day `us` block then had a log-likelihood 9 and 15 higher than role-specific
+AR processes plus the same block, with 12 parameters each.
+Role-specific AR processes cannot represent shared persistence.
+
+These datasets show that the models agree. They do not show how well the
+parameters are recovered.
+
 ## 8. Put a dyadic VAR in the mean when carryover matters
 
 Construct exact one-occasion actor and partner lags before fitting. Do not use
