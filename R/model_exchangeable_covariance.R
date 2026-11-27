@@ -2052,10 +2052,10 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     if (length(time_structured_terms) > 0L) {
       details <- c(details, paste0(
         "The model also has ", format_terms(time_structured_terms),
-        ". The recovered covariance describes only the part of the residual ",
-        "that such terms do not cover. For the whole same-occasion residual, ",
-        "add their variance to the member variances. See 'Adding pooled ",
-        "residual AR(1)' in `vignette(\"apim\", package = \"dyadMLM\")`."
+        ". The recovered covariance does not include the variance of such ",
+        "terms, so it does not describe the whole same-occasion residual. ",
+        "See 'Adding pooled residual AR(1)' in ",
+        "`vignette(\"apim\", package = \"dyadMLM\")`."
       ))
     }
 

@@ -1830,9 +1830,15 @@ test_that("a time-structured term outside the pairs is flagged", {
   data$couple_day <- interaction(data$coupleID, data$day)
   data$.member_contrast_arbitrary <- data$member
   set.seed(199)
-  data$outcome <- stats::rnorm(40)[as.integer(data$coupleID)] +
-    stats::rnorm(nlevels(data$couple_day))[as.integer(data$couple_day)] +
-    stats::rnorm(nrow(data))
+  # Each person's noise carries over to the next day.
+  persistent <- stats::ave(
+    stats::rnorm(nrow(data)), data$personID,
+    FUN = function(noise) stats::filter(noise, 0.7, method = "recursive")
+  )
+  data$outcome <- stats::rnorm(80)[as.integer(data$personID)] +
+    stats::rnorm(nrow(data)) + persistent +
+    stats::rnorm(40)[as.integer(data$coupleID)] +
+    stats::rnorm(nlevels(data$couple_day))[as.integer(data$couple_day)]
   model_formula <- outcome ~ 1 + us(1 | coupleID) +
     us(0 + .member_contrast_arbitrary | coupleID) +
     us(1 | couple_day) + us(0 + .member_contrast_arbitrary | couple_day)
