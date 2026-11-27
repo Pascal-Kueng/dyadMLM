@@ -740,11 +740,9 @@ dsm_ILD <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_dsm_data,
-  # Non-default settings help this example converge.
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
   control = glmmTMB::glmmTMBControl(
-    profile = TRUE,
-    optimizer = stats::optim,
-    optArgs = list(method = "BFGS")
+    zerodisp_val = log(0.001 * sd(ild_dsm_data$closeness))
   )
 )
 

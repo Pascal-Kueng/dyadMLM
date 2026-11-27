@@ -544,6 +544,10 @@ dim_ILD <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_exchangeable_data
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
+  , control = glmmTMB::glmmTMBControl(
+      zerodisp_val = log(0.001 * sd(ild_exchangeable_data$closeness))
+    )
 )
 
 summary(dim_ILD)
@@ -584,7 +588,10 @@ dim_ILD_ar_model <- glmmTMB::glmmTMB(
   family = gaussian(),
   data = ild_exchangeable_data,
   # Non-default settings help this example converge.
-  control = glmmTMB::glmmTMBControl(profile = TRUE)
+  control = glmmTMB::glmmTMBControl(
+    profile = TRUE,
+    zerodisp_val = log(0.001 * sd(ild_exchangeable_data$closeness))
+  )
 )
 
 glmmTMB::VarCorr(dim_ILD_ar_model)
