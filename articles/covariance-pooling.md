@@ -24,12 +24,10 @@ shows how often the check detects an omitted partner correlation.
 When pooling was correct, composition checks raised false alarms in
 10–29% of datasets, and model comparison in 1–16%. The checks flagged
 wrong pooling more often than model comparison in most settings, partly
-because of these extra false alarms. Allowing for them, the checks
-mostly did better for Gaussian outcomes with up to 200 dyads, and model
-comparison usually did better for the other families with 400 dyads. For
-the other families with 40 dyads, the checks flagged 14–21% of correctly
-pooled datasets, and no more than 22–35% of wrongly pooled ones,
-depending on the family. So a flag or its absence says little.
+because of these extra false alarms. For the non-Gaussian families with
+40 dyads, the checks flagged 14–21% of correctly pooled datasets, and no
+more than 22–35% of wrongly pooled ones, depending on the family. So a
+flag or its absence says little.
 
 Use model comparison when both models can be fitted. The checks show
 where a simpler model misfits and still work when the full model cannot
