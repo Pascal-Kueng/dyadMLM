@@ -1,5 +1,11 @@
 # dyadMLM (development version)
 
+* `recover_exchangeable_covariance()` now warns when a `glmmTMB` model also has
+  a term with a time structure, such as `ar1()` or `ou()`. The recovered
+  same-occasion covariance does not include that term's variance, so its
+  partner correlation is too far from zero for the whole residual
+  ([#199](https://github.com/Pascal-Kueng/dyadMLM/issues/199)).
+
 * Composition labels, generated column names, and factor levels no longer
   depend on the machine's language settings. Role labels are now sorted
   ignoring case, the same way on every machine. Labels change only in sessions
