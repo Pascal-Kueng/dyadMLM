@@ -698,8 +698,7 @@ With equally spaced occasions, `ar1()` and `ou()` give the same fit.
 
 ```{r ild-ou-instead-of-ar1, eval = FALSE}
 # Time since the start of the study, for example in hours.
-# Create the numFactor() column in the data. Inside the formula, numFactor()
-# only works when glmmTMB is attached with library().
+# numFactor() must be applied to the data. It does not work inside the formula.
 data$clock <- glmmTMB::numFactor(data$hours)
 
 # Distinguishable dyads: replace the two ar1() terms with
