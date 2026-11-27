@@ -143,6 +143,10 @@
 #' [extension to exchangeable random slopes](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation)
 #' section for the manual calculation.
 #'
+#' For Gaussian `glmmTMB` models, the function warns when a recovered standard
+#' deviation is practically zero (a singular fit). Correlations with that
+#' random effect are then noise.
+#'
 #' Fit Gaussian `glmmTMB` models with `dispformula = ~ 0`. Otherwise part of
 #' each member's variance stays in the residual variance, which the recovered
 #' covariance does not include. The function warns in that case.
@@ -266,6 +270,7 @@ recover_exchangeable_covariance <- function(
   # both backends use estimate/draw x coefficient x coefficient arrays.
   results <- vector("list", length(matched_pairs))
   has_undefined_correlations <- FALSE # needed for warning
+  zero_effects <- vector("list", length(matched_pairs)) # needed for warning
 
   for (i in seq_along(matched_pairs)) {
     pair <- matched_pairs[[i]]
@@ -297,6 +302,9 @@ recover_exchangeable_covariance <- function(
       sdcor <- apply(sdcor, c(2L, 3L), point_summary, na.rm = TRUE)
       sdcor[is.nan(sdcor)] <- NA_real_
     }
+    zero_effects[[i]] <- practically_zero_effects(
+      model, sdcor, pair$underlying_terms
+    )
     shared_term <- if (is.na(pair$shared_block_index)) {
       NULL
     } else {
@@ -337,8 +345,63 @@ recover_exchangeable_covariance <- function(
       call. = FALSE
     )
   }
+  zero_notes <- character()
+  for (i in seq_along(results)) {
+    if (length(zero_effects[[i]]) > 0L) {
+      zero_notes <- c(zero_notes, paste0(
+        "`", zero_effects[[i]], "` in `", result_names[[i]], "`"
+      ))
+    }
+  }
+  if (length(zero_notes) > 0L) {
+    warning(
+      "Practically zero SD (singular fit) for ",
+      paste(zero_notes, collapse = ", "),
+      ": below 1% of the outcome SD. Correlations with these random effects ",
+      "are not interpretable. Consider removing them from the model.",
+      call. = FALSE
+    )
+  }
   class(results) <- c("exchangeable_covariance", "list")
   return(results)
+}
+
+# Random effects whose size is practically zero (a singular fit). The size of
+# an effect is its member-level SD times the typical size of its predictor.
+# Returns the terms below 1% of the outcome SD. The comparison needs the
+# outcome's scale, so it covers Gaussian identity-link glmmTMB models only.
+practically_zero_effects <- function(model, sdcor, terms) {
+  if (!inherits(model, "glmmTMB")) {
+    return(character())
+  }
+  family <- stats::family(model)
+  if (!identical(family$family, "gaussian") ||
+      !identical(family$link, "identity")) {
+    return(character())
+  }
+
+  frame <- stats::model.frame(model)
+  outcome_sd <- stats::sd(stats::model.response(frame))
+  # Both members have the same SDs, so the first member's are enough.
+  member_sds <- diag(sdcor)[seq_along(terms)]
+
+  zero_terms <- character()
+  for (k in seq_along(terms)) {
+    term <- terms[[k]]
+    if (identical(term, "(Intercept)")) {
+      predictor_size <- 1
+    } else if (term %in% names(frame) && is.numeric(frame[[term]])) {
+      predictor_size <- sqrt(mean(frame[[term]]^2))
+    } else {
+      next # The predictor's size is unknown, for example for interactions.
+    }
+    effect_size <- member_sds[[k]] * predictor_size
+    # An SD of exactly zero already gives `NA` correlations and its own warning.
+    if (effect_size > 0 && effect_size < 0.01 * outcome_sd) {
+      zero_terms <- c(zero_terms, term)
+    }
+  }
+  return(zero_terms)
 }
 
 #' Print recovered exchangeable member-level covariance

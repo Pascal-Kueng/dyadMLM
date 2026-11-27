@@ -1797,6 +1797,60 @@ test_that("the public function returns member-level glmmTMB matrices", {
   expect_identical(result[[1L]]$difference_term, extracted$blocks[[2L]]$term)
 })
 
+test_that("a practically zero SD is flagged as a singular fit", {
+  skip_if_not_installed("glmmTMB")
+
+  # 1. The rule itself, on constructed SD and correlation matrices.
+  set.seed(170)
+  frame <- data.frame(outcome = stats::rnorm(200), slope = 100 * stats::rnorm(200))
+  model <- glmmTMB::glmmTMB(outcome ~ slope, data = frame)
+  terms <- c("(Intercept)", "slope")
+  sdcor_with <- function(intercept_sd, slope_sd) {
+    sdcor <- diag(c(intercept_sd, slope_sd, intercept_sd, slope_sd))
+    sdcor[sdcor == 0] <- 0.5
+    sdcor
+  }
+  outcome_sd <- stats::sd(frame$outcome)
+  expect_identical(
+    practically_zero_effects(model, sdcor_with(0.5, 0.5), terms),
+    character()
+  )
+  expect_identical(
+    practically_zero_effects(model, sdcor_with(0.001 * outcome_sd, 0.5), terms),
+    "(Intercept)"
+  )
+  # A slope counts with the size of its predictor: 0.001 x 100 is not small.
+  expect_identical(
+    practically_zero_effects(model, sdcor_with(0.5, 0.001 * outcome_sd), terms),
+    character()
+  )
+  expect_identical(
+    practically_zero_effects(model, sdcor_with(0.5, 0.00001 * outcome_sd), terms),
+    "slope"
+  )
+
+  # 2. A diary model fitted to data without stable dyad-level variance.
+  data <- expand.grid(day = 1:8, member = c(-1, 1), coupleID = seq_len(60))
+  data$coupleID <- factor(data$coupleID)
+  data$couple_day <- interaction(data$coupleID, data$day)
+  data$.member_contrast_arbitrary <- data$member
+  set.seed(2)
+  data$outcome <- stats::rnorm(nlevels(data$couple_day), 0, 0.6)[
+    as.integer(data$couple_day)
+  ] + stats::rnorm(nrow(data), 0, 0.8)
+  diary_model <- suppressWarnings(glmmTMB::glmmTMB(
+    outcome ~ 1 + us(1 | coupleID) +
+      us(0 + .member_contrast_arbitrary | coupleID) +
+      us(1 | couple_day) + us(0 + .member_contrast_arbitrary | couple_day),
+    dispformula = ~0, data = data
+  ))
+  expect_warning(
+    recover_exchangeable_covariance(diary_model),
+    "Practically zero SD (singular fit) for `(Intercept)` in `pair_1`",
+    fixed = TRUE
+  )
+})
+
 test_that("a residual variance left out of the recovered covariance is flagged", {
   skip_if_not_installed("glmmTMB")
 

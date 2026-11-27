@@ -8,6 +8,11 @@
   `z` everywhere
   ([#174](https://github.com/Pascal-Kueng/dyadMLM/issues/174)).
 
+* `recover_exchangeable_covariance()` now warns when a recovered standard
+  deviation is practically zero (a singular fit) in a Gaussian `glmmTMB` model.
+  The correlations printed for such a random effect are noise
+  ([#170](https://github.com/Pascal-Kueng/dyadMLM/issues/170)).
+
 * `check_dyad_outcomes()` warns when fewer than 39 simulated datasets are
   supplied, because the 95% limits are then infinite and nothing can be flagged
   ([#180](https://github.com/Pascal-Kueng/dyadMLM/issues/180)).
