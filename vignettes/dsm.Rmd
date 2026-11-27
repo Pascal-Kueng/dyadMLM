@@ -740,7 +740,7 @@ dsm_ILD <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_dsm_data,
-  # A slightly larger fixed residual SD avoids false-convergence warnings.
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
   control = glmmTMB::glmmTMBControl(
     zerodisp_val = log(0.001 * sd(ild_dsm_data$closeness))
   )

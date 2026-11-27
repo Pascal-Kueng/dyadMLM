@@ -612,7 +612,7 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_distinguishable_data,
-  # A slightly larger fixed residual SD avoids false-convergence warnings.
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
   control = glmmTMB::glmmTMBControl(
     zerodisp_val = log(0.001 * sd(ild_distinguishable_data$closeness))
   )
@@ -681,7 +681,7 @@ ild_distinguishable_ar_model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_distinguishable_data,
-  # A slightly larger fixed residual SD avoids false-convergence warnings.
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
   control = glmmTMB::glmmTMBControl(
     zerodisp_val = log(0.001 * sd(ild_distinguishable_data$closeness))
   )
@@ -772,7 +772,7 @@ ild_apim_model <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data
-  # A slightly larger fixed residual SD avoids false-convergence warnings.
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
   , control = glmmTMB::glmmTMBControl(
       zerodisp_val = log(0.001 * sd(ild_apim_data$closeness))
     )
@@ -815,7 +815,7 @@ ild_exchangeable_ar_model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_apim_data,
-  # A slightly larger fixed residual SD avoids false-convergence warnings.
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
   control = glmmTMB::glmmTMBControl(
     zerodisp_val = log(0.001 * sd(ild_apim_data$closeness))
   )
