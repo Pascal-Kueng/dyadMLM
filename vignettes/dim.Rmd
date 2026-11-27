@@ -258,13 +258,13 @@ interpreted in units of the outcome, here closeness:
   expected couple-average closeness. Equivalently, each member's expected
   closeness is 1.55 points higher.
 
-- The within-dyad effect estimate (about 0.90) means that a one-point difference
-  in provided support between partners is associated with a 0.90-point difference
+- The within-dyad effect estimate (about 0.84) means that a one-point difference
+  in provided support between partners is associated with a 0.84-point difference
   in their expected closeness, holding their average support constant.
   In member terms, suppose one member is 0.5 points above the dyad
   mean and the other is 0.5 points below it. Their expected closeness is then
-  about 0.45 points above and below the couple's predicted mean, respectively,
-  so they are expected to differ by 0.90 points in closeness.
+  about 0.42 points above and below the couple's predicted mean, respectively,
+  so they are expected to differ by 0.84 points in closeness.
 
 Because the Gaussian DIM is the exchangeability-constrained version of the full
 DSM, exchangeability can also be tested by comparing these nested models. This
