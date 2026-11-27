@@ -52,8 +52,8 @@ The caller remains responsible for supplying genuinely nested models.
 When a comparison removes a variance, the chi-squared p-value is too large,
 because a variance of zero lies on the boundary of the parameter space.
 Halving the p-value is the usual correction when exactly one variance is
-removed (Self and Liang, 1987; Stram and Lee, 1994). No simple correction
-applies when a variance is removed together with its covariances.
+removed (Self and Liang, 1987; Stram and Lee, 1994). Halving does not apply
+when a variance is removed together with its covariances.
 \code{alpha} affects only the printed conclusion, not the test results.
 }
 \examples{
