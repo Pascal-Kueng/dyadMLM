@@ -84,10 +84,8 @@ When pooling was correct, composition checks raised false alarms in
 datasets, and model comparison in
 `r percent_range(correct_pooling$rate[correct_pooling$method == "comparison"])`.
 The checks flagged wrong pooling more often than model comparison in most
-settings, partly because of these extra false alarms. Allowing for them, the
-checks mostly did better for Gaussian outcomes with up to 200 dyads, and model
-comparison usually did better for the other families with 400 dyads. For the
-other families with `r min(small_sample$n_dyads)` dyads, the checks flagged `r percent_range(small_sample$rate[small_sample$scenario == "Correct pooling"])`
+settings, partly because of these extra false alarms. For the non-Gaussian
+families with `r min(small_sample$n_dyads)` dyads, the checks flagged `r percent_range(small_sample$rate[small_sample$scenario == "Correct pooling"])`
 of correctly pooled datasets, and no more than
 `r percent_range(summarise(filter(small_sample, scenario != "Correct pooling"), rate = max(rate), .by = family)$rate)`
 of wrongly pooled ones, depending on the family. So a flag or its absence says little.
