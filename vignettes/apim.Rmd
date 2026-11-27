@@ -685,6 +685,31 @@ component. They are not correlations of the complete residual and do not
 represent partner influence. The dyad-day block continues to describe the
 remaining same-day variances and partner covariance.
 
+#### Unequally spaced occasions {#unequal-spacing-ou}
+
+`ar1()` assumes equally spaced occasions and goes by position. This works for
+daily diary data with one report per day at around the same time of day.
+However, with unequal spacing, such as several reports per day with a longer gap
+overnight, or with irregular intervals, `ar1()` would force the residual
+correlation to be the same for longer and shorter gaps, which is incorrect. In
+this case, `ou()` can be used to model continuous-time autocorrelation. It uses
+the actual elapsed time instead, so persistence is weaker across longer gaps.
+With equally spaced occasions, `ar1()` and `ou()` give the same fit.
+
+```{r ild-ou-instead-of-ar1, eval = FALSE}
+# Time since the start of the study, for example in hours.
+# Create the numFactor() column in the data. Inside the formula, numFactor()
+# only works when glmmTMB is attached with library().
+data$clock <- glmmTMB::numFactor(data$hours)
+
+# Distinguishable dyads: replace the two ar1() terms with
+ou(0 + .is_female:clock | coupleID) +
+ou(0 + .is_male:clock | coupleID)
+
+# Exchangeable dyads: replace the ar1() term with
+ou(0 + clock | coupleID:personID)
+```
+
 #### Random slopes
 
 For example, role-specific within-person actor random slopes can be added by
@@ -809,7 +834,8 @@ glmmTMB::VarCorr(ild_exchangeable_ar_model)
 ```
 
 The pooled AR parameters describe the persistent within-member component. The
-dyad-day blocks continue to describe same-day partner covariance.
+dyad-day blocks continue to describe same-day partner covariance. For unequally
+spaced occasions, see [`ou()`](#unequal-spacing-ou).
 
 For the fitted AR model, we can recover the member-level covariance matrices for
 both the stable dyad effects and the same-occasion residual dependence. The two
@@ -1005,6 +1031,14 @@ ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
 
 This returns lag-1 raw and within-person closeness scores. Lags match exactly
 `diaryday - 1`, so omitted diary days are not bridged.
+
+With several reports per day, a lag should usually not reach back across the
+night. Number the occasions so that each day starts after a gap, for example
+`time = day * 100 + beep`. The first report of a day then has no occasion at
+`time - 1`, so its lag is missing. Both partners need the same day and beep
+numbers. This index is not suitable as the time variable in `ar1()` or `ou()`.
+For residual autocorrelation with unequal spacing, see
+[`ou()`](#unequal-spacing-ou).
 
 These data were generated with residual AR(1), not a lagged-outcome mean model.
 The following unevaluated model demonstrates the specification only; its
