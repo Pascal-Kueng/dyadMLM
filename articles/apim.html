@@ -735,13 +735,21 @@ role-specific intercepts refer to the average study day:</p>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_distinguishable_data</span>,</span>
-<span>  <span class="co"># Non-default settings help this example converge.</span></span>
+<span>  <span class="co"># A slightly larger fixed residual SD avoids wrong false-convergence warnings.</span></span>
 <span>  control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
-<span>    profile <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    optimizer <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span>,</span>
-<span>    optArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"BFGS"</span><span class="op">)</span></span>
+<span>    zerodisp_val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.001</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ild_distinguishable_data</span><span class="op">$</span><span class="va">closeness</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>This model sets <code>zerodisp_val</code> in its <code>control</code>
+argument, which helps avoid a wrong “false convergence” warning. With
+<code>dispformula = ~ 0</code>, glmmTMB fixes the residual SD at a very
+small value (about 0.0001). In diary models, the optimizer then
+sometimes reports “false convergence (8)”, even when the estimates are
+fine, because it freaks out about the small manually set value. Here the
+residual SD is fixed at 0.1% of the outcome’s SD, instead of the default
+0.0001. This removes the warning and is still negligible for the
+variance-covariance matrix we model with the random effects. This
+setting does not hide real problems.</p>
 <div class="section level5">
 <h5 id="distinguishable-residual-ar1">Adding role-specific residual AR(1)<a class="anchor" aria-label="anchor" href="#distinguishable-residual-ar1"></a>
 </h5>
@@ -794,8 +802,10 @@ so the concurrent and persistent components are visible together.</p>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_distinguishable_data</span>,</span>
-<span>  <span class="co"># Non-default settings help this example converge.</span></span>
-<span>  control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span>profile <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="co"># A slightly larger fixed residual SD avoids wrong false-convergence warnings.</span></span>
+<span>  control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
+<span>    zerodisp_val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.001</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ild_distinguishable_data</span><span class="op">$</span><span class="va">closeness</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/VarCorr.html" class="external-link">VarCorr</a></span><span class="op">(</span><span class="va">ild_distinguishable_ar_model</span><span class="op">)</span></span>
@@ -804,10 +814,10 @@ so the concurrent and persistent components are visible together.</p>
 <span><span class="co">#&gt;  Groups            Name                         Std.Dev. Corr        </span></span>
 <span><span class="co">#&gt;  coupleID          .is_female                   0.88813              </span></span>
 <span><span class="co">#&gt;                    .is_male                     0.83006  0.334       </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday .is_female                   0.83204              </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday .is_female                   0.83203              </span></span>
 <span><span class="co">#&gt;                    .is_male                     0.81486  0.253       </span></span>
-<span><span class="co">#&gt;  coupleID.1        .is_female:factor(diaryday)0 0.49444  0.592 (ar1) </span></span>
-<span><span class="co">#&gt;  coupleID.2        .is_male:factor(diaryday)0   0.57571  0.658 (ar1)</span></span></code></pre></div>
+<span><span class="co">#&gt;  coupleID.1        .is_female:factor(diaryday)0 0.49445  0.592 (ar1) </span></span>
+<span><span class="co">#&gt;  coupleID.2        .is_male:factor(diaryday)0   0.57570  0.658 (ar1)</span></span></code></pre></div>
 <p>The two AR standard deviations and correlations describe each role’s
 persistent component. They are not correlations of the complete residual
 and do not represent partner influence. The dyad-day block continues to
@@ -959,6 +969,10 @@ exchangeability through paired shared and member-contrast terms.</p>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">ild_apim_data</span></span>
+<span>  <span class="co"># A slightly larger fixed residual SD avoids wrong false-convergence warnings.</span></span>
+<span>  , control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
+<span>      zerodisp_val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.001</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ild_apim_data</span><span class="op">$</span><span class="va">closeness</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">ild_apim_model</span><span class="op">)</span></span>
@@ -989,10 +1003,10 @@ exchangeability through paired shared and member-contrast terms.</p>
 <span><span class="co">#&gt;                               Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; (Intercept)                   5.906484   0.075513   78.22  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; diaryday                      0.006260   0.004576    1.37    0.171    </span></span>
-<span><span class="co">#&gt; .provided_support_cwp_actor   0.236697   0.024720    9.58  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_partner 0.245028   0.024720    9.91  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_actor   1.198981   0.076545   15.66  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_partner 0.354490   0.076545    4.63 3.64e-06 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_actor   0.236696   0.024720    9.58  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_partner 0.245030   0.024720    9.91  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_actor   1.198977   0.076546   15.66  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_partner 0.354492   0.076546    4.63 3.64e-06 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <div class="section level5">
@@ -1029,8 +1043,10 @@ term grouped by the member nested within the dyad:</p>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_apim_data</span>,</span>
-<span>  <span class="co"># Non-default settings help this example converge.</span></span>
-<span>  control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span>profile <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="co"># A slightly larger fixed residual SD avoids wrong false-convergence warnings.</span></span>
+<span>  control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
+<span>    zerodisp_val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.001</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ild_apim_data</span><span class="op">$</span><span class="va">closeness</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/VarCorr.html" class="external-link">VarCorr</a></span><span class="op">(</span><span class="va">ild_exchangeable_ar_model</span><span class="op">)</span></span>
@@ -1115,7 +1131,8 @@ simulation.</p>
 <span>  control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
 <span>    profile <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    optimizer <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span>,</span>
-<span>    optArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"BFGS"</span><span class="op">)</span></span>
+<span>    optArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"BFGS"</span><span class="op">)</span>,</span>
+<span>    zerodisp_val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.001</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ild_apim_data</span><span class="op">$</span><span class="va">closeness</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -1368,7 +1385,8 @@ data-generating process.</p>
 <span>  , control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
 <span>      profile <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>      optimizer <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span>,</span>
-<span>      optArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"BFGS"</span><span class="op">)</span></span>
+<span>      optArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"BFGS"</span><span class="op">)</span>,</span>
+<span>      zerodisp_val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.001</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ild_apim_data_dynamic</span><span class="op">$</span><span class="va">closeness</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The model uses raw outcome lags. Within-person-centered alternatives

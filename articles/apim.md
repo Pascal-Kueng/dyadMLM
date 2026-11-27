@@ -727,14 +727,22 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_distinguishable_data,
-  # Non-default settings help this example converge.
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
   control = glmmTMB::glmmTMBControl(
-    profile = TRUE,
-    optimizer = stats::optim,
-    optArgs = list(method = "BFGS")
+    zerodisp_val = log(0.001 * sd(ild_distinguishable_data$closeness))
   )
 )
 ```
+
+This model sets `zerodisp_val` in its `control` argument, which helps
+avoid a wrong “false convergence” warning. With `dispformula = ~ 0`,
+glmmTMB fixes the residual SD at a very small value (about 0.0001). In
+diary models, the optimizer then sometimes reports “false convergence
+(8)”, even when the estimates are fine, because it freaks out about the
+small manually set value. Here the residual SD is fixed at 0.1% of the
+outcome’s SD, instead of the default 0.0001. This removes the warning
+and is still negligible for the variance-covariance matrix we model with
+the random effects. This setting does not hide real problems.
 
 ##### Adding role-specific residual AR(1)
 
@@ -790,8 +798,10 @@ ild_distinguishable_ar_model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_distinguishable_data,
-  # Non-default settings help this example converge.
-  control = glmmTMB::glmmTMBControl(profile = TRUE)
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
+  control = glmmTMB::glmmTMBControl(
+    zerodisp_val = log(0.001 * sd(ild_distinguishable_data$closeness))
+  )
 )
 
 glmmTMB::VarCorr(ild_distinguishable_ar_model)
@@ -800,10 +810,10 @@ glmmTMB::VarCorr(ild_distinguishable_ar_model)
 #>  Groups            Name                         Std.Dev. Corr        
 #>  coupleID          .is_female                   0.88813              
 #>                    .is_male                     0.83006  0.334       
-#>  coupleID.diaryday .is_female                   0.83204              
+#>  coupleID.diaryday .is_female                   0.83203              
 #>                    .is_male                     0.81486  0.253       
-#>  coupleID.1        .is_female:factor(diaryday)0 0.49444  0.592 (ar1) 
-#>  coupleID.2        .is_male:factor(diaryday)0   0.57571  0.658 (ar1)
+#>  coupleID.1        .is_female:factor(diaryday)0 0.49445  0.592 (ar1) 
+#>  coupleID.2        .is_male:factor(diaryday)0   0.57570  0.658 (ar1)
 ```
 
 The two AR standard deviations and correlations describe each role’s
@@ -964,6 +974,10 @@ ild_apim_model <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
+  , control = glmmTMB::glmmTMBControl(
+      zerodisp_val = log(0.001 * sd(ild_apim_data$closeness))
+    )
 )
 
 summary(ild_apim_model)
@@ -994,10 +1008,10 @@ summary(ild_apim_model)
 #>                               Estimate Std. Error z value Pr(>|z|)    
 #> (Intercept)                   5.906484   0.075513   78.22  < 2e-16 ***
 #> diaryday                      0.006260   0.004576    1.37    0.171    
-#> .provided_support_cwp_actor   0.236697   0.024720    9.58  < 2e-16 ***
-#> .provided_support_cwp_partner 0.245028   0.024720    9.91  < 2e-16 ***
-#> .provided_support_cbp_actor   1.198981   0.076545   15.66  < 2e-16 ***
-#> .provided_support_cbp_partner 0.354490   0.076545    4.63 3.64e-06 ***
+#> .provided_support_cwp_actor   0.236696   0.024720    9.58  < 2e-16 ***
+#> .provided_support_cwp_partner 0.245030   0.024720    9.91  < 2e-16 ***
+#> .provided_support_cbp_actor   1.198977   0.076546   15.66  < 2e-16 ***
+#> .provided_support_cbp_partner 0.354492   0.076546    4.63 3.64e-06 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -1037,8 +1051,10 @@ ild_exchangeable_ar_model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_apim_data,
-  # Non-default settings help this example converge.
-  control = glmmTMB::glmmTMBControl(profile = TRUE)
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
+  control = glmmTMB::glmmTMBControl(
+    zerodisp_val = log(0.001 * sd(ild_apim_data$closeness))
+  )
 )
 
 glmmTMB::VarCorr(ild_exchangeable_ar_model)
@@ -1131,7 +1147,8 @@ ild_apim_random_slope_model <- update(
   control = glmmTMB::glmmTMBControl(
     profile = TRUE,
     optimizer = stats::optim,
-    optArgs = list(method = "BFGS")
+    optArgs = list(method = "BFGS"),
+    zerodisp_val = log(0.001 * sd(ild_apim_data$closeness))
   )
 )
 
@@ -1407,7 +1424,8 @@ lagged_outcome_example <- glmmTMB::glmmTMB(
   , control = glmmTMB::glmmTMBControl(
       profile = TRUE,
       optimizer = stats::optim,
-      optArgs = list(method = "BFGS")
+      optArgs = list(method = "BFGS"),
+      zerodisp_val = log(0.001 * sd(ild_apim_data_dynamic$closeness))
     )
 )
 ```

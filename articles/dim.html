@@ -527,7 +527,7 @@ directly fitted DIM estimates above confirm the equivalence. Both forms
 therefore make the same change in the linear predictor relative to the
 grand-mean reference. The intercept is omitted from both displayed
 equations.</p>
-<div class="interdep-dim-grid interdep-dim-grid--article" id="interdep-dim-grid" data-interdep-dim-grid data-limit="5" data-actor="1.19897761345149" data-partner="0.35449135900247314" data-mean="1.5534689724539632" data-within="0.84448625444901682">
+<div class="interdep-dim-grid interdep-dim-grid--article" id="interdep-dim-grid" data-interdep-dim-grid data-limit="5" data-actor="1.1989776134585828" data-partner="0.35449135899799189" data-mean="1.5534689724565747" data-within="0.84448625446059089">
   <div class="wdg-controls">
     <div class="wdg-toolbar">
       <strong>Provided support coordinates</strong>
@@ -781,6 +781,10 @@ trend across the study.</p>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
+<span>  <span class="co"># A slightly larger fixed residual SD avoids wrong false-convergence warnings.</span></span>
+<span>  , control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
+<span>      zerodisp_val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.001</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ild_exchangeable_data</span><span class="op">$</span><span class="va">closeness</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span></span>
@@ -802,18 +806,18 @@ trend across the study.</p>
 <span><span class="co">#&gt;  Groups              Name                       Variance Std.Dev.</span></span>
 <span><span class="co">#&gt;  coupleID            (Intercept)                0.5372   0.7330  </span></span>
 <span><span class="co">#&gt;  coupleID.1          .member_contrast_arbitrary 0.3021   0.5496  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                0.5717   0.7561  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                0.5718   0.7561  </span></span>
 <span><span class="co">#&gt;  coupleID.diaryday.1 .member_contrast_arbitrary 0.3714   0.6094  </span></span>
 <span><span class="co">#&gt; Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                                        Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                            5.906493   0.075513   78.22  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; (Intercept)                            5.906485   0.075513   78.22  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; diaryday                               0.006260   0.004576    1.37    0.171    </span></span>
-<span><span class="co">#&gt; .provided_support_cwp_dyad_mean        0.481722   0.034760   13.86  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_within_dyad_dev -0.008331   0.035157   -0.24    0.813    </span></span>
-<span><span class="co">#&gt; .provided_support_cbp_dyad_mean        1.553466   0.096922   16.03  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_within_dyad_dev  0.844496   0.118504    7.13 1.03e-12 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_dyad_mean        0.481727   0.034760   13.86  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_within_dyad_dev -0.008335   0.035156   -0.24    0.813    </span></span>
+<span><span class="co">#&gt; .provided_support_cbp_dyad_mean        1.553469   0.096922   16.03  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_dev  0.844486   0.118503    7.13 1.03e-12 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>This concurrent model includes stable dyad-level and same-day partner
@@ -849,7 +853,10 @@ with one member-series term:</p>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_exchangeable_data</span>,</span>
 <span>  <span class="co"># Non-default settings help this example converge.</span></span>
-<span>  control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span>profile <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
+<span>    profile <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    zerodisp_val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.001</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ild_exchangeable_data</span><span class="op">$</span><span class="va">closeness</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/VarCorr.html" class="external-link">VarCorr</a></span><span class="op">(</span><span class="va">dim_ILD_ar_model</span><span class="op">)</span></span>

@@ -959,11 +959,9 @@ vignette.</p>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_dsm_data</span>,</span>
-<span>  <span class="co"># Non-default settings help this example converge.</span></span>
+<span>  <span class="co"># A slightly larger fixed residual SD avoids wrong false-convergence warnings.</span></span>
 <span>  control <span class="op">=</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
-<span>    profile <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    optimizer <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span>,</span>
-<span>    optArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"BFGS"</span><span class="op">)</span></span>
+<span>    zerodisp_val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.001</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ild_dsm_data</span><span class="op">$</span><span class="va">closeness</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -972,7 +970,7 @@ vignette.</p>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;  Groups            Name                         Std.Dev. Corr        </span></span>
 <span><span class="co">#&gt;  coupleID          (Intercept)                  0.70187              </span></span>
-<span><span class="co">#&gt;                    .dsm_role_contrast           0.99250  0.072       </span></span>
+<span><span class="co">#&gt;                    .dsm_role_contrast           0.99251  0.072       </span></span>
 <span><span class="co">#&gt;  coupleID.diaryday (Intercept)                  0.65167              </span></span>
 <span><span class="co">#&gt;                    .dsm_role_contrast           1.00690  0.022       </span></span>
 <span><span class="co">#&gt;  coupleID.1        .is_female:factor(diaryday)0 0.49444  0.592 (ar1) </span></span>

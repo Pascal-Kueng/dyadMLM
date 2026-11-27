@@ -730,6 +730,10 @@ dim_ILD <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_exchangeable_data
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
+  , control = glmmTMB::glmmTMBControl(
+      zerodisp_val = log(0.001 * sd(ild_exchangeable_data$closeness))
+    )
 )
 
 summary(dim_ILD)
@@ -751,18 +755,18 @@ summary(dim_ILD)
 #>  Groups              Name                       Variance Std.Dev.
 #>  coupleID            (Intercept)                0.5372   0.7330  
 #>  coupleID.1          .member_contrast_arbitrary 0.3021   0.5496  
-#>  coupleID.diaryday   (Intercept)                0.5717   0.7561  
+#>  coupleID.diaryday   (Intercept)                0.5718   0.7561  
 #>  coupleID.diaryday.1 .member_contrast_arbitrary 0.3714   0.6094  
 #> Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680
 #> 
 #> Conditional model:
 #>                                        Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                            5.906493   0.075513   78.22  < 2e-16 ***
+#> (Intercept)                            5.906485   0.075513   78.22  < 2e-16 ***
 #> diaryday                               0.006260   0.004576    1.37    0.171    
-#> .provided_support_cwp_dyad_mean        0.481722   0.034760   13.86  < 2e-16 ***
-#> .provided_support_cwp_within_dyad_dev -0.008331   0.035157   -0.24    0.813    
-#> .provided_support_cbp_dyad_mean        1.553466   0.096922   16.03  < 2e-16 ***
-#> .provided_support_cbp_within_dyad_dev  0.844496   0.118504    7.13 1.03e-12 ***
+#> .provided_support_cwp_dyad_mean        0.481727   0.034760   13.86  < 2e-16 ***
+#> .provided_support_cwp_within_dyad_dev -0.008335   0.035156   -0.24    0.813    
+#> .provided_support_cbp_dyad_mean        1.553469   0.096922   16.03  < 2e-16 ***
+#> .provided_support_cbp_within_dyad_dev  0.844486   0.118503    7.13 1.03e-12 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -802,7 +806,10 @@ dim_ILD_ar_model <- glmmTMB::glmmTMB(
   family = gaussian(),
   data = ild_exchangeable_data,
   # Non-default settings help this example converge.
-  control = glmmTMB::glmmTMBControl(profile = TRUE)
+  control = glmmTMB::glmmTMBControl(
+    profile = TRUE,
+    zerodisp_val = log(0.001 * sd(ild_exchangeable_data$closeness))
+  )
 )
 
 glmmTMB::VarCorr(dim_ILD_ar_model)

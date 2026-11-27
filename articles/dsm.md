@@ -815,11 +815,9 @@ dsm_ILD <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_dsm_data,
-  # Non-default settings help this example converge.
+  # A slightly larger fixed residual SD avoids wrong false-convergence warnings.
   control = glmmTMB::glmmTMBControl(
-    profile = TRUE,
-    optimizer = stats::optim,
-    optArgs = list(method = "BFGS")
+    zerodisp_val = log(0.001 * sd(ild_dsm_data$closeness))
   )
 )
 
@@ -828,7 +826,7 @@ glmmTMB::VarCorr(dsm_ILD)
 #> Conditional model:
 #>  Groups            Name                         Std.Dev. Corr        
 #>  coupleID          (Intercept)                  0.70187              
-#>                    .dsm_role_contrast           0.99250  0.072       
+#>                    .dsm_role_contrast           0.99251  0.072       
 #>  coupleID.diaryday (Intercept)                  0.65167              
 #>                    .dsm_role_contrast           1.00690  0.022       
 #>  coupleID.1        .is_female:factor(diaryday)0 0.49444  0.592 (ar1) 
