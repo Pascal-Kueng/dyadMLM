@@ -593,7 +593,8 @@ glmmTMB::VarCorr(dim_ILD_ar_model)
 See the [exchangeable APIM AR(1) section](apim.html#exchangeable-residual-ar1)
 for the distinction between the persistent within-member component and same-day
 partner covariance. To keep this example focused, both models omit the actor
-random slopes that are also present in the simulation.
+random slopes that are also present in the simulation. For unequally spaced
+occasions, see [`ou()`](apim.html#unequal-spacing-ou).
 
 ### Interpretation of concurrent ILD DIM coefficients
 
