@@ -394,9 +394,9 @@ dyadMLM::compare_nested_models(
 
 The test provides evidence against all restrictions jointly, but it does not
 show which parameter differs. The helper also cannot determine whether the
-models are mathematically nested. That remains a modeling requirement. None of
-these equality constraints lies on a boundary of the parameter space, so the
-usual chi-squared reference distribution is appropriate for this test.
+models are mathematically nested. That remains a modeling requirement. The
+restrictions set parameters equal and remove no variance, so the usual
+chi-squared p-value applies.
 
 ## Checking partner dependence {#checking-partner-dependence}
 
@@ -1008,11 +1008,10 @@ print(no_contrast_block_covariance, representation = "sdcor")
 ```
 
 These are constraints on the stable dyad-level random effects, not on the
-same-occasion residual structure. Because both comparisons remove variances,
-and a variance of zero lies on the boundary of the parameter space, the usual
-chi-squared reference distribution gives p-values that are too large. The
-likelihood-ratio tests then reject a true constraint less often than the stated
-significance level and have less power.
+same-occasion residual structure. Both comparisons remove variances, so their
+p-values are too large and the tests are conservative. Halving the p-value is
+not valid here, because covariances are removed too (see
+`?dyadMLM::compare_nested_models`).
 
 
 ### When carryover is the research question {#dynamic-models}
