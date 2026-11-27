@@ -821,6 +821,8 @@ section](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-
 for the distinction between the persistent within-member component and
 same-day partner covariance. To keep this example focused, both models
 omit the actor random slopes that are also present in the simulation.
+For unequally spaced occasions, see
+[`ou()`](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#unequal-spacing-ou).
 
 ### Interpretation of concurrent ILD DIM coefficients
 

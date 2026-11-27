@@ -811,6 +811,32 @@ persistent component. They are not correlations of the complete residual
 and do not represent partner influence. The dyad-day block continues to
 describe the remaining same-day variances and partner covariance.
 
+##### Unequally spaced occasions
+
+`ar1()` assumes equally spaced occasions and goes by position. This
+works, for instance, for daily diary data with one report per day at
+around the same time of day. However, with unequal spacing, such as
+several reports per day with a longer gap overnight, or with irregular
+intervals, `ar1()` would force the residual correlation to be the same
+for longer and shorter gaps, which is incorrect. In this case, `ou()`
+can be used to model continuous-time autocorrelation. It uses the actual
+elapsed time instead, so persistence is weaker across longer gaps. With
+equally spaced occasions, `ar1()` and `ou()` give the same fit.
+
+``` r
+
+# Time since the start of the study, for example in hours.
+# numFactor() must be applied to the data. It does not work inside the formula.
+data$elapsed_time <- glmmTMB::numFactor(data$hours)
+
+# Distinguishable dyads: replace the two ar1() terms with
+ou(0 + .is_female:elapsed_time | coupleID) +
+ou(0 + .is_male:elapsed_time | coupleID)
+
+# Exchangeable dyads: replace the ar1() term with
+ou(0 + elapsed_time | coupleID:personID)
+```
+
 ##### Random slopes
 
 For example, role-specific within-person actor random slopes can be
@@ -1028,7 +1054,8 @@ glmmTMB::VarCorr(ild_exchangeable_ar_model)
 
 The pooled AR parameters describe the persistent within-member
 component. The dyad-day blocks continue to describe same-day partner
-covariance.
+covariance. For unequally spaced occasions, see
+[`ou()`](#unequal-spacing-ou).
 
 For the fitted AR model, we can recover the member-level covariance
 matrices for both the stable dyad effects and the same-occasion residual
