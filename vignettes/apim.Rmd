@@ -867,6 +867,27 @@ print(recovered_covariance)
 
 ```
 
+The second pair describes only the part of the same-day residual that does not
+carry over between days. Each member's residual on a given day also contains
+that member's AR(1) component, which the partners do not share. To describe the
+whole same-day residual, add the AR(1) variance to each member's variance. The
+covariance stays the same:
+
+```{r same-day-residual-with-ar1, eval = has_glmmTMB}
+same_day <- recovered_covariance$pair_2$varcov
+ar1_block <- glmmTMB::VarCorr(
+  ild_exchangeable_ar_model
+)$cond[["coupleID.personID"]]
+ar1_variance <- attr(ar1_block, "stddev")[[1]]^2
+
+whole_same_day <- same_day + diag(ar1_variance, 2)
+sqrt(diag(whole_same_day)) # SDs
+stats::cov2cor(whole_same_day) # partner correlation
+```
+
+The partner correlation of the whole same-day residual is therefore smaller
+than the one printed for the second pair.
+
 The `cwp` terms estimate actor and partner associations for occasion-specific
 deviations from each member's usual support. The `cbp` terms estimate actor and
 partner associations involving members' usual support levels. These are
