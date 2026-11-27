@@ -1032,14 +1032,6 @@ ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
 This returns lag-1 raw and within-person closeness scores. Lags match exactly
 `diaryday - 1`, so omitted diary days are not bridged.
 
-With several reports per day, a lag should usually not reach back across the
-night. Number the occasions so that each day starts after a gap, for example
-`time = day * 100 + beep`. The first report of a day then has no occasion at
-`time - 1`, so its lag is missing. Both partners need the same day and beep
-numbers. This index is not suitable as the time variable in `ar1()` or `ou()`.
-For residual autocorrelation with unequal spacing, see
-[`ou()`](#unequal-spacing-ou).
-
 These data were generated with residual AR(1), not a lagged-outcome mean model.
 The following unevaluated model demonstrates the specification only; its
 coefficients would not recover the data-generating process.
