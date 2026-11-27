@@ -91,8 +91,9 @@
 </div>
 <!-- badges: start -->
 
+<p>Dyadic data come from pairs of people, like romantic couples, a parent and a child, or a patient and a caregiver. The two members of a dyad are not independent, and their outcomes are often related. For this reason, their data should be analyzed together.</p>
 <p><code>dyadMLM</code> provides tools for dyadic multilevel modeling with linear and generalized linear mixed-effects models.</p>
-<p>It provides functions for data preparation for various types of dyadic models and post-estimation tools for interpretation and checking of model assumptions.</p>
+<p>Its <code><a href="reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> function checks whether the structure of the dyads is valid (for example, whether any dyad is coded with more than two members) and builds all the columns your models need. You then fit the models yourself with <code>glmmTMB</code> or <code>brms</code>, so you stay in control and know exactly what is being fitted. The vignettes provide guidance on how to fit which model in a variety of scenarios. After fitting, <code>dyadMLM</code> helps you compare models, test whether partners are distinguishable, and interpret the variances and partner correlations. It also checks whether a model fits the data well (similar to DHARMa) and reproduces the observed partner correlation.</p>
 <p>If you use <code>dyadMLM</code>, please cite it as:</p>
 <p>Küng, P. (2026). <em>dyadMLM: Tools for dyadic multilevel models</em> [Computer software]. <a href="https://doi.org/10.5281/zenodo.21481720" class="external-link uri">https://doi.org/10.5281/zenodo.21481720</a></p>
 <p>To include the version you used, see <a href="#citation">Citation</a>.</p>
