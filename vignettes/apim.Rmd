@@ -612,14 +612,21 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_distinguishable_data,
-  # Non-default settings help this example converge.
+  # A slightly larger fixed residual SD avoids false-convergence warnings.
   control = glmmTMB::glmmTMBControl(
-    profile = TRUE,
-    optimizer = stats::optim,
-    optArgs = list(method = "BFGS")
+    zerodisp_val = log(0.001 * sd(ild_distinguishable_data$closeness))
   )
 )
 ```
+
+This model sets `zerodisp_val` in its `control` argument, which helps avoid a
+wrong "false convergence" warning. With `dispformula = ~ 0`, glmmTMB fixes the
+residual SD at a very small value (about 0.0001). In diary models, the optimizer
+then sometimes reports "false convergence (8)", even when the estimates are
+fine. Here the residual SD is fixed at 0.1% of the outcome's SD, which removes
+the warning and is still negligible for the variance-covariance matrix we model
+with the random effects. The setting does not hide real problems. It only
+avoids the numerical trouble that the very small fixed residual SD causes.
 
 #### Adding role-specific residual AR(1) {#distinguishable-residual-ar1}
 
@@ -673,8 +680,10 @@ ild_distinguishable_ar_model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_distinguishable_data,
-  # Non-default settings help this example converge.
-  control = glmmTMB::glmmTMBControl(profile = TRUE)
+  # A slightly larger fixed residual SD avoids false-convergence warnings.
+  control = glmmTMB::glmmTMBControl(
+    zerodisp_val = log(0.001 * sd(ild_distinguishable_data$closeness))
+  )
 )
 
 glmmTMB::VarCorr(ild_distinguishable_ar_model)
@@ -762,6 +771,10 @@ ild_apim_model <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data
+  # A slightly larger fixed residual SD avoids false-convergence warnings.
+  , control = glmmTMB::glmmTMBControl(
+      zerodisp_val = log(0.001 * sd(ild_apim_data$closeness))
+    )
 )
 
 summary(ild_apim_model)
@@ -801,8 +814,10 @@ ild_exchangeable_ar_model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_apim_data,
-  # Non-default settings help this example converge.
-  control = glmmTMB::glmmTMBControl(profile = TRUE)
+  # A slightly larger fixed residual SD avoids false-convergence warnings.
+  control = glmmTMB::glmmTMBControl(
+    zerodisp_val = log(0.001 * sd(ild_apim_data$closeness))
+  )
 )
 
 glmmTMB::VarCorr(ild_exchangeable_ar_model)
@@ -855,7 +870,8 @@ ild_apim_random_slope_model <- update(
   control = glmmTMB::glmmTMBControl(
     profile = TRUE,
     optimizer = stats::optim,
-    optArgs = list(method = "BFGS")
+    optArgs = list(method = "BFGS"),
+    zerodisp_val = log(0.001 * sd(ild_apim_data$closeness))
   )
 )
 
@@ -1038,7 +1054,8 @@ lagged_outcome_example <- glmmTMB::glmmTMB(
   , control = glmmTMB::glmmTMBControl(
       profile = TRUE,
       optimizer = stats::optim,
-      optArgs = list(method = "BFGS")
+      optArgs = list(method = "BFGS"),
+      zerodisp_val = log(0.001 * sd(ild_apim_data_dynamic$closeness))
     )
 )
 ```
