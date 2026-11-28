@@ -33,12 +33,9 @@
 #'
 #' These checks establish that the models use equivalent observations. They
 #' cannot establish that one model is mathematically nested within the other.
-#' The caller remains responsible for supplying genuinely nested models.
-#' When a comparison removes a variance, the chi-squared p-value is too large,
-#' because a variance of zero lies on the boundary of the parameter space.
-#' Halving the p-value is the usual correction when exactly one variance is
-#' removed (Self and Liang, 1987; Stram and Lee, 1994). Halving does not apply
-#' when a variance is removed together with its covariances.
+#' The caller remains responsible for supplying genuinely nested models. The
+#' usual chi-squared reference distribution may also be inappropriate when
+#' tested variance parameters are on the boundary.
 #' `alpha` affects only the printed conclusion, not the test results.
 #'
 #' @return An `anova`-style data frame containing model degrees of freedom,

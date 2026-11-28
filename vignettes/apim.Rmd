@@ -394,9 +394,7 @@ dyadMLM::compare_nested_models(
 
 The test provides evidence against all restrictions jointly, but it does not
 show which parameter differs. The helper also cannot determine whether the
-models are mathematically nested. That remains a modeling requirement. The
-restrictions set parameters equal and remove no variance, so the usual
-chi-squared p-value applies.
+models are mathematically nested. That remains a modeling requirement.
 
 ## Checking partner dependence {#checking-partner-dependence}
 
@@ -1008,10 +1006,10 @@ print(no_contrast_block_covariance, representation = "sdcor")
 ```
 
 These are constraints on the stable dyad-level random effects, not on the
-same-occasion residual structure. Both comparisons remove variances, so their
-p-values are too large and the tests are conservative. Halving the p-value is
-not valid here, because covariances are removed too (see
-`?dyadMLM::compare_nested_models`).
+same-occasion residual structure. Both comparisons remove variances. Because a
+variance cannot be negative, their p-values are too large, so the tests favor
+the smaller model somewhat too often
+[@selfAsymptoticPropertiesMaximum1987; @stramVarianceComponentsTesting1994].
 
 
 ### When carryover is the research question {#dynamic-models}
