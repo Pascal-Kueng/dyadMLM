@@ -2089,8 +2089,9 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     if (identical(extracted$backend, "brms")) {
       if (identical(pair$shared_indicator, "1")) {
         details <- c(details, paste0(
-          "For `brms`, if this pair is intended to model residual dependence, ",
-          "the model should usually be refitted with a direct ",
+          "For `brms`, a Gaussian model also estimates a residual variance ",
+          "(sigma^2), which the recovered covariance does not include. To ",
+          "get the whole residual covariance, refit with a direct ",
           "`unstr(time = member_position, gr = residual_group)` ",
           "structure. See `?recover_exchangeable_covariance`."
         ))
