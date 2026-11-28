@@ -13,6 +13,12 @@
   `z` everywhere
   ([#174](https://github.com/Pascal-Kueng/dyadMLM/issues/174)).
 
+* In diary data prepared for the DIM or DSM, the lagged dyad-mean column
+  `.{x}_dyad_mean_gmc_lag1` is now centered on the same mean as
+  `.{x}_dyad_mean_gmc`, so it is the lag of that column. Its values shift by a
+  constant. Slopes do not change, but intercepts of models that use this column
+  do ([#172](https://github.com/Pascal-Kueng/dyadMLM/issues/172)).
+
 * `recover_exchangeable_covariance()` now warns about singular fits in
   `glmmTMB` models: when a recovered standard deviation is practically zero
   (Gaussian models only), and when a partner correlation is +1 or -1

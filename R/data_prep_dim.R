@@ -14,7 +14,8 @@
 #' within-dyad member-deviation column is the person's deviation from the
 #' uncentered dyad mean.
 #' Selected lag predictors additionally create lag-1 raw and within-person
-#' dyad-mean and within-dyad member-deviation columns.
+#' dyad-mean and within-dyad member-deviation columns. A lagged dyad-mean
+#' column is centered on the same mean as its unlagged column.
 #'
 #' The function reads `attr(data, "dyadMLM")$temporal_decompositions` and
 #' stores the constructed DIM columns in
@@ -138,6 +139,13 @@ construct_dyad_predictor_decompositions <- function(data, model_family = "dim") 
     deviation_col <- predictors$deviation_column[[i]]
 
     if (has_time && component %in% c("raw", "cwp")) {
+      # A lagged column is centered on the mean of its unlagged column, so
+      # that it is the lag of the centered column.
+      unlagged_source_col <- predictors$source_column[
+        predictors$predictor == predictors$predictor[[i]] &
+          predictors$component == component &
+          predictors$lag == 0L
+      ]
       out <- add_dyad_time_decomposition(
         out = out,
         group = group,
@@ -146,7 +154,8 @@ construct_dyad_predictor_decompositions <- function(data, model_family = "dim") 
         source_col = source_col,
         mean_col = mean_col,
         deviation_col = deviation_col,
-        center_mean = component == "raw"
+        center_mean = component == "raw",
+        center_source_col = unlagged_source_col
       )
     } else {
       out <- add_dyad_level_decomposition(
@@ -184,7 +193,8 @@ make_dyad_predictor_column_stem <- function(predictor, component, source_col,
 
 add_dyad_time_decomposition <- function(out, group, member, time, source_col,
                                         mean_col, deviation_col,
-                                        center_mean = FALSE) {
+                                        center_mean = FALSE,
+                                        center_source_col = source_col) {
   join_keys <- c(group, time, member)
 
   dyad_time_values <- out |>
@@ -204,10 +214,17 @@ add_dyad_time_decomposition <- function(out, group, member, time, source_col,
     dplyr::ungroup()
 
   if (center_mean) {
-    dyad_time_mean_values <- dyad_time_values |>
-      dplyr::distinct(.data[[group]], .data[[time]], .data[[mean_col]])
+    # The center is the mean of the dyad-occasion means of `center_source_col`.
+    # Each dyad-occasion with both members observed counts once.
+    center_values <- out |>
+      dplyr::summarise(
+        .dy_dyad_n_observed = sum(!is.na(.data[[center_source_col]])),
+        .dy_dyad_mean = no_NaN_mean(.data[[center_source_col]]),
+        .by = dplyr::all_of(c(group, time))
+      ) |>
+      dplyr::filter(.data$.dy_dyad_n_observed == 2L)
 
-    grand_mean <- no_NaN_mean(dyad_time_mean_values[[mean_col]])
+    grand_mean <- no_NaN_mean(center_values$.dy_dyad_mean)
 
     dyad_time_values <- dyad_time_values |>
       dplyr::mutate("{mean_col}" := .data[[mean_col]] - grand_mean)
