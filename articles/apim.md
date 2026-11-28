@@ -1120,6 +1120,46 @@ print(recovered_covariance)
 #> 2 member2: (Intercept) 0.297 0.835
 ```
 
+When an AR(1) term is in the model in addition to the same-occasion
+terms that represent the level-1 residual structure (here
+`... | coupleID:diaryday`), the residual covariance is decomposed into
+two parts:
+
+- The part of the residual that persists across days. The AR(1)
+  correlation represents how strongly this part is correlated from one
+  day to the next, and the AR(1) standard deviation represents how large
+  it is.
+- The part of the residual that does **not** persist across days. This
+  is the same-day residual variance that is back-transformed via
+  [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
+  (the second pair). Its partner correlation describes only this
+  day-specific part.
+
+For the whole same-day residual, add the AR(1) variance to each member’s
+variance. The model treats the partners’ persistent parts as unrelated,
+so the covariance stays the same:
+
+``` r
+
+ar1_block <- glmmTMB::VarCorr(
+  ild_exchangeable_ar_model
+)$cond[["coupleID.personID"]]
+ar1_variance <- ar1_block[1, 1]
+
+whole_same_day <- recovered_covariance$pair_2$varcov + diag(ar1_variance, 2)
+sqrt(diag(whole_same_day)) # SDs
+#> member_1: (Intercept) member_2: (Intercept) 
+#>              1.000721              1.000721
+stats::cov2cor(whole_same_day) # partner correlation
+#>                       member_1: (Intercept) member_2: (Intercept)
+#> member_1: (Intercept)             1.0000000             0.2063889
+#> member_2: (Intercept)             0.2063889             1.0000000
+```
+
+Report this value as the same-day partner correlation. The second pair
+alone gives a correlation further from zero, because it leaves out the
+persistent part.
+
 The `cwp` terms estimate actor and partner associations for
 occasion-specific deviations from each member’s usual support. The `cbp`
 terms estimate actor and partner associations involving members’ usual
