@@ -110,6 +110,14 @@
 #' [covariance-pooling study](https://pascal-kueng.github.io/dyadMLM/articles/covariance-pooling.html)
 #' illustrates detection and false alarms when checking each composition.
 #'
+#' Model-centring can cause false alarms when the model has many fixed effects
+#' that are constant within a dyad and the data have few dyads. In simulations
+#' with 30 dyads and 8 such fixed effects, a correct model was flagged in about
+#' one of six datasets, where 5% is intended. The predictions were fitted to
+#' the observed responses only, so the observed partner correlation fell below
+#' the simulated range. Fixed effects that are constant within a dyad and
+#' occasion, such as day dummies, had a smaller effect of the same kind.
+#'
 #' A flexible covariance model will usually reproduce features it estimated from
 #' the same data. Agreement alone therefore does not establish good fit.
 #' For example, pooled summaries (`role = NULL`) of a Gaussian model with an
