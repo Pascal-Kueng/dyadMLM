@@ -351,6 +351,11 @@ recover_exchangeable_covariance <- function(
 #    so it covers Gaussian identity-link models only.
 # 2. Its partner correlation is +1 or -1, because the variance in one of the
 #    pair's two blocks is practically zero.
+# Both cases follow lme4::isSingular(), which also flags variances near zero
+# and correlations near +1 or -1. The cutoffs (1% and 0.999) are somewhat
+# arbitrary. They are looser than lme4's tolerance of 1e-4, because glmmTMB
+# estimates log-SDs and stops at small values instead of zero. There is no
+# consensus on a tolerance yet, so adapt the cutoffs once there is one.
 warn_about_singular_fit <- function(model, results, pairs) {
   family <- stats::family(model)
   frame <- stats::model.frame(model)
