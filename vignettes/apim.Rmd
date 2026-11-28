@@ -869,13 +869,15 @@ print(recovered_covariance)
 
 When an AR(1) term is in the model in addition to the same-occasion terms that
 represent the level-1 residual structure (here `... | coupleID:diaryday`), the
-residual covariance is decomposed. The AR(1) correlation represents how
-strongly the part of the residual that persists across days is correlated from
-one day to the next, and the AR(1) standard deviation represents how large that
-persistent part is. Conversely, the same-day residual variance that is
-back-transformed via `recover_exchangeable_covariance()` (the second pair) is
-only the part of the residual variance that does **not** persist across days.
-Its partner correlation describes only this day-specific part.
+residual covariance is decomposed into two parts:
+
+- The part of the residual that persists across days. The AR(1) correlation
+  represents how strongly this part is correlated from one day to the next, and
+  the AR(1) standard deviation represents how large it is.
+- The part of the residual that does **not** persist across days. This is the
+  same-day residual variance that is back-transformed via
+  `recover_exchangeable_covariance()` (the second pair). Its partner
+  correlation describes only this day-specific part.
 
 For the whole same-day residual, add the AR(1) variance to each member's
 variance. The model treats the partners' persistent parts as unrelated, so the
