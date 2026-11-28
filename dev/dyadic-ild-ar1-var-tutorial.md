@@ -20,7 +20,7 @@ exchangeable dyads.
 | Scientific target | Start here | If that is too rich or unstable |
 |---|---|---|
 | Concurrent associations; distinguishable dyads | Role-specific individual AR processes plus same-day role covariance | Pool the two AR processes, then drop AR while retaining same-day covariance |
-| Concurrent associations; exchangeable dyads | Mean- and difference-mode AR processes **without** an extra same-day block | Set an unsupported mode's $\rho$ to zero; if both are unsupported, retain same-day mean/difference covariance only |
+| Concurrent associations; exchangeable dyads | Mean- and difference-mode AR processes plus an exchangeable same-day block | Drop the same-day block if it is unsupported; then set an unsupported mode's $\rho$ to zero; if both are unsupported, retain same-day mean/difference covariance only |
 | Own/partner carryover | Put both partners' lagged outcomes in the mean as a dyadic VAR; initially retain same-day innovation covariance but no extra residual AR | Revisit lag order, trends, and other mean structure; add residual AR only if justified by remaining diagnostics |
 
 The pooled member AR is the cleanest **common AR component** across dyad types.
@@ -269,7 +269,7 @@ does not prove that the two temporal processes really differ.
 Because $W$ is independent of the AR states, this is a latent-AR-plus-nugget
 model. It is neither a single Kronecker covariance nor a full dyadic VAR.
 
-## 5. Exchangeable default: AR processes for the dyad mean and difference
+## 5. Exchangeable starting model: mean and difference AR processes plus same-day noise
 
 For exchangeable dyads, arbitrary labels must not affect the likelihood. A
 natural structure decomposes the residual process into:
@@ -278,10 +278,11 @@ natural structure decomposes the residual process into:
 - a directed member-difference process, loading `+1` and `-1`.
 
 The recommended starting model gives both modes their own AR variance and
-correlation. It does **not** add a separate same-day covariance block:
+correlation. It also adds an exchangeable same-day covariance block $W$ for
+noise that does not carry over, such as measurement error:
 
 ```r
-fit_e_two_mode <- glmmTMB::glmmTMB(
+fit_e_state_space <- glmmTMB::glmmTMB(
   y ~
     1 +
     # pooled actor/partner predictors and time trends ...
@@ -292,7 +293,11 @@ fit_e_two_mode <- glmmTMB::glmmTMB(
 
     # Persistent dyad-mean and member-difference processes
     ar1(0 + day_f      | coupleID) +
-    ar1(0 + diff:day_f | coupleID),
+    ar1(0 + diff:day_f | coupleID) +
+
+    # Same-day exchangeable covariance W
+    (1 | coupleID:day_f) +
+    (0 + diff | coupleID:day_f),
 
   dispformula = ~ 0,
   family = gaussian(),
@@ -314,6 +319,56 @@ $$
 J_2=\begin{pmatrix}1&1\\1&1\end{pmatrix}, \qquad
 K_2=\begin{pmatrix}1&-1\\-1&1\end{pmatrix}.
 $$
+
+Conditional on the stable effects, this model implies
+
+$$
+\Gamma_h
+=v_+\rho_+^hJ_2+v_-\rho_-^hK_2+I(h=0)W.
+$$
+
+| Component | Covariance parameters |
+|---|---:|
+| Stable exchangeable covariance $B$ | 2 |
+| Mean and difference AR processes | 4 |
+| Same-day exchangeable covariance $W$ | 2 |
+| **Total** | **8** |
+
+The observed residual is a sum of latent AR states and serially independent
+noise. It is generally not an ordinary VAR(1) or a single Kronecker
+covariance. In particular, $W$ contributes at lag zero but does not propagate
+to later lags.
+
+Start here because some noise that does not carry over is nearly always
+present in self-reports. If the model leaves it out, the AR processes absorb
+it. Their correlations are then too low, and the implied correlation fades too
+fast at longer lags. In experience-sampling data from 94 couples (about 62
+reports each, an outcome on a 0 to 100 scale), dropping $W$ lowered the
+log-likelihood by 148. The own correlation of the whole residual was:
+
+| Lag (reports) | Without $W$ | With $W$ |
+|---|---:|---:|
+| 1 | 0.44 | 0.45 |
+| 2 | 0.20 | 0.35 |
+| 6 | 0.01 | 0.13 |
+
+The model without $W$ also showed a partner carryover of 0.09 per report. With
+$W$ it was -0.01.
+
+The eight-parameter model needs enough occasions to separate the AR states
+from $W$. If a mode's $\rho$ is close to zero, its AR variance and its same-day
+variance cannot be told apart (Section 9). Then simplify as in Section 6.
+
+### Without same-day noise: an exchangeable VAR(1)
+
+If the variances in $W$ are close to zero, drop the block:
+
+```r
+fit_e_two_mode <- update(
+  fit_e_state_space,
+  . ~ . - (1 | coupleID:day_f) - (0 + diff | coupleID:day_f)
+)
+```
 
 Conditional on the stable effects, this model implies
 
@@ -359,35 +414,13 @@ the concurrent fixed effects into lagged actor or partner carryover effects.
 A lagged-outcome VAR instead puts $Y_{t-1}$ in the conditional mean, conditions
 on or omits initial rows, and changes the estimand.
 
-### Optional extension: two AR modes plus same-day noise
-
-Add a separate exchangeable $W$ only when theory calls for a persistent latent
-state plus occasion-specific or measurement noise, and the data can identify
-that decomposition:
-
-```r
-fit_e_state_space <- update(
-  fit_e_two_mode,
-  . ~ . + (1 | coupleID:day_f) + (0 + diff | coupleID:day_f)
-)
-```
-
-This optional maximal model has eight covariance parameters: two in stable
-$B$, four in the AR modes, and two in $W$. It implies
-
-$$
-\Gamma_h
-=v_+\rho_+^hJ_2+v_-\rho_-^hK_2+I(h=0)W.
-$$
-
-The observed residual is now a sum of latent AR states and serially independent
-noise. It is generally no longer an ordinary VAR(1) or a single Kronecker
-covariance. In particular, $W$ contributes at lag zero but does not propagate
-to later lags.
+With $W$ in the model, these relations describe the latent AR states only, not
+the observed residual.
 
 ## 6. Simplify according to what is unsupported
 
-The exchangeable no-$W$ model has a genuine nested zero-$\rho$ ladder, shown
+The exchangeable models below are restrictions of the eight-parameter starting
+model. The no-$W$ model also has a genuine nested zero-$\rho$ ladder, shown
 below. Across all candidate structures, however, there is no universal ladder:
 a shared-couple AR and a pooled individual AR make different claims. Use
 estimates, diagnostics, and theory to choose a branch.
@@ -444,9 +477,10 @@ This has six covariance parameters. Treat couple-clustered inference and a
 whole-couple bootstrap as sensitivity analyses for remaining covariance
 misspecification.
 
-### Exchangeable dyads: first simplify within the no-$W$ family
+### Exchangeable dyads: if $W$ is unsupported, simplify within the no-$W$ family
 
-The recommended `fit_e_two_mode` model has a genuine nested simplification
+If the variances in $W$ are close to zero, drop $W$ and continue with
+`fit_e_two_mode` (Section 5). That model has a genuine nested simplification
 path. Setting a mode's $\rho$ to zero retains its occasion-specific variance
 while removing its persistence.
 
@@ -548,12 +582,12 @@ $$
 
 where totals include stable $B$.
 
-### Alternative exchangeable working structures
+### Exchangeable dyads: if $W$ is supported
 
-The next two models are useful alternatives when a separate same-day nugget is
-important. They are **not** lower-dimensional simplifications of the default
-six-parameter no-$W$ model: each also has six covariance parameters and makes
-a different claim about positive-lag covariance.
+If $W$ is supported, the next two models are the simplifications to consider.
+Each is a six-parameter restriction of the eight-parameter starting model.
+They are **not** nested in the six-parameter no-$W$ model, and each makes a
+different claim about positive-lag covariance.
 
 #### Shared-couple AR plus a full same-day $W$
 
@@ -611,7 +645,7 @@ $$
 
 Each member has an independent AR realization; only its parameters are pooled.
 The shared-$W$ and pooled-$W$ models are not nested in one another. Both are
-six-parameter reductions of the optional eight-parameter two-mode-AR-plus-$W$
+six-parameter reductions of the eight-parameter two-mode-AR-plus-$W$ starting
 model: the former removes the difference AR, while the latter equates the two
 AR modes after accounting for the `+1/-1` loading scale. Variance-zero tests
 are boundary cases, and these separate formulas do not automatically impose
@@ -636,7 +670,7 @@ fit_e_pooled_no_w <- glmmTMB::glmmTMB(
 )
 ```
 
-This four-parameter model is nested in the default two-mode model through
+This four-parameter model is nested in the no-$W$ two-mode model through
 $\rho_+=\rho_-$ and equal, appropriately scaled mode variances. It forces
 
 $$
@@ -667,7 +701,8 @@ The following table describes covariance conditional on stable $B$.
 
 | Structure | Lag-$h$ covariance | Central restriction |
 |---|---|---|
-| Exchangeable two-mode AR, no $W$ | $v_+\rho_+^hJ_2+v_-\rho_-^hK_2$ | Symmetric mean/difference dynamics; recommended exchangeable default |
+| Exchangeable two-mode AR + $W$ | $v_+\rho_+^hJ_2+v_-\rho_-^hK_2+I(h=0)W$ | Symmetric mean/difference dynamics plus same-day noise; recommended exchangeable starting model |
+| Exchangeable two-mode AR, no $W$ | $v_+\rho_+^hJ_2+v_-\rho_-^hK_2$ | Symmetric mean/difference dynamics; an exchangeable VAR(1) |
 | One AR mode plus one white mode | One term above plus $I(h=0)$ times the other mode matrix | One mode has $\rho=0$ |
 | Pooled member AR, no $W$ | $v\rho^hI_2$ | Zero conditional partner covariance at every lag |
 | Shared couple AR + full $W$ | $v\rho^hJ_2+I(h=0)W$ | All persistence is shared equally |
@@ -682,6 +717,7 @@ For comparison, the main dynamic/covariance parameter counts are:
 | Distinguishable role AR + $W$ | 4 AR + 3 $W$ = 7 | 3 | 10 |
 | Distinguishable full VAR in the mean | 4 $A$ + 3 $Q$ = 7 | 3 | 10 |
 | Distinguishable Kronecker AR1@UN benchmark | 1 $\rho$ + 3 $\Sigma_2$ = 4 | 3 | 7 |
+| Exchangeable two-mode AR + $W$ | 4 AR + 2 $W$ = 6 | 2 | 8 |
 | Exchangeable two-mode AR, no $W$ | 4 | 2 | 6 |
 | Exchangeable VAR in the mean | 2 $A$ + 2 $Q$ = 4 | 2 | 6 |
 | Exchangeable Kronecker benchmark | 1 $\rho$ + 2 $\Sigma_2$ = 3 | 2 | 5 |
@@ -738,6 +774,67 @@ $$
 
 to the full $2T\times2T$ covariance. This constant covariance at every lag can
 be difficult to distinguish from an AR process whose $\rho$ is near one.
+
+### Numerical check of the Kronecker special case
+
+The statement above, that the two-mode model with $\rho_+=\rho_-$ is an
+exchangeable Kronecker AR(1), was checked on simulated data. The check used a
+development build of `glmmTMB` (1.1.15.1) with an unreleased `kron()`
+structure. The workflow in this tutorial does not depend on that build.
+
+Released `glmmTMB` fits the restricted model by tying the two AR correlations
+with `map`:
+
+```r
+# theta holds, in formula order: the two stable SDs (1, 2), the mean mode's SD
+# and correlation (3, 4), and the difference mode's SD and correlation (5, 6).
+fit_e_equal_rho <- update(
+  fit_e_two_mode,
+  map = list(theta = factor(c(1, 2, 3, 4, 5, 4)))
+)
+
+anova(fit_e_equal_rho, fit_e_two_mode)
+```
+
+For the starting model with $W$, tie the same two elements with
+`factor(c(1, 2, 3, 4, 5, 4, 7, 8))`.
+
+With the $A$ of Section 5, $\rho_+=\rho_-$ means no partner carryover in the
+residual process. The likelihood-ratio test above therefore tests that
+restriction, with one degree of freedom.
+
+The development build fits the same model as one term, with `member_f` as
+`member_no` coded as a factor:
+
+```r
+kron(homcs(0 + member_f) %x% ar1(0 + day_f) | coupleID)
+```
+
+Five simulated datasets (150 dyads, 14 days) were each fitted without and with
+the same-day block $W$. Three had partner carryover in the residual process
+($\rho_+=0.7$, $\rho_-=0.3$) and no same-day noise. Two had $\rho_+=\rho_-=0.6$
+and same-day noise.
+
+- In all 10 comparisons, the tied two-mode model and the `kron()` model had the
+  same log-likelihood to four decimals.
+- Two `ou()` modes gave the same log-likelihood as two `ar1()` modes on equally
+  spaced days.
+- With partner carryover in the data, freeing the two correlations raised the
+  log-likelihood by 55 to 74 without $W$, and by 10 to 12 with $W$. With
+  $\rho_+=\rho_-$ in the data, it raised it by at most 2.7.
+- With partner carryover in the data, adding $W$ to the tied model raised the
+  log-likelihood by 44 to 62, although the data had no same-day noise. A
+  same-day block can therefore absorb partner carryover that a tied model
+  leaves out. Test the tie in the model with free correlations.
+
+For distinguishable dyads, two further datasets had persistence that the
+partners shared. `kron(us(0 + role) %x% ar1(0 + day_f) | coupleID)` plus a
+same-day `us` block then had a log-likelihood 9 and 15 higher than role-specific
+AR processes plus the same block, with 12 parameters each.
+Role-specific AR processes cannot represent shared persistence.
+
+These datasets show that the models agree. They do not show how well the
+parameters are recovered.
 
 ## 8. Put a dyadic VAR in the mean when carryover matters
 
@@ -932,16 +1029,15 @@ check.
 2. **Create `day_f` explicitly** with every scheduled occasion retained.
 3. **Fit a role-compatible temporal structure.** Start with role-specific
    individual AR processes plus $W$ for distinguishable dyads. Start with
-   mean/difference AR processes without $W$ for exchangeable dyads.
-4. **Treat extra same-day noise as an extension.** Adding $W$ to both
-   exchangeable AR modes creates an eight-parameter latent-state-plus-nugget
-   model; use it only when that decomposition is meaningful and identifiable.
-5. **Use the true exchangeable nested path first.** Set an unsupported mode's
+   mean/difference AR processes plus $W$ for exchangeable dyads.
+4. **Drop $W$ only if it is unsupported.** Without $W$, the two exchangeable
+   AR modes form a six-parameter model that is an exact exchangeable VAR(1).
+5. **Without $W$, use the nested zero-$\rho$ path.** Set an unsupported mode's
    $\rho$ to zero while retaining its white variance; if neither mode persists,
    retain same-day mean/difference covariance only.
-6. **Treat shared-plus-$W$ and pooled-plus-$W$ as alternative branches.** They
-   are different six-parameter working structures, not smaller rungs below the
-   six-parameter no-$W$ default.
+6. **With $W$, consider shared-plus-$W$ and pooled-plus-$W$.** They are
+   six-parameter restrictions of the starting model, not rungs below the
+   six-parameter no-$W$ model.
 7. **Use pooled member AR as a common component, with care.** Without $W$ it
    forces zero conditional same-day partner covariance; with $W$ it becomes a
    latent-AR-plus-nugget working model.
