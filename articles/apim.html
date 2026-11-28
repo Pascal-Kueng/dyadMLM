@@ -1068,6 +1068,11 @@ dependence. The two matched block pairs are returned separately:</p>
 <span><span class="va">recovered_covariance</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance</a></span><span class="op">(</span></span>
 <span>  <span class="va">ild_exchangeable_ar_model</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Review possible residual-level structure:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Pair for `.member_contrast_arbitrary` (group `coupleID:diaryday`) may be residual-level (reason: at most two fitted rows per group).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; - The model also has `ar1(0 + factor(diaryday) | coupleID:personID)`. The recovered covariance does not include the variance of such terms, so it does not describe the whole same-occasion residual. See 'Adding pooled residual AR(1)' in `vignette("apim", package = "dyadMLM")`.</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">recovered_covariance</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Recovered exchangeable member-level covariances (2 block pairs)</span></span>

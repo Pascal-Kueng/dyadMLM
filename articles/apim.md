@@ -1082,6 +1082,11 @@ dependence. The two matched block pairs are returned separately:
 recovered_covariance <- dyadMLM::recover_exchangeable_covariance(
   ild_exchangeable_ar_model
 )
+#> Warning: Review possible residual-level structure:
+#> 
+#> Pair for `.member_contrast_arbitrary` (group `coupleID:diaryday`) may be residual-level (reason: at most two fitted rows per group).
+#> 
+#> - The model also has `ar1(0 + factor(diaryday) | coupleID:personID)`. The recovered covariance does not include the variance of such terms, so it does not describe the whole same-occasion residual. See 'Adding pooled residual AR(1)' in `vignette("apim", package = "dyadMLM")`.
 
 print(recovered_covariance)
 #> Recovered exchangeable member-level covariances (2 block pairs)

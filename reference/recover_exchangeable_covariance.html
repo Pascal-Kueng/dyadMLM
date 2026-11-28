@@ -190,12 +190,6 @@ indicator columns, <code>difference_indicator</code> must assign <code>-1</code>
 two arbitrary member positions consistently within each dyad. For
 composition-specific blocks, it must be zero where <code>shared_indicator</code> is
 zero.</p>
-<p>The function checks whether both positions occur within each supported
-fitted grouping unit. It rejects coding when no group contains both
-positions. For custom difference indicators supplied through
-<code>block_pairings</code>, it also warns when only some groups are one-sided, which
-can result from fitted-row filtering, and when stable member assignments
-cannot be verified across repeated rows without a member identifier.</p>
     </div>
     <div class="section level2">
     <h2 id="what-omitted-blocks-and-terms-mean">What omitted blocks and terms mean<a class="anchor" aria-label="anchor" href="#what-omitted-blocks-and-terms-mean"></a></h2>
@@ -228,7 +222,7 @@ a warning. See the vignette's
 section for the manual calculation.</p>
 <p>Fit Gaussian <code>glmmTMB</code> models with <code>dispformula = ~ 0</code>. Otherwise part of
 each member's variance stays in the residual variance, which the recovered
-covariance does not include. The function warns in that case.</p>
+covariance does not include.</p>
 <p>In <code>brms</code>, cross-sectional and same-occasion partner dependence can be
 represented directly with
 <code>unstr(time = member_position, gr = residual_group)</code>. With Gaussian
