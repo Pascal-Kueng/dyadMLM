@@ -825,12 +825,12 @@ glmmTMB::VarCorr(dsm_ILD)
 #> 
 #> Conditional model:
 #>  Groups            Name                         Std.Dev. Corr        
-#>  coupleID          (Intercept)                  0.70188              
-#>                    .dsm_role_contrast           0.99250  0.072       
+#>  coupleID          (Intercept)                  0.70187              
+#>                    .dsm_role_contrast           0.99251  0.072       
 #>  coupleID.diaryday (Intercept)                  0.65167              
 #>                    .dsm_role_contrast           1.00690  0.022       
-#>  coupleID.1        .is_female:factor(diaryday)0 0.49445  0.592 (ar1) 
-#>  coupleID.2        .is_male:factor(diaryday)0   0.57572  0.658 (ar1)
+#>  coupleID.1        .is_female:factor(diaryday)0 0.49444  0.592 (ar1) 
+#>  coupleID.2        .is_male:factor(diaryday)0   0.57571  0.658 (ar1)
 ```
 
 This AR-adjusted, fixed-slope DSM omits the actor random slopes present

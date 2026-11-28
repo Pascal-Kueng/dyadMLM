@@ -528,8 +528,7 @@ likelihood-ratio test:</p>
 <p>The test provides evidence against all restrictions jointly, but it
 does not show which parameter differs. The helper also cannot determine
 whether the models are mathematically nested. That remains a modeling
-requirement. The usual chi-squared reference distribution may be
-unreliable when a tested variance parameter lies on its boundary.</p>
+requirement.</p>
 </div>
 <div class="section level3">
 <h3 id="checking-partner-dependence">Checking partner dependence<a class="anchor" aria-label="anchor" href="#checking-partner-dependence"></a>
@@ -813,8 +812,8 @@ so the concurrent and persistent components are visible together.</p>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;  Groups            Name                         Std.Dev. Corr        </span></span>
 <span><span class="co">#&gt;  coupleID          .is_female                   0.88813              </span></span>
-<span><span class="co">#&gt;                    .is_male                     0.83007  0.334       </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday .is_female                   0.83204              </span></span>
+<span><span class="co">#&gt;                    .is_male                     0.83006  0.334       </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday .is_female                   0.83203              </span></span>
 <span><span class="co">#&gt;                    .is_male                     0.81486  0.253       </span></span>
 <span><span class="co">#&gt;  coupleID.1        .is_female:factor(diaryday)0 0.49445  0.592 (ar1) </span></span>
 <span><span class="co">#&gt;  coupleID.2        .is_male:factor(diaryday)0   0.57570  0.658 (ar1)</span></span></code></pre></div>
@@ -1056,7 +1055,7 @@ term grouped by the member nested within the dyad:</p>
 <span><span class="co">#&gt;  coupleID            (Intercept)                0.71486             </span></span>
 <span><span class="co">#&gt;  coupleID.1          .member_contrast_arbitrary 0.52485             </span></span>
 <span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                0.67201             </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.1 .member_contrast_arbitrary 0.49489             </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.1 .member_contrast_arbitrary 0.49488             </span></span>
 <span><span class="co">#&gt;  coupleID.personID   factor(diaryday)0          0.55221  0.598 (ar1)</span></span></code></pre></div>
 <p>The pooled AR parameters describe the persistent within-member
 component. The dyad-day blocks continue to describe same-day partner
@@ -1311,10 +1310,9 @@ is absent, we specify it as <code>NULL</code>:</p>
 <span><span class="co">#&gt; 3 member2: (Intercept)                 1.000 0.406 0.734 0.406</span></span>
 <span><span class="co">#&gt; 4 member2: .provided_support_cwp_actor 0.406 1.000 0.406 0.276</span></span></code></pre></div>
 <p>These are constraints on the stable dyad-level random effects, not on
-the same-occasion residual structure. Because variance constraints lie
-on the boundary of the parameter space, the usual chi-squared reference
-distribution for the likelihood-ratio tests should be interpreted
-cautiously.</p>
+the same-occasion residual structure. Both comparisons remove variances.
+Because a variance cannot be negative, their p-values are too large, so
+the tests favor the smaller model somewhat too often <span class="citation">(Self and Liang 1987; Stram and Lee 1994)</span>.</p>
 </div>
 </div>
 <div class="section level4">
@@ -1476,6 +1474,17 @@ Rosario, Kareena S. del, and Tessa V. West. 2025. <span>“A
 in <span>Longitudinal Dyadic Multilevel Modeling</span>.”</span>
 <em>Advances in Methods and Practices in Psychological Science</em> 8
 (3): 25152459251351286. <a href="https://doi.org/10.1177/25152459251351286" class="external-link">https://doi.org/10.1177/25152459251351286</a>.
+</div>
+<div id="ref-selfAsymptoticPropertiesMaximum1987" class="csl-entry">
+Self, Steven G., and Kung-Yee Liang. 1987. <span>“Asymptotic Properties
+of Maximum Likelihood Estimators and Likelihood Ratio Tests Under
+Nonstandard Conditions.”</span> <em>Journal of the American Statistical
+Association</em> 82 (398): 605–10. <a href="https://doi.org/10.1080/01621459.1987.10478472" class="external-link">https://doi.org/10.1080/01621459.1987.10478472</a>.
+</div>
+<div id="ref-stramVarianceComponentsTesting1994" class="csl-entry">
+Stram, Daniel O., and Jae Won Lee. 1994. <span>“Variance Components
+Testing in the Longitudinal Mixed Effects Model.”</span>
+<em>Biometrics</em> 50 (4): 1171–77. <a href="https://doi.org/10.2307/2533455" class="external-link">https://doi.org/10.2307/2533455</a>.
 </div>
 </div>
 </div>

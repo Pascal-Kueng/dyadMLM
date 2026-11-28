@@ -487,8 +487,7 @@ dyadMLM::compare_nested_models(
 The test provides evidence against all restrictions jointly, but it does
 not show which parameter differs. The helper also cannot determine
 whether the models are mathematically nested. That remains a modeling
-requirement. The usual chi-squared reference distribution may be
-unreliable when a tested variance parameter lies on its boundary.
+requirement.
 
 ### Checking partner dependence
 
@@ -809,8 +808,8 @@ glmmTMB::VarCorr(ild_distinguishable_ar_model)
 #> Conditional model:
 #>  Groups            Name                         Std.Dev. Corr        
 #>  coupleID          .is_female                   0.88813              
-#>                    .is_male                     0.83007  0.334       
-#>  coupleID.diaryday .is_female                   0.83204              
+#>                    .is_male                     0.83006  0.334       
+#>  coupleID.diaryday .is_female                   0.83203              
 #>                    .is_male                     0.81486  0.253       
 #>  coupleID.1        .is_female:factor(diaryday)0 0.49445  0.592 (ar1) 
 #>  coupleID.2        .is_male:factor(diaryday)0   0.57570  0.658 (ar1)
@@ -1064,7 +1063,7 @@ glmmTMB::VarCorr(ild_exchangeable_ar_model)
 #>  coupleID            (Intercept)                0.71486             
 #>  coupleID.1          .member_contrast_arbitrary 0.52485             
 #>  coupleID.diaryday   (Intercept)                0.67201             
-#>  coupleID.diaryday.1 .member_contrast_arbitrary 0.49489             
+#>  coupleID.diaryday.1 .member_contrast_arbitrary 0.49488             
 #>  coupleID.personID   factor(diaryday)0          0.55221  0.598 (ar1)
 ```
 
@@ -1346,10 +1345,10 @@ print(no_contrast_block_covariance, representation = "sdcor")
 ```
 
 These are constraints on the stable dyad-level random effects, not on
-the same-occasion residual structure. Because variance constraints lie
-on the boundary of the parameter space, the usual chi-squared reference
-distribution for the likelihood-ratio tests should be interpreted
-cautiously.
+the same-occasion residual structure. Both comparisons remove variances.
+Because a variance cannot be negative, their p-values are too large, so
+the tests favor the smaller model somewhat too often (Self and Liang
+1987; Stram and Lee 1994).
 
 #### When carryover is the research question
 
@@ -1507,3 +1506,13 @@ Rosario, Kareena S. del, and Tessa V. West. 2025. “A Practical Guide to
 Specifying Random Effects in Longitudinal Dyadic Multilevel Modeling.”
 *Advances in Methods and Practices in Psychological Science* 8 (3):
 25152459251351286. <https://doi.org/10.1177/25152459251351286>.
+
+Self, Steven G., and Kung-Yee Liang. 1987. “Asymptotic Properties of
+Maximum Likelihood Estimators and Likelihood Ratio Tests Under
+Nonstandard Conditions.” *Journal of the American Statistical
+Association* 82 (398): 605–10.
+<https://doi.org/10.1080/01621459.1987.10478472>.
+
+Stram, Daniel O., and Jae Won Lee. 1994. “Variance Components Testing in
+the Longitudinal Mixed Effects Model.” *Biometrics* 50 (4): 1171–77.
+<https://doi.org/10.2307/2533455>.
