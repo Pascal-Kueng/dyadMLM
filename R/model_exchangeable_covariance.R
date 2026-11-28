@@ -147,10 +147,6 @@
 #' each member's variance stays in the residual variance, which the recovered
 #' covariance does not include. The function warns in that case.
 #'
-#' Terms with a time structure, such as `ar1()` or `ou()`, belong to no pair.
-#' The recovered same-occasion covariance does not include their variance. The
-#' function warns in that case too.
-#'
 #' In `brms`, cross-sectional and same-occasion partner dependence can be
 #' represented directly with
 #' `unstr(time = member_position, gr = residual_group)`. With Gaussian
