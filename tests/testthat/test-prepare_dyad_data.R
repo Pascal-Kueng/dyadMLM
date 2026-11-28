@@ -884,9 +884,35 @@ test_that("prepare_dyad_data rejects role labels containing the internal separat
 
   expect_error(
     prepare_dyad_data(data, dyad = dyad_id, member = person_id, role = role),
-    "`role` values must not contain `_x_`",
+    "or contain `_x_`, because dyadMLM joins role labels with `_x_`",
     fixed = TRUE
   )
+})
+
+test_that("prepare_dyad_data rejects role labels that could merge compositions", {
+  # `a_x` with `b` and `a` with `x_b` would both be labelled `a_x_x_b`.
+  data <- data.frame(
+    dyad_id = rep(1:4, each = 2),
+    person_id = 1:8,
+    role = c("a_x", "b", "a_x", "b", "a", "x_b", "a", "x_b")
+  )
+
+  expect_error(
+    prepare_dyad_data(data, dyad = dyad_id, member = person_id, role = role),
+    "must not start with `x_`, end with `_x`, or contain `_x_`",
+    fixed = TRUE
+  )
+  expect_error(
+    prepare_dyad_data(data, dyad = dyad_id, member = person_id, role = role),
+    "Offending value(s): a_x, x_b.",
+    fixed = TRUE
+  )
+
+  # An `x` inside a label is fine.
+  data$role <- rep(c("ex_wife", "taxi_driver"), 4)
+  expect_no_error(suppressMessages(
+    prepare_dyad_data(data, dyad = dyad_id, member = person_id, role = role)
+  ))
 })
 
 test_that("prepare_dyad_data rejects empty role labels", {

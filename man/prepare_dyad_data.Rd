@@ -38,7 +38,8 @@ one row per observed time point.}
 
 \item{role}{Optional column identifying a stable member role, such as gender.
 Non-missing values must be consistent within each \code{dyad} x \code{member} and
-must not contain \verb{_x_}. In repeated-measures data, an observed role is
+must not start with \code{x_}, end with \verb{_x}, or contain \verb{_x_}. In
+repeated-measures data, an observed role is
 propagated to missing rows for the same member within a dyad.
 \code{missing_role} controls dyads in which a member has no non-missing role on
 any row. If no role is supplied, all dyads are treated as the same type of

@@ -25,7 +25,8 @@
 #' @param member Column identifying a person or the member within dyad.
 #' @param role Optional column identifying a stable member role, such as gender.
 #'   Non-missing values must be consistent within each `dyad` x `member` and
-#'   must not contain `_x_`. In repeated-measures data, an observed role is
+#'   must not start with `x_`, end with `_x`, or contain `_x_`. In
+#'   repeated-measures data, an observed role is
 #'   propagated to missing rows for the same member within a dyad.
 #'   `missing_role` controls dyads in which a member has no non-missing role on
 #'   any row. If no role is supplied, all dyads are treated as the same type of

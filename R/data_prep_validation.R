@@ -589,15 +589,16 @@ resolve_dyad_roles <- function(out, dyad_name, member_name, role_name, missing_r
     )
   }
 
-  # Reject role labels that contain the reserved composition separator.
-  if (any(grepl(dyad_composition_sep, role_labels, fixed = TRUE))) {
-    offending_roles <- unique(known_roles[
-      grepl(dyad_composition_sep, as.character(known_roles), fixed = TRUE)
-    ])
+  # Reject role labels that contain the composition separator or would form
+  # it at the join: `a_x` with `b` and `a` with `x_b` both give `a_x_x_b`.
+  reserved <- grepl(dyad_composition_sep, role_labels, fixed = TRUE) |
+    startsWith(role_labels, "x_") | endsWith(role_labels, "_x")
+  if (any(reserved)) {
     stop(
-      "`role` values must not contain `", dyad_composition_sep,
-      "`; this separator is reserved by dyadMLM. Offending value(s): ",
-      paste(sort(as.character(offending_roles)), collapse = ", "),
+      "`role` values must not start with `x_`, end with `_x`, or contain `",
+      dyad_composition_sep, "`, because dyadMLM joins role labels with `",
+      dyad_composition_sep, "`. Offending value(s): ",
+      paste(sort(unique(role_labels[reserved])), collapse = ", "),
       ". Rename these role values before preparing the data.",
       call. = FALSE
     )

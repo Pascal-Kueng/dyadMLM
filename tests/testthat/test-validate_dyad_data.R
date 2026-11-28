@@ -813,7 +813,7 @@ test_that("validate_dyad_data rejects role labels with reserved separator", {
 
   expect_error(
     validate_dyad_data(data, dyad = dyad_id, member = person_id, role = role),
-    "`role` values must not contain `_x_`",
+    "or contain `_x_`, because dyadMLM joins role labels with `_x_`",
     fixed = TRUE
   )
 })
