@@ -256,3 +256,37 @@ test_that("a warning is given when all lag values are missing", {
     fixed = TRUE
   )
 })
+
+test_that("lagged dyad means are centered on the mean of the unlagged column", {
+  set.seed(1)
+  data <- expand.grid(day = 1:4, position = 1:2, dyad_id = 1:50)
+  data$person_id <- paste(data$dyad_id, data$position)
+  data$role <- c("f", "m")[data$position]
+  data$x <- data$day + stats::rnorm(nrow(data)) # x rises by 1 per day
+
+  # The lagged column must be the lag of the unlagged column.
+  expect_lag_of_unlagged <- function(prepared) {
+    previous <- match(
+      paste(prepared$person_id, prepared$day - 1),
+      paste(prepared$person_id, prepared$day)
+    )
+    expect_equal(
+      prepared$.x_dyad_mean_gmc_lag1,
+      prepared$.x_dyad_mean_gmc[previous]
+    )
+  }
+
+  expect_lag_of_unlagged(prepare_dyad_data(
+    data[names(data) != "role"],
+    dyad = dyad_id, member = person_id, time = day,
+    predictors = x, lag1_predictors = x,
+    model_types = "dim", temporal_decomposition = "none", seed = 1
+  ))
+  expect_lag_of_unlagged(suppressMessages(prepare_dyad_data(
+    data,
+    dyad = dyad_id, member = person_id, role = role, time = day,
+    predictors = x, lag1_predictors = x,
+    model_types = "dsm", dsm_role_order = c("f", "m"),
+    temporal_decomposition = "none"
+  )))
+})

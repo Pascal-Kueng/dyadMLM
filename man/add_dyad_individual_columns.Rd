@@ -29,7 +29,8 @@ of dyad means, or dyad-occasion means in longitudinal data, while the
 within-dyad member-deviation column is the person's deviation from the
 uncentered dyad mean.
 Selected lag predictors additionally create lag-1 raw and within-person
-dyad-mean and within-dyad member-deviation columns.
+dyad-mean and within-dyad member-deviation columns. A lagged dyad-mean
+column is centered on the same mean as its unlagged column.
 }
 \details{
 The function reads \code{attr(data, "dyadMLM")$temporal_decompositions} and
