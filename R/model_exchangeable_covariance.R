@@ -1967,6 +1967,27 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     )
   }
 
+  # Terms with a time structure, such as ar1() or ou(), belong to no pair.
+  # Their variance is part of the same-occasion residual, but not of the
+  # recovered covariance. glmmTMB terms start with their structure's name.
+  time_structures <- c(
+    "ar1", "hetar1", "ou", "exp", "gau", "mat", "toep", "homtoep"
+  )
+  paired_blocks <- integer()
+  for (pair in pairs) {
+    paired_blocks <- c(
+      paired_blocks, pair$shared_block_index, pair$difference_block_index
+    )
+  }
+  time_structured_terms <- character()
+  for (j in seq_along(extracted$blocks)) {
+    term <- extracted$blocks[[j]]$term
+    structure <- sub("\\(.*$", "", term)
+    if (!j %in% paired_blocks && structure %in% time_structures) {
+      time_structured_terms <- c(time_structured_terms, term)
+    }
+  }
+
   for (i in seq_along(pairs)) {
     pair <- pairs[[i]]
     if (!may_be_exchangeable_residual_level(extracted, pair)) {
@@ -2021,6 +2042,16 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
         "are too small and partner correlations too far from zero. Refit the ",
         "model with `dispformula = ~ 0` to move this variance into the ",
         "random effects."
+      ))
+    }
+
+    if (length(time_structured_terms) > 0L) {
+      details <- c(details, paste0(
+        "The model also has ", format_terms(time_structured_terms),
+        ". The recovered covariance does not include the variance of such ",
+        "terms, so it does not describe the whole same-occasion residual. ",
+        "See 'Adding pooled residual AR(1)' in ",
+        "`vignette(\"apim\", package = \"dyadMLM\")`."
       ))
     }
 

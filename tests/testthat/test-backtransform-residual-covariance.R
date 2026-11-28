@@ -1821,6 +1821,46 @@ test_that("a residual variance left out of the recovered covariance is flagged",
   )
 })
 
+test_that("a time-structured term outside the pairs is flagged", {
+  skip_if_not_installed("glmmTMB")
+
+  data <- expand.grid(member = c(-1, 1), day = 1:8, coupleID = seq_len(40))
+  data$coupleID <- factor(data$coupleID)
+  data$personID <- interaction(data$coupleID, data$member)
+  data$couple_day <- interaction(data$coupleID, data$day)
+  data$.member_contrast_arbitrary <- data$member
+  set.seed(199)
+  # Each person's noise carries over to the next day.
+  persistent <- stats::ave(
+    stats::rnorm(nrow(data)), data$personID,
+    FUN = function(noise) stats::filter(noise, 0.7, method = "recursive")
+  )
+  data$outcome <- stats::rnorm(80)[as.integer(data$personID)] +
+    stats::rnorm(nrow(data)) + persistent +
+    stats::rnorm(40)[as.integer(data$coupleID)] +
+    stats::rnorm(nlevels(data$couple_day))[as.integer(data$couple_day)]
+  model_formula <- outcome ~ 1 + us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID) +
+    us(1 | couple_day) + us(0 + .member_contrast_arbitrary | couple_day)
+
+  # Without a time-structured term, the pairs hold the whole residual.
+  base_model <- suppressWarnings(glmmTMB::glmmTMB(
+    model_formula, dispformula = ~0, data = data
+  ))
+  expect_no_warning(recover_exchangeable_covariance(base_model))
+
+  # The AR(1) variance is outside the same-day pair.
+  ar1_model <- suppressWarnings(glmmTMB::glmmTMB(
+    update(model_formula, . ~ . + ar1(0 + factor(day) | personID)),
+    dispformula = ~0, data = data
+  ))
+  expect_warning(
+    recover_exchangeable_covariance(ar1_model),
+    "The model also has `ar1(0 + factor(day) | personID)`",
+    fixed = TRUE
+  )
+})
+
 test_that("the public function returns fitted link-scale covariance for Poisson models", {
   skip_if_not_installed("glmmTMB")
 
