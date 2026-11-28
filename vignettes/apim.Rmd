@@ -867,20 +867,19 @@ print(recovered_covariance)
 
 ```
 
-This model has an AR(1) term in addition to the same-occasion terms
-(`... | coupleID:diaryday`). Together they split each member's residual on a
-given day into two parts:
+When an AR(1) term is in the model in addition to the same-occasion terms that
+represent the level-1 residual structure (here `... | coupleID:diaryday`), the
+residual covariance is decomposed. The AR(1) correlation represents how
+strongly the part of the residual that persists across days is correlated from
+one day to the next, and the AR(1) standard deviation represents how large that
+persistent part is. Conversely, the same-day residual variance that is
+back-transformed via `recover_exchangeable_covariance()` (the second pair) is
+only the part of the residual variance that does **not** persist across days.
+Its partner correlation describes only this day-specific part.
 
-- A persistent part, which carries over from day to day. The AR(1) term
-  describes it. Its standard deviation says how large this part is, and its
-  correlation says how strongly it carries over to the next day.
-- A day-specific part, which is new every day. The same-occasion terms describe
-  it, and `recover_exchangeable_covariance()` returns it as the second pair.
-
-The second pair's partner correlation is therefore the correlation of the
-day-specific parts only. For the whole same-day residual, add the AR(1)
-variance to each member's variance. The model treats the partners' persistent
-parts as unrelated, so the covariance stays the same:
+For the whole same-day residual, add the AR(1) variance to each member's
+variance. The model treats the partners' persistent parts as unrelated, so the
+covariance stays the same:
 
 ```{r same-day-residual-with-ar1, eval = has_glmmTMB}
 ar1_block <- glmmTMB::VarCorr(
