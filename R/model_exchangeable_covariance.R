@@ -145,7 +145,7 @@
 #'
 #' Fit Gaussian `glmmTMB` models with `dispformula = ~ 0`. Otherwise part of
 #' each member's variance stays in the residual variance, which the recovered
-#' covariance does not include. The function warns in that case.
+#' covariance does not include.
 #'
 #' In `brms`, cross-sectional and same-occasion partner dependence can be
 #' represented directly with
