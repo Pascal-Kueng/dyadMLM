@@ -143,10 +143,6 @@
 #' [extension to exchangeable random slopes](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation)
 #' section for the manual calculation.
 #'
-#' For `glmmTMB` models, the function warns about singular fits: when a
-#' recovered standard deviation is practically zero (Gaussian models only), and
-#' when a partner correlation is +1 or -1.
-#'
 #' Fit Gaussian `glmmTMB` models with `dispformula = ~ 0`. Otherwise part of
 #' each member's variance stays in the residual variance, which the recovered
 #' covariance does not include. The function warns in that case.
