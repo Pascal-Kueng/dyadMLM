@@ -5,6 +5,11 @@
   same-occasion covariance does not include that term's variance
   ([#199](https://github.com/Pascal-Kueng/dyadMLM/issues/199)).
 
+* `prepare_dyad_data()` now rejects role labels that start with `x_` or end
+  with `_x`. Combined with other labels, they could give two different
+  compositions the same label
+  ([#173](https://github.com/Pascal-Kueng/dyadMLM/issues/173)).
+
 * Composition labels, generated column names, and factor levels no longer
   depend on the machine's language settings. Role labels are now sorted
   ignoring case, the same way on every machine. Labels change only in sessions
