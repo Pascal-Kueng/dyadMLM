@@ -330,8 +330,86 @@ recover_exchangeable_covariance <- function(
       call. = FALSE
     )
   }
+  if (identical(extracted$backend, "glmmTMB")) {
+    warn_about_singular_fit(model, results, matched_pairs)
+  }
   class(results) <- c("exchangeable_covariance", "list")
   return(results)
+}
+
+# Warn about singular fits in a glmmTMB model. Every term of every pair is
+# checked for two cases:
+# 1. Its SD is practically zero: the SD times the typical size of the term's
+#    predictor is below 1% of the outcome SD. This needs the outcome's scale,
+#    so it covers Gaussian identity-link models only.
+# 2. Its partner correlation is +1 or -1, because the variance in one of the
+#    pair's two blocks is practically zero.
+# Both cases follow lme4::isSingular(), which also flags variances near zero
+# and correlations near +1 or -1. The cutoffs (1% and 0.999) are somewhat
+# arbitrary. They are looser than lme4's tolerance of 1e-4, because glmmTMB
+# estimates log-SDs and stops at small values instead of zero. There is no
+# consensus on a tolerance yet, so adapt the cutoffs once there is one.
+warn_about_singular_fit <- function(model, results, pairs) {
+  family <- stats::family(model)
+  frame <- stats::model.frame(model)
+  outcome_sd <- NA_real_
+  if (identical(family$family, "gaussian") &&
+      identical(family$link, "identity")) {
+    outcome_sd <- stats::sd(stats::model.response(frame))
+  }
+
+  notes <- character()
+  for (i in seq_along(pairs)) {
+    pair <- pairs[[i]]
+    sdcor <- results[[i]]$sdcor
+    terms <- pair$underlying_terms
+    for (k in seq_along(terms)) {
+      term <- terms[[k]]
+      label <- paste0("`", term, "` in `", names(results)[[i]], "`")
+
+      # 1. Practically zero SD. Both members have the same SD. The predictor's
+      # size is unknown for some terms, for example for interactions.
+      predictor_size <- NA_real_
+      if (identical(term, "(Intercept)")) {
+        predictor_size <- 1
+      } else if (term %in% names(frame) && is.numeric(frame[[term]])) {
+        predictor_size <- sqrt(mean(frame[[term]]^2))
+      }
+      effect_size <- sdcor[k, k] * predictor_size
+      # An SD of exactly zero gives `NA` correlations and its own warning.
+      if (isTRUE(effect_size > 0 && effect_size < 0.01 * outcome_sd)) {
+        notes <- c(notes, paste0(
+          label, ": the SD is practically zero (below 1% of the outcome SD). ",
+          "Its correlations are not interpretable. Consider removing this ",
+          "random effect."
+        ))
+        next
+      }
+
+      # 2. Partner correlation of +1 or -1. A term fitted in only one block is
+      # there by design.
+      in_both_blocks <- !is.na(pair$shared_term_indices[[k]]) &&
+        !is.na(pair$difference_term_indices[[k]])
+      partner_correlation <- sdcor[k, length(terms) + k]
+      if (in_both_blocks && isTRUE(abs(partner_correlation) > 0.999)) {
+        notes <- c(notes, paste0(
+          label, ": the partner correlation is ",
+          if (partner_correlation > 0) "+1" else "-1",
+          ", because the variance in the ",
+          if (partner_correlation > 0) "difference" else "shared",
+          " block is practically zero. Consider removing the term from that ",
+          "block."
+        ))
+      }
+    }
+  }
+  if (length(notes) > 0L) {
+    warning(
+      "Singular fit:\n\n- ", paste(notes, collapse = "\n- "),
+      call. = FALSE
+    )
+  }
+  return(invisible(NULL))
 }
 
 #' Print recovered exchangeable member-level covariance

@@ -1797,6 +1797,104 @@ test_that("the public function returns member-level glmmTMB matrices", {
   expect_identical(result[[1L]]$difference_term, extracted$blocks[[2L]]$term)
 })
 
+test_that("the rules for a singular fit flag the right terms", {
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(170)
+  frame <- data.frame(
+    outcome = stats::rnorm(200),
+    slope = 100 * stats::rnorm(200)
+  )
+  model <- glmmTMB::glmmTMB(outcome ~ slope, data = frame)
+  tiny <- 0.001 * stats::sd(frame$outcome)
+  pair <- list(
+    underlying_terms = c("(Intercept)", "slope"),
+    shared_term_indices = 1:2,
+    difference_term_indices = 1:2
+  )
+  # Rows and columns: both terms of member 1, then both terms of member 2.
+  warn <- function(intercept_sd, slope_sd, partner_correlation = 0.5,
+                   pair_record = pair) {
+    sdcor <- matrix(0.5, nrow = 4, ncol = 4)
+    diag(sdcor) <- c(intercept_sd, slope_sd, intercept_sd, slope_sd)
+    sdcor[1, 3] <- partner_correlation
+    warn_about_singular_fit(
+      model, list(pair_1 = list(sdcor = sdcor)), list(pair_record)
+    )
+  }
+
+  expect_no_warning(warn(0.5, 0.5))
+
+  # 1. Practically zero SD
+  expect_warning(
+    warn(tiny, 0.5),
+    "`(Intercept)` in `pair_1`: the SD is practically zero",
+    fixed = TRUE
+  )
+  # A slope counts with the size of its predictor: 0.001 x 100 is not small.
+  expect_no_warning(warn(0.5, tiny))
+  expect_warning(
+    warn(0.5, tiny / 100),
+    "`slope` in `pair_1`: the SD is practically zero",
+    fixed = TRUE
+  )
+
+  # 2. Partner correlation of +1 or -1
+  expect_warning(
+    warn(0.5, 0.5, partner_correlation = 1),
+    "the partner correlation is +1, because the variance in the difference",
+    fixed = TRUE
+  )
+  expect_warning(
+    warn(0.5, 0.5, partner_correlation = -0.9999),
+    "the partner correlation is -1, because the variance in the shared",
+    fixed = TRUE
+  )
+  # A term left out of the difference block is at +1 by design.
+  shared_only <- pair
+  shared_only$difference_term_indices <- c(NA, 2L)
+  expect_no_warning(
+    warn(0.5, 0.5, partner_correlation = 1, pair_record = shared_only)
+  )
+})
+
+test_that("singular fits of diary models are flagged", {
+  skip_if_not_installed("glmmTMB")
+
+  recover_from_diary <- function(stable_dyad_sd) {
+    data <- expand.grid(day = 1:8, member = c(-1, 1), coupleID = seq_len(60))
+    data$coupleID <- factor(data$coupleID)
+    data$couple_day <- interaction(data$coupleID, data$day)
+    data$.member_contrast_arbitrary <- data$member
+    set.seed(2)
+    dyad_effect <- stats::rnorm(60, 0, stable_dyad_sd)
+    day_effect <- stats::rnorm(nlevels(data$couple_day), 0, 0.6)
+    data$outcome <- dyad_effect[as.integer(data$coupleID)] +
+      day_effect[as.integer(data$couple_day)] +
+      stats::rnorm(nrow(data), 0, 0.8)
+    model <- suppressWarnings(glmmTMB::glmmTMB(
+      outcome ~ 1 + us(1 | coupleID) +
+        us(0 + .member_contrast_arbitrary | coupleID) +
+        us(1 | couple_day) + us(0 + .member_contrast_arbitrary | couple_day),
+      dispformula = ~0, data = data
+    ))
+    recover_exchangeable_covariance(model)
+  }
+
+  # No stable dyad-level variance at all.
+  expect_warning(
+    recover_from_diary(stable_dyad_sd = 0),
+    "`(Intercept)` in `pair_1`: the SD is practically zero",
+    fixed = TRUE
+  )
+  # Stable dyad-level variance, but no stable differences between members.
+  expect_warning(
+    recover_from_diary(stable_dyad_sd = 1),
+    "`(Intercept)` in `pair_1`: the partner correlation is +1",
+    fixed = TRUE
+  )
+})
+
 test_that("a residual variance left out of the recovered covariance is flagged", {
   skip_if_not_installed("glmmTMB")
 

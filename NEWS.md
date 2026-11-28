@@ -13,6 +13,11 @@
   `z` everywhere
   ([#174](https://github.com/Pascal-Kueng/dyadMLM/issues/174)).
 
+* `recover_exchangeable_covariance()` now warns about singular fits in
+  `glmmTMB` models: when a recovered standard deviation is practically zero
+  (Gaussian models only), and when a partner correlation is +1 or -1
+  ([#170](https://github.com/Pascal-Kueng/dyadMLM/issues/170)).
+
 * `check_dyad_outcomes()` warns when fewer than 39 simulated datasets are
   supplied, because the 95% limits are then infinite and nothing can be flagged
   ([#180](https://github.com/Pascal-Kueng/dyadMLM/issues/180)).
