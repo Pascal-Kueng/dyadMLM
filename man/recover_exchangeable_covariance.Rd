@@ -134,13 +134,6 @@ indicator columns, \code{difference_indicator} must assign \code{-1} and \code{+
 two arbitrary member positions consistently within each dyad. For
 composition-specific blocks, it must be zero where \code{shared_indicator} is
 zero.
-
-The function checks whether both positions occur within each supported
-fitted grouping unit. It rejects coding when no group contains both
-positions. For custom difference indicators supplied through
-\code{block_pairings}, it also warns when only some groups are one-sided, which
-can result from fitted-row filtering, and when stable member assignments
-cannot be verified across repeated rows without a member identifier.
 }
 \section{What omitted blocks and terms mean}{
 
